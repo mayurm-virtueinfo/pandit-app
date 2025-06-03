@@ -1,4 +1,5 @@
 #import "AppDelegate.h"
+#import "RNSplashScreen.h" // Import RNSplashScreen
 
 #import <React/RCTBundleURLProvider.h>
 
@@ -11,7 +12,9 @@
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
 
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  BOOL didFinishLaunching = [super application:application didFinishLaunchingWithOptions:launchOptions];
+  [RNSplashScreen show]; // Show splash screen
+  return didFinishLaunching;
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
