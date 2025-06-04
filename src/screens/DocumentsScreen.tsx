@@ -14,7 +14,7 @@ import { AuthStackParamList } from '../navigation/AuthNavigator'; // Assuming th
 
 type DocumentsScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
-  'Documents' // Assuming 'Documents' will be the route name
+  'Documents'
 >;
 
 interface DocumentFile {
@@ -72,8 +72,8 @@ const DocumentsScreen = () => {
 
   const handleNext = () => {
     if (validateForm()) {
-      Alert.alert('Success', 'Documents information captured (mock).');
-      // navigation.navigate('NextScreenAfterDocuments'); // Navigate to the next screen
+      // Navigate to PoojaAndAstrologyPerformedScreen
+      navigation.navigate('PoojaAndAstrologyPerformed');
     }
   };
 

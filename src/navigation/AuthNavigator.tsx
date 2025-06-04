@@ -4,14 +4,16 @@ import SignInScreen from '../screens/SignInScreen';
 import OTPVerificationScreen from '../screens/OTPVerificationScreen';
 import PanditRegistrationScreen from '../screens/PanditRegistrationScreen';
 import SelectCityAreaScreen from '../screens/SelectCityAreaScreen';
-import DocumentsScreen from '../screens/DocumentsScreen'; // Import DocumentsScreen
+import DocumentsScreen from '../screens/DocumentsScreen';
+import PoojaAndAstrologyPerformedScreen from '../screens/PoojaAndAstrologyPerformedScreen'; // Import new screen
 
 export type AuthStackParamList = {
   SignIn: undefined;
   OTPVerification: {phoneNumber: string};
   PanditRegistration: undefined;
   SelectCityArea: undefined;
-  Documents: undefined; // Added for DocumentsScreen
+  Documents: undefined;
+  PoojaAndAstrologyPerformed: undefined; // Added for new screen
 };
 
 const Stack = createStackNavigator<AuthStackParamList>();
@@ -42,6 +44,13 @@ const AuthNavigator = () => {
       <Stack.Screen
         name="Documents"
         component={DocumentsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="PoojaAndAstrologyPerformed"
+        component={PoojaAndAstrologyPerformedScreen}
         options={{
           headerShown: false, // Assuming no header based on screenshot
         }}
