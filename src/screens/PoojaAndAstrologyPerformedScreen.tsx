@@ -16,7 +16,7 @@ import { dropdownService, DropdownItem } from '../api/dropdownService';
 
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
-  'PoojaAndAstrologyPerformed' // Assuming this will be the route name
+  'PoojaAndAstrologyPerformed'
 >;
 
 const PoojaAndAstrologyPerformedScreen = () => {
@@ -68,8 +68,8 @@ const PoojaAndAstrologyPerformedScreen = () => {
       Alert.alert('Validation Error', 'Please select at least one Pooja or Astrology service.');
       return;
     }
-    Alert.alert('Success', 'Selections submitted (mock).');
-    // navigation.navigate('NextScreenAfterPooja'); // Navigate to the next screen
+    // Navigate to LanguagesScreen
+    navigation.navigate('Languages');
   };
 
   const handleCancel = () => {
