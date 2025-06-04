@@ -4,6 +4,7 @@ import axios from 'axios';
 export interface DropdownItem {
   id: string | number;
   name: string;
+  description?:string
 }
 
 // Base API URLs
@@ -18,6 +19,8 @@ const CASTE_API = `${BASE_URL}/${API_VERSION}/684010988a456b7966a95413`;
 const SUB_CASTE_API = `${BASE_URL}/${API_VERSION}/6840110f8960c979a5a51370`;
 const GOTRA_API = `${BASE_URL}/${API_VERSION}/684010bd8960c979a5a51350`;
 const AREA_API = `${BASE_URL}/${API_VERSION}/68401ec68960c979a5a51838`;
+const POOJA_PERFORMED_API = `${BASE_URL}/${API_VERSION}/684033358561e97a501f8459`;
+const ASTROLOGY_CONSLATION_PERFORMED_API = `${BASE_URL}/${API_VERSION}/6840339b8a456b7966a9601b`;
 const XMasterKey = `$2a$10$XR82L3T4Q4gtDUAvZKwioOsmNaU2X7QVpkZbtKJ90jdcoVal/Pd4a`;
 
 export const dropdownService = {
@@ -52,7 +55,7 @@ export const dropdownService = {
     }
   },
 
-  // Fetch sub-castes based on caste (mock data)
+  // Fetch sub-castes based on caste 
   getSubCastes: async (casteId: number): Promise<DropdownItem[]> => {
     try {
       const response = await axios.get(`${SUB_CASTE_API}?caste=${casteId}`);
@@ -65,7 +68,7 @@ export const dropdownService = {
     }
   },
 
-  // Fetch gotras (mock data)
+  // Fetch gotras 
   getGotras: async (): Promise<DropdownItem[]> => {
     try {
       const response = await axios.get(GOTRA_API, {
@@ -82,10 +85,44 @@ export const dropdownService = {
     }
   },
 
-    // Fetch gotras (mock data)
+    // Fetch getArea
   getArea: async (): Promise<DropdownItem[]> => {
     try {
       const response = await axios.get(AREA_API, {
+        headers: {
+          'X-Master-Key': XMasterKey
+        }
+      });
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching gotras:', error);
+      return [];
+    }
+  },
+
+   // Fetch getPoojaPerformed
+  getPoojaPerformed: async (): Promise<DropdownItem[]> => {
+    try {
+      const response = await axios.get(POOJA_PERFORMED_API, {
+        headers: {
+          'X-Master-Key': XMasterKey
+        }
+      });
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching gotras:', error);
+      return [];
+    }
+  },
+
+  // Fetch getPoojaPerformed
+  getAstrologyConsulationPerformed: async (): Promise<DropdownItem[]> => {
+    try {
+      const response = await axios.get(ASTROLOGY_CONSLATION_PERFORMED_API, {
         headers: {
           'X-Master-Key': XMasterKey
         }
