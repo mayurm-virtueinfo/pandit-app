@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="splash_background">#FFFFFF</color> {/* White background, you can change this */}
+    <color name="splash_background">#FFA500</color> {/* Orange background */}
 </resources>
