@@ -4,12 +4,14 @@ import SignInScreen from '../screens/SignInScreen';
 import OTPVerificationScreen from '../screens/OTPVerificationScreen';
 import PanditRegistrationScreen from '../screens/PanditRegistrationScreen';
 import SelectCityAreaScreen from '../screens/SelectCityAreaScreen';
+import DocumentsScreen from '../screens/DocumentsScreen'; // Import DocumentsScreen
 
 export type AuthStackParamList = {
   SignIn: undefined;
   OTPVerification: {phoneNumber: string};
   PanditRegistration: undefined;
-  SelectCityArea: undefined; // Added for the new screen
+  SelectCityArea: undefined;
+  Documents: undefined; // Added for DocumentsScreen
 };
 
 const Stack = createStackNavigator<AuthStackParamList>();
@@ -34,7 +36,14 @@ const AuthNavigator = () => {
         name="SelectCityArea"
         component={SelectCityAreaScreen}
         options={{
-          headerShown: false, // Assuming no header based on screenshot and other screens
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Documents"
+        component={DocumentsScreen}
+        options={{
+          headerShown: false, // Assuming no header based on screenshot
         }}
       />
     </Stack.Navigator>

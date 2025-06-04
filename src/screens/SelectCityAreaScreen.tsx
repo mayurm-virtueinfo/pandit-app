@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { dropdownService, DropdownItem } from '../api/dropdownService';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
+import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
 
 // Mock data for cities as per screenshot, since getCities in dropdownService is pincode-based
 const STATIC_CITIES: DropdownItem[] = [
@@ -23,11 +25,11 @@ const STATIC_CITIES: DropdownItem[] = [
 ];
 
 const SelectCityAreaScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
 
-  const [cities, setCities] = useState<DropdownItem[]>();
+  const [cities, setCities] = useState<DropdownItem[]>([]);
   const [areas, setAreas] = useState<DropdownItem[]>([]);
-  const [filteredCities, setFilteredCities] = useState<DropdownItem[]>();
+  const [filteredCities, setFilteredCities] = useState<DropdownItem[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<DropdownItem[]>([]);
 
   const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
@@ -36,33 +38,31 @@ const SelectCityAreaScreen = () => {
   const [citySearch, setCitySearch] = useState('');
   const [areaSearch, setAreaSearch] = useState('');
 
-  const [isLoadingAreas, setIsLoadingAreas] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false); // Renamed for clarity
 
   useEffect(() => {
-    // Fetch Areas
-    const fetchAreas = async () => {
-      setIsLoadingAreas(true);
+    const fetchData = async () => {
+      setIsLoadingData(true);
       try {
-        const [cities, areas ] = await Promise.all([
-                dropdownService.getCities('110001'),
-                dropdownService.getArea()
-              ]);
-        console.log('fetchCities : ',cities);
-        console.log('fetchedAreas : ',areas);
+        // Fetch both cities (with a default/example pincode) and areas
+        const [fetchedCities, fetchedAreas] = await Promise.all([
+          dropdownService.getCities('110001'), // Example pincode, adjust if needed
+          dropdownService.getArea(),
+        ]);
         
-        setCities(cities);
-        setFilteredCities(cities);
+        setCities(fetchedCities);
+        setFilteredCities(fetchedCities);
 
-        setAreas(areas);
-        setFilteredAreas(areas);
+        setAreas(fetchedAreas);
+        setFilteredAreas(fetchedAreas);
       } catch (error) {
-        console.error('Error fetching areas:', error);
-        Alert.alert('Error', 'Could not load areas.');
+        console.error('Error fetching data:', error);
+        Alert.alert('Error', 'Could not load city/area data.');
       } finally {
-        setIsLoadingAreas(false);
+        setIsLoadingData(false);
       }
     };
-    fetchAreas();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const SelectCityAreaScreen = () => {
       setFilteredCities(cities);
     } else {
       setFilteredCities(
-        cities.filter(city =>
+        (cities || []).filter(city => // Add null check for safety, though initialized
           city.name.toLowerCase().includes(citySearch.toLowerCase())
         )
       );
@@ -94,9 +94,8 @@ const SelectCityAreaScreen = () => {
       Alert.alert('Validation Error', 'Please select both a city and an area.');
       return;
     }
-    // Navigate to the next screen or perform an action
-    Alert.alert('Selected', `City: ${selectedCity.name}, Area: ${selectedArea.name}`);
-    // Example: navigation.navigate('NextScreen', { city: selectedCity, area: selectedArea });
+    // Navigate to DocumentsScreen
+    navigation.navigate('Documents');
   };
 
   const renderHeader = (title: string) => (
@@ -142,7 +141,7 @@ const SelectCityAreaScreen = () => {
         {/* Cities List */}
         {renderHeader('City')}
         {renderSearchInput('Search for a city', citySearch, setCitySearch)}
-        {isLoadingAreas ? (
+        {isLoadingData ? (
           <ActivityIndicator size="large" color="#007AFF" />
         ) : (
           <FlatList
@@ -158,7 +157,7 @@ const SelectCityAreaScreen = () => {
         {/* Areas List */}
         {renderHeader('Area')}
         {renderSearchInput('Search for an area', areaSearch, setAreaSearch)}
-        {isLoadingAreas ? (
+        {isLoadingData ? (
           <ActivityIndicator size="large" color="#007AFF" />
         ) : (
           <FlatList
