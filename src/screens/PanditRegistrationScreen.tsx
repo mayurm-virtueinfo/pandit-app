@@ -14,6 +14,8 @@ import {
   FlatList,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
+import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
 import {dropdownService, DropdownItem} from '../api/dropdownService';
 
 interface FormData {
@@ -37,7 +39,7 @@ interface DropdownState {
 }
 
 const PanditRegistrationScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -165,8 +167,8 @@ const PanditRegistrationScreen: React.FC = () => {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      Alert.alert('Success', 'Registration details submitted successfully');
-      // Handle form submission
+      // Navigate to SelectCityAreaScreen upon successful submission
+      navigation.navigate('SelectCityArea');
     } else {
       Alert.alert('Error', 'Please fill all required fields correctly');
     }

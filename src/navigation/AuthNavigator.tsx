@@ -3,11 +3,13 @@ import {createStackNavigator} from '@react-navigation/stack';
 import SignInScreen from '../screens/SignInScreen';
 import OTPVerificationScreen from '../screens/OTPVerificationScreen';
 import PanditRegistrationScreen from '../screens/PanditRegistrationScreen';
+import SelectCityAreaScreen from '../screens/SelectCityAreaScreen';
 
 export type AuthStackParamList = {
   SignIn: undefined;
   OTPVerification: {phoneNumber: string};
   PanditRegistration: undefined;
+  SelectCityArea: undefined; // Added for the new screen
 };
 
 const Stack = createStackNavigator<AuthStackParamList>();
@@ -26,6 +28,13 @@ const AuthNavigator = () => {
         component={PanditRegistrationScreen}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SelectCityArea"
+        component={SelectCityAreaScreen}
+        options={{
+          headerShown: false, // Assuming no header based on screenshot and other screens
         }}
       />
     </Stack.Navigator>
