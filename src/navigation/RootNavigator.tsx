@@ -79,11 +79,12 @@ const RootNavigator = () => {
 
   return (
     <RootStack.Navigator
+      initialRouteName='Auth'
       screenOptions={{
         headerShown: false,
         // contentStyle: {backgroundColor: 'transparent'}, // Removed to fix error, apply to screens if needed
       }}>
-      {isAuthenticated ? (
+      
         <RootStack.Screen
           name="Main"
           component={MainAppStackNavigator} // Use the new MainAppStackNavigator
@@ -91,7 +92,6 @@ const RootNavigator = () => {
           //   animationTypeForReplace: 'push',
           // } as StackNavigationOptions}
         />
-      ) : (
         <RootStack.Screen
           name="Auth"
           component={AuthNavigator}
@@ -99,7 +99,9 @@ const RootNavigator = () => {
           //   animationTypeForReplace: 'pop',
           // }}
         />
-      )}
+        <MainApp.Screen name="Languages" component={LanguagesScreen} />
+      <MainApp.Screen name="AppDrawer" component={AppDrawerNavigator} />
+
     </RootStack.Navigator>
   );
 };
