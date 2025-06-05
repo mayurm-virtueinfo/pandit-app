@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../navigation/AuthNavigator';
+import ThemedInput from '../components/ThemedInput';
 
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -65,7 +66,7 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
             Please enter your phone number to continue
           </Text>
 
-          <View style={styles.inputContainer}>
+          {/* <View style={styles.inputContainer}>
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
               style={styles.input}
@@ -77,7 +78,17 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
               textContentType="telephoneNumber"
               maxLength={15}
             />
-          </View>
+          </View> */}
+          <ThemedInput
+            label="Phone Number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            placeholder="Enter your phone number"
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
+            maxLength={15}
+          />
 
           <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
             <Text style={styles.signInButtonText}>Get OTP</Text>
