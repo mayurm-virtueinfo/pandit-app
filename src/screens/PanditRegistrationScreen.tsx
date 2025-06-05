@@ -283,7 +283,7 @@ const PanditRegistrationScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>←</Text>
+          <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Panditji Registration</Text>
         <View style={styles.backButton} />
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backButtonText: {
-    fontSize: 24,
+    fontSize: 28,
     color: '#374151',
     fontWeight: '600',
   },

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // Types for dropdown data
 export interface DropdownItem {
+  subCastes: any[];
   id: string | number;
   name: string;
   description?:string

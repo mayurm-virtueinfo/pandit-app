@@ -60,7 +60,6 @@ const RootNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        animationEnabled: true,
         cardStyle: {backgroundColor: 'transparent'},
       }}>
       {isAuthenticated ? (

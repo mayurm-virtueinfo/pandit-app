@@ -15,14 +15,6 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
 
-// Mock data for cities as per screenshot, since getCities in dropdownService is pincode-based
-const STATIC_CITIES: DropdownItem[] = [
-  { id: '1', name: 'Mumbai' },
-  { id: '2', name: 'Delhi' },
-  { id: '3', name: 'Bangalore' },
-  { id: '4', name: 'Hyderabad' },
-  { id: '5', name: 'Chennai' },
-];
 
 const SelectCityAreaScreen = () => {
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
