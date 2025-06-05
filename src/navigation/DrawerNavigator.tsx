@@ -22,6 +22,7 @@ import TermsAndConditionsScreen from '../screens/TermsAndConditionsScreen';
 import AboutUsScreen from '../screens/AboutUsScreen';
 import ContactUsScreen from '../screens/ContactUsScreen';
 import { useAuth } from './RootNavigator'; // Import useAuth
+import { COLORS } from '../theme/theme';
 
 export type AppDrawerParamList = {
   MainApp: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
@@ -66,12 +67,20 @@ const AppDrawerNavigator: React.FC = () => {
     <Drawer.Navigator
       initialRouteName="MainApp"
       drawerContent={props => <CustomDrawerContent {...props} />}
-      screenOptions={{
-        headerStyle: { backgroundColor: '#6200ee' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-        drawerActiveTintColor: '#6200ee',
-        drawerInactiveTintColor: 'gray',
+      // screenOptions={{
+      //   headerStyle: { backgroundColor: '#6200ee' },
+      //   headerTintColor: '#fff',
+      //   headerTitleStyle: { fontWeight: 'bold' },
+      //   drawerActiveTintColor: '#6200ee',
+      //   drawerInactiveTintColor: 'gray',
+      // }}
+       screenOptions={{
+        headerStyle: {
+          backgroundColor: COLORS.primary,
+        },
+        headerTintColor: COLORS.white,
+        drawerActiveTintColor: COLORS.primary,
+        drawerInactiveTintColor: COLORS.textPrimary,
       }}
     >
       <Drawer.Screen

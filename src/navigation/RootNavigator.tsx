@@ -5,6 +5,7 @@ import AuthNavigator from './AuthNavigator';
 // import MainNavigator from './MainNavigator'; // MainNavigator is being replaced by a new flow
 import AppDrawerNavigator, { AppDrawerParamList } from './DrawerNavigator'; // Corrected import path
 import LanguagesScreen from '../screens/LanguagesScreen'; // Import LanguagesScreen
+import { COLORS } from '../theme/theme';
 
 // Authentication Context
 interface AuthContextType {
@@ -59,7 +60,14 @@ const MainApp = createStackNavigator<MainAppStackParamList>();
 
 const MainAppStackNavigator = () => {
   return (
-    <MainApp.Navigator screenOptions={{ headerShown: false }}>
+    <MainApp.Navigator 
+     screenOptions={{
+        headerStyle: {
+          backgroundColor: COLORS.primary,
+        },
+        headerTintColor: COLORS.white,
+        cardStyle: { backgroundColor: COLORS.backgroundPrimary },
+      }}>
       <MainApp.Screen name="Languages" component={LanguagesScreen} />
       <MainApp.Screen name="AppDrawer" component={AppDrawerNavigator} />
     </MainApp.Navigator>

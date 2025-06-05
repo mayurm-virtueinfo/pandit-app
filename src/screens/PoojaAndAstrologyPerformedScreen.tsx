@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Will be updated
 import { apiService, DropdownItem } from '../api/apiService';
+import { COLORS } from '../theme/theme';
 
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -123,7 +124,7 @@ const PoojaAndAstrologyPerformedScreen = () => {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {isLoading ? (
-          <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+          <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
         ) : (
           <>
             {renderListSection(
@@ -217,14 +218,14 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 4, // Square shape
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: COLORS.primary,
     marginRight: 12,
     marginTop: 3, // Align with first line of text
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxSelected: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
   },
   checkboxCheck: {
     color: '#FFFFFF',
@@ -264,11 +265,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   submitButton: {
-    backgroundColor: '#007AFF', // Blue for submit
+    backgroundColor: COLORS.primary, // Blue for submit
     marginLeft: 10,
   },
   submitButtonDisabled: {
-    backgroundColor: '#A0CFFF',
+    backgroundColor: COLORS.primaryDisabled,
   },
   buttonText: {
     fontSize: 16,

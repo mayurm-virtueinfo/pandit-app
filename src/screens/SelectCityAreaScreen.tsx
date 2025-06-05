@@ -14,6 +14,7 @@ import { apiService, DropdownItem } from '../api/apiService';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
+import { COLORS } from '../theme/theme';
 
 
 const SelectCityAreaScreen = () => {
@@ -134,7 +135,7 @@ const SelectCityAreaScreen = () => {
         {renderHeader('City')}
         {renderSearchInput('Search for a city', citySearch, setCitySearch)}
         {isLoadingData ? (
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         ) : (
           <FlatList
             data={filteredCities}
@@ -150,7 +151,7 @@ const SelectCityAreaScreen = () => {
         {renderHeader('Area')}
         {renderSearchInput('Search for an area', areaSearch, setAreaSearch)}
         {isLoadingData ? (
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         ) : (
           <FlatList
             data={filteredAreas}
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 28,
-    color: '#007AFF', // Blue color for back arrow
+    color: COLORS.primary, // Blue color for back arrow
   },
   headerTitle: {
     fontSize: 18,
@@ -257,13 +258,13 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 4, // Square shape as per screenshot
     borderWidth: 2,
-    borderColor: '#007AFF', // Blue border
+    borderColor: COLORS.primary, // Blue border
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioButtonSelected: {
-    backgroundColor: '#007AFF', // Blue fill when selected
+    backgroundColor: COLORS.primary, // Blue fill when selected
   },
   radioButtonCheck: {
     color: '#FFFFFF', // White checkmark
@@ -281,13 +282,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F4F8', // Match safe area
   },
   nextButton: {
-    backgroundColor: '#007AFF', // Blue button
+    backgroundColor: COLORS.primary, // Blue button
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
   nextButtonDisabled: {
-    backgroundColor: '#A0CFFF', // Lighter blue when disabled
+    backgroundColor: COLORS.primaryDisabled, // Lighter blue when disabled
   },
   nextButtonText: {
     color: '#FFFFFF',

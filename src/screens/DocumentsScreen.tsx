@@ -11,6 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Assuming this will be updated
+import { COLORS } from '../theme/theme';
 
 type DocumentsScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   nextButton: {
-    backgroundColor: '#007AFF', // Blue for next
+    backgroundColor: COLORS.primary, // Blue for next
     marginLeft: 10,
   },
   buttonText: {

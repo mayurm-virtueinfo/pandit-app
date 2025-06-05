@@ -15,6 +15,7 @@ import { AuthStackParamList } from '../navigation/AuthNavigator'; // This might 
 import { AppDrawerParamList } from '../navigation/DrawerNavigator'; // Import Drawer param list
 import { NavigatorScreenParams } from '@react-navigation/native'; // Import NavigatorScreenParams
 import { apiService, DropdownItem } from '../api/apiService';
+import { COLORS } from '../theme/theme';
 
 // Define a more general ParamList that includes the AppDrawer
 // This assumes LanguagesScreen is part of a stack that can navigate to AppDrawer
@@ -110,7 +111,7 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.sectionTitle}>Select your own languages:</Text>
         {isLoading ? (
-          <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+          <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
         ) : languages.length === 0 ? (
           <Text>No languages available.</Text>
         ) : (
@@ -201,13 +202,13 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: COLORS.primary,
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxSelected: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
   },
   checkboxCheck: {
     color: '#FFFFFF',
@@ -238,11 +239,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
     marginLeft: 10,
   },
   submitButtonDisabled: {
-    backgroundColor: '#A0CFFF',
+    backgroundColor: COLORS.primaryDisabled,
   },
   buttonText: {
     fontSize: 16,

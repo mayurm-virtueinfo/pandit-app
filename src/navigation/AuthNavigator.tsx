@@ -7,6 +7,7 @@ import SelectCityAreaScreen from '../screens/SelectCityAreaScreen';
 import DocumentsScreen from '../screens/DocumentsScreen';
 import PoojaAndAstrologyPerformedScreen from '../screens/PoojaAndAstrologyPerformedScreen';
 import LanguagesScreen from '../screens/LanguagesScreen'; // Import new screen
+import { COLORS } from '../theme/theme';
 
 export type AuthStackParamList = {
   SignIn: undefined;
@@ -25,7 +26,7 @@ const AuthNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: {backgroundColor: '#FFFFFF'},
+        cardStyle: { backgroundColor: COLORS.backgroundPrimary },
       }}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
