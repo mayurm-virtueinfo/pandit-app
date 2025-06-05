@@ -12,7 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Will be updated
-import { dropdownService, DropdownItem } from '../api/dropdownService';
+import { apiService, DropdownItem } from '../api/apiService';
 
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -30,7 +30,7 @@ const LanguagesScreen = () => {
     const loadLanguages = async () => {
       setIsLoading(true);
       try {
-        const fetchedLanguages = await dropdownService.getLanguages();
+        const fetchedLanguages = await apiService.getLanguages();
         setLanguages(fetchedLanguages);
       } catch (error) {
         console.error('Error fetching languages:', error);

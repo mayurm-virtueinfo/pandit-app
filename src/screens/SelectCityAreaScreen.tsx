@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { dropdownService, DropdownItem } from '../api/dropdownService';
+import { apiService, DropdownItem } from '../api/apiService';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
@@ -38,8 +38,8 @@ const SelectCityAreaScreen = () => {
       try {
         // Fetch both cities (with a default/example pincode) and areas
         const [fetchedCities, fetchedAreas] = await Promise.all([
-          dropdownService.getCities('110001'), // Example pincode, adjust if needed
-          dropdownService.getArea(),
+          apiService.getCities('110001'), // Example pincode, adjust if needed
+          apiService.getArea(),
         ]);
         
         setCities(fetchedCities);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import api from '../api/api'; // We will create this file next
+import axios from 'axios';
 
 const ProfileScreen = () => {
   const [users, setUsers] = useState([]);
@@ -10,7 +10,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await api.get('/users');
+        const response = await axios.get('/users');
         setUsers(response.data);
       } catch (err) {
         setError(err.message);

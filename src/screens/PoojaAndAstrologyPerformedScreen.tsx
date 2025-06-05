@@ -12,7 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Will be updated
-import { dropdownService, DropdownItem } from '../api/dropdownService';
+import { apiService, DropdownItem } from '../api/apiService';
 
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -35,8 +35,8 @@ const PoojaAndAstrologyPerformedScreen = () => {
       setIsLoading(true);
       try {
         const [fetchedPoojaItems, fetchedAstrologyItems] = await Promise.all([
-          dropdownService.getPoojaPerformed(),
-          dropdownService.getAstrologyConsulationPerformed(),
+          apiService.getPoojaPerformed(),
+          apiService.getAstrologyConsulationPerformed(),
         ]);
         setPoojaItems(fetchedPoojaItems);
         setAstrologyItems(fetchedAstrologyItems);

@@ -16,7 +16,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
-import {dropdownService, DropdownItem} from '../api/dropdownService';
+import {apiService, DropdownItem} from '../api/apiService';
 
 interface FormData {
   firstName: string;
@@ -84,10 +84,10 @@ const PanditRegistrationScreen: React.FC = () => {
     setDropdownData(prev => ({...prev, loading: true, error: null}));
     try {
       const [cities, castes, subCastes, gotras] = await Promise.all([
-        dropdownService.getCities('110001'),
-        dropdownService.getCastes(),
-        dropdownService.getSubCastes(1),
-        dropdownService.getGotras(),
+        apiService.getCities('110001'),
+        apiService.getCastes(),
+        apiService.getSubCastes(1),
+        apiService.getGotras(),
       ]);
 
       console.log(' cities : ',cities);
@@ -113,7 +113,7 @@ const PanditRegistrationScreen: React.FC = () => {
     if (pincode.length === 6) {
       setDropdownData(prev => ({...prev, loading: true, error: null}));
       try {
-        const cities = await dropdownService.getCities(pincode);
+        const cities = await apiService.getCities(pincode);
         setDropdownData(prev => ({...prev, cities, loading: false}));
       } catch (error) {
         setDropdownData(prev => ({
@@ -128,7 +128,7 @@ const PanditRegistrationScreen: React.FC = () => {
   const loadSubCastes = async (casteId: number) => {
     setDropdownData(prev => ({...prev, loading: true, error: null}));
     try {
-      const subCastes = await dropdownService.getSubCastes(casteId);
+      const subCastes = await apiService.getSubCastes(casteId);
       setDropdownData(prev => ({...prev, subCastes, loading: false}));
     } catch (error) {
       setDropdownData(prev => ({
@@ -225,7 +225,7 @@ const PanditRegistrationScreen: React.FC = () => {
     //       loading: true,
     //       error: 'Failed to load sub-castes',
     //     }));
-    //     const subCastesRes = await dropdownService.getSubCastes(parseInt(`${item.id}`));
+    //     const subCastesRes = await apiService.getSubCastes(parseInt(`${item.id}`));
     //     const subCastesFilter = subCastesRes.filter((subCaste: any) => subCaste.casteId === item.id); 
     //     let subCastes = [];
     //     if (subCastesFilter.length > 0) {
