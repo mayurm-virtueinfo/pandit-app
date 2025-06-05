@@ -4,6 +4,8 @@ import HomeScreen from '../screens/HomeScreen';
 import PoojaListScreen from '../screens/PoojaListScreen';
 import AstroServicesScreen from '../screens/AstroServicesScreen';
 import EarningsScreen from '../screens/EarningsScreen';
+import PoojaRequestScreen from '../screens/PoojaRequestScreen';
+import { COLORS } from '../theme/theme';
 // Import icons later if needed
 
 export type AppBottomTabParamList = {
@@ -20,11 +22,11 @@ const AppBottomTabNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false, // Usually handled by Drawer or Stack
-        tabBarActiveTintColor: 'tomato',
+        tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: 'gray',
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={PoojaRequestScreen} />
       <Tab.Screen name="PoojaList" component={PoojaListScreen} options={{ title: 'Pooja List' }} />
       <Tab.Screen name="AstroServices" component={AstroServicesScreen} options={{ title: 'Astro Services' }} />
       <Tab.Screen name="Earnings" component={EarningsScreen} />

@@ -87,7 +87,7 @@ const RootNavigator = () => {
 
   return (
     <RootStack.Navigator
-      initialRouteName='Auth'
+      initialRouteName='AppDrawer'
       screenOptions={{
         headerShown: false,
         // contentStyle: {backgroundColor: 'transparent'}, // Removed to fix error, apply to screens if needed
