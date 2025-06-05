@@ -27,11 +27,6 @@ const AcceptedRequests = () => (
 );
 
 const PoojaRequestScreen: React.FC = () => {
-    const handleValidation = () => {
-        // Implement any validation logic needed
-        // For demonstration, show an alert
-        Alert.alert("Validation Passed", "You can proceed!");
-    };
 
     return (
         <View style={styles.container}>
