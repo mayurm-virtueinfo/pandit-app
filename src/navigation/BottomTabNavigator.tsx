@@ -3,9 +3,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
-const Tab = createBottomTabNavigator();
+// Define ParamList for the Tab Navigator
+export type BottomTabParamList = {
+  Home: undefined;
+  Profile: undefined; // Assuming ProfileScreen also doesn't take params for now
+};
 
-const BottomTabNavigator = () => {
+const Tab = createBottomTabNavigator<BottomTabParamList>();
+
+const BottomTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{

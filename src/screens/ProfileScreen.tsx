@@ -1,19 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
-const ProfileScreen = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// Define an interface for the User object
+interface User {
+  id: number; // Assuming id is a number, adjust if it's a string
+  name: string;
+  email: string;
+  // Add other user properties if any
+}
+
+const ProfileScreen: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('/users');
+        const response = await axios.get<User[]>('/users'); // Specify User[] as response type
         setUsers(response.data);
       } catch (err) {
-        setError(err.message);
+        if (axios.isAxiosError(err)) {
+          const axiosError = err as AxiosError;
+          setError(axiosError.message);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -43,8 +58,8 @@ const ProfileScreen = () => {
       <Text style={styles.title}>Profile Screen - Users</Text>
       <FlatList
         data={users}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
+        keyExtractor={(item: User) => item.id.toString()}
+        renderItem={({ item }: { item: User }) => (
           <View style={styles.userContainer}>
             <Text style={styles.userName}>{item.name}</Text>
             <Text style={styles.userEmail}>{item.email}</Text>

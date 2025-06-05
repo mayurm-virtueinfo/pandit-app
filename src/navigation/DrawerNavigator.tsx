@@ -1,10 +1,18 @@
 import React from 'react';
 import {createDrawerNavigator} from '@react-navigation/drawer';
-import BottomTabNavigator from './BottomTabNavigator';
+import { NavigatorScreenParams } from '@react-navigation/native'; // Added NavigatorScreenParams
+import BottomTabNavigator, {BottomTabParamList} from './BottomTabNavigator'; // Added BottomTabParamList import
 import SettingsScreen from '../screens/SettingsScreen';
-const Drawer = createDrawerNavigator();
 
-const DrawerNavigator = () => {
+// Define ParamList for the Drawer Navigator
+export type DrawerParamList = {
+  Main: NavigatorScreenParams<BottomTabParamList>; // For nested navigator
+  Settings: undefined; // Assuming SettingsScreen doesn't take params
+};
+
+const Drawer = createDrawerNavigator<DrawerParamList>();
+
+const DrawerNavigator: React.FC = () => {
   return (
     <Drawer.Navigator
       screenOptions={{
