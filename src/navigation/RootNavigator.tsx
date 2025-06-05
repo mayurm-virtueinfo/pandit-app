@@ -1,7 +1,10 @@
 import React, {createContext, useContext, useState, ReactNode} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import {createStackNavigator, StackNavigationOptions} from '@react-navigation/stack';
+import { NavigatorScreenParams } from '@react-navigation/native'; // Import NavigatorScreenParams
 import AuthNavigator from './AuthNavigator';
-import MainNavigator from './MainNavigator';
+// import MainNavigator from './MainNavigator'; // MainNavigator is being replaced by a new flow
+import AppDrawerNavigator, { AppDrawerParamList } from './DrawerNavigator'; // Corrected import path
+import LanguagesScreen from '../screens/LanguagesScreen'; // Import LanguagesScreen
 
 // Authentication Context
 interface AuthContextType {
@@ -46,40 +49,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 };
 
 // Root Stack Types
-export type RootStackParamList = {
-  Auth: undefined;
-  Main: undefined;
+// Define the param list for the stack that includes LanguagesScreen and AppDrawerNavigator
+export type MainAppStackParamList = {
+  Languages: undefined;
+  AppDrawer: NavigatorScreenParams<AppDrawerParamList>; // AppDrawerNavigator itself
 };
 
-const Stack = createStackNavigator<RootStackParamList>();
+const MainApp = createStackNavigator<MainAppStackParamList>();
+
+const MainAppStackNavigator = () => {
+  return (
+    <MainApp.Navigator screenOptions={{ headerShown: false }}>
+      <MainApp.Screen name="Languages" component={LanguagesScreen} />
+      <MainApp.Screen name="AppDrawer" component={AppDrawerNavigator} />
+    </MainApp.Navigator>
+  );
+};
+
+// Root Stack Types - Main now points to MainAppStack
+export type RootStackParamList = {
+  Auth: undefined; // AuthNavigator for unauthenticated users
+  Main: NavigatorScreenParams<MainAppStackParamList>; // MainAppStackNavigator for authenticated users
+};
+
+const RootStack = createStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
   const {isAuthenticated} = useAuth();
 
   return (
-    <Stack.Navigator
+    <RootStack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: {backgroundColor: 'transparent'},
+        // contentStyle: {backgroundColor: 'transparent'}, // Removed to fix error, apply to screens if needed
       }}>
       {isAuthenticated ? (
-        <Stack.Screen
+        <RootStack.Screen
           name="Main"
-          component={MainNavigator}
-          options={{
-            animationTypeForReplace: 'push',
-          }}
+          component={MainAppStackNavigator} // Use the new MainAppStackNavigator
+          // options={{ // Removed animationTypeForReplace for simplicity and to fix type error
+          //   animationTypeForReplace: 'push',
+          // } as StackNavigationOptions}
         />
       ) : (
-        <Stack.Screen
+        <RootStack.Screen
           name="Auth"
           component={AuthNavigator}
-          options={{
-            animationTypeForReplace: 'pop',
-          }}
+          // options={{ // Removed animationTypeForReplace
+          //   animationTypeForReplace: 'pop',
+          // }}
         />
       )}
-    </Stack.Navigator>
+    </RootStack.Navigator>
   );
 };
 

@@ -11,15 +11,25 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../navigation/AuthNavigator'; // Will be updated
+import { AuthStackParamList } from '../navigation/AuthNavigator'; // This might change depending on where LanguagesScreen lives
+import { AppDrawerParamList } from '../navigation/DrawerNavigator'; // Import Drawer param list
+import { NavigatorScreenParams } from '@react-navigation/native'; // Import NavigatorScreenParams
 import { apiService, DropdownItem } from '../api/apiService';
 
+// Define a more general ParamList that includes the AppDrawer
+// This assumes LanguagesScreen is part of a stack that can navigate to AppDrawer
+export type MainAppStackParamList = {
+  Languages: undefined;
+  AppDrawer: NavigatorScreenParams<AppDrawerParamList>;
+  // Potentially other screens at this level
+};
+
 type ScreenNavigationProp = StackNavigationProp<
-  AuthStackParamList,
-  'Languages' // Assuming this will be the route name
+  MainAppStackParamList,
+  'Languages'
 >;
 
-const LanguagesScreen = () => {
+const LanguagesScreen: React.FC = () => { // Added React.FC
   const navigation = useNavigation<ScreenNavigationProp>();
 
   const [languages, setLanguages] = useState<DropdownItem[]>([]);
@@ -58,8 +68,17 @@ const LanguagesScreen = () => {
       Alert.alert('Validation Error', 'Please select at least one language.');
       return;
     }
-    Alert.alert('Success', 'Languages submitted (mock).');
-    // Example: navigation.navigate('NextScreenAfterLanguages');
+    // Alert.alert('Success', 'Languages submitted (mock).');
+    // Navigate to the Drawer Navigator, targeting the 'MainApp' (BottomTabNavigator)
+    // and its initial 'Home' screen.
+    // navigation.navigate('Main');
+    navigation.navigate('AppDrawer', {
+      screen: 'MainApp',
+      params: {
+        screen: 'Home',
+        // params: undefined, // 'Home' screen in AppBottomTabParamList takes undefined params
+      },
+    });
   };
 
   const handleCancel = () => {

@@ -1,30 +1,35 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import PoojaListScreen from '../screens/PoojaListScreen';
+import AstroServicesScreen from '../screens/AstroServicesScreen';
+import EarningsScreen from '../screens/EarningsScreen';
+// Import icons later if needed
 
-// Define ParamList for the Tab Navigator
-export type BottomTabParamList = {
+export type AppBottomTabParamList = {
   Home: undefined;
-  Profile: undefined; // Assuming ProfileScreen also doesn't take params for now
+  PoojaList: undefined;
+  AstroServices: undefined;
+  Earnings: undefined;
 };
 
-const Tab = createBottomTabNavigator<BottomTabParamList>();
+const Tab = createBottomTabNavigator<AppBottomTabParamList>();
 
-const BottomTabNavigator: React.FC = () => {
+const AppBottomTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: false, // Hiding header here as Drawer will have its own
+        headerShown: false, // Usually handled by Drawer or Stack
         tabBarActiveTintColor: 'tomato',
         tabBarInactiveTintColor: 'gray',
-        tabBarStyle: [{ display: 'flex' }, null],
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="PoojaList" component={PoojaListScreen} options={{ title: 'Pooja List' }} />
+      <Tab.Screen name="AstroServices" component={AstroServicesScreen} options={{ title: 'Astro Services' }} />
+      <Tab.Screen name="Earnings" component={EarningsScreen} />
     </Tab.Navigator>
   );
 };
 
-export default BottomTabNavigator;
+export default AppBottomTabNavigator;
