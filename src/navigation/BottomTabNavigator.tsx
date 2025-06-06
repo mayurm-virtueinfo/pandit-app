@@ -9,10 +9,11 @@ import { COLORS } from '../theme/theme';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Imported icons
 import PoojaRequestNavigator from './PoojaRequestNavigator';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import PoojaListNavigator from './PoojaListNavigator';
 
 export type AppBottomTabParamList = {
   PoojaRequestNavigator: undefined;
-  PoojaList: undefined;
+  PoojaListNavigator: undefined;
   AstroServices: undefined;
   Earnings: undefined;
 };
@@ -58,8 +59,8 @@ const AppBottomTabNavigator: React.FC = () => {
         
       />
       <Tab.Screen
-        name="PoojaList"
-        component={PoojaListScreen}
+        name="PoojaListNavigator"
+        component={PoojaListNavigator}
         options={{ 
           title: 'Pooja List', 
           tabBarIcon: ({ color, size }) => <Ionicons name="list-outline" size={size} color={color} /> 

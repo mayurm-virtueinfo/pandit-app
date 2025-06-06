@@ -14,7 +14,9 @@ export interface PoojaRequestItem {
   id:number;
   title : string;
   scheduledDate: string;
-  imageUrl?:string
+  imageUrl?:string,
+  subtitle?:string,
+  price?:number
 }
 
 
