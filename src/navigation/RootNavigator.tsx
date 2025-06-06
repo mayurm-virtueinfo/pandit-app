@@ -2,9 +2,7 @@ import React, {createContext, useContext, useState, ReactNode} from 'react';
 import {createStackNavigator, StackNavigationOptions} from '@react-navigation/stack';
 import { NavigatorScreenParams } from '@react-navigation/native'; // Import NavigatorScreenParams
 import AuthNavigator from './AuthNavigator';
-// import MainNavigator from './MainNavigator'; // MainNavigator is being replaced by a new flow
 import AppDrawerNavigator, { AppDrawerParamList } from './DrawerNavigator'; // Corrected import path
-import LanguagesScreen from '../screens/LanguagesScreen'; // Import LanguagesScreen
 import { COLORS } from '../theme/theme';
 
 // Authentication Context
@@ -52,7 +50,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 // Root Stack Types
 // Define the param list for the stack that includes LanguagesScreen and AppDrawerNavigator
 export type MainAppStackParamList = {
-  Languages: undefined;
   AppDrawer: NavigatorScreenParams<AppDrawerParamList>; // AppDrawerNavigator itself
 };
 
@@ -62,13 +59,13 @@ const MainAppStackNavigator = () => {
   return (
     <MainApp.Navigator 
      screenOptions={{
+        headerShown: false,
         headerStyle: {
           backgroundColor: COLORS.primary,
         },
         headerTintColor: COLORS.white,
         cardStyle: { backgroundColor: COLORS.backgroundPrimary },
       }}>
-      <MainApp.Screen name="Languages" component={LanguagesScreen} />
       <MainApp.Screen name="AppDrawer" component={AppDrawerNavigator} />
     </MainApp.Navigator>
   );
@@ -87,7 +84,7 @@ const RootNavigator = () => {
 
   return (
     <RootStack.Navigator
-      initialRouteName='AppDrawer'
+      initialRouteName='Auth'
       screenOptions={{
         headerShown: false,
         // contentStyle: {backgroundColor: 'transparent'}, // Removed to fix error, apply to screens if needed
@@ -107,8 +104,6 @@ const RootNavigator = () => {
           //   animationTypeForReplace: 'pop',
           // }}
         />
-        <MainApp.Screen name="Languages" component={LanguagesScreen} />
-      <MainApp.Screen name="AppDrawer" component={AppDrawerNavigator} />
 
     </RootStack.Navigator>
   );

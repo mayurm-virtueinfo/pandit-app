@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import CustomHeader from '../components/CustomHeader';
 
 const PrivacyPolicyScreen: React.FC = () => {
   return (
+    <>
+    <CustomHeader showBackButton={false} showMenuButton={true} title={'Privacy Policy'}/>
     <View style={styles.container}>
       <Text style={styles.text}>Privacy Policy Screen</Text>
     </View>
+    </>
+    
   );
 };
 

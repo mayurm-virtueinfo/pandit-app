@@ -5,6 +5,7 @@ import { COLORS } from '../theme/theme';
 import AllRequestsScreen from './AllRequestsScreen';
 import PendingRequestsScreen from './PendingRequestsScreen';
 import AcceptedRequestsScreen from './AcceptedRequestsScreen';
+import CustomHeader from '../components/CustomHeader';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -13,6 +14,7 @@ const PoojaRequestScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
+            <CustomHeader showBackButton={false} showMenuButton={true} title={'Pooja Requests'}/>
             <Tab.Navigator
                 screenOptions={{
                     tabBarIndicatorStyle: {

@@ -5,7 +5,7 @@ import {
   DrawerItemList,
   DrawerItem,
 } from '@react-navigation/drawer';
-import { NavigatorScreenParams } from '@react-navigation/native';
+import { getFocusedRouteNameFromRoute, NavigatorScreenParams } from '@react-navigation/native';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native'; // Added for custom content
 
 // Navigators
@@ -23,6 +23,7 @@ import AboutUsScreen from '../screens/AboutUsScreen';
 import ContactUsScreen from '../screens/ContactUsScreen';
 import { useAuth } from './RootNavigator'; // Import useAuth
 import { COLORS } from '../theme/theme';
+import CustomHeader from '../components/CustomHeader';
 
 export type AppDrawerParamList = {
   MainApp: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
@@ -63,6 +64,25 @@ const CustomDrawerContent = (props: any) => {
 };
 
 const AppDrawerNavigator: React.FC = () => {
+  // Utility function to get the title based on the current tab route name
+  const getHeaderTitle = (route: any) => {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? 'PoojaRequest';
+    console.log('DrawerNavigator.tsx : routeName : ',routeName)
+    switch (routeName) {
+      case 'PoojaRequest':
+        return 'Pooja Requests';
+      case 'PoojaRequestNavigator':
+        return 'Pooja Requests';
+      case 'PoojaList':
+        return 'Pooja List';
+      case 'AstroServices':
+        return 'Astro Services';
+      case 'Earnings':
+        return 'Earnings';
+      default:
+        return '---1';
+    }
+  };
   return (
     <Drawer.Navigator
       initialRouteName="MainApp"
@@ -74,7 +94,9 @@ const AppDrawerNavigator: React.FC = () => {
       //   drawerActiveTintColor: '#6200ee',
       //   drawerInactiveTintColor: 'gray',
       // }}
-       screenOptions={{
+      screenOptions={{
+        // header: () => <CustomHeader />,
+        headerShown: false, // Show header for each screen
         headerStyle: {
           backgroundColor: COLORS.primary,
         },
@@ -86,7 +108,11 @@ const AppDrawerNavigator: React.FC = () => {
       <Drawer.Screen
         name="MainApp"
         component={AppBottomTabNavigator}
-        options={{ title: 'Home Dashboard' }} // Title for the drawer item
+        options={({ route }) => ({
+          // title: getHeaderTitle(route), // <- dynamic title here
+          drawerLabel: 'Home Dashboard', // static label in drawer
+          headerTitle: getHeaderTitle(route), // dynamic title in screen header
+        })}
       />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />

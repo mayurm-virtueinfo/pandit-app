@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import CustomHeader from '../components/CustomHeader';
 
 const EarningsScreen: React.FC = () => {
   return (
+    <>
+    <CustomHeader showBackButton={false} showMenuButton={true} title={'Earnings'}/>
     <View style={styles.container}>
       <Text style={styles.text}>Earnings Screen</Text>
     </View>
+    </>
+    
   );
 };
 

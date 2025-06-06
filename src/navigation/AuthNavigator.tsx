@@ -24,6 +24,7 @@ const Stack = createStackNavigator<AuthStackParamList>();
 const AuthNavigator = () => {
   return (
     <Stack.Navigator
+      initialRouteName='Languages'
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: COLORS.backgroundPrimary },

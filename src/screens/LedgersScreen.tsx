@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import CustomHeader from '../components/CustomHeader';
 
 const LedgersScreen: React.FC = () => {
   return (
+    <>
+    <CustomHeader showBackButton={false} showMenuButton={true} title={'Ledgers'}/>
     <View style={styles.container}>
       <Text style={styles.text}>Ledgers Screen</Text>
     </View>
+    </>
+    
   );
 };
 

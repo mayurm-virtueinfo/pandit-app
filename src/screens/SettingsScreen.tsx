@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {useAuth} from '../navigation/RootNavigator';
+import CustomHeader from '../components/CustomHeader';
 
 // Assuming useAuth provides a signOut function of type () => void
 // If RootNavigator.tsx exports an AuthContextType, it would be better to use it here.
@@ -14,12 +15,16 @@ const SettingsScreen: React.FC = () => {
   };
 
   return (
+    <>
+    <CustomHeader showBackButton={false} showMenuButton={true} title={'Settings'}/>
     <View style={styles.container}>
       <Text style={styles.title}>Settings Screen</Text>
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
         <Text style={styles.signOutText}>Sign Out</Text>
       </TouchableOpacity>
     </View>
+    </>
+    
   );
 };
 

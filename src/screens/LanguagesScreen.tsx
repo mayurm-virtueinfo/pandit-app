@@ -16,18 +16,15 @@ import { AppDrawerParamList } from '../navigation/DrawerNavigator'; // Import Dr
 import { NavigatorScreenParams } from '@react-navigation/native'; // Import NavigatorScreenParams
 import { apiService, DropdownItem } from '../api/apiService';
 import { COLORS } from '../theme/theme';
+import { RootStackParamList } from '../navigation/RootNavigator';
 
 // Define a more general ParamList that includes the AppDrawer
 // This assumes LanguagesScreen is part of a stack that can navigate to AppDrawer
-export type MainAppStackParamList = {
-  Languages: undefined;
-  AppDrawer: NavigatorScreenParams<AppDrawerParamList>;
-  // Potentially other screens at this level
-};
+
 
 type ScreenNavigationProp = StackNavigationProp<
-  MainAppStackParamList,
-  'Languages'
+  RootStackParamList,
+  'Main'
 >;
 
 const LanguagesScreen: React.FC = () => { // Added React.FC
@@ -72,13 +69,12 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
     // Alert.alert('Success', 'Languages submitted (mock).');
     // Navigate to the Drawer Navigator, targeting the 'MainApp' (BottomTabNavigator)
     // and its initial 'Home' screen.
-    // navigation.navigate('Main');
-    navigation.navigate('AppDrawer', {
-      screen: 'MainApp',
+    //  navigation.replace('Main');
+    navigation.navigate('Main', {
+      screen: 'AppDrawer', // Navigate to the Drawer Navigator
       params: {
-        screen: 'Home',
-        // params: undefined, // 'Home' screen in AppBottomTabParamList takes undefined params
-      },
+        screen: 'MainApp', // Navigate to the MainApp screen within the Drawer
+      } as NavigatorScreenParams<AppDrawerParamList>, // Ensure params are typed correctly
     });
   };
 

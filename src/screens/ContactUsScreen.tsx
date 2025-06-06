@@ -1,11 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import CustomHeader from '../components/CustomHeader';
 
 const ContactUsScreen: React.FC = () => {
   return (
+    <>
+    <CustomHeader showBackButton={false} showMenuButton={true} title={'Contact Us'}/>
     <View style={styles.container}>
       <Text style={styles.text}>Contact Us Screen</Text>
     </View>
+    </>
   );
 };
 

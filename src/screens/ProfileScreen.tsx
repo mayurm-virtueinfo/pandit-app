@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import axios, { AxiosError } from 'axios';
+import CustomHeader from '../components/CustomHeader';
 
 // Define an interface for the User object
 interface User {
@@ -47,9 +48,13 @@ const ProfileScreen: React.FC = () => {
 
   if (error) {
     return (
+      <>
+      <CustomHeader showBackButton={false} showMenuButton={true} title={'Profile'}/>
       <View style={[styles.container, styles.centered]}>
         <Text style={styles.errorText}>Error: {error}</Text>
       </View>
+      </>
+      
     );
   }
 

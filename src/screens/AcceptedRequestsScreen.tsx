@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { apiService, PoojaRequestItem } from '../api/apiService';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
+import { useNavigation } from '@react-navigation/native';
 
+type ScreenNavigationProp = StackNavigationProp<
+  PoojaRequestParamList,
+  'PoojaRequestDetail'
+>;
 const AcceptedRequestsScreen: React.FC = () => {
+    const navigation = useNavigation<ScreenNavigationProp>();
     const [poojaRequests, setPoojaRequests] = useState<PoojaRequestItem[]>([]);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -21,14 +29,20 @@ const AcceptedRequestsScreen: React.FC = () => {
         setRefreshing(false);
     };
 
+    const handleRequestPress = (item: PoojaRequestItem) => {
+            // Handle the request press, e.g., navigate to a details screen or show more info
+            console.log('Request pressed:', item);
+            navigation.navigate('PoojaRequestDetail', { request: item });
+        };
+
     const renderItem = ({ item }: { item: PoojaRequestItem }) => (
-        <View style={styles.card}>
+        <TouchableOpacity onPress={() => handleRequestPress(item)} style={styles.card}>
             <View style={styles.cardText}>
                 <Text style={styles.title}>{item.title}</Text>
                 <Text style={styles.date}>Scheduled on {item.scheduledDate}</Text>
             </View>
             <Image source={{ uri: item.imageUrl }} style={styles.image} />
-        </View>
+        </TouchableOpacity>
     );
 
     return (
