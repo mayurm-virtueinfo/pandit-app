@@ -2,29 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { COLORS } from '../theme/theme';
+import AllRequestsScreen from './AllRequestsScreen';
+import PendingRequestsScreen from './PendingRequestsScreen';
+import AcceptedRequestsScreen from './AcceptedRequestsScreen';
 
 const Tab = createMaterialTopTabNavigator();
 
-const AllRequests = () => (
-    <View style={styles.tabContainer}>
-        <Text>All Requests</Text>
-        {/* Add functionality to display all requests */}
-    </View>
-);
-
-const PendingRequests = () => (
-    <View style={styles.tabContainer}>
-        <Text>Pending Requests</Text>
-        {/* Add functionality to display pending requests */}
-    </View>
-);
-
-const AcceptedRequests = () => (
-    <View style={styles.tabContainer}>
-        <Text>Accepted Requests</Text>
-        {/* Add functionality to display accepted requests */}
-    </View>
-);
 
 const PoojaRequestScreen: React.FC = () => {
 
@@ -40,9 +23,9 @@ const PoojaRequestScreen: React.FC = () => {
                     tabBarActiveTintColor: COLORS.primary,
                     tabBarInactiveTintColor: 'gray',
                 }}>
-                <Tab.Screen name="All" component={AllRequests} />
-                <Tab.Screen name="Pending" component={PendingRequests} />
-                <Tab.Screen name="Accepted" component={AcceptedRequests} />
+                <Tab.Screen name="All" component={AllRequestsScreen} />
+                <Tab.Screen name="Pending" component={PendingRequestsScreen} />
+                <Tab.Screen name="Accepted" component={AcceptedRequestsScreen} />
             </Tab.Navigator>
         </View>
     );

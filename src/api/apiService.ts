@@ -9,6 +9,12 @@ export interface DropdownItem {
   name: string;
   description?:string
 }
+// Types for dropdown data
+export interface PoojaRequestItem {
+  title : string;
+  scheduledDate: string;
+  imageUrl?:string
+}
 
 
 
@@ -120,4 +126,17 @@ export const apiService = {
       return [];
     }
   },
+  // Fetch poojaRequests
+  getPoojaRequests: async (): Promise<PoojaRequestItem[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.POOJA_REQUESTS_API);
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching pooja requests:', error);
+      return [];
+    }
+  },
+  
 };

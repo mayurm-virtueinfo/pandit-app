@@ -6,7 +6,7 @@ import AstroServicesScreen from '../screens/AstroServicesScreen';
 import EarningsScreen from '../screens/EarningsScreen';
 import PoojaRequestScreen from '../screens/PoojaRequestScreen';
 import { COLORS } from '../theme/theme';
-// Import icons later if needed
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Imported icons
 
 export type AppBottomTabParamList = {
   Home: undefined;
@@ -21,15 +21,37 @@ const AppBottomTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: false, // Usually handled by Drawer or Stack
+        headerShown: false, 
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: 'gray',
       }}
     >
-      <Tab.Screen name="Home" component={PoojaRequestScreen} />
-      <Tab.Screen name="PoojaList" component={PoojaListScreen} options={{ title: 'Pooja List' }} />
-      <Tab.Screen name="AstroServices" component={AstroServicesScreen} options={{ title: 'Astro Services' }} />
-      <Tab.Screen name="Earnings" component={EarningsScreen} />
+      <Tab.Screen 
+        name="Home" 
+        component={PoojaRequestScreen} 
+        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} /> }} 
+      />
+      <Tab.Screen 
+        name="PoojaList" 
+        component={PoojaListScreen} 
+        options={{ 
+          title: 'Pooja List', 
+          tabBarIcon: ({ color, size }) => <Ionicons name="list-outline" size={size} color={color} /> 
+        }} 
+      />
+      <Tab.Screen 
+        name="AstroServices" 
+        component={AstroServicesScreen} 
+        options={{ 
+          title: 'Astro Services', 
+          tabBarIcon: ({ color, size }) => <Ionicons name="star-outline" size={size} color={color} /> 
+        }} 
+      />
+      <Tab.Screen 
+        name="Earnings" 
+        component={EarningsScreen} 
+        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="cash-outline" size={size} color={color} /> }} 
+      />
     </Tab.Navigator>
   );
 };
