@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    FlatList,
-    Image
-} from 'react-native';
-
+import { View, Text, StyleSheet, FlatList, RefreshControl, Image } from 'react-native';
 import { apiService, PoojaRequestItem } from '../api/apiService'; // adjust path
 
 const AllRequestsScreen: React.FC = () => {
     const [poojaRequests, setPoojaRequests] = useState<PoojaRequestItem[]>([]);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        const fetchPoojaRequests = async () => {
-            const requests = await apiService.getPoojaRequests();
-            setPoojaRequests(requests);
-        };
-
         fetchPoojaRequests();
     }, []);
+
+    const fetchPoojaRequests = async () => {
+        const requests = await apiService.getPoojaRequests();
+        console.log('Fetched Pooja Requests:', requests);
+        setPoojaRequests(requests);
+    };
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchPoojaRequests();
+        setRefreshing(false);
+    };
 
     const renderItem = ({ item }: { item: PoojaRequestItem }) => (
         <View style={styles.card}>
@@ -33,15 +34,16 @@ const AllRequestsScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/* List */}
             <FlatList
                 data={poojaRequests}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.title}
+                keyExtractor={(item, index) => `${item.title}-${index}`}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
             />
-
         </View>
     );
 };
@@ -89,5 +91,4 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
 });
-
 export default AllRequestsScreen;

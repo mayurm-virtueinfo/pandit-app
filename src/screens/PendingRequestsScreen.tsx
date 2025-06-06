@@ -1,18 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, RefreshControl } from 'react-native';
 import { apiService, PoojaRequestItem } from '../api/apiService';
 
 const PendingRequestsScreen: React.FC = () => {
     const [poojaRequests, setPoojaRequests] = useState<PoojaRequestItem[]>([]);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        const fetchPoojaRequests = async () => {
-            const requests = await apiService.getPoojaRequests();
-            setPoojaRequests(requests);
-        };
-
         fetchPoojaRequests();
     }, []);
+
+    const fetchPoojaRequests = async () => {
+        const requests = await apiService.getPoojaRequests();
+        setPoojaRequests(requests);
+    };
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchPoojaRequests();
+        setRefreshing(false);
+    };
 
     const renderItem = ({ item }: { item: PoojaRequestItem }) => (
         <View style={styles.card}>
@@ -26,15 +33,16 @@ const PendingRequestsScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/* List */}
             <FlatList
                 data={poojaRequests}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.title}
+                keyExtractor={(item, index) => `${item.title}-${index}`}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
             />
-
         </View>
     );
 };

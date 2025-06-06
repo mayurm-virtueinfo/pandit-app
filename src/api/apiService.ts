@@ -11,6 +11,7 @@ export interface DropdownItem {
 }
 // Types for dropdown data
 export interface PoojaRequestItem {
+  id:number;
   title : string;
   scheduledDate: string;
   imageUrl?:string
