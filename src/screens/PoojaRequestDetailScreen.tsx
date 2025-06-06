@@ -12,7 +12,7 @@ const PoojaRequestDetailScreen: React.FC = () => {
 
     return (
         <>
-            <CustomHeader showBackButton={true} showMenuButton={false} title='Pooja Request' />
+            <CustomHeader showBackButton={true} showMenuButton={false} title='Ganesh Chaturthi Pooja' />
 
             <ScrollView style={styles.container}>
                 {/* Header image */}

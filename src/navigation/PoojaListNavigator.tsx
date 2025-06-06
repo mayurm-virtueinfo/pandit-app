@@ -1,10 +1,14 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import PoojaListScreen from '../screens/PoojaListScreen';
+import AddNewPoojaScreen from '../screens/AddNewPoojaScreen';
+import { PoojaRequestItem } from '../api/apiService';
+import PoojaRequestDetailScreen from '../screens/PoojaRequestDetailScreen';
 
 export type PoojaListParamList = {
   PoojaList: undefined;
-  // PoojaRequestDetail: {request:PoojaRequestItem};
+  AddNewPooja: undefined;
+  PoojaRequestDetail: {request:PoojaRequestItem};
 };
 
 const Stack = createStackNavigator<PoojaListParamList>();
@@ -14,32 +18,19 @@ const PoojaListNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        // cardStyle: { backgroundColor: COLORS.backgroundPrimary },
       }}>
       <Stack.Screen
         name="PoojaList"
         component={PoojaListScreen}
-        options={{
-          title: 'Pooja List',
-          // headerShown: true,
-          // headerStyle: {
-          //   backgroundColor: COLORS.primary,
-          // },
-          // headerTintColor: COLORS.white,
-        }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
+        name="AddNewPooja"
+        component={AddNewPoojaScreen} // Assuming you have an AddNewPoojaScreen component
+      />
+      <Stack.Screen
         name="PoojaRequestDetail"
         component={PoojaRequestDetailScreen}
-        options={{
-          title: 'Pooja Request',
-          // headerShown: true,
-          // headerStyle: {
-          //   backgroundColor: COLORS.primary,
-          // },
-          // headerTintColor: COLORS.white,
-        }}
-      /> */}
+      />
     </Stack.Navigator>
   );
 };

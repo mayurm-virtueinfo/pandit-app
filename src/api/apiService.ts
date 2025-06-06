@@ -9,7 +9,7 @@ export interface DropdownItem {
   name: string;
   description?:string
 }
-// Types for dropdown data
+// Types for pooja request data
 export interface PoojaRequestItem {
   id:number;
   title : string;
@@ -17,6 +17,14 @@ export interface PoojaRequestItem {
   imageUrl?:string,
   subtitle?:string,
   price?:number
+}
+// Types for pooja request data
+export interface AstroServiceItem {
+  id:number;
+  title : string;
+  pricePerMin: string;
+  imageUrl?:string,
+  description?:string
 }
 
 
@@ -138,6 +146,18 @@ export const apiService = {
       );
     } catch (error) {
       console.error('Error fetching pooja requests:', error);
+      return [];
+    }
+  },
+  // Fetch getAstroServices
+  getAstroServices: async (): Promise<AstroServiceItem[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.ASTRO_SERVICES_API);
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching astro services:', error);
       return [];
     }
   },

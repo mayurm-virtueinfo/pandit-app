@@ -8,11 +8,12 @@ import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
 import  Ionicons  from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
+import { PoojaListParamList } from '../navigation/PoojaListNavigator';
 
 // Navigation type
 type ScreenNavigationProp = StackNavigationProp<
-  PoojaRequestParamList,
-  'PoojaRequestDetail'
+  PoojaListParamList,
+  'AddNewPooja'|'PoojaRequestDetail'
 >;
 
 const PoojaListScreen: React.FC = () => {
@@ -36,14 +37,17 @@ const PoojaListScreen: React.FC = () => {
   };
 
   const handleRequestPressEdit = (item: PoojaRequestItem) => {
-    navigation.navigate('PoojaRequestDetail', { request: item });
+    navigation.navigate('AddNewPooja');
   };
-  const handleRequestPressAdd = (item: PoojaRequestItem) => {
+  const handleRequestPressAdd = () => {
+    navigation.navigate('AddNewPooja');
+  };
+  const handleRequestPressDetail = (item: PoojaRequestItem) => {
     navigation.navigate('PoojaRequestDetail', { request: item });
   };
 
   const renderItem = ({ item }: { item: PoojaRequestItem }) => (
-    <TouchableOpacity onPress={() => handleRequestPressAdd(item)} style={styles.card}>
+    <TouchableOpacity onPress={() => handleRequestPressDetail(item)} style={styles.card}>
       <Image source={{ uri: item.imageUrl }} style={styles.image} />
       <View style={styles.cardText}>
         <Text style={styles.title}>{item.title}</Text>
@@ -67,7 +71,7 @@ const PoojaListScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       />
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity  onPress={() => handleRequestPressAdd()} style={styles.addButton}>
         <Text style={styles.addButtonText}>Add New Pooja</Text>
       </TouchableOpacity>
     </View>
