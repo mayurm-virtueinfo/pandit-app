@@ -12,9 +12,15 @@ import { apiService, AstroServiceItem } from '../api/apiService';
 import CustomHeader from '../components/CustomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../theme/theme';
+import { AstroServiceParamList } from '../navigation/AstroServiceNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 
+type ScreenNavigationProp = StackNavigationProp<
+  AstroServiceParamList,
+  'AddNewAstroService'
+>;
 const AstroServicesScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ScreenNavigationProp>();
   const [astroServices, setAstroServices] = useState<AstroServiceItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -75,7 +81,7 @@ const AstroServicesScreen: React.FC = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddNewAstroService')}>
         <Text style={styles.addButtonText}>Add New Astro Service</Text>
       </TouchableOpacity>
     </View>
