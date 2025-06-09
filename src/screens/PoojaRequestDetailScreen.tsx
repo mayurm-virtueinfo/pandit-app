@@ -6,9 +6,40 @@ import Feather from 'react-native-vector-icons/Feather'; // Imported icons
 import { useNavigation } from '@react-navigation/native';
 import CustomHeader from '../components/CustomHeader';
 import { COLORS } from '../theme/theme';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
+
+type ScreenNavigationProp = StackNavigationProp<
+  PoojaRequestParamList,
+  'ChatMessages'
+>;
+
+
 
 const PoojaRequestDetailScreen: React.FC = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<ScreenNavigationProp>();
+
+    const handleChatMessagePress = () => {
+        // Navigate to chat screen or perform chat action
+        console.log('Chat with Dharmesh pressed');
+        navigation.navigate('ChatMessages');
+    };
+    const handleItemsListPress = () => {
+        // Navigate to items list screen or perform items list action
+        console.log('View Pooja Items list pressed');
+    };
+    const handlePanditLocationPress = () => {
+        // Navigate to pandit location screen or perform location action
+        console.log('Pandit location pressed');
+    };
+    const handleStartPress = () => {
+        // Handle start button press
+        console.log('Start Pooja pressed');
+    };
+    const handleCancelPress = () => {
+        // Handle cancel button press
+        console.log('Cancel Pooja pressed');
+    };
 
     return (
         <>
@@ -39,31 +70,31 @@ const PoojaRequestDetailScreen: React.FC = () => {
                     </View>
 
                     {/* Chat */}
-                    <View style={styles.row}>
+                    <TouchableOpacity onPress={handleChatMessagePress} style={styles.row}>
                         <Ionicons name="chatbox-outline" size={20} color="#333" style={styles.icon} />
                         <Text style={styles.link}>Chat with Dharmesh...</Text>
-                    </View>
+                    </TouchableOpacity>
 
                     {/* Items List */}
-                    <View style={styles.row}>
+                    <TouchableOpacity  onPress={handleItemsListPress} style={styles.row}>
                         <Feather name="list" size={20} color="#333" style={styles.icon} />
                         <Text style={styles.link}>View Pooja Items list</Text>
-                    </View>
+                    </TouchableOpacity>
 
                     {/* Pandit Info */}
-                    <View style={styles.row}>
+                    <TouchableOpacity onPress={handlePanditLocationPress} style={styles.row}>
                         <Image
                             source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} // Replace with actual image
                             style={styles.avatar}
                         />
-                        <View style={{ flex: 1 }}>
+                        <TouchableOpacity  style={{ flex: 1 }}>
                             <Text style={styles.panditName}>Dharmesh Shah</Text>
                             <Text style={styles.address}>
                                 House no. 102, Ganesh Colony, GK Road, Ahemdabad
                             </Text>
-                        </View>
+                        </TouchableOpacity>
                         <MaterialCommunityIcons name="map-marker-distance" size={20} color="#333" />
-                    </View>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Pricing Section */}
@@ -84,10 +115,10 @@ const PoojaRequestDetailScreen: React.FC = () => {
                 </View>
 
                 {/* Buttons */}
-                <TouchableOpacity style={styles.primaryBtn}>
+                <TouchableOpacity onPress={handleStartPress} style={styles.primaryBtn}>
                     <Text style={styles.primaryBtnText}>Start</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.secondaryBtn}>
+                <TouchableOpacity onPress={handleCancelPress} style={styles.secondaryBtn}>
                     <Text style={styles.secondaryBtnText}>Cancel</Text>
                 </TouchableOpacity>
             </ScrollView>

@@ -13,6 +13,7 @@ class ApiEndpoints {
   static readonly LANGUAGES_API = `${ApiEndpoints.API_VERSION}/68403db38a456b7966a963f6`;
   static readonly POOJA_REQUESTS_API = `${ApiEndpoints.API_VERSION}/68428e788561e97a50203819`;
   static readonly ASTRO_SERVICES_API = `${ApiEndpoints.API_VERSION}/6842ff2a8960c979a5a5f4f5`;
+  static readonly MESSAGES_API = `${ApiEndpoints.API_VERSION}/68466cab8960c979a5a6dc41`;
   static readonly XMasterKey = '$2a$10$XR82L3T4Q4gtDUAvZKwioOsmNaU2X7QVpkZbtKJ90jdcoVal/Pd4a';
 }
 

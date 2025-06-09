@@ -4,10 +4,12 @@ import { COLORS } from '../theme/theme';
 import PoojaRequestScreen from '../screens/PoojaRequestScreen';
 import PoojaRequestDetailScreen from '../screens/PoojaRequestDetailScreen';
 import { PoojaRequestItem } from '../api/apiService';
+import ChatMessagesScreen from '../screens/ChatMessagesScreen';
 
 export type PoojaRequestParamList = {
   PoojaRequest: undefined;
   PoojaRequestDetail: {request:PoojaRequestItem};
+  ChatMessages:undefined
 };
 
 const Stack = createStackNavigator<PoojaRequestParamList>();
@@ -34,6 +36,18 @@ const PoojaRequestNavigator = () => {
       <Stack.Screen
         name="PoojaRequestDetail"
         component={PoojaRequestDetailScreen}
+        options={{
+          title: 'Pooja Request',
+          // headerShown: true,
+          // headerStyle: {
+          //   backgroundColor: COLORS.primary,
+          // },
+          // headerTintColor: COLORS.white,
+        }}
+      />
+      <Stack.Screen
+        name="ChatMessages"
+        component={ChatMessagesScreen}
         options={{
           title: 'Pooja Request',
           // headerShown: true,

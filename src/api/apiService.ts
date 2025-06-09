@@ -27,6 +27,14 @@ export interface AstroServiceItem {
   description?:string
 }
 
+export interface ChatMessage {
+  id: number;
+  sender: {
+    name: string;
+    isUser: boolean;
+  };
+  text: string;
+}
 
 
 export const apiService = {
@@ -158,6 +166,18 @@ export const apiService = {
       );
     } catch (error) {
       console.error('Error fetching astro services:', error);
+      return [];
+    }
+  },
+  // Fetch getMessages
+  getMessages: async (): Promise<ChatMessage[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.MESSAGES_API);
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching messages:', error);
       return [];
     }
   },
