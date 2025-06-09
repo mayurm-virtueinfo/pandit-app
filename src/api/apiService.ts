@@ -36,6 +36,14 @@ export interface ChatMessage {
   text: string;
 }
 
+export interface PoojaItem {
+  id: number;
+  name: string;
+  amount: number;
+  unit: string;
+}
+
+
 
 export const apiService = {
   // Fetch cities based on pincode
@@ -178,6 +186,18 @@ export const apiService = {
       );
     } catch (error) {
       console.error('Error fetching messages:', error);
+      return [];
+    }
+  },
+    // Fetch getPoojaItems
+  getPoojaItems: async (): Promise<PoojaItem[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.POOJA_ITEMS_API);
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching pooja items:', error);
       return [];
     }
   },

@@ -11,7 +11,7 @@ import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
 
 type ScreenNavigationProp = StackNavigationProp<
   PoojaRequestParamList,
-  'ChatMessages'
+  'ChatMessages'|'PoojaItemList'
 >;
 
 
@@ -27,6 +27,7 @@ const PoojaRequestDetailScreen: React.FC = () => {
     const handleItemsListPress = () => {
         // Navigate to items list screen or perform items list action
         console.log('View Pooja Items list pressed');
+        navigation.navigate('PoojaItemList');
     };
     const handlePanditLocationPress = () => {
         // Navigate to pandit location screen or perform location action

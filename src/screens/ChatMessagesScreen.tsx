@@ -35,6 +35,7 @@ const ChatMessagesScreen: React.FC = () => {
         style={[
           styles.messageContainer,
           isUser ? styles.messageRight : styles.messageLeft,
+          
         ]}
       >
         {!isUser && (
@@ -111,7 +112,8 @@ const styles = StyleSheet.create({
   },
   messageRight: {
     justifyContent: 'flex-end',
-    flexDirection: 'row-reverse',
+    // flexDirection: 'row-reverse',
+    // backgroundColor:'yellow'
   },
   avatar: {
     width: 32,
