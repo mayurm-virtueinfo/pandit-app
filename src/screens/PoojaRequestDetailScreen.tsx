@@ -11,13 +11,19 @@ import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
 
 type ScreenNavigationProp = StackNavigationProp<
   PoojaRequestParamList,
-  'ChatMessages'|'PoojaItemList'
+  'ChatMessages'|'PoojaItemList'|'PinVerification'
 >;
 
 
 
 const PoojaRequestDetailScreen: React.FC = () => {
     const navigation = useNavigation<ScreenNavigationProp>();
+
+    const handlePinVerify = () => {
+        // Navigate to chat screen or perform chat action
+        console.log('Pin Verify pressed');
+        navigation.navigate('PinVerification');
+    };
 
     const handleChatMessagePress = () => {
         // Navigate to chat screen or perform chat action
@@ -118,6 +124,9 @@ const PoojaRequestDetailScreen: React.FC = () => {
                 {/* Buttons */}
                 <TouchableOpacity onPress={handleStartPress} style={styles.primaryBtn}>
                     <Text style={styles.primaryBtnText}>Start</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handlePinVerify} style={styles.primaryBtn}>
+                    <Text style={styles.primaryBtnText}>Pin Verify</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleCancelPress} style={styles.secondaryBtn}>
                     <Text style={styles.secondaryBtnText}>Cancel</Text>

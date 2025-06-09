@@ -6,12 +6,14 @@ import PoojaRequestDetailScreen from '../screens/PoojaRequestDetailScreen';
 import { PoojaRequestItem } from '../api/apiService';
 import ChatMessagesScreen from '../screens/ChatMessagesScreen';
 import PoojaItemListScreen from '../screens/PoojaItemListScreen';
+import PinVerificationScreen from '../screens/PinVerificationScreen';
 
 export type PoojaRequestParamList = {
   PoojaRequest: undefined;
   PoojaRequestDetail: {request:PoojaRequestItem};
   ChatMessages:undefined,
-  PoojaItemList:undefined
+  PoojaItemList:undefined,
+  PinVerification:undefined
 };
 
 const Stack = createStackNavigator<PoojaRequestParamList>();
@@ -38,6 +40,10 @@ const PoojaRequestNavigator = () => {
       <Stack.Screen
         name="PoojaItemList"
         component={PoojaItemListScreen}
+      />
+      <Stack.Screen
+        name="PinVerification"
+        component={PinVerificationScreen}
       />
     </Stack.Navigator>
   );
