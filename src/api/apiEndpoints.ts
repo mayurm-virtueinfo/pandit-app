@@ -1,4 +1,6 @@
 class ApiEndpoints {
+  static readonly XMasterKey = '$2a$10$XR82L3T4Q4gtDUAvZKwioOsmNaU2X7QVpkZbtKJ90jdcoVal/Pd4a';
+
   static readonly CITY_API = 'https://api.postalpincode.in/pincode';
   static readonly BASE_URL = 'https://api.jsonbin.io';
   static readonly API_VERSION = 'v3/b';
@@ -15,7 +17,8 @@ class ApiEndpoints {
   static readonly ASTRO_SERVICES_API = `${ApiEndpoints.API_VERSION}/6842ff2a8960c979a5a5f4f5`;
   static readonly MESSAGES_API = `${ApiEndpoints.API_VERSION}/68466cab8960c979a5a6dc41`;
   static readonly POOJA_ITEMS_API = `${ApiEndpoints.API_VERSION}/684675428960c979a5a6de75`;
-  static readonly XMasterKey = '$2a$10$XR82L3T4Q4gtDUAvZKwioOsmNaU2X7QVpkZbtKJ90jdcoVal/Pd4a';
+  static readonly CANCELLATION_REASON_API = `${ApiEndpoints.API_VERSION}/684691198960c979a5a6e6f5`;
+  static readonly CANCELLATION_POLICY_API = `${ApiEndpoints.API_VERSION}/684695808a456b7966ab29c0`;
 }
 
 export default ApiEndpoints;

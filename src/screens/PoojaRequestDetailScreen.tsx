@@ -11,7 +11,7 @@ import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
 
 type ScreenNavigationProp = StackNavigationProp<
   PoojaRequestParamList,
-  'ChatMessages'|'PoojaItemList'|'PinVerification'
+  'ChatMessages'|'PoojaItemList'|'PinVerification'|'CancellationReason'
 >;
 
 
@@ -46,6 +46,7 @@ const PoojaRequestDetailScreen: React.FC = () => {
     const handleCancelPress = () => {
         // Handle cancel button press
         console.log('Cancel Pooja pressed');
+        navigation.navigate('CancellationReason');
     };
 
     return (

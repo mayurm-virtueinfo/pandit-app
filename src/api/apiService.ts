@@ -42,6 +42,16 @@ export interface PoojaItem {
   amount: number;
   unit: string;
 }
+export interface CancellationReason {
+  id: number;
+  reason: string;
+  requiresSpecification?: boolean; // Optional, only for "Other"
+}
+export interface CancellationPolicy {
+  id: number;
+  description: string;
+}
+
 
 
 
@@ -201,5 +211,26 @@ export const apiService = {
       return [];
     }
   },
-  
+  getCancellationReason: async (): Promise<CancellationReason[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.CANCELLATION_REASON_API);
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching cancellation reasons:', error);
+      return [];
+    }
+  },
+    getCancellationPolicy: async (): Promise<CancellationPolicy[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.CANCELLATION_POLICY_API);
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching cancellation policies:', error);
+      return [];
+    }
+  },
 };
