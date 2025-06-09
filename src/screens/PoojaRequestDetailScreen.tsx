@@ -11,7 +11,7 @@ import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
 
 type ScreenNavigationProp = StackNavigationProp<
   PoojaRequestParamList,
-  'ChatMessages'|'PoojaItemList'|'PinVerification'|'CancellationReason'
+  'ChatMessages'|'PoojaItemList'|'PinVerification'|'CancellationReason'|'RateYourExperience'
 >;
 
 
@@ -49,6 +49,9 @@ const PoojaRequestDetailScreen: React.FC = () => {
         navigation.navigate('CancellationReason');
     };
 
+    const handleRateYourExperience = () => {
+      navigation.navigate('RateYourExperience');
+  };
     return (
         <>
             <CustomHeader showBackButton={true} showMenuButton={false} title='Ganesh Chaturthi Pooja' />
@@ -129,6 +132,9 @@ const PoojaRequestDetailScreen: React.FC = () => {
                 <TouchableOpacity onPress={handlePinVerify} style={styles.primaryBtn}>
                     <Text style={styles.primaryBtnText}>Pin Verify</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.primaryBtn} onPress={handleRateYourExperience}>
+                          <Text style={styles.primaryBtnText}>Rate Your Experience</Text>
+                        </TouchableOpacity>
                 <TouchableOpacity onPress={handleCancelPress} style={styles.secondaryBtn}>
                     <Text style={styles.secondaryBtnText}>Cancel</Text>
                 </TouchableOpacity>

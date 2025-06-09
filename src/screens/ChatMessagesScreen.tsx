@@ -13,9 +13,19 @@ import { apiService, ChatMessage } from '../api/apiService';
 import CustomHeader from '../components/CustomHeader';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../theme/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AstroRequestParamList } from '../navigation/AstroRequestNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
 
+type ScreenNavigationProp = StackNavigationProp<
+  AstroRequestParamList,
+  'VideoCall'
+>;
 
 const ChatMessagesScreen: React.FC = () => {
+    const navigation = useNavigation<ScreenNavigationProp>();
+    const insets = useSafeAreaInsets();
   const [messagesList, setMessagesList] = useState<ChatMessage[]>([]);
 
   const fetchMessagesList = async () => {
@@ -59,9 +69,12 @@ const ChatMessagesScreen: React.FC = () => {
     );
   };
 
+  const handleVideoCallPress = () => {
+    navigation.navigate('VideoCall');
+  }
   return (
-    <View style={styles.container}>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Messages'} />
+    <View style={[styles.container, { marginBottom: insets.bottom }]}>
+      <CustomHeader showBackButton={true} showMenuButton={false} title={'Astrology Consultation'} />
       <FlatList
         data={messagesList}
         keyExtractor={(item) => item.id.toString()}
@@ -81,10 +94,13 @@ const ChatMessagesScreen: React.FC = () => {
           placeholderTextColor="#999"
         />
         <TouchableOpacity>
-          <Icon name="call-outline" size={24} color="black" style={styles.icon} />
+          <Icon name="call-outline" size={22} color="black" style={styles.icon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleVideoCallPress}>
+          <Icon name="videocam-outline" size={24} color="black" style={styles.icon} />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Icon name="happy-outline" size={24} color="black" style={styles.icon} />
+          <Icon name="attach-outline" size={24} color="black" style={styles.icon} />
         </TouchableOpacity>
       </View>
     </View>

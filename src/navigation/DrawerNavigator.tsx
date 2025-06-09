@@ -24,6 +24,8 @@ import ContactUsScreen from '../screens/ContactUsScreen';
 import { useAuth } from './RootNavigator'; // Import useAuth
 import { COLORS } from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
+import AstroRequestScreen from '../screens/AstroRequestScreen';
+import AstroRequestNavigator from './AstroRequestNavigator';
 
 export type AppDrawerParamList = {
   MainApp: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
@@ -36,6 +38,7 @@ export type AppDrawerParamList = {
   TermsAndConditions: undefined;
   AboutUs: undefined;
   ContactUs: undefined;
+  AstroRequestNavigator: undefined;
   // Logout is handled via custom content, not a screen
 };
 
@@ -123,6 +126,7 @@ const AppDrawerNavigator: React.FC = () => {
       <Drawer.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} options={{ title: 'Terms & Conditions' }} />
       <Drawer.Screen name="AboutUs" component={AboutUsScreen} options={{ title: 'About Us' }} />
       <Drawer.Screen name="ContactUs" component={ContactUsScreen} options={{ title: 'Contact Us' }} />
+      <Drawer.Screen name="AstroRequestNavigator" component={AstroRequestNavigator} options={{ title: 'Astro Request' }} />
     </Drawer.Navigator>
   );
 };

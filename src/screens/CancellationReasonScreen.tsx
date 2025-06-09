@@ -24,7 +24,7 @@ interface CancellationReason {
 
 type ScreenNavigationProp = StackNavigationProp<
   PoojaRequestParamList,
-  'CancellationPolicy'
+  'CancellationPolicy'|'RateYourExperience'
 >;
 
 const CancellationReasonScreen = () => {
@@ -65,10 +65,11 @@ const CancellationReasonScreen = () => {
     Alert.alert('Success', 'Cancellation submitted successfully.');
   };
 
-  const handleOpenPolicy = () => {
-    // Linking.openURL('https://your-cancellation-policy-link.com');
-    navigation.navigate('CancellationPolicy');
-  };    
+    const handleOpenPolicy = () => {
+        // Linking.openURL('https://your-cancellation-policy-link.com');
+        navigation.navigate('CancellationPolicy');
+    };
+  
 
   const showCustomInput =
     cancellationReasons.find(r => r.id === selectedReasonId)?.requiresSpecification;
@@ -137,6 +138,7 @@ const CancellationReasonScreen = () => {
         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
           <Text style={styles.submitText}>Submit Cancellation</Text>
         </TouchableOpacity>
+        
       </ScrollView>
     </View>
   );

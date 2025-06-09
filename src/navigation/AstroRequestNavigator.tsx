@@ -10,21 +10,18 @@ import PinVerificationScreen from '../screens/PinVerificationScreen';
 import CancellationReasonScreen from '../screens/CancellationReasonScreen';
 import CancellationPolicyScreen from '../screens/CancellationPolicyScreen';
 import RateYourExperienceScreen from '../screens/RateYourExperienceScreen';
+import AstroRequestScreen from '../screens/AstroRequestScreen';
+import VideoCallScreen from '../screens/VideoCallScreen';
 
-export type PoojaRequestParamList = {
-  PoojaRequest: undefined;
-  PoojaRequestDetail: {request:PoojaRequestItem};
+export type AstroRequestParamList = {
+  AstroRequest: undefined;
   ChatMessages:undefined,
-  PoojaItemList:undefined,
-  PinVerification:undefined,
-  CancellationReason:undefined,
-  CancellationPolicy:undefined,
-  RateYourExperience: undefined;
+  VideoCall: undefined;
 };
 
-const Stack = createStackNavigator<PoojaRequestParamList>();
+const Stack = createStackNavigator<AstroRequestParamList>();
 
-const PoojaRequestNavigator = () => {
+const AstroRequestNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -32,39 +29,19 @@ const PoojaRequestNavigator = () => {
         // cardStyle: { backgroundColor: COLORS.backgroundPrimary },
       }}>
       <Stack.Screen
-        name="PoojaRequest"
-        component={PoojaRequestScreen}
-      />
-      <Stack.Screen
-        name="PoojaRequestDetail"
-        component={PoojaRequestDetailScreen}
+        name="AstroRequest"
+        component={AstroRequestScreen}
       />
       <Stack.Screen
         name="ChatMessages"
         component={ChatMessagesScreen}
       />
       <Stack.Screen
-        name="PoojaItemList"
-        component={PoojaItemListScreen}
-      />
-      <Stack.Screen
-        name="PinVerification"
-        component={PinVerificationScreen}
-      />
-      <Stack.Screen
-        name="CancellationReason"
-        component={CancellationReasonScreen}
-      />
-      <Stack.Screen
-        name="CancellationPolicy"
-        component={CancellationPolicyScreen}
-      />
-      <Stack.Screen
-        name="RateYourExperience"
-        component={RateYourExperienceScreen}
+        name="VideoCall"
+        component={VideoCallScreen}
       />
     </Stack.Navigator>
   );
 };
 
-export default PoojaRequestNavigator;
+export default AstroRequestNavigator;
