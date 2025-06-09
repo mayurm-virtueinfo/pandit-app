@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   Switch,
+  ScrollView,
 } from 'react-native';
 import CustomHeader from '../components/CustomHeader';
 import { apiService, AstroServiceItem } from '../api/apiService';
@@ -51,7 +52,8 @@ const AddNewAstroServiceScreen: React.FC = () => {
     <View style={styles.container}>
       <CustomHeader showBackButton={true} showMenuButton={false} title={'Add New'} />
 
-      <Text style={styles.sectionTitle}>Search by Astro Service Name</Text>
+      <ScrollView>
+        <Text style={styles.sectionTitle}>Search by Astro Service Name</Text>
       <TextInput
         placeholder="Search by Astro Service Name"
         style={styles.searchInput}
@@ -95,7 +97,7 @@ const AddNewAstroServiceScreen: React.FC = () => {
           value={enableChat}
           onValueChange={setEnableChat}
           thumbColor={enableChat ? COLORS.primary : '#ccc'}
-          trackColor={{ false: '#ccc', true: COLORS.primary }}
+          trackColor={{ false: '#ccc', true: '#ccc' }}
         />
       </View>
 
@@ -108,7 +110,8 @@ const AddNewAstroServiceScreen: React.FC = () => {
           value={enableAudio}
           onValueChange={setEnableAudio}
           thumbColor={enableAudio ? COLORS.primary : '#ccc'}
-          trackColor={{ false: '#ccc', true: COLORS.primary }}
+          trackColor={{ false: '#ccc', true: '#ccc' }}
+          
         />
       </View>
 
@@ -121,9 +124,10 @@ const AddNewAstroServiceScreen: React.FC = () => {
           value={enableVideo}
           onValueChange={setEnableVideo}
           thumbColor={enableVideo ? COLORS.primary : '#ccc'}
-          trackColor={{ false: '#ccc', true: COLORS.primary }}
+          trackColor={{ false: '#ccc', true: '#ccc' }}
         />
       </View>
+      </ScrollView>
 
       <TouchableOpacity style={styles.addButton}>
         <Text style={styles.addButtonText}>Add New</Text>
@@ -139,6 +143,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginTop: 16,
+    marginBottom: 8,
     marginHorizontal: 16,
     fontWeight: 'bold',
     fontSize: 15,
