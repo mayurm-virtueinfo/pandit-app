@@ -19,6 +19,8 @@ class ApiEndpoints {
   static readonly POOJA_ITEMS_API = `${ApiEndpoints.API_VERSION}/684675428960c979a5a6de75`;
   static readonly CANCELLATION_REASON_API = `${ApiEndpoints.API_VERSION}/684691198960c979a5a6e6f5`;
   static readonly CANCELLATION_POLICY_API = `${ApiEndpoints.API_VERSION}/684695808a456b7966ab29c0`;
+  static readonly PAST_BOOKINGS_API = `${ApiEndpoints.API_VERSION}/6846d3ec8561e97a502165ce`;
+  
 }
 
 export default ApiEndpoints;

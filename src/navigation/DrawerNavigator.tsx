@@ -26,9 +26,11 @@ import { COLORS } from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
 import AstroRequestScreen from '../screens/AstroRequestScreen';
 import AstroRequestNavigator from './AstroRequestNavigator';
+import PastBookingsBottomTabNavigator from './PastBookingsBottomTabNavigator';
 
 export type AppDrawerParamList = {
   MainApp: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
+  PastBooking: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
   Profile: undefined;
   Settings: undefined;
   DrawerEarnings: undefined; // Naming it differently if it's a distinct screen from tab
@@ -114,6 +116,15 @@ const AppDrawerNavigator: React.FC = () => {
         options={({ route }) => ({
           // title: getHeaderTitle(route), // <- dynamic title here
           drawerLabel: 'Home Dashboard', // static label in drawer
+          headerTitle: getHeaderTitle(route), // dynamic title in screen header
+        })}
+      />
+      <Drawer.Screen
+        name="PastBooking"
+        component={PastBookingsBottomTabNavigator}
+        options={({ route }) => ({
+          // title: getHeaderTitle(route), // <- dynamic title here
+          drawerLabel: 'Past Bookings', // static label in drawer
           headerTitle: getHeaderTitle(route), // dynamic title in screen header
         })}
       />

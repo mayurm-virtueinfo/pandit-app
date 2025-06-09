@@ -9,8 +9,16 @@ export const COLORS = {
   gray: '#888888',
   lightGray: '#F5F5F5',
   backgroundPrimary: '#FFFFFF',
+  backGroundSecondary:'#ebeded',
   textPrimary: '#222222',
   textSecondary: '#888888',
+  success: '#32CD32',       // Green for "Completed"
+  warning: '#FF4500',       // Orange-Red for "Cancelled by User"
+  error: '#FF0000',         // Red for "Rejected"
+  textDark: '#1A1A1A',      // Primary dark text (e.g. pooja name)
+  textGray: '#7D7D7D',      // Secondary gray text (e.g. date, maharaj name)
+  background: '#F7F9FC',    // Light background color for screens
+  border: '#DDDDDD',        // Border/light separator if needed
 };
 
 // Typography

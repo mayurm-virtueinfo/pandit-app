@@ -51,6 +51,14 @@ export interface CancellationPolicy {
   id: number;
   description: string;
 }
+export interface PastBookingItem {
+  id: number;
+  poojaName: string;
+  date: string; // ISO date string, e.g., "2024-09-26"
+  maharajName: string;
+  status: 'accepted' | 'completed' | 'cancelled' | 'rejected';
+  imageUrl: string;
+}
 
 
 
@@ -230,6 +238,17 @@ export const apiService = {
       );
     } catch (error) {
       console.error('Error fetching cancellation policies:', error);
+      return [];
+    }
+  },
+   getPastBookings: async (): Promise<PastBookingItem[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.PAST_BOOKINGS_API);
+      return (
+        response.data?.record || []
+      );
+    } catch (error) {
+      console.error('Error fetching past bookings :', error);
       return [];
     }
   },
