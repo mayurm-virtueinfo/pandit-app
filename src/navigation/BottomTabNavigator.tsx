@@ -67,7 +67,9 @@ const AppBottomTabNavigator: React.FC = () => {
       <Tab.Screen 
         name="EarningsNavigator" 
         component={EarningsNavigator} 
-        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="cash-outline" size={size} color={color} /> }} 
+        options={{ 
+          title: 'Earnings', 
+          tabBarIcon: ({ color, size }) => <Ionicons name="cash-outline" size={size} color={color} /> }} 
       />
     </Tab.Navigator>
   );

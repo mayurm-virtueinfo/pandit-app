@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Assuming this will be updated
 import { COLORS } from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type DocumentsScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -107,6 +108,7 @@ const DocumentsScreen = () => {
     </View>
   );
 
+  const inset = useSafeAreaInsets();
   return (
     <>
       <CustomHeader showBackButton={true} showMenuButton={false} title={'Documents'} />
@@ -148,7 +150,7 @@ const DocumentsScreen = () => {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer,{marginBottom:inset.bottom}]}>
         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
           <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
         </TouchableOpacity>
@@ -238,8 +240,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
   },
   button: {
     flex: 1,

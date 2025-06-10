@@ -18,6 +18,7 @@ import { StackNavigationProp } from '@react-navigation/stack'; // Import for typ
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
 import {apiService, DropdownItem} from '../api/apiService';
 import CustomHeader from '../components/CustomHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface FormData {
   firstName: string;
@@ -275,7 +276,7 @@ const PanditRegistrationScreen: React.FC = () => {
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
-
+  const inset = useSafeAreaInsets();
   return (
     <>
     <CustomHeader showBackButton={true} showMenuButton={false} title={'Panditji Registration'}/>
@@ -391,7 +392,7 @@ const PanditRegistrationScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+      <TouchableOpacity style={[styles.button,{marginBottom:inset.bottom}]} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
 
@@ -541,7 +542,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#00bcd4',
     borderRadius: 8,
     marginHorizontal: 20,
-    marginBottom: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },

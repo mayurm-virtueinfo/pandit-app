@@ -16,6 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack'; // Import for typ
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
 import { COLORS } from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 const SelectCityAreaScreen = () => {
@@ -43,7 +44,7 @@ const SelectCityAreaScreen = () => {
           apiService.getCities('110001'), // Example pincode, adjust if needed
           apiService.getArea(),
         ]);
-        
+
         setCities(fetchedCities);
         setFilteredCities(fetchedCities);
 
@@ -121,10 +122,10 @@ const SelectCityAreaScreen = () => {
       <Text style={styles.radioLabel}>{item.name}</Text>
     </TouchableOpacity>
   );
-
+  const inset = useSafeAreaInsets();
   return (
     <>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Select your City & Area'}/>
+      <CustomHeader showBackButton={true} showMenuButton={false} title={'Select your City & Area'} />
       {/* <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>‹</Text>
@@ -164,16 +165,17 @@ const SelectCityAreaScreen = () => {
             style={styles.list}
           />
         )}
-        
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={[styles.nextButton, (!selectedCity || !selectedArea) && styles.nextButtonDisabled]}
-            onPress={handleNext}
-            disabled={!selectedCity || !selectedArea}
-          >
-            <Text style={styles.nextButtonText}>Next</Text>
-          </TouchableOpacity>
-        </View>
+
+
+      </View>
+      <View style={[styles.footer,{marginBottom:inset.bottom}]}>
+        <TouchableOpacity
+          style={[styles.nextButton, (!selectedCity || !selectedArea) && styles.nextButtonDisabled]}
+          onPress={handleNext}
+          disabled={!selectedCity || !selectedArea}
+        >
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
       </View>
     </>
   );
@@ -242,7 +244,7 @@ const styles = StyleSheet.create({
   list: {
     flexGrow: 0, // Important for multiple FlatLists if not nested in ScrollView
     maxHeight: 200, // Adjust as needed, or manage layout differently
-    backgroundColor: '#FFFFFF',
+    // backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E0E0E0',
@@ -279,9 +281,11 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingVertical: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    backgroundColor: '#F0F4F8', // Match safe area
+    marginLeft:20,
+    marginRight:20
+    // borderTopWidth: 1,
+    // borderTopColor: '#E0E0E0',
+    // backgroundColor: '#F0F4F8', // Match safe area
   },
   nextButton: {
     backgroundColor: COLORS.primary, // Blue button

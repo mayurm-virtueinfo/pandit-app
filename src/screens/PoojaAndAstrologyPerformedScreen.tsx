@@ -246,8 +246,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
     backgroundColor: '#F8F9FA',
   },
   button: {
