@@ -20,6 +20,7 @@ export const COLORS = {
   background: '#F7F9FC',    // Light background color for screens
   border: '#DDDDDD',        // Border/light separator if needed
   darkText: '#1F2937',
+  inputBg: '#ECEEF2',
 };
 
 // Typography

@@ -15,7 +15,7 @@ import { COLORS } from '../theme/theme';
 
 const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-const AvailabilityScreen = () => {
+const AvailabilityScreen : React.FC = () => {
   const [monthOffset, setMonthOffset] = useState(0);
   const [nonAvailableDays, setNonAvailableDays] = useState<number[]>([15, 16, 17, 23, 24]);
 

@@ -11,12 +11,13 @@ import PoojaRequestNavigator from './PoojaRequestNavigator';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import PoojaListNavigator from './PoojaListNavigator';
 import AstroServiceNavigator from './AstroServiceNavigator';
+import EarningsNavigator from './EarningsNavigator';
 
 export type AppBottomTabParamList = {
   PoojaRequestNavigator: undefined;
   PoojaListNavigator: undefined;
   AstroServiceNavigator: undefined;
-  Earnings: undefined;
+  EarningsNavigator: undefined;
 };
 
 const Tab = createBottomTabNavigator<AppBottomTabParamList>();
@@ -64,8 +65,8 @@ const AppBottomTabNavigator: React.FC = () => {
         }} 
       />
       <Tab.Screen 
-        name="Earnings" 
-        component={EarningsScreen} 
+        name="EarningsNavigator" 
+        component={EarningsNavigator} 
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="cash-outline" size={size} color={color} /> }} 
       />
     </Tab.Navigator>

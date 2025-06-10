@@ -28,13 +28,14 @@ import AstroRequestScreen from '../screens/AstroRequestScreen';
 import AstroRequestNavigator from './AstroRequestNavigator';
 import PastBookingsBottomTabNavigator from './PastBookingsBottomTabNavigator';
 import AvailabilityScreen from '../screens/AvailabilityScreen';
+import EarningsNavigator from './EarningsNavigator';
 
 export type AppDrawerParamList = {
   MainApp: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
   PastBooking: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
   Profile: undefined;
   Settings: undefined;
-  DrawerEarnings: undefined; // Naming it differently if it's a distinct screen from tab
+  EarningsNavigator: undefined; // Naming it differently if it's a distinct screen from tab
   Availabality:undefined;
   Ledgers: undefined;
   HelpAndSupport: undefined;
@@ -132,7 +133,7 @@ const AppDrawerNavigator: React.FC = () => {
       />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
-      <Drawer.Screen name="DrawerEarnings" component={EarningsScreen} options={{ title: 'Earnings' }} />
+      <Drawer.Screen name="EarningsNavigator" component={EarningsNavigator} options={{ title: 'Earnings' }} />
       <Drawer.Screen name="Availabality" component={AvailabilityScreen} options={{ title: 'Availabality' }} />
       <Drawer.Screen name="Ledgers" component={LedgersScreen} />
       <Drawer.Screen name="HelpAndSupport" component={HelpAndSupportScreen} options={{ title: 'Help & Support' }} />
