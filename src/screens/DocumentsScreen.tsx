@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Assuming this will be updated
 import { COLORS } from '../theme/theme';
+import CustomHeader from '../components/CustomHeader';
 
 type DocumentsScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -107,13 +108,14 @@ const DocumentsScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerBar}>
+    <>
+      <CustomHeader showBackButton={true} showMenuButton={false} title={'Documents'} />
+      {/* <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Documents</Text>
-      </View>
+      </View> */}
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {renderFileInput(
@@ -154,7 +156,7 @@ const DocumentsScreen = () => {
           <Text style={[styles.buttonText, styles.nextButtonText]}>Next</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </>
   );
 };
 

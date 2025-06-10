@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
 import { COLORS } from '../theme/theme';
+import CustomHeader from '../components/CustomHeader';
 
 
 const SelectCityAreaScreen = () => {
@@ -122,13 +123,14 @@ const SelectCityAreaScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerBar}>
+    <>
+      <CustomHeader showBackButton={true} showMenuButton={false} title={'Select your City & Area'}/>
+      {/* <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Select your City & Area</Text>
-      </View>
+      </View> */}
 
       <View style={styles.container}>
         {/* Cities List */}
@@ -173,7 +175,7 @@ const SelectCityAreaScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </>
   );
 };
 

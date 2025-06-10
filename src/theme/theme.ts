@@ -19,6 +19,7 @@ export const COLORS = {
   textGray: '#7D7D7D',      // Secondary gray text (e.g. date, maharaj name)
   background: '#F7F9FC',    // Light background color for screens
   border: '#DDDDDD',        // Border/light separator if needed
+  darkText: '#1F2937',
 };
 
 // Typography

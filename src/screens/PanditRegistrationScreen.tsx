@@ -17,6 +17,7 @@ import {useNavigation} from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
 import {apiService, DropdownItem} from '../api/apiService';
+import CustomHeader from '../components/CustomHeader';
 
 interface FormData {
   firstName: string;
@@ -276,10 +277,12 @@ const PanditRegistrationScreen: React.FC = () => {
   );
 
   return (
+    <>
+    <CustomHeader showBackButton={true} showMenuButton={false} title={'Panditji Registration'}/>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}>
@@ -287,7 +290,7 @@ const PanditRegistrationScreen: React.FC = () => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Panditji Registration</Text>
         <View style={styles.backButton} />
-      </View>
+      </View> */}
 
       <ScrollView style={styles.scrollView}>
         <Text style={styles.description}>
@@ -429,7 +432,7 @@ const PanditRegistrationScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-    </KeyboardAvoidingView>
+    </KeyboardAvoidingView></>
   );
 };
 

@@ -14,6 +14,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator'; // Will be updated
 import { apiService, DropdownItem } from '../api/apiService';
 import { COLORS } from '../theme/theme';
+import CustomHeader from '../components/CustomHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -112,15 +114,10 @@ const PoojaAndAstrologyPerformedScreen = () => {
     </View>
   );
 
-
+  const inset = useSafeAreaInsets();
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>‹</Text>
-        </TouchableOpacity>
-        {/* Header title is not in the screenshot, can be added if needed */}
-      </View>
+    <>
+      <CustomHeader showBackButton={true} showMenuButton={false} title={'Pooja or Astrology Performed'} />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {isLoading ? (
@@ -143,7 +140,7 @@ const PoojaAndAstrologyPerformedScreen = () => {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer,{marginBottom:inset.bottom}]}>
         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
           <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
         </TouchableOpacity>
@@ -159,7 +156,7 @@ const PoojaAndAstrologyPerformedScreen = () => {
           <Text style={[styles.buttonText, styles.submitButtonText]}>Submit</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </>
   );
 };
 

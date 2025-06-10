@@ -17,6 +17,8 @@ import { NavigatorScreenParams } from '@react-navigation/native'; // Import Navi
 import { apiService, DropdownItem } from '../api/apiService';
 import { COLORS } from '../theme/theme';
 import { RootStackParamList } from '../navigation/RootNavigator';
+import CustomHeader from '../components/CustomHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Define a more general ParamList that includes the AppDrawer
 // This assumes LanguagesScreen is part of a stack that can navigate to AppDrawer
@@ -95,15 +97,11 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
     </TouchableOpacity>
   );
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Languages Selection</Text>
-      </View>
+  const inset = useSafeAreaInsets();
 
+  return (
+    <>
+      <CustomHeader showBackButton={true} showMenuButton={false} title={'Languages Selection'} />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.sectionTitle}>Select your own languages:</Text>
         {isLoading ? (
@@ -121,7 +119,7 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer,{marginBlock:inset.bottom}]}>
         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
           <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
         </TouchableOpacity>
@@ -137,7 +135,7 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
           <Text style={[styles.buttonText, styles.submitButtonText]}>Submit</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </>
   );
 };
 

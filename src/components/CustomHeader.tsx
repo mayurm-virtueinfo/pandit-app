@@ -22,15 +22,19 @@ const CustomHeader : React.FC<CustomHeaderProps> = ({
 
   return (
     <>
-   {/* <StatusBar barStyle="light-content" />  */}
+   <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
     
     <SafeAreaView edges={['top']} style={{ backgroundColor: COLORS.primary }}>
       <View
         style={{
+          borderBottomColor:COLORS.gray,
+          borderBottomWidth:2,
           height: headerHeight,
           backgroundColor: COLORS.primary,
           flexDirection: 'row',
           alignItems: 'center',
+          // marginTop:inset.top,
+          // paddingTop:inset.top
         //   paddingHorizontal: 16,
         }}>
         <View style={{width:headerHeight,height:headerHeight, justifyContent:'center',alignItems: 'center' }}>
