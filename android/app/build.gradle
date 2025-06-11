@@ -116,8 +116,5 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    implementation platform('com.google.firebase:firebase-bom:33.15.0')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation("com.google.firebase:firebase-auth")
 }
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
