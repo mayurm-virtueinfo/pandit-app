@@ -1,4 +1,4 @@
-package com.panditapp
+package com.panditjiapp.pandit
 
 import android.app.Application
 import com.facebook.react.PackageList

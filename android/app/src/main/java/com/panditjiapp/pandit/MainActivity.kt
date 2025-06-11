@@ -1,4 +1,4 @@
-package com.panditapp
+package com.panditjiapp.pandit
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
