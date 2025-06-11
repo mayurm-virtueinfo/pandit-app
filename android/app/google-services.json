@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "763089003272",
+    "project_id": "panditji-42b4a",
+    "storage_bucket": "panditji-42b4a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763089003272:android:ef8b3f3f1ab892936342bd",
+        "android_client_info": {
+          "package_name": "com.panditjiapp.pandit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFZKnm1J3Qn5C5aVhHeJ8ePbwOLwpfa8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
