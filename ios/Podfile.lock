@@ -3085,7 +3085,7 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
-  - RNGestureHandler (2.25.0):
+  - RNGestureHandler (2.26.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -3704,7 +3704,7 @@ SPEC CHECKSUMS:
   RNFBDatabase: 08166d909641b24279f8b4ecd85c64d71dd26167
   RNFBFirestore: fa1739cc4dc22aff2cc384808a963e809802d956
   RNFBMessaging: 6586f18ab3411aeb3349088c19fe54283d39e529
-  RNGestureHandler: c74975e16bc27971316465bde1a7523af5a6a256
+  RNGestureHandler: b7ac73560e3a3b45f80a221f24d0549d75638dd5
   RNReanimated: 170d2f7655729d981001a9822efd545640bfb858
   RNScreens: e0eb1f8681af3e2c07857453fa9d1a73c344925c
   RNSVG: da256d265c17ca95aa37356825ee54d7ea15071b
@@ -3712,6 +3712,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 1259c7a8cbaccf7b4c3ddf8ee36ca11be9dee407
 
-PODFILE CHECKSUM: 1e502a3f55c5029e246b608dc7f5df895e2d6c79
+PODFILE CHECKSUM: 6cada9bf285f7f8ae722425a3623e2f3bc37e8fa
 
 COCOAPODS: 1.16.2
