@@ -8,10 +8,11 @@ import DocumentsScreen from '../screens/DocumentsScreen';
 import PoojaAndAstrologyPerformedScreen from '../screens/PoojaAndAstrologyPerformedScreen';
 import LanguagesScreen from '../screens/LanguagesScreen'; // Import new screen
 import { COLORS } from '../theme/theme';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 export type AuthStackParamList = {
   SignIn: undefined;
-  OTPVerification: {phoneNumber: string};
+  OTPVerification: {phoneNumber: string, confirmation:FirebaseAuthTypes.ConfirmationResult};
   PanditRegistration: undefined;
   SelectCityArea: undefined;
   Documents: undefined;

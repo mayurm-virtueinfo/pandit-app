@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,12 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AuthStackParamList} from '../navigation/AuthNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AuthStackParamList } from '../navigation/AuthNavigator';
 import ThemedInput from '../components/ThemedInput';
-
+import { onAuthStateChanged, signInWithPhoneNumber } from '@react-native-firebase/auth';
+import { validatePhoneNumber } from '../helper/Validation';
+import { firebaseAuth } from '../../App';
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
   'SignIn'
@@ -23,34 +25,42 @@ interface Props {
   navigation: SignInScreenNavigationProp;
 }
 
-const SignInScreen: React.FC<Props> = ({navigation}) => {
+const SignInScreen: React.FC<Props> = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
 
-  const validatePhoneNumber = (number: string) => {
-    // Basic phone number validation - can be enhanced based on requirements
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    return phoneRegex.test(number.replace(/\s+/g, ''));
-  };
 
-  const handleSignIn = () => {
-    const cleanPhoneNumber = phoneNumber.trim();
-
+  const handleSignIn = async () => {
+    console.log('---1')
+    const cleanPhoneNumber = phoneNumber.trim().replace(/\s+/g, '');
+    console.log('---2')
     if (!cleanPhoneNumber) {
-      Alert.alert('Error', 'Please enter your phone number');
+      Alert.alert('Validation Error', 'Please enter your phone number.');
       return;
     }
-
-    if (!validatePhoneNumber(cleanPhoneNumber)) {
-      Alert.alert('Error', 'Please enter a valid phone number');
+    console.log('---3')
+    // Ensure it has +country code
+    const formattedPhone = cleanPhoneNumber.startsWith('+') ? cleanPhoneNumber : `+91${cleanPhoneNumber}`;
+    console.log('---4')
+    if (!validatePhoneNumber(formattedPhone)) {
+      Alert.alert('Validation Error', 'Please enter a valid phone number in international format.');
       return;
     }
-
-    // Here you would typically make an API call to send OTP
-    // For now, we'll just navigate to OTP screen
-
-    navigation.navigate('OTPVerification', {
-      phoneNumber: cleanPhoneNumber,
-    });
+    console.log('---5-new')
+    try {
+      // const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+      const confirmation = await signInWithPhoneNumber(firebaseAuth, formattedPhone);
+      Alert.alert('Success', 'OTP has been sent to your phone.');
+      console.log('---6')
+      navigation.navigate('OTPVerification', {
+        phoneNumber: formattedPhone,
+        confirmation,
+      });
+      console.log('---7')
+    } catch (error: any) {
+      console.log('---8')
+      console.error(error);
+      Alert.alert('Error', error?.message || 'Failed to send OTP. Please try again.');
+    }
   };
 
   return (
@@ -83,13 +93,12 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
             label="Phone Number"
             value={phoneNumber}
             onChangeText={setPhoneNumber}
-            placeholder="Enter your phone number"
+            placeholder="Enter phone number"
             keyboardType="phone-pad"
             autoComplete="tel"
             textContentType="telephoneNumber"
-            maxLength={15}
+            maxLength={10}
           />
-
           <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
             <Text style={styles.signInButtonText}>Get OTP</Text>
           </TouchableOpacity>
