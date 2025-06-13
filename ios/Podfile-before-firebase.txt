@@ -1,4 +1,4 @@
-$RNFirebaseAsStaticFramework = true
+# Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
@@ -16,7 +16,7 @@ end
 
 target 'PanditApp' do
   config = use_native_modules!
-  use_frameworks! :linkage => :static
+
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
@@ -36,17 +36,5 @@ target 'PanditApp' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
-
-    # ✅ Key gRPC module fix
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-
-        # Prevent using missing modulemap for gRPC
-        if target.name.include?('gRPC')
-          config.build_settings['DEFINES_MODULE'] = 'NO'
-        end
-      end
-    end
   end
 end

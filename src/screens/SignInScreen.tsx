@@ -13,9 +13,9 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 import ThemedInput from '../components/ThemedInput';
-import { onAuthStateChanged, signInWithPhoneNumber } from '@react-native-firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithPhoneNumber } from '@react-native-firebase/auth';
 import { validatePhoneNumber } from '../helper/Validation';
-import { firebaseAuth } from '../../App';
+// import { firebaseAuth } from '../../App';
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
   'SignIn'
@@ -48,7 +48,7 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
     console.log('---5-new')
     try {
       // const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
-      const confirmation = await signInWithPhoneNumber(firebaseAuth, formattedPhone);
+      const confirmation = await signInWithPhoneNumber(getAuth(), formattedPhone);
       Alert.alert('Success', 'OTP has been sent to your phone.');
       console.log('---6')
       navigation.navigate('OTPVerification', {
