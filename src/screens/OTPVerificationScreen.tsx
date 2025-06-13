@@ -32,7 +32,7 @@ interface Props {
 const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<Array<TextInput | null>>([]);
-  const {phoneNumber} = route.params;
+  const {phoneNumber,confirmation} = route.params;
 
   const handleOtpChange = (value: string, index: number) => {
     if (value.length <= 1) {

@@ -12,6 +12,14 @@ LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
   'Non-serializable values were found in the navigation state', // This can happen with some params
 ]);
+// import { getApp } from '@react-native-firebase/app';
+// // import { getReactNativePersistence } from 'firebase/auth/react-native';
+// import { initializeAuth } from '@react-native-firebase/auth';
+
+// // Export auth instance
+// const app = getApp();
+
+// export const firebaseAuth = initializeAuth(app);
 
 const App = () => {
   useEffect(() => {
