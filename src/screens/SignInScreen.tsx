@@ -9,12 +9,16 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 import ThemedInput from '../components/ThemedInput';
 import { getAuth, onAuthStateChanged, signInWithPhoneNumber } from '@react-native-firebase/auth';
 import { validatePhoneNumber } from '../helper/Validation';
+import Loader from '../components/Loader';
+import { moderateScale } from 'react-native-size-matters';
+import { useCommonToast } from '../common/CommonToast';
 // import { firebaseAuth } from '../../App';
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -26,7 +30,10 @@ interface Props {
 }
 
 const SignInScreen: React.FC<Props> = ({ navigation }) => {
+  const { showErrorToast, showSuccessToast } = useCommonToast();
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
 
   const handleSignIn = async () => {
@@ -34,7 +41,9 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
     const cleanPhoneNumber = phoneNumber.trim().replace(/\s+/g, '');
     console.log('---2')
     if (!cleanPhoneNumber) {
-      Alert.alert('Validation Error', 'Please enter your phone number.');
+      const newErrors: any = {};
+      newErrors.phoneNumber = 'Please enter your phone number.';
+      setErrors(newErrors);
       return;
     }
     console.log('---3')
@@ -42,15 +51,23 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
     const formattedPhone = cleanPhoneNumber.startsWith('+') ? cleanPhoneNumber : `+91${cleanPhoneNumber}`;
     console.log('---4')
     if (!validatePhoneNumber(formattedPhone)) {
-      Alert.alert('Validation Error', 'Please enter a valid phone number in international format.');
+      // Alert.alert('Validation Error', 'Please enter a valid phone number in international format.');
+      const newErrors: any = {};
+      newErrors.phoneNumber = 'Please enter a valid phone number in international format.';
+      setErrors(newErrors);
       return;
     }
+
+    setErrors({})
     console.log('---5-new')
     try {
       // const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+      setLoading(true);
       const confirmation = await signInWithPhoneNumber(getAuth(), formattedPhone);
-      Alert.alert('Success', 'OTP has been sent to your phone.');
-      console.log('---6')
+      setLoading(false);
+      // Alert.alert('Success', 'OTP has been sent to your phone.');
+      showSuccessToast('OTP has been sent to your phone.')
+      // console.log('---6 : ',confirmation)
       navigation.navigate('OTPVerification', {
         phoneNumber: formattedPhone,
         confirmation,
@@ -59,7 +76,9 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
     } catch (error: any) {
       console.log('---8')
       console.error(error);
-      Alert.alert('Error', error?.message || 'Failed to send OTP. Please try again.');
+      setLoading(false);
+      // Alert.alert('Error', error?.message || 'Failed to send OTP. Please try again.');
+      showErrorToast(error?.message || 'Failed to send OTP. Please try again.')
     }
   };
 
@@ -67,6 +86,7 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
+      <Loader loading={isLoading} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
@@ -98,7 +118,10 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
             autoComplete="tel"
             textContentType="telephoneNumber"
             maxLength={10}
+            errors={errors}
+            errorField='phoneNumber'
           />
+
           <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
             <Text style={styles.signInButtonText}>Get OTP</Text>
           </TouchableOpacity>
@@ -161,7 +184,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: moderateScale(16),
+    marginTop: moderateScale(10)
   },
   signInButtonText: {
     color: '#FFFFFF',
@@ -173,6 +197,10 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     lineHeight: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 12,
   },
 });
 

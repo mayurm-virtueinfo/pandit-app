@@ -33,8 +33,10 @@
     "react-native-reanimated": "^3.18.0",
     "react-native-safe-area-context": "^5.4.1",
     "react-native-screens": "^4.11.1",
+    "react-native-size-matters": "^0.4.2",
     "react-native-splash-screen": "^3.3.0",
     "react-native-svg": "^15.12.0",
+    "react-native-toast-notifications": "^3.4.0",
     "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {

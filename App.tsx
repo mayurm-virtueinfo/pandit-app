@@ -1,11 +1,15 @@
 import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
-import RootNavigator, {AuthProvider} from './src/navigation/RootNavigator';
+import RootNavigator from './src/navigation/RootNavigator';
 import {LogBox} from 'react-native';
 
 // It's good practice to import gesture handler at the top
 import 'react-native-gesture-handler';
+import { AuthProvider } from './src/provider/AuthProvider';
+import { ToastProvider } from 'react-native-toast-notifications';
+import { moderateScale } from 'react-native-size-matters';
+import { COLORS } from './src/theme/theme';
 
 // Ignore specific warnings if necessary, for example, from reanimated
 LogBox.ignoreLogs([
@@ -32,11 +36,26 @@ const App = () => {
   }, []);
 
   return (
+    <ToastProvider
+          style={{
+            // borderRadius: 20,
+            backgroundColor: COLORS.primary,
+            // borderWidth: 1,
+            // borderColor: Colors.tertiaryGrey,
+          }}
+          textStyle={{
+            // fontFamily: fonts.nunitoRegular,
+            fontSize: moderateScale(16),
+            color: COLORS.textPrimary,
+          }}
+          // icon={<SVGIcon iconType={SvgIconTypes.IcTick} />}
+        >
     <AuthProvider>
       <NavigationContainer>
         <RootNavigator />
       </NavigationContainer>
     </AuthProvider>
+    </ToastProvider>
   );
 };
 

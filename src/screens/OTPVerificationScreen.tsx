@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,6 +12,9 @@ import {
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {AuthStackParamList} from '../navigation/AuthNavigator';
+import Loader from '../components/Loader';
+import { getAuth, signInWithPhoneNumber } from '@react-native-firebase/auth';
+import { useCommonToast } from '../common/CommonToast';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -30,9 +32,13 @@ interface Props {
 }
 
 const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
+  const { showErrorToast, showSuccessToast } = useCommonToast();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const {phoneNumber,confirmation} = route.params;
+
+  const [otpConfirmation, setOtpConfirmation] = useState(confirmation)
+  const [isLoading,setLoading] = useState(false);
 
   const handleOtpChange = (value: string, index: number) => {
     if (value.length <= 1) {
@@ -53,34 +59,66 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
     }
   };
 
+  const confirmCode = async (code:string) => {
+    try {
+      setLoading(true)
+      await otpConfirmation.confirm(code);
+      setLoading(false)
+      navigation.navigate('PanditRegistration');
+    } catch (error:any) {
+      console.log('Invalid code.');
+      setLoading(false)
+      // Alert.alert('','Invalid code');
+      showErrorToast(error?.message || 'Failed to Resend OTP. Please try again.')
+    }
+  }
   const handleVerification = async () => {
     try {
       const otpValue = otp.join('');
       if (otpValue.length !== 6) {
-        Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+        // Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+        showErrorToast('Please enter a valid 6-digit OTP')
         return;
       }
 
       // Here you would typically make an API call to verify the OTP
       // For now, we'll simulate a successful verification
 
+      confirmCode(otpValue);
       // Navigate to registration screen after successful verification
-      navigation.navigate('PanditRegistration');
+      
     } catch (error) {
       console.error('Verification failed:', error);
-      Alert.alert('Error', 'OTP verification failed. Please try again.');
+      // Alert.alert('Error', 'OTP verification failed. Please try again.');
+      showErrorToast('OTP verification failed. Please try again.')
     }
   };
 
-  const handleResendOTP = () => {
+  const handleResendOTP = async() => {
     // Implement resend OTP logic here
-    Alert.alert('Success', 'New OTP has been sent to your phone number');
+    try {
+          // const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+          setLoading(true);
+          const confirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
+          setLoading(false);
+          // Alert.alert('Success', 'New OTP has been sent to your phone number');
+          showSuccessToast('New OTP has been sent to your phone number');
+          setOtpConfirmation(confirmation);
+        } catch (error: any) {
+          console.log('---8')
+          console.error(error);
+          setLoading(false);
+          // Alert.alert('Error', error?.message || 'Failed to Resend OTP. Please try again.');
+          showErrorToast(error?.message || 'Failed to Resend OTP. Please try again.')
+        }
+    
   };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
+      <Loader loading={isLoading}/>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">

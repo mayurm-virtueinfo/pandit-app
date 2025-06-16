@@ -21,7 +21,7 @@ import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import TermsAndConditionsScreen from '../screens/TermsAndConditionsScreen';
 import AboutUsScreen from '../screens/AboutUsScreen';
 import ContactUsScreen from '../screens/ContactUsScreen';
-import { useAuth } from './RootNavigator'; // Import useAuth
+// import { useAuth } from './RootNavigator'; // Import useAuth
 import { COLORS } from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
 import AstroRequestScreen from '../screens/AstroRequestScreen';
@@ -29,6 +29,7 @@ import AstroRequestNavigator from './AstroRequestNavigator';
 import PastBookingsBottomTabNavigator from './PastBookingsBottomTabNavigator';
 import AvailabilityScreen from '../screens/AvailabilityScreen';
 import EarningsNavigator from './EarningsNavigator';
+import { useAuth } from '../provider/AuthProvider';
 
 export type AppDrawerParamList = {
   MainApp: NavigatorScreenParams<AppBottomTabParamList>; // Main content with Bottom Tabs
@@ -50,10 +51,10 @@ export type AppDrawerParamList = {
 const Drawer = createDrawerNavigator<AppDrawerParamList>();
 
 const CustomDrawerContent = (props: any) => {
-  const { signOut } = useAuth(); // Get signOut from context
+  const { signOutApp } = useAuth(); // Get signOut from context
 
   const handleLogoutPress = () => {
-    signOut();
+    signOutApp();
     // Navigation to Auth stack is handled by RootNavigator's conditional rendering
   };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {useAuth} from '../navigation/RootNavigator';
+// import {useAuth} from '../navigation/RootNavigator';
 import CustomHeader from '../components/CustomHeader';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { COLORS } from '../theme/theme';

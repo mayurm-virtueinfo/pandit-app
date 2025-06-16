@@ -69,7 +69,7 @@ export const COMPONENT_STYLES = StyleSheet.create({
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   footerText: {
     textAlign: 'center',

@@ -1,17 +1,18 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {useAuth} from '../navigation/RootNavigator';
+// import {useAuth} from '../navigation/RootNavigator';
 import CustomHeader from '../components/CustomHeader';
+import { useAuth } from '../provider/AuthProvider';
 
 // Assuming useAuth provides a signOut function of type () => void
 // If RootNavigator.tsx exports an AuthContextType, it would be better to use it here.
 // For example: const { signOut }: AuthContextType = useAuth();
 
 const PastBookingSettingScreen: React.FC = () => {
-  const {signOut} = useAuth();
+  const {signOutApp} = useAuth();
 
   const handleSignOut = () => {
-    signOut();
+    signOutApp();
   };
 
   return (
