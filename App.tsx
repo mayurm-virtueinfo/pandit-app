@@ -10,6 +10,7 @@ import { AuthProvider } from './src/provider/AuthProvider';
 import { ToastProvider } from 'react-native-toast-notifications';
 import { moderateScale } from 'react-native-size-matters';
 import { COLORS } from './src/theme/theme';
+import { registerNotificationListeners, requestUserPermission } from './src/configuration/firebaseMessaging';
 
 // Ignore specific warnings if necessary, for example, from reanimated
 LogBox.ignoreLogs([
@@ -24,13 +25,22 @@ LogBox.ignoreLogs([
 // const app = getApp();
 
 // export const firebaseAuth = initializeAuth(app);
+import { getAuth } from '@react-native-firebase/auth';
 
+// Connect to emulator (do this ONCE at app startup)
+const auth = getAuth();
+if (__DEV__) {
+  auth.useEmulator('http://127.0.0.1:9099'); // or 'http://localhost:9099'
+}
 const App = () => {
   useEffect(() => {
     // Hide splash screen after a delay
     const timer = setTimeout(() => {
       SplashScreen.hide();
     }, 2500); // Show splash for 2.5 seconds
+
+    requestUserPermission();
+    registerNotificationListeners();
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, []);

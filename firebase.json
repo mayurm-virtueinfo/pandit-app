@@ -1,6 +1,12 @@
 {
   "react-native": {
     "android_task_executor_maximum_pool_size": 10,
-    "android_task_executor_keep_alive_seconds": 3
+    "android_task_executor_keep_alive_seconds": 3,
+    "ios_auto_verify_app_check_debug_token": true
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    }
   }
 }

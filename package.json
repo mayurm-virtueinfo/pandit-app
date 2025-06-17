@@ -7,7 +7,10 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "firebase-emulator": "firebase emulators:start --only auth",
+    "dev": "concurrently \"firebase emulators:start --only auth\" \"react-native start\"",
+    "ios:dev": "concurrently \"firebase emulators:start --only auth\" \"npm run ios\""
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.2",
