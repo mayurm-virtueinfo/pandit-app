@@ -45,7 +45,7 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
@@ -67,6 +67,11 @@
 		<string>Octicons.ttf</string>
 		<string>Zocial.ttf</string>
 		<string>Fontisto.ttf</string>
+		<string>Sen-Bold.ttf</string>
+		<string>Sen-ExtraBold.ttf</string>
+		<string>Sen-Medium.ttf</string>
+		<string>Sen-Regular.ttf</string>
+		<string>Sen-SemiBold.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

@@ -4,6 +4,7 @@ import { apiService, PoojaRequestItem } from '../api/apiService'; // adjust path
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
+import Fonts from '../theme/fonts';
 
 type ScreenNavigationProp = StackNavigationProp<
   PoojaRequestParamList,
@@ -92,12 +93,14 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 16,
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
+        fontFamily:Fonts.Sen_Bold
     },
     date: {
         fontSize: 14,
         color: '#888',
         marginTop: 4,
+        fontFamily: Fonts.Sen_Regular,
     },
     image: {
         width: 60,

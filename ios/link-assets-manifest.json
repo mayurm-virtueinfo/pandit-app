@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Sen-Bold.ttf",
+      "sha1": "f1bfde4e0cbdc0476ad84e91bc7e55af85d6797f"
+    },
+    {
+      "path": "src/assets/fonts/Sen-ExtraBold.ttf",
+      "sha1": "b5a3cb490f5a44c754fcb1de9fa41f565394aa21"
+    },
+    {
+      "path": "src/assets/fonts/Sen-Medium.ttf",
+      "sha1": "ae6d58ddc674ad891536181a061e3002b3f44cb7"
+    },
+    {
+      "path": "src/assets/fonts/Sen-Regular.ttf",
+      "sha1": "bc7998b5085c0fc36934dd5e73e1d0a84d6c6450"
+    },
+    {
+      "path": "src/assets/fonts/Sen-SemiBold.ttf",
+      "sha1": "7998c43151a9f1bc19649071984195f4dc4824c7"
+    }
+  ]
+}
