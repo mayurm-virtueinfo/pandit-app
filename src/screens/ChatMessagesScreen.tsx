@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   FlatList,
@@ -8,15 +8,16 @@ import {
   Image,
   StyleSheet,
 } from 'react-native';
-import { apiService, ChatMessage } from '../api/apiService';
+import {apiService, ChatMessage} from '../api/apiService';
 // import { COLORS } from '../theme/colors';
 import CustomHeader from '../components/CustomHeader';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '../theme/theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AstroRequestParamList } from '../navigation/AstroRequestNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
+import {COLORS} from '../theme/theme';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {AstroRequestParamList} from '../navigation/AstroRequestNavigator';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 
 type ScreenNavigationProp = StackNavigationProp<
   AstroRequestParamList,
@@ -24,9 +25,11 @@ type ScreenNavigationProp = StackNavigationProp<
 >;
 
 const ChatMessagesScreen: React.FC = () => {
-    const navigation = useNavigation<ScreenNavigationProp>();
-    const insets = useSafeAreaInsets();
+  const navigation = useNavigation<ScreenNavigationProp>();
+  const insets = useSafeAreaInsets();
   const [messagesList, setMessagesList] = useState<ChatMessage[]>([]);
+
+  const {t} = useTranslation();
 
   const fetchMessagesList = async () => {
     const requests = await apiService.getMessages();
@@ -38,21 +41,19 @@ const ChatMessagesScreen: React.FC = () => {
     fetchMessagesList();
   }, []);
 
-  const renderMessage = ({ item }: { item: ChatMessage }) => {
+  const renderMessage = ({item}: {item: ChatMessage}) => {
     const isUser = item.sender.isUser;
     return (
       <View
         style={[
           styles.messageContainer,
           isUser ? styles.messageRight : styles.messageLeft,
-          
-        ]}
-      >
+        ]}>
         {!isUser && (
           <Image
             source={{
-            uri: 'https://johnjronline.wordpress.com/wp-content/uploads/2025/04/john-jr-avatar-transparent-avataaars.png', // Replace with actual avatar URL
-          }} // Replace with actual path
+              uri: 'https://johnjronline.wordpress.com/wp-content/uploads/2025/04/john-jr-avatar-transparent-avataaars.png', // Replace with actual avatar URL
+            }} // Replace with actual path
             style={styles.avatar}
           />
         )}
@@ -60,8 +61,7 @@ const ChatMessagesScreen: React.FC = () => {
           style={[
             styles.messageBubble,
             isUser ? styles.userBubble : styles.receiverBubble,
-          ]}
-        >
+          ]}>
           {!isUser && <Text style={styles.senderName}>{item.sender.name}</Text>}
           <Text style={styles.messageText}>{item.text}</Text>
         </View>
@@ -71,36 +71,55 @@ const ChatMessagesScreen: React.FC = () => {
 
   const handleVideoCallPress = () => {
     navigation.navigate('VideoCall');
-  }
+  };
   return (
-    <View style={[styles.container, { marginBottom: insets.bottom }]}>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Astrology Consultation'} />
+    <View style={[styles.container, {marginBottom: insets.bottom}]}>
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('astrology_consultation')}
+      />
       <FlatList
         data={messagesList}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         renderItem={renderMessage}
         contentContainerStyle={styles.messagesList}
       />
       <View style={styles.inputContainer}>
         <Image
           source={{
-            uri: 'https://johnjronline.wordpress.com/wp-content/uploads/2025/04/john-jr-avatar-transparent-avataaars.png', // Replace with actual avatar URL
+            uri: 'https://johnjronline.wordpress.com/wp-content/uploads/2025/04/john-jr-avatar-transparent-avataaars.png',
           }} // Replace with actual path
           style={styles.inputAvatar}
         />
         <TextInput
           style={styles.input}
-          placeholder="Type message..."
+          placeholder={t('type_message')}
           placeholderTextColor="#999"
         />
         <TouchableOpacity>
-          <Icon name="call-outline" size={22} color="black" style={styles.icon} />
+          <Icon
+            name="call-outline"
+            size={22}
+            color="black"
+            style={styles.icon}
+          />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleVideoCallPress}>
-          <Icon name="videocam-outline" size={24} color="black" style={styles.icon} />
+          <Icon
+            name="videocam-outline"
+            size={24}
+            color="black"
+            style={styles.icon}
+          />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Icon name="attach-outline" size={24} color="black" style={styles.icon} />
+          <Icon
+            name="attach-outline"
+            size={24}
+            color="black"
+            style={styles.icon}
+          />
         </TouchableOpacity>
       </View>
     </View>

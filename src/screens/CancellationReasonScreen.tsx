@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,13 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { apiService } from '../api/apiService';
+import {apiService} from '../api/apiService';
 import CustomHeader from '../components/CustomHeader';
-import { COLORS } from '../theme/theme';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
-import { useNavigation } from '@react-navigation/native';
+import {COLORS} from '../theme/theme';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {PoojaRequestParamList} from '../navigation/PoojaRequestNavigator';
+import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 
 interface CancellationReason {
   id: number;
@@ -24,14 +25,18 @@ interface CancellationReason {
 
 type ScreenNavigationProp = StackNavigationProp<
   PoojaRequestParamList,
-  'CancellationPolicy'|'RateYourExperience'
+  'CancellationPolicy' | 'RateYourExperience'
 >;
 
 const CancellationReasonScreen = () => {
-    const navigation = useNavigation<ScreenNavigationProp>();
-  const [cancellationReasons, setCancellationReasons] = useState<CancellationReason[]>([]);
+  const navigation = useNavigation<ScreenNavigationProp>();
+  const [cancellationReasons, setCancellationReasons] = useState<
+    CancellationReason[]
+  >([]);
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
   const [customReason, setCustomReason] = useState('');
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     fetchCancellationReason();
@@ -44,7 +49,9 @@ const CancellationReasonScreen = () => {
   };
 
   const handleSubmit = () => {
-    const selectedReason = cancellationReasons.find(r => r.id === selectedReasonId);
+    const selectedReason = cancellationReasons.find(
+      r => r.id === selectedReasonId,
+    );
 
     if (!selectedReason) {
       Alert.alert('Validation Error', 'Please select a cancellation reason.');
@@ -59,39 +66,38 @@ const CancellationReasonScreen = () => {
     // Submit logic here
     console.log('Submitting with:', {
       reasonId: selectedReasonId,
-      reasonText: selectedReason.requiresSpecification ? customReason : selectedReason.reason,
+      reasonText: selectedReason.requiresSpecification
+        ? customReason
+        : selectedReason.reason,
     });
 
     Alert.alert('Success', 'Cancellation submitted successfully.');
   };
 
-    const handleOpenPolicy = () => {
-        // Linking.openURL('https://your-cancellation-policy-link.com');
-        navigation.navigate('CancellationPolicy');
-    };
-  
+  const handleOpenPolicy = () => {
+    // Linking.openURL('https://your-cancellation-policy-link.com');
+    navigation.navigate('CancellationPolicy');
+  };
 
-  const showCustomInput =
-    cancellationReasons.find(r => r.id === selectedReasonId)?.requiresSpecification;
+  const showCustomInput = cancellationReasons.find(
+    r => r.id === selectedReasonId,
+  )?.requiresSpecification;
 
   return (
     <View style={styles.container}>
       <CustomHeader
         showBackButton={true}
         showMenuButton={false}
-        title={'Pooja Cancellation'}
+        title={t('pooja_cancellation')}
       />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.heading}>Cancellation Reason</Text>
-        <Text style={styles.description}>
-          Please note that cancellations are only applicable if made 24 hours prior to the
-          scheduled Pooja. If you cancel within this period, You will be charged Rs. 1000 penalty.
-        </Text>
+        <Text style={styles.heading}>{t('cancellation_reason')}</Text>
+        <Text style={styles.description}>{t('cancellation_reason_desc')}</Text>
         <Text style={styles.policy}>
-          Cancellation policy:{' '}
+          {t('pooja_cancellation')}:{' '}
           <Text style={styles.link} onPress={handleOpenPolicy}>
-            click here
+            {t('click_here')}
           </Text>
         </Text>
 
@@ -100,14 +106,14 @@ const CancellationReasonScreen = () => {
             <TouchableOpacity
               key={reason.id}
               style={styles.radioOption}
-              onPress={() => setSelectedReasonId(reason.id)}
-            >
+              onPress={() => setSelectedReasonId(reason.id)}>
               <View
                 style={[
                   styles.radioCircle,
-                  selectedReasonId === reason.id && { borderColor: COLORS.primary },
-                ]}
-              >
+                  selectedReasonId === reason.id && {
+                    borderColor: COLORS.primary,
+                  },
+                ]}>
                 {selectedReasonId === reason.id && (
                   <View style={styles.selectedDot} />
                 )}
@@ -116,8 +122,7 @@ const CancellationReasonScreen = () => {
                 style={[
                   styles.radioText,
                   reason.requiresSpecification && styles.otherText,
-                ]}
-              >
+                ]}>
                 {reason.reason}
                 {reason.requiresSpecification ? ' (Please Specify)' : ''}
               </Text>
@@ -128,7 +133,7 @@ const CancellationReasonScreen = () => {
         {showCustomInput && (
           <TextInput
             style={styles.input}
-            placeholder="Enter your cancellation reason"
+            placeholder={t('enter_your_cancellation_reason')}
             value={customReason}
             onChangeText={setCustomReason}
             multiline
@@ -136,9 +141,8 @@ const CancellationReasonScreen = () => {
         )}
 
         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-          <Text style={styles.submitText}>Submit Cancellation</Text>
+          <Text style={styles.submitText}>{t('submit_cancellation')}</Text>
         </TouchableOpacity>
-        
       </ScrollView>
     </View>
   );

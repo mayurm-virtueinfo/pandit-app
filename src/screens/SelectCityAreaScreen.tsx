@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {
   View,
   Text,
@@ -10,14 +10,14 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { apiService, DropdownItem } from '../api/apiService';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack'; // Import for typing navigation
-import { AuthStackParamList } from '../navigation/AuthNavigator'; // Import your param list
-import { COLORS } from '../theme/theme';
+import {apiService, DropdownItem} from '../api/apiService';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack'; // Import for typing navigation
+import {AuthStackParamList} from '../navigation/AuthNavigator'; // Import your param list
+import {COLORS} from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 
 const SelectCityAreaScreen = () => {
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
@@ -33,7 +33,9 @@ const SelectCityAreaScreen = () => {
   const [citySearch, setCitySearch] = useState('');
   const [areaSearch, setAreaSearch] = useState('');
 
-  const [isLoadingData, setIsLoadingData] = useState(false); // Renamed for clarity
+  const [isLoadingData, setIsLoadingData] = useState(false);
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,9 +67,11 @@ const SelectCityAreaScreen = () => {
       setFilteredCities(cities);
     } else {
       setFilteredCities(
-        (cities || []).filter(city => // Add null check for safety, though initialized
-          city.name.toLowerCase().includes(citySearch.toLowerCase())
-        )
+        (cities || []).filter(
+          (
+            city, // Add null check for safety, though initialized
+          ) => city.name.toLowerCase().includes(citySearch.toLowerCase()),
+        ),
       );
     }
   }, [citySearch, cities]);
@@ -78,8 +82,8 @@ const SelectCityAreaScreen = () => {
     } else {
       setFilteredAreas(
         areas.filter(area =>
-          area.name.toLowerCase().includes(areaSearch.toLowerCase())
-        )
+          area.name.toLowerCase().includes(areaSearch.toLowerCase()),
+        ),
       );
     }
   }, [areaSearch, areas]);
@@ -97,7 +101,11 @@ const SelectCityAreaScreen = () => {
     <Text style={styles.listHeader}>{title}</Text>
   );
 
-  const renderSearchInput = (placeholder: string, value: string, onChangeText: (text: string) => void) => (
+  const renderSearchInput = (
+    placeholder: string,
+    value: string,
+    onChangeText: (text: string) => void,
+  ) => (
     <View style={styles.searchInputContainer}>
       <Text style={styles.searchIcon}>🔍</Text>
       <TextInput
@@ -113,10 +121,11 @@ const SelectCityAreaScreen = () => {
   const renderRadioItem = (
     item: DropdownItem,
     isSelected: boolean,
-    onSelect: () => void
+    onSelect: () => void,
   ) => (
     <TouchableOpacity onPress={onSelect} style={styles.radioItem}>
-      <View style={[styles.radioButton, isSelected && styles.radioButtonSelected]}>
+      <View
+        style={[styles.radioButton, isSelected && styles.radioButtonSelected]}>
         {isSelected && <Text style={styles.radioButtonCheck}>✓</Text>}
       </View>
       <Text style={styles.radioLabel}>{item.name}</Text>
@@ -125,7 +134,11 @@ const SelectCityAreaScreen = () => {
   const inset = useSafeAreaInsets();
   return (
     <>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Select your City & Area'} />
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('select_yoyr_city_and_area')}
+      />
       {/* <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>‹</Text>
@@ -135,46 +148,50 @@ const SelectCityAreaScreen = () => {
 
       <View style={styles.container}>
         {/* Cities List */}
-        {renderHeader('City')}
-        {renderSearchInput('Search for a city', citySearch, setCitySearch)}
+        {renderHeader(t('city'))}
+        {renderSearchInput(t('search_for_a_city'), citySearch, setCitySearch)}
         {isLoadingData ? (
           <ActivityIndicator size="large" color={COLORS.primary} />
         ) : (
           <FlatList
             data={filteredCities}
             keyExtractor={item => String(item.id)}
-            renderItem={({ item }) =>
-              renderRadioItem(item, selectedCity?.id === item.id, () => setSelectedCity(item))
+            renderItem={({item}) =>
+              renderRadioItem(item, selectedCity?.id === item.id, () =>
+                setSelectedCity(item),
+              )
             }
             style={styles.list}
           />
         )}
 
         {/* Areas List */}
-        {renderHeader('Area')}
-        {renderSearchInput('Search for an area', areaSearch, setAreaSearch)}
+        {renderHeader(t('area'))}
+        {renderSearchInput(t('select_your_area'), areaSearch, setAreaSearch)}
         {isLoadingData ? (
           <ActivityIndicator size="large" color={COLORS.primary} />
         ) : (
           <FlatList
             data={filteredAreas}
             keyExtractor={item => String(item.id)}
-            renderItem={({ item }) =>
-              renderRadioItem(item, selectedArea?.id === item.id, () => setSelectedArea(item))
+            renderItem={({item}) =>
+              renderRadioItem(item, selectedArea?.id === item.id, () =>
+                setSelectedArea(item),
+              )
             }
             style={styles.list}
           />
         )}
-
-
       </View>
-      <View style={[styles.footer,{marginBottom:inset.bottom}]}>
+      <View style={[styles.footer, {marginBottom: inset.bottom}]}>
         <TouchableOpacity
-          style={[styles.nextButton, (!selectedCity || !selectedArea) && styles.nextButtonDisabled]}
+          style={[
+            styles.nextButton,
+            (!selectedCity || !selectedArea) && styles.nextButtonDisabled,
+          ]}
           onPress={handleNext}
-          disabled={!selectedCity || !selectedArea}
-        >
-          <Text style={styles.nextButtonText}>Next</Text>
+          disabled={!selectedCity || !selectedArea}>
+          <Text style={styles.nextButtonText}>{t('next')}</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -281,8 +298,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingVertical: 20,
-    marginLeft:20,
-    marginRight:20
+    marginLeft: 20,
+    marginRight: 20,
     // borderTopWidth: 1,
     // borderTopColor: '#E0E0E0',
     // backgroundColor: '#F0F4F8', // Match safe area

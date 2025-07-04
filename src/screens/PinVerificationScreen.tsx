@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,15 @@ import {
   Platform,
 } from 'react-native';
 import CustomHeader from '../components/CustomHeader'; // Adjust the path as needed
-import { COLORS } from '../theme/theme';
+import {COLORS} from '../theme/theme';
+import {useTranslation} from 'react-i18next';
 // import { COLORS } from '../constants/theme'; // Ensure COLORS.primary is defined here
 
 const PinVerificationScreen = () => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+
+  const {t} = useTranslation();
 
   const handleSubmit = () => {
     if (!pin.trim()) {
@@ -41,28 +44,31 @@ const PinVerificationScreen = () => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
-    >
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Pin Verification'} />
+      behavior={Platform.select({ios: 'padding', android: undefined})}>
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('pin_verification')}
+      />
 
       <View style={styles.content}>
-        <Text style={styles.label}>Enter Pin code from user app to start the pooja</Text>
+        <Text style={styles.label}>{t('pin_code_desc')}</Text>
         <TextInput
           style={[styles.input, error && styles.inputError]}
           value={pin}
           onChangeText={setPin}
-          placeholder="Enter Pin"
+          placeholder={t('enter_pin')}
           keyboardType="numeric"
           maxLength={6}
         />
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit</Text>
+          <Text style={styles.submitButtonText}>{t('submit')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
+          <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

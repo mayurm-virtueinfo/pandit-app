@@ -1,16 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 
 const AboutUsScreen: React.FC = () => {
+  const {t, i18n} = useTranslation();
   return (
     <>
-    <CustomHeader showBackButton={false} showMenuButton={true} title={'About Us'}/>
-    <View style={styles.container}>
-      <Text style={styles.text}>About Us Screen</Text>
-    </View>
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('about_us')}
+      />
+      <View style={styles.container}>
+        <Text style={styles.text}>About Us Screen</Text>
+      </View>
     </>
-    
   );
 };
 

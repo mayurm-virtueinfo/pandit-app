@@ -1,16 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 
 const TermsAndConditionsScreen: React.FC = () => {
+  const {t, i18n} = useTranslation();
+
   return (
     <>
-    <CustomHeader showBackButton={false} showMenuButton={true} title={'Terms & Conditions'}/>
-    <View style={styles.container}>
-      <Text style={styles.text}>Terms & Conditions Screen</Text>
-    </View>
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('terms_and_conditions')}
+      />
+      <View style={styles.container}>
+        <Text style={styles.text}>Terms & Conditions Screen</Text>
+      </View>
     </>
-    
   );
 };
 

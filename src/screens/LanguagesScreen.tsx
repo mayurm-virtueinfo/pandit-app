@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,32 +9,34 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../navigation/AuthNavigator'; // This might change depending on where LanguagesScreen lives
-import { AppDrawerParamList } from '../navigation/DrawerNavigator'; // Import Drawer param list
-import { NavigatorScreenParams } from '@react-navigation/native'; // Import NavigatorScreenParams
-import { apiService, DropdownItem } from '../api/apiService';
-import { COLORS } from '../theme/theme';
-import { RootStackParamList } from '../navigation/RootNavigator';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '../navigation/AuthNavigator'; // This might change depending on where LanguagesScreen lives
+import {AppDrawerParamList} from '../navigation/DrawerNavigator'; // Import Drawer param list
+import {NavigatorScreenParams} from '@react-navigation/native'; // Import NavigatorScreenParams
+import {apiService, DropdownItem} from '../api/apiService';
+import {COLORS} from '../theme/theme';
+import {RootStackParamList} from '../navigation/RootNavigator';
 import CustomHeader from '../components/CustomHeader';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 
 // Define a more general ParamList that includes the AppDrawer
 // This assumes LanguagesScreen is part of a stack that can navigate to AppDrawer
 
+type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
-type ScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Main'
->;
-
-const LanguagesScreen: React.FC = () => { // Added React.FC
+const LanguagesScreen: React.FC = () => {
+  // Added React.FC
   const navigation = useNavigation<ScreenNavigationProp>();
 
   const [languages, setLanguages] = useState<DropdownItem[]>([]);
-  const [selectedLanguages, setSelectedLanguages] = useState<DropdownItem[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<DropdownItem[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(false);
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     const loadLanguages = async () => {
@@ -87,9 +89,12 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
   const renderCheckboxItem = (
     item: DropdownItem,
     isSelected: boolean,
-    onToggle: () => void
+    onToggle: () => void,
   ) => (
-    <TouchableOpacity key={`${item.id}-${item.name}`} onPress={onToggle} style={styles.checkboxItemContainer}>
+    <TouchableOpacity
+      key={`${item.id}-${item.name}`}
+      onPress={onToggle}
+      style={styles.checkboxItemContainer}>
       <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
         {isSelected && <Text style={styles.checkboxCheck}>✓</Text>}
       </View>
@@ -101,27 +106,43 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
 
   return (
     <>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Languages Selection'} />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.sectionTitle}>Select your own languages:</Text>
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('languages_selection')}
+      />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.sectionTitle}>
+          {t('select_your_own_languages')}:
+        </Text>
         {isLoading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={styles.loader}
+          />
         ) : languages.length === 0 ? (
-          <Text>No languages available.</Text>
+          <Text>{t('no_languages_available')}</Text>
         ) : (
           languages.map(lang =>
             renderCheckboxItem(
               lang,
               selectedLanguages.some(selected => selected.id === lang.id),
-              () => toggleLanguageSelection(lang)
-            )
+              () => toggleLanguageSelection(lang),
+            ),
           )
         )}
       </ScrollView>
 
-      <View style={[styles.footer,{marginBlock:inset.bottom}]}>
-        <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
-          <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+      <View style={[styles.footer, {marginBlock: inset.bottom}]}>
+        <TouchableOpacity
+          style={[styles.button, styles.cancelButton]}
+          onPress={handleCancel}>
+          <Text style={[styles.buttonText, styles.cancelButtonText]}>
+            {t('cancel')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -130,9 +151,10 @@ const LanguagesScreen: React.FC = () => { // Added React.FC
             selectedLanguages.length === 0 && styles.submitButtonDisabled,
           ]}
           onPress={handleSubmit}
-          disabled={selectedLanguages.length === 0}
-        >
-          <Text style={[styles.buttonText, styles.submitButtonText]}>Submit</Text>
+          disabled={selectedLanguages.length === 0}>
+          <Text style={[styles.buttonText, styles.submitButtonText]}>
+            {t('submit')}
+          </Text>
         </TouchableOpacity>
       </View>
     </>

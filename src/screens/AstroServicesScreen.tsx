@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { apiService, AstroServiceItem } from '../api/apiService';
+import {apiService, AstroServiceItem} from '../api/apiService';
 import CustomHeader from '../components/CustomHeader';
-import { useNavigation } from '@react-navigation/native';
-import { COLORS } from '../theme/theme';
-import { AstroServiceParamList } from '../navigation/AstroServiceNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import {COLORS} from '../theme/theme';
+import {AstroServiceParamList} from '../navigation/AstroServiceNavigator';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useTranslation} from 'react-i18next';
 
 type ScreenNavigationProp = StackNavigationProp<
   AstroServiceParamList,
@@ -23,6 +24,8 @@ const AstroServicesScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const [astroServices, setAstroServices] = useState<AstroServiceItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     fetchAstroServices();
@@ -45,9 +48,9 @@ const AstroServicesScreen: React.FC = () => {
     // Navigate to Edit Screen or show modal
   };
 
-  const renderItem = ({ item }: { item: AstroServiceItem }) => (
+  const renderItem = ({item}: {item: AstroServiceItem}) => (
     <View style={styles.card}>
-      <Image source={{ uri: item.imageUrl }} style={styles.image} />
+      <Image source={{uri: item.imageUrl}} style={styles.image} />
       <View style={styles.cardContent}>
         <Text style={styles.title}>{item.title}</Text>
         {!!item.description && (
@@ -57,9 +60,8 @@ const AstroServicesScreen: React.FC = () => {
       </View>
       <TouchableOpacity
         style={styles.editButton}
-        onPress={() => handleEditPress(item)}
-      >
-        <Text style={styles.editText}>Edit</Text>
+        onPress={() => handleEditPress(item)}>
+        <Text style={styles.editText}>{t('edit')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -69,7 +71,7 @@ const AstroServicesScreen: React.FC = () => {
       <CustomHeader
         showBackButton={false}
         showMenuButton={true}
-        title={'Astro Services'}
+        title={t('astro_services')}
       />
       <FlatList
         data={astroServices}
@@ -81,8 +83,10 @@ const AstroServicesScreen: React.FC = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddNewAstroService')}>
-        <Text style={styles.addButtonText}>Add New Astro Service</Text>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('AddNewAstroService')}>
+        <Text style={styles.addButtonText}>{t('add_new_astro_service')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -108,7 +112,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
   },
   image: {
     width: 60,

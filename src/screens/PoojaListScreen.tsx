@@ -1,25 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, Image, TouchableOpacity } from 'react-native';
-import { apiService, PoojaRequestItem } from '../api/apiService';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { PoojaRequestParamList } from '../navigation/PoojaRequestNavigator';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import {apiService, PoojaRequestItem} from '../api/apiService';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {PoojaRequestParamList} from '../navigation/PoojaRequestNavigator';
 
-import  Ionicons  from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '../theme/theme';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {COLORS} from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
-import { PoojaListParamList } from '../navigation/PoojaListNavigator';
+import {PoojaListParamList} from '../navigation/PoojaListNavigator';
+import {useTranslation} from 'react-i18next';
 
 // Navigation type
 type ScreenNavigationProp = StackNavigationProp<
   PoojaListParamList,
-  'AddNewPooja'|'PoojaRequestDetail'
+  'AddNewPooja' | 'PoojaRequestDetail'
 >;
 
 const PoojaListScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const [poojaRequests, setPoojaRequests] = useState<PoojaRequestItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     fetchPoojaRequests();
@@ -43,36 +54,48 @@ const PoojaListScreen: React.FC = () => {
     navigation.navigate('AddNewPooja');
   };
   const handleRequestPressDetail = (item: PoojaRequestItem) => {
-    navigation.navigate('PoojaRequestDetail', { request: item });
+    navigation.navigate('PoojaRequestDetail', {request: item});
   };
 
-  const renderItem = ({ item }: { item: PoojaRequestItem }) => (
-    <TouchableOpacity onPress={() => handleRequestPressDetail(item)} style={styles.card}>
-      <Image source={{ uri: item.imageUrl }} style={styles.image} />
+  const renderItem = ({item}: {item: PoojaRequestItem}) => (
+    <TouchableOpacity
+      onPress={() => handleRequestPressDetail(item)}
+      style={styles.card}>
+      <Image source={{uri: item.imageUrl}} style={styles.image} />
       <View style={styles.cardText}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.subtitle}>{item.subtitle}</Text>
         <Text style={styles.price}>{item.price}</Text>
       </View>
-      <TouchableOpacity onPress={() => handleRequestPressEdit(item)} style={styles.editButton}>
-        <Text style={styles.editText}>Edit</Text>
+      <TouchableOpacity
+        onPress={() => handleRequestPressEdit(item)}
+        style={styles.editButton}>
+        <Text style={styles.editText}>{t('edit')}</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <CustomHeader showBackButton={false} showMenuButton={true} title={'Pooja List'}/>
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('pooja_list')}
+      />
       <FlatList
         data={poojaRequests}
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.title}-${index}`}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
-      <TouchableOpacity  onPress={() => handleRequestPressAdd()} style={styles.addButton}>
-        <Text style={styles.addButtonText}>Add New Pooja</Text>
+      <TouchableOpacity
+        onPress={() => handleRequestPressAdd()}
+        style={styles.addButton}>
+        <Text style={styles.addButtonText}>{t('add_new_pooja')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -106,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowRadius: 4,
     elevation: 2,
   },

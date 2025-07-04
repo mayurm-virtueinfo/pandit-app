@@ -13,8 +13,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {AuthStackParamList} from '../navigation/AuthNavigator';
 import Loader from '../components/Loader';
-import { getAuth, signInWithPhoneNumber } from '@react-native-firebase/auth';
-import { useCommonToast } from '../common/CommonToast';
+import {getAuth, signInWithPhoneNumber} from '@react-native-firebase/auth';
+import {useCommonToast} from '../common/CommonToast';
+import {useTranslation} from 'react-i18next';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -32,13 +33,17 @@ interface Props {
 }
 
 const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
-  const { showErrorToast, showSuccessToast } = useCommonToast();
+  const {showErrorToast, showSuccessToast} = useCommonToast();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<Array<TextInput | null>>([]);
-  const {phoneNumber,confirmation} = route.params;
+  const {phoneNumber, confirmation} = route.params;
 
-  const [otpConfirmation, setOtpConfirmation] = useState(confirmation)
-  const [isLoading,setLoading] = useState(false);
+  const [otpConfirmation, setOtpConfirmation] = useState(confirmation);
+  const [isLoading, setLoading] = useState(false);
+
+  const {t} = useTranslation();
+
+  console.log('OTPConfirmation value :: ', otpConfirmation);
 
   const handleOtpChange = (value: string, index: number) => {
     if (value.length <= 1) {
@@ -59,25 +64,27 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
     }
   };
 
-  const confirmCode = async (code:string) => {
+  const confirmCode = async (code: string) => {
     try {
-      setLoading(true)
+      setLoading(true);
       await otpConfirmation.confirm(code);
-      setLoading(false)
+      setLoading(false);
       navigation.navigate('PanditRegistration');
-    } catch (error:any) {
+    } catch (error: any) {
       console.log('Invalid code.');
-      setLoading(false)
+      setLoading(false);
       // Alert.alert('','Invalid code');
-      showErrorToast(error?.message || 'Failed to Resend OTP. Please try again.')
+      showErrorToast(
+        error?.message || 'Failed to Resend OTP. Please try again.',
+      );
     }
-  }
+  };
   const handleVerification = async () => {
     try {
       const otpValue = otp.join('');
       if (otpValue.length !== 6) {
         // Alert.alert('Error', 'Please enter a valid 6-digit OTP');
-        showErrorToast('Please enter a valid 6-digit OTP')
+        showErrorToast('Please enter a valid 6-digit OTP');
         return;
       }
 
@@ -86,46 +93,46 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
 
       confirmCode(otpValue);
       // Navigate to registration screen after successful verification
-      
     } catch (error) {
       console.error('Verification failed:', error);
       // Alert.alert('Error', 'OTP verification failed. Please try again.');
-      showErrorToast('OTP verification failed. Please try again.')
+      showErrorToast('OTP verification failed. Please try again.');
     }
   };
 
-  const handleResendOTP = async() => {
+  const handleResendOTP = async () => {
     // Implement resend OTP logic here
     try {
-          // const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
-          setLoading(true);
-          const confirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
-          setLoading(false);
-          // Alert.alert('Success', 'New OTP has been sent to your phone number');
-          showSuccessToast('New OTP has been sent to your phone number');
-          setOtpConfirmation(confirmation);
-        } catch (error: any) {
-          console.log('---8')
-          console.error(error);
-          setLoading(false);
-          // Alert.alert('Error', error?.message || 'Failed to Resend OTP. Please try again.');
-          showErrorToast(error?.message || 'Failed to Resend OTP. Please try again.')
-        }
-    
+      // const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+      setLoading(true);
+      const confirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
+      setLoading(false);
+      // Alert.alert('Success', 'New OTP has been sent to your phone number');
+      showSuccessToast('New OTP has been sent to your phone number');
+      setOtpConfirmation(confirmation);
+    } catch (error: any) {
+      console.log('---8');
+      console.error(error);
+      setLoading(false);
+      // Alert.alert('Error', error?.message || 'Failed to Resend OTP. Please try again.');
+      showErrorToast(
+        error?.message || 'Failed to Resend OTP. Please try again.',
+      );
+    }
   };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
-      <Loader loading={isLoading}/>
+      <Loader loading={isLoading} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
-          <Text style={styles.title}>OTP Verification</Text>
+          <Text style={styles.title}>{t('otp_verification')}</Text>
           <Text style={styles.subtitle}>
-            Enter the verification code we sent to
+            {t('enter_the_verification_code_we_sent_to')}
           </Text>
           <Text style={styles.phoneNumber}>{phoneNumber}</Text>
 
@@ -149,13 +156,13 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
           <TouchableOpacity
             style={styles.verifyButton}
             onPress={handleVerification}>
-            <Text style={styles.verifyButtonText}>Verify</Text>
+            <Text style={styles.verifyButtonText}>{t('verify')}</Text>
           </TouchableOpacity>
 
           <View style={styles.resendContainer}>
-            <Text style={styles.resendText}>Didn't receive the code? </Text>
+            <Text style={styles.resendText}>{t('didnt_receive_the_code')}</Text>
             <TouchableOpacity onPress={handleResendOTP}>
-              <Text style={styles.resendButton}>Resend OTP</Text>
+              <Text style={styles.resendButton}>{t('resend_otp')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,8 +1,8 @@
-
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView } from 'react-native';
-import { apiService } from '../api/apiService';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet, FlatList, SafeAreaView} from 'react-native';
+import {apiService} from '../api/apiService';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 // import { CustomHeader } from '../components/CustomHeader';
 // import { COLORS } from '../constants/colors';
 
@@ -12,7 +12,11 @@ interface CancellationPolicy {
 }
 
 const CancellationPolicyScreen: React.FC = () => {
-  const [cancellationPolicies, setCancellationPolicies] = useState<CancellationPolicy[]>([]);
+  const [cancellationPolicies, setCancellationPolicies] = useState<
+    CancellationPolicy[]
+  >([]);
+
+  const {t} = useTranslation();
 
   const fetchCancellationPolicies = async () => {
     const requests = await apiService.getCancellationPolicy();
@@ -24,7 +28,13 @@ const CancellationPolicyScreen: React.FC = () => {
     fetchCancellationPolicies();
   }, []);
 
-  const renderPolicyItem = ({ item, index }: { item: CancellationPolicy; index: number }) => (
+  const renderPolicyItem = ({
+    item,
+    index,
+  }: {
+    item: CancellationPolicy;
+    index: number;
+  }) => (
     <Text style={styles.policyText}>
       {index + 1}. {item.description}
     </Text>
@@ -32,10 +42,14 @@ const CancellationPolicyScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader showBackButton={true} showMenuButton={false} title="Cancellation Policy" />
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('cancellation_policy')}
+      />
       <FlatList
         data={cancellationPolicies}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         renderItem={renderPolicyItem}
         contentContainerStyle={styles.contentContainer}
       />

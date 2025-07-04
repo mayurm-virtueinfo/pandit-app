@@ -1,30 +1,27 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
-import { COLORS } from '../theme/theme';
+import {View, Text, StyleSheet, Dimensions, ScrollView} from 'react-native';
+import {BarChart} from 'react-native-chart-kit';
+import {COLORS} from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-const EarningDetailScreen : React.FC = () => {
+const EarningDetailScreen: React.FC = () => {
   const earnings = [
-    { label: 'Ganesh Pooja', amount: 5000 },
-    { label: 'Lakshmi Pooja', amount: 7000 },
-    { label: 'Satyanarayan Pooja', amount: 4000 },
-    { label: 'Navagraha Pooja', amount: 8000 },
-    { label: 'Rudrabhishek', amount: 9000 },
-    { label: 'Additional Dakshina', amount: 2000 },
+    {label: 'Ganesh Pooja', amount: 5000},
+    {label: 'Lakshmi Pooja', amount: 7000},
+    {label: 'Satyanarayan Pooja', amount: 4000},
+    {label: 'Navagraha Pooja', amount: 8000},
+    {label: 'Rudrabhishek', amount: 9000},
+    {label: 'Additional Dakshina', amount: 2000},
   ];
 
   const total = earnings.reduce((sum, item) => sum + item.amount, 0);
   const deductions = total * 0.18;
   const netEarnings = total - deductions;
+
+  const {t} = useTranslation();
 
   const barChartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr'],
@@ -46,19 +43,19 @@ const EarningDetailScreen : React.FC = () => {
       <CustomHeader
         showBackButton={true}
         showMenuButton={false}
-        title={'Earnings'}
+        title={t('earnings')}
       />
       <ScrollView contentContainerStyle={styles.content}>
         {/* Nav Controls */}
         <View style={styles.navRow}>
-          <Text style={styles.navButton}>{'◀︎ Previous'}</Text>
-          <Text style={styles.currentMonth}>Current Month</Text>
-          <Text style={styles.navButton}>{'Next ▶︎'}</Text>
+          <Text style={styles.navButton}>{t('previous')}</Text>
+          <Text style={styles.currentMonth}>{t('current_month')}</Text>
+          <Text style={styles.navButton}>{t('next')}</Text>
         </View>
 
         {/* Earnings Summary */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Current month earnings</Text>
+          <Text style={styles.cardTitle}>{t('current_month_earnings')}</Text>
           {earnings.map((item, index) => (
             <View key={index} style={styles.row}>
               <Text style={styles.label}>{item.label}</Text>
@@ -68,17 +65,19 @@ const EarningDetailScreen : React.FC = () => {
           <View style={styles.separator} />
 
           <View style={styles.row}>
-            <Text style={styles.label}>Total</Text>
+            <Text style={styles.label}>{t('total')}</Text>
             <Text style={styles.amount}>₹{total.toLocaleString()}</Text>
           </View>
           <View style={styles.row}>
-            <Text style={styles.label}>Total Deductions (18%)</Text>
-            <Text style={[styles.amount, { color: 'red' }]}>
+            <Text style={styles.label}>{t('total_deductions')}</Text>
+            <Text style={[styles.amount, {color: 'red'}]}>
               -₹{deductions.toLocaleString()}
             </Text>
           </View>
           <View style={styles.row}>
-            <Text style={[styles.label, styles.bold]}>Total Earnings</Text>
+            <Text style={[styles.label, styles.bold]}>
+              {t('total_earnings')}
+            </Text>
             <Text style={[styles.amount, styles.bold]}>
               ₹{netEarnings.toLocaleString()}
             </Text>
@@ -86,10 +85,14 @@ const EarningDetailScreen : React.FC = () => {
         </View>
 
         {/* Earnings Breakdown */}
-        <Text style={styles.sectionTitle}>Earnings Breakdown (Monthly)</Text>
+        <Text style={styles.sectionTitle}>
+          {t('earnings_breakdown_monthly')}
+        </Text>
         <View style={styles.card}>
           <Text style={styles.monthlyTotal}>₹35,000</Text>
-          <Text style={styles.percentageChange}>This month <Text style={{ color: 'green' }}>+10%</Text></Text>
+          <Text style={styles.percentageChange}>
+            {t('this_month')} <Text style={{color: 'green'}}>+10%</Text>
+          </Text>
           <BarChart
             data={barChartData}
             width={width - 40}
@@ -108,7 +111,7 @@ const EarningDetailScreen : React.FC = () => {
             withInnerLines={false}
             flatColor={true}
             showBarTops={false}
-            style={{ marginTop: 12 }}
+            style={{marginTop: 12}}
           />
         </View>
       </ScrollView>
@@ -195,4 +198,3 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 });
-

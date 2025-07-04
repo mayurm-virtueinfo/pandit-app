@@ -1,12 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+} from 'react-native';
 import CustomHeader from '../components/CustomHeader';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '../theme/theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {COLORS} from '../theme/theme';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 
 const VideoCallScreen: React.FC = () => {
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
+  const {t, i18n} = useTranslation();
+
   const handleMute = () => {
     // Add mute logic
     console.log('Mute toggled');
@@ -18,17 +28,25 @@ const VideoCallScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container,{marginBottom:insets.bottom}]}>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Astrology Consultation'} />
+    <View style={[styles.container, {marginBottom: insets.bottom}]}>
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('astrology_consultation')}
+      />
 
       <View style={styles.videoContainer}>
         <Image
-          source={{uri:'https://www.shutterstock.com/shutterstock/photos/1803127858/display_1500/stock-vector-vector-graphic-illustration-indian-pandit-is-talking-on-a-mobile-phone-individually-on-white-1803127858.jpg'}} // Replace with actual image
+          source={{
+            uri: 'https://www.shutterstock.com/shutterstock/photos/1803127858/display_1500/stock-vector-vector-graphic-illustration-indian-pandit-is-talking-on-a-mobile-phone-individually-on-white-1803127858.jpg',
+          }} // Replace with actual image
           style={styles.fullVideo}
           resizeMode="cover"
         />
         <Image
-          source={{uri:'https://c8.alamy.com/comp/2BCTP34/laptop-screen-view-aged-woman-use-videocall-talking-with-relatives-2BCTP34.jpg'}} // Replace with actual image
+          source={{
+            uri: 'https://c8.alamy.com/comp/2BCTP34/laptop-screen-view-aged-woman-use-videocall-talking-with-relatives-2BCTP34.jpg',
+          }} // Replace with actual image
           style={styles.miniVideo}
           resizeMode="cover"
         />
@@ -37,12 +55,12 @@ const VideoCallScreen: React.FC = () => {
       <View style={styles.controls}>
         <TouchableOpacity style={styles.muteButton} onPress={handleMute}>
           <Icon name="mic-off-outline" size={20} color="#000" />
-          <Text style={styles.muteText}>Mute</Text>
+          <Text style={styles.muteText}>{t('mute')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.endButton} onPress={handleEndCall}>
           <Icon name="call-outline" size={20} color="#fff" />
-          <Text style={styles.endText}>End</Text>
+          <Text style={styles.endText}>{t('end')}</Text>
         </TouchableOpacity>
       </View>
     </View>

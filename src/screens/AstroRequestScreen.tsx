@@ -1,13 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+} from 'react-native';
 import CustomHeader from '../components/CustomHeader';
-import { COLORS } from '../theme/theme';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AstroRequestParamList } from '../navigation/AstroRequestNavigator';
-import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {COLORS} from '../theme/theme';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AstroRequestParamList} from '../navigation/AstroRequestNavigator';
+import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 // import { COLORS } from '../theme/colors';
-
 
 type ScreenNavigationProp = StackNavigationProp<
   AstroRequestParamList,
@@ -16,10 +23,13 @@ type ScreenNavigationProp = StackNavigationProp<
 const AstroRequestScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
+
+  const {t} = useTranslation();
+
   const handleAccept = () => {
     // Add accept logic here
     console.log('Accepted');
-    navigation.navigate('ChatMessages'); // Navigate to chat screen after accepting 
+    navigation.navigate('ChatMessages'); // Navigate to chat screen after accepting
   };
 
   const handleReject = () => {
@@ -28,12 +38,18 @@ const AstroRequestScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { marginBottom: insets.bottom }]}>
-      <CustomHeader showBackButton={false} showMenuButton={true} title={'Astro Request'} />
+    <View style={[styles.container, {marginBottom: insets.bottom}]}>
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('astro_request')}
+      />
 
       <View style={styles.content}>
         <Image
-          source={{uri:'https://www.drikpanchang.com/images/page-showcase/270x180/kundali_milan.jpg'}} // Replace with your actual image path
+          source={{
+            uri: 'https://www.drikpanchang.com/images/page-showcase/270x180/kundali_milan.jpg',
+          }} // Replace with your actual image path
           style={styles.image}
           resizeMode="contain"
         />
@@ -41,10 +57,18 @@ const AstroRequestScreen: React.FC = () => {
         <Text style={styles.title}>Kundali matching</Text>
 
         <View style={styles.detailBlock}>
-          <Text style={styles.label}>Name: <Text style={styles.value}>Shailesh Vyas</Text></Text>
-          <Text style={styles.label}>City: <Text style={styles.value}>Mumbai</Text></Text>
-          <Text style={styles.label}>DOB: <Text style={styles.value}>13-Dec-2024</Text></Text>
-          <Text style={styles.label}>Time of birth: <Text style={styles.value}>8:40AM</Text></Text>
+          <Text style={styles.label}>
+            {t('name')}: <Text style={styles.value}>Shailesh Vyas</Text>
+          </Text>
+          <Text style={styles.label}>
+            {t('city')}: <Text style={styles.value}>Mumbai</Text>
+          </Text>
+          <Text style={styles.label}>
+            {t('dob')}: <Text style={styles.value}>13-Dec-2024</Text>
+          </Text>
+          <Text style={styles.label}>
+            {t('time_of_birth')}: <Text style={styles.value}>8:40AM</Text>
+          </Text>
         </View>
 
         <Text style={styles.description}>
@@ -52,11 +76,11 @@ const AstroRequestScreen: React.FC = () => {
         </Text>
 
         <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
-          <Text style={styles.acceptButtonText}>Accept</Text>
+          <Text style={styles.acceptButtonText}>{t('accept')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.rejectButton} onPress={handleReject}>
-          <Text style={styles.rejectButtonText}>Reject</Text>
+          <Text style={styles.rejectButtonText}>{t('reject')}</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,12 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { Image } from 'react-native';
-import { COLORS } from '../theme/theme';
+import {Image} from 'react-native';
+import {COLORS} from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
-import { apiService, PoojaRequestItem } from '../api/apiService';
+import {apiService, PoojaRequestItem} from '../api/apiService';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {useTranslation} from 'react-i18next';
 
 const AddNewPoojaScreen: React.FC = () => {
   const [poojaRequests, setPoojaRequests] = useState<PoojaRequestItem[]>([]);
@@ -21,6 +22,8 @@ const AddNewPoojaScreen: React.FC = () => {
   const [priceWithItems, setPriceWithItems] = useState(true);
   const [customPriceWithoutItems, setCustomPriceWithoutItems] = useState('');
   const [customPriceWithItems, setCustomPriceWithItems] = useState('');
+
+  const {t, i18n} = useTranslation();
 
   useEffect(() => {
     fetchPoojaRequests();
@@ -32,17 +35,16 @@ const AddNewPoojaScreen: React.FC = () => {
     setPoojaRequests(requests);
   };
 
-  const renderPoojaItem = ({ item }: { item: PoojaRequestItem }) => {
+  const renderPoojaItem = ({item}: {item: PoojaRequestItem}) => {
     const isSelected = selectedPooja === item.title;
     return (
       <TouchableOpacity
         style={[styles.poojaCard, isSelected && styles.selectedCard]}
-        onPress={() => setSelectedPooja(item.title)}
-      >
+        onPress={() => setSelectedPooja(item.title)}>
         <View style={styles.radioCircle}>
           {isSelected && <View style={styles.selectedDot} />}
         </View>
-        <Image source={{ uri: item.imageUrl }} style={styles.poojaImage} />
+        <Image source={{uri: item.imageUrl}} style={styles.poojaImage} />
         <View style={styles.poojaTextContainer}>
           <Text style={styles.poojaTitle}>{item.title}</Text>
           <Text style={styles.poojaSubtitle}>{item.subtitle}</Text>
@@ -53,14 +55,18 @@ const AddNewPoojaScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Add New'} />
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('add_new')}
+      />
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.label}>Search by Pooja Name</Text>
+        <Text style={styles.label}>{t('search_by_pooja_name')}</Text>
         <TextInput
-          placeholder="Search by Pooja Name"
+          placeholder={t('search_by_pooja_name')}
           style={styles.searchInput}
-          editable={false} // Non-functional input to match design
+          editable={false}
         />
 
         <FlatList
@@ -70,19 +76,20 @@ const AddNewPoojaScreen: React.FC = () => {
           scrollEnabled={false}
         />
 
-        <Text style={styles.sectionTitle}>System Price</Text>
+        <Text style={styles.sectionTitle}>{t('system_price')}</Text>
 
         <View style={styles.checkboxRow}>
-          <TouchableOpacity onPress={() => setPriceWithoutItems(!priceWithoutItems)}>
+          <TouchableOpacity
+            onPress={() => setPriceWithoutItems(!priceWithoutItems)}>
             <Ionicons
               name={priceWithoutItems ? 'checkbox' : 'square-outline'}
               size={24}
               color={COLORS.primary}
             />
           </TouchableOpacity>
-          <View style={{ marginLeft: 12 }}>
-            <Text style={styles.price}>Rs 5000</Text>
-            <Text style={styles.subText}>Without pooja items</Text>
+          <View style={{marginLeft: 12}}>
+            <Text style={styles.price}>{t('rs_5000')}</Text>
+            <Text style={styles.subText}>{t('without_pooja_items')}</Text>
           </View>
         </View>
 
@@ -94,34 +101,38 @@ const AddNewPoojaScreen: React.FC = () => {
               color={COLORS.primary}
             />
           </TouchableOpacity>
-          <View style={{ marginLeft: 12 }}>
-            <Text style={styles.price}>Rs 8000</Text>
-            <Text style={styles.subText}>With pooja items</Text>
+          <View style={{marginLeft: 12}}>
+            <Text style={styles.price}>{t('rs_8000')}</Text>
+            <Text style={styles.subText}>{t('with_pooja_items')}</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>OR</Text>
+        <Text style={styles.sectionTitle}>{t('or')}</Text>
 
-        <Text style={styles.inputLabel}>Enter Custom Price without pooja items</Text>
+        <Text style={styles.inputLabel}>
+          {t('enter_custom_price_without_pooja_items')}
+        </Text>
         <TextInput
           style={styles.input}
-          placeholder="Rs 5500"
+          placeholder={t('rs_5000')}
           value={customPriceWithoutItems}
           onChangeText={setCustomPriceWithoutItems}
           keyboardType="numeric"
         />
 
-        <Text style={styles.inputLabel}>Enter Custom Price with Pooja Items</Text>
+        <Text style={styles.inputLabel}>
+          {t('enter_custom_price_with_pooja_items')}
+        </Text>
         <TextInput
           style={styles.input}
-          placeholder="Rs 7000"
+          placeholder={t('rs_7000')}
           value={customPriceWithItems}
           onChangeText={setCustomPriceWithItems}
           keyboardType="numeric"
         />
 
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Add New</Text>
+          <Text style={styles.buttonText}>{t('add_new_button')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

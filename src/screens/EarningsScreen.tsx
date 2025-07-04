@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -10,37 +10,49 @@ import {
 } from 'react-native';
 import CustomHeader from '../components/CustomHeader';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS } from '../theme/theme';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { EarningsParamList } from '../navigation/EarningsNavigator';
-import { useNavigation } from '@react-navigation/native';
+import {COLORS} from '../theme/theme';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {EarningsParamList} from '../navigation/EarningsNavigator';
+import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 
 const years = ['2021', '2022', '2023', '2024', '2025'];
 const months = [
-  '-', 'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  '-',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const monthData = [
-  { month: 'January', amount: '₹50,000', status: 'Pending' },
-  { month: 'February', amount: '₹55,000', status: 'Paid' },
-  { month: 'March', amount: '₹60,500', status: 'Paid' },
-  { month: 'April', amount: '₹66,550', status: 'Paid' },
-  { month: 'May', amount: '₹73,205', status: 'Paid' },
-  { month: 'June', amount: '₹80,525', status: 'Paid' },
-  { month: 'July', amount: '₹88,578', status: 'Paid' },
-  { month: 'August', amount: '₹97,436', status: 'Paid' },
-  { month: 'September', amount: '₹107,179', status: 'Paid' },
-  { month: 'October', amount: '₹117,897', status: 'Paid' },
-  { month: 'November', amount: '₹129,687', status: 'Paid' },
-  { month: 'December', amount: '₹142,655', status: 'Paid' },
+  {month: 'January', amount: '₹50,000', status: 'Pending'},
+  {month: 'February', amount: '₹55,000', status: 'Paid'},
+  {month: 'March', amount: '₹60,500', status: 'Paid'},
+  {month: 'April', amount: '₹66,550', status: 'Paid'},
+  {month: 'May', amount: '₹73,205', status: 'Paid'},
+  {month: 'June', amount: '₹80,525', status: 'Paid'},
+  {month: 'July', amount: '₹88,578', status: 'Paid'},
+  {month: 'August', amount: '₹97,436', status: 'Paid'},
+  {month: 'September', amount: '₹107,179', status: 'Paid'},
+  {month: 'October', amount: '₹117,897', status: 'Paid'},
+  {month: 'November', amount: '₹129,687', status: 'Paid'},
+  {month: 'December', amount: '₹142,655', status: 'Paid'},
 ];
 
 type ScreenNavigationProp = StackNavigationProp<
   EarningsParamList,
   'EarningDetailScreen'
 >;
-const EarningsScreen : React.FC = () => {
+const EarningsScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const [selectedYear, setSelectedYear] = useState('2023');
   const [selectedMonth, setSelectedMonth] = useState('-');
@@ -48,72 +60,84 @@ const EarningsScreen : React.FC = () => {
   const [yearModalVisible, setYearModalVisible] = useState(false);
   const [monthModalVisible, setMonthModalVisible] = useState(false);
 
+  const {t} = useTranslation();
+
   const handleApplyFilterPress = () => {
     navigation.navigate('EarningDetailScreen');
-  }
+  };
   return (
     <View style={styles.container}>
       <CustomHeader
         showBackButton={false}
         showMenuButton={true}
-        title={'Earnings Overview'}
+        title={t('earnings_overview')}
       />
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={{padding: 16}}>
         {/* Lifetime Earnings */}
-        <Text style={styles.sectionTitle}>Lifetime Earnings</Text>
+        <Text style={styles.sectionTitle}>{t('lifetime_earnings')}</Text>
         <View style={styles.earningsBox}>
           <Text style={styles.earningsAmount}>₹15,69,00.00</Text>
         </View>
 
-        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Earnings Overview</Text>
+        <Text style={[styles.sectionTitle, {marginTop: 24}]}>
+          {t('earnings_overview')}
+        </Text>
 
         {/* Year Picker */}
-        <Text style={styles.label}>Select Year</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => setYearModalVisible(true)}>
+        <Text style={styles.label}>{t('select_year')}</Text>
+        <TouchableOpacity
+          style={styles.dropdown}
+          onPress={() => setYearModalVisible(true)}>
           <Text style={styles.dropdownText}>{selectedYear}</Text>
         </TouchableOpacity>
 
         {/* Month Picker */}
-        <Text style={styles.label}>Month</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => setMonthModalVisible(true)}>
+        <Text style={styles.label}>{t('month')}</Text>
+        <TouchableOpacity
+          style={styles.dropdown}
+          onPress={() => setMonthModalVisible(true)}>
           <Text style={styles.dropdownText}>{selectedMonth}</Text>
         </TouchableOpacity>
 
         {/* Month Range */}
-        <Text style={styles.label}>Month</Text>
+        <Text style={styles.label}>{t('month')}</Text>
         <View style={styles.monthRangeRow}>
           <TouchableOpacity style={styles.rangeBox}>
-            <Text style={styles.dropdownText}>Select</Text>
+            <Text style={styles.dropdownText}>{t('select')}</Text>
           </TouchableOpacity>
           <Text style={styles.hyphen}>-</Text>
           <TouchableOpacity style={styles.rangeBox}>
-            <Text style={styles.dropdownText}>Select</Text>
+            <Text style={styles.dropdownText}>{t('select')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Filter Buttons */}
         <View style={styles.filterRow}>
           <TouchableOpacity style={styles.cancelButton}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t('cancel')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleApplyFilterPress} style={styles.applyButton}>
-            <Text style={styles.applyText}>Apply Filter</Text>
+          <TouchableOpacity
+            onPress={handleApplyFilterPress}
+            style={styles.applyButton}>
+            <Text style={styles.applyText}>{t('apply_filter')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Total */}
-        <Text style={styles.totalEarningsLabel}>Total Earnings for {selectedYear}</Text>
+        <Text style={styles.totalEarningsLabel}>
+          {t('total_earning_for')} {selectedYear}
+        </Text>
         <View style={styles.totalEarningsBox}>
           <Text style={styles.totalEarningsText}>₹6,55,000</Text>
         </View>
 
         {/* Month Data List */}
-        <Text style={styles.sectionTitle}>Current Month</Text>
+        <Text style={styles.sectionTitle}>{t('current_month')}</Text>
         <FlatList
           data={monthData}
           keyExtractor={item => item.month}
           scrollEnabled={false}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <View style={styles.monthRow}>
               <View style={styles.iconBox}>
                 <Icon name="calendar" size={20} color={COLORS.darkText} />
@@ -135,9 +159,11 @@ const EarningsScreen : React.FC = () => {
         transparent
         animationType="slide"
         onRequestClose={() => setYearModalVisible(false)}>
-        <TouchableOpacity style={styles.modalOverlay} onPress={() => setYearModalVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={() => setYearModalVisible(false)}>
           <View style={styles.modalContent}>
-            {years.map((year) => (
+            {years.map(year => (
               <TouchableOpacity
                 key={year}
                 onPress={() => {
@@ -158,9 +184,11 @@ const EarningsScreen : React.FC = () => {
         transparent
         animationType="slide"
         onRequestClose={() => setMonthModalVisible(false)}>
-        <TouchableOpacity style={styles.modalOverlay} onPress={() => setMonthModalVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={() => setMonthModalVisible(false)}>
           <View style={styles.modalContent}>
-            {months.map((month) => (
+            {months.map(month => (
               <TouchableOpacity
                 key={month}
                 onPress={() => {
@@ -179,7 +207,6 @@ const EarningsScreen : React.FC = () => {
 };
 
 export default EarningsScreen;
-
 
 const styles = StyleSheet.create({
   container: {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../navigation/AuthNavigator'; // Assuming this will be updated
-import { COLORS } from '../theme/theme';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '../navigation/AuthNavigator'; // Assuming this will be updated
+import {COLORS} from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 
 type DocumentsScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -31,38 +32,47 @@ const DocumentsScreen = () => {
 
   const [idProof, setIdProof] = useState<DocumentFile | null>(null);
   const [panCard, setPanCard] = useState<DocumentFile | null>(null);
-  const [electricityBill, setElectricityBill] = useState<DocumentFile | null>(null);
-  const [certifications, setCertifications] = useState<DocumentFile | null>(null);
+  const [electricityBill, setElectricityBill] = useState<DocumentFile | null>(
+    null,
+  );
+  const [certifications, setCertifications] = useState<DocumentFile | null>(
+    null,
+  );
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  const {t} = useTranslation();
 
   // Mock file picker function
   const handlePickDocument = (
     setter: React.Dispatch<React.SetStateAction<DocumentFile | null>>,
-    docType: string
+    docType: string,
   ) => {
     // In a real app, you would use a document picker library here
     // For example: DocumentPicker.getDocumentAsync(...)
     Alert.alert(
-      "Pick Document",
+      'Pick Document',
       `Simulating picking a ${docType}. A placeholder will be set.`,
       [
         {
-          text: "OK",
-          onPress: () => setter({ name: `${docType.toLowerCase().replace(' ', '_')}_document.pdf` }),
+          text: 'OK',
+          onPress: () =>
+            setter({
+              name: `${docType.toLowerCase().replace(' ', '_')}_document.pdf`,
+            }),
         },
-      ]
+      ],
     );
     // Clear error for this field
     setErrors(prev => {
-      const newErrors = { ...prev };
+      const newErrors = {...prev};
       delete newErrors[docType.toLowerCase().replace(/\s+/g, '')]; // e.g., idproof(aadharcard)* -> idproof(aadharcard)
       return newErrors;
     });
   };
 
   const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: {[key: string]: string} = {};
     if (!idProof) {
       newErrors.idProof = 'ID Proof (Aadhar Card) is required.';
     }
@@ -89,19 +99,24 @@ const DocumentsScreen = () => {
     isOptional: boolean,
     file: DocumentFile | null,
     onPress: () => void,
-    error?: string
+    error?: string,
   ) => (
     <View style={styles.inputGroup}>
       <Text style={styles.label}>
         {label}
-        {isOptional ? <Text style={styles.optionalText}> (Optional)</Text> : <Text style={styles.requiredText}>*</Text>}
+        {isOptional ? (
+          <Text style={styles.optionalText}> (Optional)</Text>
+        ) : (
+          <Text style={styles.requiredText}>*</Text>
+        )}
       </Text>
       <TouchableOpacity
         style={[styles.fileInput, error ? styles.errorBorder : null]}
-        onPress={onPress}
-      >
+        onPress={onPress}>
         <Text style={file ? styles.fileNameText : styles.placeholderText}>
-          {file ? file.name : `Upload ${label.split('(')[0].trim().toLowerCase()}`}
+          {file
+            ? file.name
+            : `Upload ${label.split('(')[0].trim().toLowerCase()}`}
         </Text>
       </TouchableOpacity>
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -111,7 +126,11 @@ const DocumentsScreen = () => {
   const inset = useSafeAreaInsets();
   return (
     <>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Documents'} />
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('documents')}
+      />
       {/* <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>‹</Text>
@@ -119,43 +138,53 @@ const DocumentsScreen = () => {
         <Text style={styles.headerTitle}>Documents</Text>
       </View> */}
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}>
         {renderFileInput(
-          'ID Proof (Aadhar Card)',
+          t('id_proof_aadhar_card'),
           false,
           idProof,
           () => handlePickDocument(setIdProof, 'ID Proof'),
-          errors.idProof
+          errors.idProof,
         )}
         {renderFileInput(
-          'PAN Card',
+          t('pan_card'),
           false,
           panCard,
           () => handlePickDocument(setPanCard, 'PAN Card'),
-          errors.panCard
+          errors.panCard,
         )}
         {renderFileInput(
-          'Electricity Bill',
+          t('electricity_bill'),
           true,
           electricityBill,
           () => handlePickDocument(setElectricityBill, 'Electricity Bill'),
-          errors.electricityBill
+          errors.electricityBill,
         )}
         {renderFileInput(
-          'Certifications',
+          t('certifications'),
           true, // Assuming optional based on no asterisk in screenshot
           certifications,
           () => handlePickDocument(setCertifications, 'Certifications'),
-          errors.certifications
+          errors.certifications,
         )}
       </ScrollView>
 
-      <View style={[styles.footer,{marginBottom:inset.bottom}]}>
-        <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
-          <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+      <View style={[styles.footer, {marginBottom: inset.bottom}]}>
+        <TouchableOpacity
+          style={[styles.button, styles.cancelButton]}
+          onPress={handleCancel}>
+          <Text style={[styles.buttonText, styles.cancelButtonText]}>
+            {t('cancel')}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.nextButton]} onPress={handleNext}>
-          <Text style={[styles.buttonText, styles.nextButtonText]}>Next</Text>
+        <TouchableOpacity
+          style={[styles.button, styles.nextButton]}
+          onPress={handleNext}>
+          <Text style={[styles.buttonText, styles.nextButtonText]}>
+            {t('next')}
+          </Text>
         </TouchableOpacity>
       </View>
     </>

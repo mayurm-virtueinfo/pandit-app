@@ -1,6 +1,6 @@
 // RateYourExperienceScreen.tsx
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,15 @@ import {
 } from 'react-native';
 // import { COLORS } from '../constants/colors';
 // import { CustomHeader } from '../components/CustomHeader';
-import { AirbnbRating } from 'react-native-ratings';
-import { COLORS } from '../theme/theme';
+import {AirbnbRating} from 'react-native-ratings';
+import {COLORS} from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 
 const RateYourExperienceScreen = () => {
   const [rating, setRating] = useState(0);
+
+  const {t} = useTranslation();
 
   const handleRatingCompleted = (value: number) => {
     setRating(value);
@@ -32,10 +35,14 @@ const RateYourExperienceScreen = () => {
       <CustomHeader
         showBackButton={true}
         showMenuButton={false}
-        title={'Rate Your Experience'}
+        title={t('rate_your_experience')}
       />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.successText}>Booking Completed{'\n'}Successfully!</Text>
+        <Text style={styles.successText}>
+          {t('booking_completed')}
+          {'\n'}
+          {t('successfully')}
+        </Text>
 
         <View style={styles.imageCard}>
           <Image
@@ -48,7 +55,7 @@ const RateYourExperienceScreen = () => {
           <Text style={styles.nameText}>Dharmesh Shah</Text>
         </View>
 
-        <Text style={styles.questionText}>How was your experience?</Text>
+        <Text style={styles.questionText}>{t('how_was_your_experience')}</Text>
 
         <View style={styles.ratingBox}>
           <AirbnbRating
@@ -59,12 +66,12 @@ const RateYourExperienceScreen = () => {
             showRating={false}
             onFinishRating={handleRatingCompleted}
             selectedColor={COLORS.primary}
-            starContainerStyle={{ justifyContent: 'center' }}
+            starContainerStyle={{justifyContent: 'center'}}
           />
         </View>
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitText}>Submit Rating</Text>
+          <Text style={styles.submitText}>{t('submit_rating')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

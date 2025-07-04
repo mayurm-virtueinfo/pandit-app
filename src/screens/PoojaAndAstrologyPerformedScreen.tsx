@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,14 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../navigation/AuthNavigator'; // Will be updated
-import { apiService, DropdownItem } from '../api/apiService';
-import { COLORS } from '../theme/theme';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '../navigation/AuthNavigator'; // Will be updated
+import {apiService, DropdownItem} from '../api/apiService';
+import {COLORS} from '../theme/theme';
 import CustomHeader from '../components/CustomHeader';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -28,10 +29,16 @@ const PoojaAndAstrologyPerformedScreen = () => {
   const [poojaItems, setPoojaItems] = useState<DropdownItem[]>([]);
   const [astrologyItems, setAstrologyItems] = useState<DropdownItem[]>([]);
 
-  const [selectedPoojaItems, setSelectedPoojaItems] = useState<DropdownItem[]>([]);
-  const [selectedAstrologyItems, setSelectedAstrologyItems] = useState<DropdownItem[]>([]);
+  const [selectedPoojaItems, setSelectedPoojaItems] = useState<DropdownItem[]>(
+    [],
+  );
+  const [selectedAstrologyItems, setSelectedAstrologyItems] = useState<
+    DropdownItem[]
+  >([]);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     const loadData = async () => {
@@ -56,9 +63,11 @@ const PoojaAndAstrologyPerformedScreen = () => {
   const toggleSelection = (
     item: DropdownItem,
     currentSelection: DropdownItem[],
-    setter: React.Dispatch<React.SetStateAction<DropdownItem[]>>
+    setter: React.Dispatch<React.SetStateAction<DropdownItem[]>>,
   ) => {
-    const isSelected = currentSelection.find(selected => selected.id === item.id);
+    const isSelected = currentSelection.find(
+      selected => selected.id === item.id,
+    );
     if (isSelected) {
       setter(currentSelection.filter(selected => selected.id !== item.id));
     } else {
@@ -67,8 +76,14 @@ const PoojaAndAstrologyPerformedScreen = () => {
   };
 
   const handleSubmit = () => {
-    if (selectedPoojaItems.length === 0 && selectedAstrologyItems.length === 0) {
-      Alert.alert('Validation Error', 'Please select at least one Pooja or Astrology service.');
+    if (
+      selectedPoojaItems.length === 0 &&
+      selectedAstrologyItems.length === 0
+    ) {
+      Alert.alert(
+        'Validation Error',
+        'Please select at least one Pooja or Astrology service.',
+      );
       return;
     }
     // Navigate to LanguagesScreen
@@ -82,15 +97,20 @@ const PoojaAndAstrologyPerformedScreen = () => {
   const renderCheckboxItem = (
     item: DropdownItem,
     isSelected: boolean,
-    onToggle: () => void
+    onToggle: () => void,
   ) => (
-    <TouchableOpacity key={`${item.id}-${item.name}`} onPress={onToggle} style={styles.checkboxItemContainer}>
+    <TouchableOpacity
+      key={`${item.id}-${item.name}`}
+      onPress={onToggle}
+      style={styles.checkboxItemContainer}>
       <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
         {isSelected && <Text style={styles.checkboxCheck}>✓</Text>}
       </View>
       <View style={styles.itemTextContainer}>
         <Text style={styles.itemName}>{item.name}</Text>
-        {item.description && <Text style={styles.itemDescription}>{item.description}</Text>}
+        {item.description && (
+          <Text style={styles.itemDescription}>{item.description}</Text>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -99,17 +119,19 @@ const PoojaAndAstrologyPerformedScreen = () => {
     title: string,
     items: DropdownItem[],
     selectedItems: DropdownItem[],
-    toggleFunc: (item: DropdownItem) => void
+    toggleFunc: (item: DropdownItem) => void,
   ) => (
     <View style={styles.sectionContainer}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      {items.length === 0 && !isLoading ? <Text>No items available.</Text> : null}
+      {items.length === 0 && !isLoading ? (
+        <Text>{t('no_item_available')}</Text>
+      ) : null}
       {items.map(item =>
         renderCheckboxItem(
           item,
           selectedItems.some(selected => selected.id === item.id),
-          () => toggleFunc(item)
-        )
+          () => toggleFunc(item),
+        ),
       )}
     </View>
   );
@@ -117,43 +139,73 @@ const PoojaAndAstrologyPerformedScreen = () => {
   const inset = useSafeAreaInsets();
   return (
     <>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'Pooja or Astrology Performed'} />
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('pooja_or_astrology_performed')}
+      />
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}>
         {isLoading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={styles.loader}
+          />
         ) : (
           <>
             {renderListSection(
               'Pooja performed:',
               poojaItems,
               selectedPoojaItems,
-              (item) => toggleSelection(item, selectedPoojaItems, setSelectedPoojaItems)
+              item =>
+                toggleSelection(
+                  item,
+                  selectedPoojaItems,
+                  setSelectedPoojaItems,
+                ),
             )}
             {renderListSection(
               'Astrology consulation peformed:',
               astrologyItems,
               selectedAstrologyItems,
-              (item) => toggleSelection(item, selectedAstrologyItems, setSelectedAstrologyItems)
+              item =>
+                toggleSelection(
+                  item,
+                  selectedAstrologyItems,
+                  setSelectedAstrologyItems,
+                ),
             )}
           </>
         )}
       </ScrollView>
 
-      <View style={[styles.footer,{marginBottom:inset.bottom}]}>
-        <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
-          <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+      <View style={[styles.footer, {marginBottom: inset.bottom}]}>
+        <TouchableOpacity
+          style={[styles.button, styles.cancelButton]}
+          onPress={handleCancel}>
+          <Text style={[styles.buttonText, styles.cancelButtonText]}>
+            {t('cancel')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.button,
             styles.submitButton,
-            (selectedPoojaItems.length === 0 && selectedAstrologyItems.length === 0) && styles.submitButtonDisabled
+            selectedPoojaItems.length === 0 &&
+              selectedAstrologyItems.length === 0 &&
+              styles.submitButtonDisabled,
           ]}
           onPress={handleSubmit}
-          disabled={selectedPoojaItems.length === 0 && selectedAstrologyItems.length === 0}
-        >
-          <Text style={[styles.buttonText, styles.submitButtonText]}>Submit</Text>
+          disabled={
+            selectedPoojaItems.length === 0 &&
+            selectedAstrologyItems.length === 0
+          }>
+          <Text style={[styles.buttonText, styles.submitButtonText]}>
+            {t('submit')}
+          </Text>
         </TouchableOpacity>
       </View>
     </>

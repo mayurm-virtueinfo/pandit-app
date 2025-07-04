@@ -1,20 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 // import {useAuth} from '../navigation/RootNavigator';
 import CustomHeader from '../components/CustomHeader';
-import { useAuth } from '../provider/AuthProvider';
-import { changeLanguage } from '../i18n';
-import { useTranslation } from 'react-i18next';
-import { moderateScale } from 'react-native-size-matters';
-import { COLORS } from '../theme/theme';
+import {useAuth} from '../provider/AuthProvider';
+import {changeLanguage} from '../i18n';
+import {useTranslation} from 'react-i18next';
+import {moderateScale} from 'react-native-size-matters';
+import {COLORS} from '../theme/theme';
 
 // Assuming useAuth provides a signOut function of type () => void
 // If RootNavigator.tsx exports an AuthContextType, it would be better to use it here.
 // For example: const { signOut }: AuthContextType = useAuth();
 
 const SettingsScreen: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  const { signOutApp } = useAuth();
+  const {t, i18n} = useTranslation();
+  const {signOutApp} = useAuth();
 
   const handleSignOut = () => {
     signOutApp();
@@ -28,29 +28,35 @@ const SettingsScreen: React.FC = () => {
   };
   return (
     <>
-      <CustomHeader showBackButton={false} showMenuButton={true} title={'Settings'} />
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('settings')}
+      />
       <View style={styles.container}>
-        <Text style={styles.title}>Settings Screen</Text>
+        <Text style={styles.title}>{t('setting_screen')}</Text>
         <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <Text style={styles.signOutText}>Sign Out</Text>
+          <Text style={styles.signOutText}>{t('sign_out')}</Text>
         </TouchableOpacity>
-
 
         <View style={styles.containerLanguageDemo}>
           <Text style={styles.languageText}>{t('settings')}</Text>
           <Text style={styles.languageText}>{t('welcome')}</Text>
           <Text style={styles.languageText}>{t('login')}</Text>
           <Text style={styles.languageText}>{t('language')}</Text>
-          <TouchableOpacity style={styles.languageChangeButton} onPress={handleEnglish}>
-            <Text style={styles.signOutText}>Change to English</Text>
+          <TouchableOpacity
+            style={styles.languageChangeButton}
+            onPress={handleEnglish}>
+            <Text style={styles.signOutText}>{t('change_to_english')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.languageChangeButton} onPress={handleHindi}>
-            <Text style={styles.signOutText}>Change to Hindi</Text>
+          <TouchableOpacity
+            style={styles.languageChangeButton}
+            onPress={handleHindi}>
+            <Text style={styles.signOutText}>{t('change_to_hindi')}</Text>
           </TouchableOpacity>
         </View>
       </View>
     </>
-
   );
 };
 

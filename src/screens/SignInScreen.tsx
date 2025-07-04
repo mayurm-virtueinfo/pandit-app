@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,14 +11,19 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../navigation/AuthNavigator';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '../navigation/AuthNavigator';
 import ThemedInput from '../components/ThemedInput';
-import { getAuth, onAuthStateChanged, signInWithPhoneNumber } from '@react-native-firebase/auth';
-import { validatePhoneNumber } from '../helper/Validation';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithPhoneNumber,
+} from '@react-native-firebase/auth';
+import {validatePhoneNumber} from '../helper/Validation';
 import Loader from '../components/Loader';
-import { moderateScale } from 'react-native-size-matters';
-import { useCommonToast } from '../common/CommonToast';
+import {moderateScale} from 'react-native-size-matters';
+import {useCommonToast} from '../common/CommonToast';
+import {useTranslation} from 'react-i18next';
 // import { firebaseAuth } from '../../App';
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -29,56 +34,64 @@ interface Props {
   navigation: SignInScreenNavigationProp;
 }
 
-const SignInScreen: React.FC<Props> = ({ navigation }) => {
-  const { showErrorToast, showSuccessToast } = useCommonToast();
+const SignInScreen: React.FC<Props> = ({navigation}) => {
+  const {showErrorToast, showSuccessToast} = useCommonToast();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setLoading] = useState(false);
   const [errors, setErrors] = useState<any>({});
 
+  const {t, i18n} = useTranslation();
 
   const handleSignIn = async () => {
-    console.log('---1')
+    console.log('---1');
     const cleanPhoneNumber = phoneNumber.trim().replace(/\s+/g, '');
-    console.log('---2')
+    console.log('---2');
     if (!cleanPhoneNumber) {
       const newErrors: any = {};
       newErrors.phoneNumber = 'Please enter your phone number.';
       setErrors(newErrors);
       return;
     }
-    console.log('---3')
+    console.log('---3');
     // Ensure it has +country code
-    const formattedPhone = cleanPhoneNumber.startsWith('+') ? cleanPhoneNumber : `+91${cleanPhoneNumber}`;
-    console.log('---4')
+    const formattedPhone = cleanPhoneNumber.startsWith('+')
+      ? cleanPhoneNumber
+      : `+91${cleanPhoneNumber}`;
+    console.log('---4');
     if (!validatePhoneNumber(formattedPhone)) {
       // Alert.alert('Validation Error', 'Please enter a valid phone number in international format.');
       const newErrors: any = {};
-      newErrors.phoneNumber = 'Please enter a valid phone number in international format.';
+      newErrors.phoneNumber =
+        'Please enter a valid phone number in international format.';
       setErrors(newErrors);
       return;
     }
 
-    setErrors({})
-    console.log('---5-new')
+    setErrors({});
+    console.log('---5-new');
     try {
       // const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
       setLoading(true);
-      const confirmation = await signInWithPhoneNumber(getAuth(), formattedPhone);
+      const confirmation = await signInWithPhoneNumber(
+        getAuth(),
+        formattedPhone,
+      );
+      console.log('confirmation in sign in screen : ', confirmation);
       setLoading(false);
       // Alert.alert('Success', 'OTP has been sent to your phone.');
-      showSuccessToast('OTP has been sent to your phone.')
+      showSuccessToast('OTP has been sent to your phone.');
       // console.log('---6 : ',confirmation)
       navigation.navigate('OTPVerification', {
         phoneNumber: formattedPhone,
         confirmation,
       });
-      console.log('---7')
+      console.log('---7');
     } catch (error: any) {
-      console.log('---8')
+      console.log('---8');
       console.error(error);
       setLoading(false);
       // Alert.alert('Error', error?.message || 'Failed to send OTP. Please try again.');
-      showErrorToast(error?.message || 'Failed to send OTP. Please try again.')
+      showErrorToast(error?.message || 'Failed to send OTP. Please try again.');
     }
   };
 
@@ -91,9 +104,9 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
-          <Text style={styles.title}>Welcome to PanditApp</Text>
+          <Text style={styles.title}>{t('welcome_to_panditapp')}</Text>
           <Text style={styles.subtitle}>
-            Please enter your phone number to continue
+            {t('please_enter_your_phone_number_to_continue')}
           </Text>
 
           {/* <View style={styles.inputContainer}>
@@ -110,25 +123,23 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
             />
           </View> */}
           <ThemedInput
-            label="Phone Number"
+            label={t('phone_number')}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
-            placeholder="Enter phone number"
+            placeholder={t('enter_phone_number')}
             keyboardType="phone-pad"
             autoComplete="tel"
             textContentType="telephoneNumber"
             maxLength={10}
             errors={errors}
-            errorField='phoneNumber'
+            errorField="phoneNumber"
           />
 
           <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
-            <Text style={styles.signInButtonText}>Get OTP</Text>
+            <Text style={styles.signInButtonText}>{t('get_otp')}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.termsText}>
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </Text>
+          <Text style={styles.termsText}>{t('terms_and_conditions_desc')}</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -185,7 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: moderateScale(16),
-    marginTop: moderateScale(10)
+    marginTop: moderateScale(10),
   },
   signInButtonText: {
     color: '#FFFFFF',

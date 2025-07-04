@@ -1,16 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 
 const PrivacyPolicyScreen: React.FC = () => {
+  const {t} = useTranslation();
+
   return (
     <>
-    <CustomHeader showBackButton={false} showMenuButton={true} title={'Privacy Policy'}/>
-    <View style={styles.container}>
-      <Text style={styles.text}>Privacy Policy Screen</Text>
-    </View>
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('privacy_policy')}
+      />
+      <View style={styles.container}>
+        <Text style={styles.text}>Privacy Policy Screen</Text>
+      </View>
     </>
-    
   );
 };
 

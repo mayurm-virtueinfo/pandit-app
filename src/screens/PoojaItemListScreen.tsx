@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  SafeAreaView
-} from 'react-native';
-import { apiService, PoojaItem } from '../api/apiService';
+import React, {useEffect, useState} from 'react';
+import {View, Text, FlatList, StyleSheet, SafeAreaView} from 'react-native';
+import {apiService, PoojaItem} from '../api/apiService';
 import CustomHeader from '../components/CustomHeader';
-import { COLORS } from '../theme/theme';
+import {COLORS} from '../theme/theme';
+import {useTranslation} from 'react-i18next';
 // import { COLORS } from '../theme/colors';
-
 
 const PoojaItemListScreen: React.FC = () => {
   const [poojaItemList, setPoojaItemList] = useState<PoojaItem[]>([]);
+
+  const {t} = useTranslation();
 
   const fetchPoojaItems = async () => {
     const requests = await apiService.getPoojaItems();
@@ -25,7 +21,7 @@ const PoojaItemListScreen: React.FC = () => {
     fetchPoojaItems();
   }, []);
 
-  const renderItem = ({ item }: { item: PoojaItem }) => (
+  const renderItem = ({item}: {item: PoojaItem}) => (
     <Text style={styles.listItem}>
       {item.id}. {item.name} - {item.amount} {item.unit}
     </Text>
@@ -33,17 +29,20 @@ const PoojaItemListScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader showBackButton={true} showMenuButton={false} title={'List of Pooja Items'} />
+      <CustomHeader
+        showBackButton={true}
+        showMenuButton={false}
+        title={t('list_of_pooja_items')}
+      />
       <View style={styles.content}>
-        <Text style={styles.description}>
-          Please take a note of below things you would need to carry from your end for this pooja:
-        </Text>
+        <Text style={styles.description}>{t('pooja_item_desc')}</Text>
         <Text style={styles.totalAmount}>
-          Total Item Price Received: <Text style={styles.amountText}>Rs2000</Text>
+          {t('total_item_price_received')}{' '}
+          <Text style={styles.amountText}>Rs2000</Text>
         </Text>
         <FlatList
           data={poojaItemList}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={item => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.listContainer}
         />

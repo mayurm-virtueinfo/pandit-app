@@ -1,15 +1,23 @@
 import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import {View, TextInput, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '../theme/theme';
+import {COLORS} from '../theme/theme';
+import {useTranslation} from 'react-i18next';
 
 const SearchBookings = () => {
+  const {t, i18n} = useTranslation();
+
   return (
     <View style={styles.container}>
-      <Icon name="search-outline" size={20} color={COLORS.textGray} style={styles.icon} />
+      <Icon
+        name="search-outline"
+        size={20}
+        color={COLORS.textGray}
+        style={styles.icon}
+      />
       <TextInput
         style={styles.input}
-        placeholder="Search bookings"
+        placeholder={t('search_bookings')}
         placeholderTextColor={COLORS.textGray}
       />
     </View>

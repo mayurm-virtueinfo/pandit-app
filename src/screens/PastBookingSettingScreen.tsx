@@ -2,7 +2,8 @@ import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 // import {useAuth} from '../navigation/RootNavigator';
 import CustomHeader from '../components/CustomHeader';
-import { useAuth } from '../provider/AuthProvider';
+import {useAuth} from '../provider/AuthProvider';
+import {useTranslation} from 'react-i18next';
 
 // Assuming useAuth provides a signOut function of type () => void
 // If RootNavigator.tsx exports an AuthContextType, it would be better to use it here.
@@ -11,21 +12,26 @@ import { useAuth } from '../provider/AuthProvider';
 const PastBookingSettingScreen: React.FC = () => {
   const {signOutApp} = useAuth();
 
+  const {t} = useTranslation();
+
   const handleSignOut = () => {
     signOutApp();
   };
 
   return (
     <>
-    <CustomHeader showBackButton={false} showMenuButton={true} title={'Settings'}/>
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings Screen</Text>
-      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-        <Text style={styles.signOutText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('settings')}
+      />
+      <View style={styles.container}>
+        <Text style={styles.title}>{t('setting_screen')}</Text>
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <Text style={styles.signOutText}>{t('sign_out')}</Text>
+        </TouchableOpacity>
+      </View>
     </>
-    
   );
 };
 

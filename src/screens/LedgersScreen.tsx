@@ -1,16 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 
 const LedgersScreen: React.FC = () => {
+  const {t} = useTranslation();
+
   return (
     <>
-    <CustomHeader showBackButton={false} showMenuButton={true} title={'Ledgers'}/>
-    <View style={styles.container}>
-      <Text style={styles.text}>Ledgers Screen</Text>
-    </View>
+      <CustomHeader
+        showBackButton={false}
+        showMenuButton={true}
+        title={t('ledgers')}
+      />
+      <View style={styles.container}>
+        <Text style={styles.text}>Ledgers Screen</Text>
+      </View>
     </>
-    
   );
 };
 

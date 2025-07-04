@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import axios, { AxiosError } from 'axios';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
+import axios, {AxiosError} from 'axios';
 import CustomHeader from '../components/CustomHeader';
+import {useTranslation} from 'react-i18next';
 
 // Define an interface for the User object
 interface User {
@@ -15,6 +22,8 @@ const ProfileScreen: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -49,22 +58,25 @@ const ProfileScreen: React.FC = () => {
   if (error) {
     return (
       <>
-      <CustomHeader showBackButton={false} showMenuButton={true} title={'Profile'}/>
-      <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Error: {error}</Text>
-      </View>
+        <CustomHeader
+          showBackButton={false}
+          showMenuButton={true}
+          title={t('profile')}
+        />
+        <View style={[styles.container, styles.centered]}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+        </View>
       </>
-      
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile Screen - Users</Text>
+      <Text style={styles.title}>{t('profile_screen_user')}</Text>
       <FlatList
         data={users}
         keyExtractor={(item: User) => item.id.toString()}
-        renderItem={({ item }: { item: User }) => (
+        renderItem={({item}: {item: User}) => (
           <View style={styles.userContainer}>
             <Text style={styles.userName}>{item.name}</Text>
             <Text style={styles.userEmail}>{item.email}</Text>
@@ -97,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
