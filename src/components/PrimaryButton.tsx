@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
   },
   disabled: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: COLORS.disabled,
   },
 });
 
