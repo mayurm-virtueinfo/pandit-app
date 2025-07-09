@@ -56,7 +56,7 @@
   "electricity_bill": "Electricity Bill",
   "certifications": "Certifications",
   "cancel": "Cancel",
-  "next": "Next",
+  "next": "NEXT",
   "earnings": "Earnings",
   "previous": "◀︎ Previous",
   "current_month": "Current Month",
@@ -97,7 +97,7 @@
   "gotra": "Gotra",
   "address": "Address",
   "enter_your_address": "Enter your address",
-  "address_desc": "Please provide your full address including house number, street, and locality. This information is crucial for accurate service. delivery and communication.",
+  "address_desc": "Please provide your full address including house number, street and locality.",
   "settings": "Settings",
   "setting_screen": "Setting Screen",
   "sign_out": "Sign Out",
@@ -138,5 +138,11 @@
   "terms_and_conditions": "Terms & Conditions",
   "mute": "Mute",
   "end": "End",
-  "search_bookings": "Search bookings"
+  "search_bookings": "Search bookings",
+  "complete_your_profile": "Complete your profile",
+  "select_your_city": "Select your city",
+  "select_your_caste": "Select your caste",
+  "select_your_sub_caste": "Select your sub caste",
+  "select_your_gotra": "Select your gotra",
+  "select_your_address": "Select your address"
 }
