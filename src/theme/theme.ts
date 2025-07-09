@@ -70,6 +70,7 @@ export const COLORS = {
   chatColor: '#F0F0F0',
   chatUserBackground: '#FFD1D4',
   badgeBackground: '#EAEAEA',
+  disabled: "#EAEAEA"
 };
 
 // Typography
