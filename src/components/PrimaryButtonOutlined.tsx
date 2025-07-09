@@ -1,4 +1,4 @@
-// components/PrimaryButton.tsx
+// components/PrimaryButtonOutlined.tsx
 import React from 'react';
 import {
   TouchableOpacity,
@@ -20,7 +20,7 @@ interface Props {
   textStyle?: TextStyle;
 }
 
-const PrimaryButton: React.FC<Props> = ({
+const PrimaryButtonOutlined: React.FC<Props> = ({
   title,
   onPress,
   disabled = false,
@@ -41,8 +41,10 @@ const PrimaryButton: React.FC<Props> = ({
 const styles = StyleSheet.create({
   button: {
     height: moderateScale(48),
-    backgroundColor: COLORS.primaryBackgroundButton, // Customize with your primary color
+    backgroundColor: COLORS.white, // Customize with your primary color
     borderRadius: 10,
+    borderColor: COLORS.primaryBackgroundButton, // Border color
+    borderWidth: 1, // Border width
     justifyContent: 'center',
     alignItems: 'center',
     // shadowColor: '#000',
@@ -61,4 +63,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PrimaryButton;
+export default PrimaryButtonOutlined;

@@ -3,28 +3,34 @@ import apiDev from './apiDev';
 import ApiEndpoints from './apiEndpoints';
 
 // Types for dropdown data
-export interface DropdownItem {
-  subCastes: any[];
+export interface PanditPujaList {
   id: string | number;
   name: string;
-  description?:string
+  date?: string,
+  image?: string
 }
+
+export interface PujaList {
+  upcomingPujas: PanditPujaList,
+  completedPujas: PanditPujaList
+}
+
 // Types for pooja request data
 export interface PoojaRequestItem {
-  id:number;
-  title : string;
+  id: number;
+  title: string;
   scheduledDate: string;
-  imageUrl?:string,
-  subtitle?:string,
-  price?:number
+  imageUrl?: string,
+  subtitle?: string,
+  price?: number
 }
 // Types for pooja request data
 export interface AstroServiceItem {
-  id:number;
-  title : string;
+  id: number;
+  title: string;
   pricePerMin: string;
-  imageUrl?:string,
-  description?:string
+  imageUrl?: string,
+  description?: string
 }
 
 export interface ChatMessage {
@@ -60,32 +66,51 @@ export interface PastBookingItem {
   imageUrl: string;
 }
 
+export interface PujaItemsItem {
+  id: number;
+  item: string;
+  description: string
+}
 
+
+export interface pujaDetails {
+  id: number,
+  name: string; // "Ganesh Chaturthi Puja"
+  address: string; // "House no. 102, Ganesh Colony, GK Road, Ahmedabad"
+  date: string; // "15/09/2025"
+  time: string; // "10:00 AM"
+  client: string; // "Dharmesh Shah"
+  pricing: string; // "₹ 5000"
+  puja_item_type: string; // "Including puja items"
+  image: string
+}
+
+export interface PanditPujaDetails {
+  pujaDetails: pujaDetails
+}
+
+export interface PujaListItemType {
+  id: number;
+  name: string;
+  pujaPurpose: string;
+  price: number;
+  image: string;
+  description: string;
+  visualSection: string;
+}
+
+
+export interface PujaListDataResponse {
+  pujaList: PujaListItemType[];
+}
 
 
 export const apiService = {
-  // Fetch cities based on pincode
-  getCities: async (pincode: string): Promise<DropdownItem[]> => {
-    try {
-      const response = await apiDev.get(`${ApiEndpoints.CITY_API}/${pincode}`);
-      if (response.data[0].Status === 'Success') {
-        const postOffices = response.data[0].PostOffice || [];
-        return postOffices.map((office: any) => ({
-          id: office.Name,
-          name: `${office.Name}, ${office.District}, ${office.State}`,
-        }));
-      }
-      return [];
-    } catch (error) {
-      console.error('Error fetching cities:', error);
-      return [];
-    }
-  },
 
   // Fetch castes (mock data)
-  getCastes: async (): Promise<DropdownItem[]> => {
+  getPujaList: async (): Promise<PujaList[]> => {
     try {
-      const response = await apiDev.get(ApiEndpoints.CASTE_API);
+      const response = await apiDev.get(ApiEndpoints.PANDIT_PUJA_LIST_API);
       return (
         response?.data?.record || []
       );
@@ -95,161 +120,45 @@ export const apiService = {
     }
   },
 
-  // Fetch sub-castes based on caste 
-  getSubCastes: async (casteId: number): Promise<DropdownItem[]> => {
+  getPujaItemsData: async (): Promise<PujaItemsItem[]> => {
     try {
-      const response = await apiDev.get(`${ApiEndpoints.SUB_CASTE_API}?caste=${casteId}`);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching sub-castes:', error);
-      return [];
-    }
-  },
-
-  // Fetch gotras 
-  getGotras: async (): Promise<DropdownItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.GOTRA_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching gotras:', error);
-      return [];
-    }
-  },
-
-    // Fetch getArea
-  getArea: async (): Promise<DropdownItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.AREA_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching gotras:', error);
-      return [];
-    }
-  },
-
-   // Fetch getPoojaPerformed
-  getPoojaPerformed: async (): Promise<DropdownItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.POOJA_PERFORMED_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching gotras:', error);
-      return [];
-    }
-  },
-
-  // Fetch getPoojaPerformed
-  getAstrologyConsulationPerformed: async (): Promise<DropdownItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.ASTROLOGY_CONSLATION_PERFORMED_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching gotras:', error);
-      return [];
-    }
-  },
-   // Fetch getLanguages
-  getLanguages: async (): Promise<DropdownItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.LANGUAGES_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching gotras:', error);
-      return [];
-    }
-  },
-  // Fetch poojaRequests
-  getPoojaRequests: async (): Promise<PoojaRequestItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.POOJA_REQUESTS_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching pooja requests:', error);
-      return [];
-    }
-  },
-  // Fetch getAstroServices
-  getAstroServices: async (): Promise<AstroServiceItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.ASTRO_SERVICES_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching astro services:', error);
-      return [];
-    }
-  },
-  // Fetch getMessages
-  getMessages: async (): Promise<ChatMessage[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.MESSAGES_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      return [];
-    }
-  },
-    // Fetch getPoojaItems
-  getPoojaItems: async (): Promise<PoojaItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.POOJA_ITEMS_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching pooja items:', error);
-      return [];
-    }
-  },
-  getCancellationReason: async (): Promise<CancellationReason[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.CANCELLATION_REASON_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching cancellation reasons:', error);
-      return [];
-    }
-  },
-    getCancellationPolicy: async (): Promise<CancellationPolicy[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.CANCELLATION_POLICY_API);
-      return (
-        response.data?.record || []
-      );
-    } catch (error) {
-      console.error('Error fetching cancellation policies:', error);
-      return [];
-    }
-  },
-   getPastBookings: async (): Promise<PastBookingItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.PAST_BOOKINGS_API);
-      return (
-        response.data?.record || []
-      );
+      const response = await apiDev.get(ApiEndpoints.PUJA_ITEMS_API);
+      return response.data?.record || [];
     } catch (error) {
       console.error('Error fetching past bookings :', error);
       return [];
     }
   },
-};
+  getPujaDetailsData: async (): Promise<PanditPujaDetails> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.PUJA_DETAILS_API);
+      return response.data?.record || [];
+    } catch (error) {
+      console.error('Error fetching past bookings :', error);
+      // Return a default value that matches the PanditPujaDetails interface
+      return {
+        pujaDetails: {
+          id: 0,
+          name: '',
+          address: '',
+          date: '',
+          time: '',
+          client: '',
+          pricing: '',
+          puja_item_type: '',
+          image: ''
+        }
+      };
+    }
+  },
+
+  getPujaListData: async (): Promise<PujaListDataResponse> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
+      return response.data?.record || { recommendedPuja: [], pujaList: [] };
+    } catch (error) {
+      console.error('Error fetching puja list data:', error);
+      return { pujaList: [] };
+    }
+  },
+} 

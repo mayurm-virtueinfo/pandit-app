@@ -20,7 +20,12 @@ class ApiEndpoints {
   static readonly CANCELLATION_REASON_API = `${ApiEndpoints.API_VERSION}/684691198960c979a5a6e6f5`;
   static readonly CANCELLATION_POLICY_API = `${ApiEndpoints.API_VERSION}/684695808a456b7966ab29c0`;
   static readonly PAST_BOOKINGS_API = `${ApiEndpoints.API_VERSION}/6846d3ec8561e97a502165ce`;
-  
+
+  static readonly PANDIT_PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/686ce57f8561e97a50338b51`;
+  static readonly PUJA_ITEMS_API = `${ApiEndpoints.API_VERSION}/686d03318960c979a5b92ebd`;
+  static readonly PUJA_DETAILS_API = `${ApiEndpoints.API_VERSION}/686d088a8561e97a50339c4d`;
+  static readonly PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/685e858d8561e97a502cbc73`;
+
 }
 
 export default ApiEndpoints;

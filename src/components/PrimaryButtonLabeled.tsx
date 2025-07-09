@@ -1,4 +1,4 @@
-// components/PrimaryButton.tsx
+// components/PrimaryButtonLabeled.tsx
 import React from 'react';
 import {
   TouchableOpacity,
@@ -8,9 +8,9 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import {COLORS} from '../theme/theme';
+import { COLORS } from '../theme/theme';
 import Fonts from '../theme/fonts';
-import {moderateScale} from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 
 interface Props {
   title: string;
@@ -20,7 +20,7 @@ interface Props {
   textStyle?: TextStyle;
 }
 
-const PrimaryButton: React.FC<Props> = ({
+const PrimaryButtonLabeled: React.FC<Props> = ({
   title,
   onPress,
   disabled = false,
@@ -28,13 +28,7 @@ const PrimaryButton: React.FC<Props> = ({
   textStyle,
 }) => {
   return (
-    <TouchableOpacity
-      style={[styles.button, style, disabled && styles.disabled]}
-      onPress={onPress}
-      activeOpacity={0.7}
-      disabled={disabled}>
-      <Text style={[styles.buttonText, textStyle]}>{title}</Text>
-    </TouchableOpacity>
+    <Text onPress={onPress} style={[styles.buttonText, textStyle]}>{title}</Text>
   );
 };
 
@@ -45,20 +39,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    // shadowColor: '#000',
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
-    // shadowOffset: { width: 0, height: 2 },
-    // elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
     marginTop: moderateScale(10),
   },
   buttonText: {
-    fontSize: moderateScale(15),
-    fontFamily: Fonts.Sen_Medium,
+    fontSize: moderateScale(14),
+    fontFamily:Fonts.Sen_Regular,
+    color: COLORS.primaryBackgroundButton, // Customize with your text color
   },
   disabled: {
     backgroundColor: '#E5E7EB',
   },
 });
 
-export default PrimaryButton;
+export default PrimaryButtonLabeled;
