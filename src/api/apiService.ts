@@ -6,13 +6,13 @@ import ApiEndpoints from './apiEndpoints';
 export interface PanditPujaList {
   id: string | number;
   name: string;
-  date?: string,
-  image?: string
+  date?: string;
+  image?: string;
 }
 
 export interface PujaList {
-  upcomingPujas: PanditPujaList,
-  completedPujas: PanditPujaList
+  upcomingPujas: PanditPujaList;
+  completedPujas: PanditPujaList;
 }
 
 // Types for pooja request data
@@ -20,17 +20,17 @@ export interface PoojaRequestItem {
   id: number;
   title: string;
   scheduledDate: string;
-  imageUrl?: string,
-  subtitle?: string,
-  price?: number
+  imageUrl?: string;
+  subtitle?: string;
+  price?: number;
 }
 // Types for pooja request data
 export interface AstroServiceItem {
   id: number;
   title: string;
   pricePerMin: string;
-  imageUrl?: string,
-  description?: string
+  imageUrl?: string;
+  description?: string;
 }
 
 export interface ChatMessage {
@@ -69,12 +69,11 @@ export interface PastBookingItem {
 export interface PujaItemsItem {
   id: number;
   item: string;
-  description: string
+  description: string;
 }
 
-
 export interface pujaDetails {
-  id: number,
+  id: number;
   name: string; // "Ganesh Chaturthi Puja"
   address: string; // "House no. 102, Ganesh Colony, GK Road, Ahmedabad"
   date: string; // "15/09/2025"
@@ -82,11 +81,11 @@ export interface pujaDetails {
   client: string; // "Dharmesh Shah"
   pricing: string; // "₹ 5000"
   puja_item_type: string; // "Including puja items"
-  image: string
+  image: string;
 }
 
 export interface PanditPujaDetails {
-  pujaDetails: pujaDetails
+  pujaDetails: pujaDetails;
 }
 
 export interface PujaListItemType {
@@ -97,23 +96,35 @@ export interface PujaListItemType {
   image: string;
   description: string;
   visualSection: string;
+  status: string
 }
-
 
 export interface PujaListDataResponse {
   pujaList: PujaListItemType[];
 }
 
+export interface EarningsHistoryResponse {
+  [x: string]: any;
+  id: number;
+  poojaName: string;
+  price: number;
+  date: string
+}
+
+export interface NotificationData {
+  id: number;
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+}
 
 export const apiService = {
-
   // Fetch castes (mock data)
   getPujaList: async (): Promise<PujaList[]> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PANDIT_PUJA_LIST_API);
-      return (
-        response?.data?.record || []
-      );
+      return response?.data?.record || [];
     } catch (error) {
       console.error('Error fetching castes:', error);
       return [];
@@ -146,8 +157,8 @@ export const apiService = {
           client: '',
           pricing: '',
           puja_item_type: '',
-          image: ''
-        }
+          image: '',
+        },
       };
     }
   },
@@ -161,4 +172,31 @@ export const apiService = {
       return { pujaList: [] };
     }
   },
-} 
+
+  getEaningsHistoryData: async (): Promise<EarningsHistoryResponse> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.EARNINGS_HISTORY_API);
+      return response.data?.record;
+    } catch (error) {
+      console.error('Error fetching earnings history data:', error);
+      // Return a default value that matches the EarningsHistoryResponse interface
+      return {
+        id: 0,
+        poojaName: '',
+        price: 0,
+        date: '',
+      };
+
+    }
+  },
+
+  getNotificationData: async (): Promise<NotificationData[]> => {
+    try {
+      const response = await apiDev.get(ApiEndpoints.NOTIFICATION_DATA_API);
+      return response.data?.record || [];
+    } catch (error) {
+      console.error('Error fetching past bookings :', error);
+      return [];
+    }
+  },
+}
