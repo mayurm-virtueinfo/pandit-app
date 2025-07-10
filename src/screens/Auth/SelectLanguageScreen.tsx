@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {COLORS, wp} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -20,10 +20,14 @@ import {useTranslation} from 'react-i18next';
 import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
 
+type RouteParams = {
+  action?: string;
+};
+
 const SelectLanguageScreen: React.FC = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-
+  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {t} = useTranslation();
 
   const [languages] = useState<CustomeSelectorDataOption[]>([
@@ -42,6 +46,9 @@ const SelectLanguageScreen: React.FC = () => {
   ]);
 
   const [selectedLanguageId, setSelectedLanguageId] = useState<number[]>([]);
+
+  // Get action from route params if present
+  const action = route.params?.action;
 
   const handleLanguageSelect = (languageId: number) => {
     setSelectedLanguageId(prev =>
@@ -64,6 +71,9 @@ const SelectLanguageScreen: React.FC = () => {
   };
 
   console.log('selectedLanguageId :: ', selectedLanguageId);
+
+  // Set button text based on action
+  const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
@@ -102,7 +112,7 @@ const SelectLanguageScreen: React.FC = () => {
                   isMultiSelect={true}
                 />
                 <PrimaryButton
-                  title={t('next')}
+                  title={buttonText}
                   onPress={handleNext}
                   style={styles.nextButton}
                   disabled={!selectedLanguageId}

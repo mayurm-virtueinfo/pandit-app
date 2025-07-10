@@ -98,7 +98,7 @@ const HomeScreen: React.FC = () => {
       <UserCustomHeader
         title={t('home')}
         showBellButton={true}
-        onNotificationPress={() => console.log('Notification pressed')}
+        onNotificationPress={() => navigation.navigate('NotificationScreen')}
       />
 
       {/* Main Content */}

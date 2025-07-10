@@ -99,7 +99,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         showBackButton
         showBellButton
         onBackPress={handleBackPress}
-        onNotificationPress={() => {}}
+        onNotificationPress={() => {
+          navigation.navigate('NotificationScreen');
+        }}
       />
 
       <View style={styles.contentContainer}>

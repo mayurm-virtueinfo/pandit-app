@@ -27,10 +27,13 @@ import PrimaryButtonLabeled from '../../components/PrimaryButtonLabeled';
 import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
 // import {apiService, postSignIn} from '../../api/apiService';
 import {useAuth} from '../../provider/AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {postSignIn} from '../../api/apiService';
+import AppConstant from '../../utils/AppContent';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
-  'OTPVerification'
+  'OTPVerification' | 'AppBottomTabNavigator'
 >;
 
 type OTPVerificationScreenRouteProp = RouteProp<
@@ -46,7 +49,7 @@ interface Props {
 const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   const {t} = useTranslation();
   const {showErrorToast, showSuccessToast} = useCommonToast();
-  const {setIsAuthenticated} = useAuth();
+  const {signIn} = useAuth();
   const inset = useSafeAreaInsets();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isLoading, setLoading] = useState(false);
@@ -94,32 +97,46 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
     }
   };
 
-  // const handleSignIn = async (phoneNumber: string, uid: string) => {
-  //   setLoading(true);
-  //   try {
-  //     const params = {
-  //       mobile: phoneNumber,
-  //       firebase_uid: uid,
-  //     };
-  //     const response = await postSignIn(params);
-  //     if (response) {
-  //       console.log('response :: ', response);
-  //       setIsAuthenticated(true);
-  //       // navigation.navigate('CompleteProfileScreen');
-  //     }
-  //   } catch (error: any) {
-  //     showErrorToast(error?.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleSignIn = async (phoneNumber: string, uid: string) => {
+    setLoading(true);
+    try {
+      const params = {
+        mobile: phoneNumber,
+        firebase_uid: uid,
+      };
+      const response = await postSignIn(params);
+      if (response) {
+        console.log('response :: ', response);
+        if (response?.is_register === false) {
+          navigation.navigate('CompleteProfileScreen', {
+            phoneNumber: phoneNumber,
+          });
+        } else {
+          signIn(response.access_token);
+          await AsyncStorage.setItem(
+            AppConstant.REFRESH_TOKEN,
+            response.refresh_token,
+          );
+          navigation.navigate('AppBottomTabNavigator');
+        }
+      }
+    } catch (error: any) {
+      showErrorToast(error?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const verifyOtp = async (code: string) => {
     try {
       setLoading(true);
       const userCredential = await otpConfirmation.confirm(code);
       if (userCredential?.user) {
-        // await handleSignIn(phoneNumber, userCredential.user.uid);
+        await handleSignIn(phoneNumber, userCredential.user.uid);
+        await AsyncStorage.setItem(
+          AppConstant.FIREBASE_UID,
+          userCredential.user.uid,
+        );
       }
     } catch (error: any) {
       showErrorToast(error?.message);
@@ -171,7 +188,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
             <View style={[styles.body, {paddingBottom: inset.bottom}]}>
               <Text style={styles.mainTitle}>{t('otp_verification')}</Text>
               <Text style={styles.subtitle}>
-                {t('enter_4_digit_the_verification_code')}
+                {t('enter_6_digit_the_verification_code')}
               </Text>
               <Text style={styles.phoneNumber}>{phoneNumber}</Text>
               <View style={styles.otpContainer}>

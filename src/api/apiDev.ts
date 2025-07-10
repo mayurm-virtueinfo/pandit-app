@@ -7,8 +7,8 @@ import ApiEndpoints from './apiEndpoints';
 const apiDev = axios.create({
   // baseURL: Config.BASE_URL,
   baseURL:
-    // 'https://stagcms.laggitgolf.com',
-    ApiEndpoints.BASE_URL,
+    'https://bbd3fa423b43.ngrok-free.app',
+  // ApiEndpoints.BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

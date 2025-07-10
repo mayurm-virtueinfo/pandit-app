@@ -1,6 +1,6 @@
 // import axios from 'axios';
 import apiDev from './apiDev';
-import ApiEndpoints from './apiEndpoints';
+import ApiEndpoints, { POST_SIGNIN } from './apiEndpoints';
 
 // Types for dropdown data
 export interface PanditPujaList {
@@ -119,6 +119,31 @@ export interface NotificationData {
   isRead: boolean;
 }
 
+export interface SignInRequest {
+  mobile: string;
+  firebase_uid: string;
+}
+
+export interface SignInResponse {
+  message: string;
+  access_token: string;
+  refresh_token: string;
+  is_register: boolean;
+  user: User;
+}
+
+export interface User {
+  mobile: string;
+  firebase_uid: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: number;
+  gender: number;
+  profile_img: string;
+  pandit_details: string;
+}
+
 export const apiService = {
   // Fetch castes (mock data)
   getPujaList: async (): Promise<PujaList[]> => {
@@ -200,3 +225,19 @@ export const apiService = {
     }
   },
 }
+
+export const postSignIn = (data: SignInRequest): Promise<SignInResponse> => {
+  console.log('params data ::', data);
+  let apiUrl = POST_SIGNIN;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching sign in data:', error);
+        reject(error);
+      });
+  });
+};

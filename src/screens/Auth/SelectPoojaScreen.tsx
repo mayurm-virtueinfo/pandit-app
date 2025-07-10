@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {COLORS, wp, hp} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -21,10 +21,14 @@ import CustomSelector from '../../components/CustomeSelector';
 import {poojaDataOption} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
 
+type RouteParams = {
+  action?: string;
+};
+
 const SelectPoojaScreen: React.FC = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-
+  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {t} = useTranslation();
 
   const [poojaData] = useState<poojaDataOption[]>([
@@ -52,6 +56,9 @@ const SelectPoojaScreen: React.FC = () => {
 
   const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
 
+  // Get action from route params if present
+  const action = route.params?.action;
+
   const handlePoojaSelect = (poojaId: number) => {
     setSelectedPoojaId(prev =>
       prev.includes(poojaId)
@@ -73,6 +80,9 @@ const SelectPoojaScreen: React.FC = () => {
   };
 
   console.log('selectedPoojaId :: ', selectedPoojaId);
+
+  // Set button text based on action
+  const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
@@ -108,7 +118,7 @@ const SelectPoojaScreen: React.FC = () => {
                   isMultiSelect={true}
                 />
                 <PrimaryButton
-                  title={t('next')}
+                  title={buttonText}
                   onPress={handleNext}
                   style={styles.nextButton}
                   disabled={!selectedPoojaId}

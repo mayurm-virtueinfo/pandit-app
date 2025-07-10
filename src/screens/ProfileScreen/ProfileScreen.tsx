@@ -14,14 +14,19 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
-import {UserProfileParamList} from '../../../navigation/User/userProfileNavigator';
 import Fonts from '../../theme/fonts';
 import UserCustomHeader from '../../components/CustomHeader';
 import {useAuth} from '../../provider/AuthProvider';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import {moderateScale} from 'react-native-size-matters';
+import {ProfileStackParamList} from '../../navigation/ProfileStack/ProfileStack';
 
-const ProfileField = ({label, value}) => (
+type ProfileFieldProps = {
+  label: string;
+  value: string;
+};
+
+const ProfileField: React.FC<ProfileFieldProps> = ({label, value}) => (
   <View style={styles.fieldContainer}>
     <Text style={styles.fieldLabel}>{label}</Text>
     <Text style={styles.fieldValue}>{value}</Text>
@@ -30,7 +35,7 @@ const ProfileField = ({label, value}) => (
 
 const ProfileScreen = () => {
   const inset = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProfileStackParamList>();
   const {t, i18n} = useTranslation();
   const {signOutApp} = useAuth();
 
@@ -41,7 +46,7 @@ const ProfileScreen = () => {
     navigation.navigate('NotificationScreen');
   };
   const handleEditNavigation = () => {
-    navigation.navigate('AddAddressScreen');
+    navigation.navigate('CompleteProfileScreen');
   };
   const handlePastPujaNavigation = () => {
     navigation.navigate('PastPujaScreen');

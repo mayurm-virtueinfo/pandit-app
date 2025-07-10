@@ -102,7 +102,7 @@
   "ledgers": "Ledgers",
   "change_mobile_number": "CHANGE MOBILE NUMBER",
   "otp_verification": "OTP Verification",
-  "enter_4_digit_the_verification_code": "4 digit code has been sent to our mobile number.",
+  "enter_6_digit_the_verification_code": "6 digit code has been sent to our mobile number.",
   "verify": "Verify",
   "didnt_receive_the_code": "Didn't receive the code?",
   "resend_otp": "Resend OTP",

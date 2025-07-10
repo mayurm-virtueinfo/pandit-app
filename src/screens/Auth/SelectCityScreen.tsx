@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {COLORS, wp, hp} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -20,10 +20,14 @@ import {useTranslation} from 'react-i18next';
 import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomSelector from '../../components/CustomeSelector';
 
+type RouteParams = {
+  action?: string;
+};
+
 const SelectCityScreen: React.FC = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-
+  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {t} = useTranslation();
 
   const [cities] = useState<CustomeSelectorDataOption[]>([
@@ -34,6 +38,9 @@ const SelectCityScreen: React.FC = () => {
   ]);
 
   const [selectedCityId, setSelectedCityId] = useState<number | null>();
+
+  // Get action from route params if present
+  const action = route.params?.action;
 
   console.log('selectedCityId :: ', selectedCityId);
 
@@ -51,6 +58,9 @@ const SelectCityScreen: React.FC = () => {
       console.log('Selected city:', selectedCity.name);
     }
   };
+
+  // Set button text based on action
+  const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
@@ -86,7 +96,7 @@ const SelectCityScreen: React.FC = () => {
                   searchPlaceholder={t('search_city')}
                 />
                 <PrimaryButton
-                  title={t('next')}
+                  title={buttonText}
                   onPress={handleNext}
                   style={styles.nextButton}
                   disabled={!selectedCityId}

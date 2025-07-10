@@ -5,10 +5,12 @@ import ProfileScreen from '../../screens/ProfileScreen/ProfileScreen';
 import PastPujaScreen from '../../screens/ProfileScreen/PastBookingsScreen';
 import EarningsHistoryScreen from '../../screens/ProfileScreen/EarningsHistoryScreen';
 import NotificationScreen from '../../screens/ProfileScreen/NotificationScreen';
+import CompleteProfileScreen from '../../screens/Auth/CompleteProfileScreen';
 
 export type ProfileStackParamList = {
   navigate(arg0: string): void;
   ProfileScreen: undefined;
+  CompleteProfileScreen: undefined;
   PastPujaScreen: undefined;
   EarningsHistoryScreen: undefined;
   NotificationScreen: undefined;
@@ -25,6 +27,10 @@ const ProfileNavigator = () => {
         cardStyle: {backgroundColor: COLORS.backgroundPrimary},
       }}>
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <Stack.Screen
+        name="CompleteProfileScreen"
+        component={CompleteProfileScreen}
+      />
       <Stack.Screen name="PastPujaScreen" component={PastPujaScreen} />
       <Stack.Screen
         name="EarningsHistoryScreen"
