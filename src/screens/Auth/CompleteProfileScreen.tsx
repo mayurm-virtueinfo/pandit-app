@@ -14,14 +14,14 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import CustomHeader from '../components/CustomHeader';
-import {COLORS} from '../theme/theme';
-import CustomTextInput from '../components/CustomTextInput';
-import PrimaryButton from '../components/PrimaryButton';
-import Fonts from '../theme/fonts';
+import CustomHeader from '../../components/CustomHeader';
+import {COLORS} from '../../theme/theme';
+import CustomTextInput from '../../components/CustomTextInput';
+import PrimaryButton from '../../components/PrimaryButton';
+import Fonts from '../../theme/fonts';
 import {moderateScale} from 'react-native-size-matters';
-import {casteOptions} from '../helper/helper';
-import CustomDropdown from '../components/CustomDropdown';
+import {casteOptions} from '../../helper/helper';
+import CustomDropdown from '../../components/CustomDropdown';
 import {useTranslation} from 'react-i18next';
 
 interface FormData {

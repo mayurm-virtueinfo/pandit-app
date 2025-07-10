@@ -2705,7 +2705,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context (5.4.1):
+  - react-native-safe-area-context (5.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2718,8 +2718,8 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-safe-area-context/common (= 5.4.1)
-    - react-native-safe-area-context/fabric (= 5.4.1)
+    - react-native-safe-area-context/common (= 5.5.1)
+    - react-native-safe-area-context/fabric (= 5.5.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -2728,7 +2728,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/common (5.4.1):
+  - react-native-safe-area-context/common (5.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2749,7 +2749,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/fabric (5.4.1):
+  - react-native-safe-area-context/fabric (5.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -3087,7 +3087,7 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
-  - RNGestureHandler (2.26.0):
+  - RNGestureHandler (2.27.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -3674,7 +3674,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 9343a5c14536d4463c80f09a960653d754daae21
   React-microtasksnativemodule: c7cafd8f4470cf8a4578ee605daa4c74d3278bf8
   react-native-pager-view: 226334e2362b07d51cc020ba984951d9a1d57537
-  react-native-safe-area-context: d7b183658c99410842887de068ae2fd887f6ce1f
+  react-native-safe-area-context: 2f1d83da763f858d622978e20a2c8a6e3bddc303
   react-native-splash-screen: 95994222cc95c236bd3cdc59fe45ed5f27969594
   React-nativeconfig: 415626a63057638759bcc75e0a96e2e07771a479
   React-NativeModulesApple: d33b55553c6957ff94835574636838d78121a1c6
@@ -3710,7 +3710,7 @@ SPEC CHECKSUMS:
   RNFBDatabase: fbaef25876440735423486c8fbc5f6e3c47271d9
   RNFBFirestore: 9a012778dad07b4cda95b1197ff10afc616e57f0
   RNFBMessaging: de62448d205095171915d622ed5fb45c2be5e075
-  RNGestureHandler: 4dc799b2655e0840b4f780ba99c4aac202c01cbe
+  RNGestureHandler: 443ede9a286057de85a0faad4fd247f1f085a932
   RNReanimated: 7f40d16441f0ed3422a65900bb0810de68d8e11f
   RNScreens: adc414245fe4ccbddcba33dbf6d0f682ff3e0829
   RNSVG: e1a716d635c65297c86e874eeb6adf3704a2e50a

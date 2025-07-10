@@ -1,5 +1,5 @@
-import { Dimensions, StyleSheet } from 'react-native';
-import { moderateScale } from 'react-native-size-matters';
+import {Dimensions, StyleSheet} from 'react-native';
+import {moderateScale} from 'react-native-size-matters';
 
 export const SCREEN_WIDTH = Dimensions.get('window').width;
 export const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -18,16 +18,16 @@ export const hp = (percentage: number) => {
 export const THEMESHADOW = {
   shadow: {
     borderRadius: moderateScale(10),
-    elevation: 7, // Android shadow
-    shadowColor: '#000', // iOS shadow
+    elevation: 5,
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 5, // iOS shadow
+      height: 5,
     },
-    shadowOpacity: 0.2, // iOS shadow
-    shadowRadius: 7, // iOS shadow
-  }
-}
+    shadowOpacity: 0.2,
+    shadowRadius: 7,
+  },
+};
 
 // Colors
 export const COLORS = {
@@ -70,7 +70,9 @@ export const COLORS = {
   chatColor: '#F0F0F0',
   chatUserBackground: '#FFD1D4',
   badgeBackground: '#EAEAEA',
-  disabled: "#EAEAEA"
+  disabled: '#EAEAEA',
+  lighttext: '#6C7278',
+  searchbartext: '#BAB8B8',
 };
 
 // Typography

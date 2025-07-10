@@ -12,21 +12,21 @@ import {
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
-import {AuthStackParamList} from '../navigation/AuthNavigator';
-import Loader from '../components/Loader';
+import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import Loader from '../../components/Loader';
 import {getAuth, signInWithPhoneNumber} from '@react-native-firebase/auth';
-import {useCommonToast} from '../common/CommonToast';
-import {COLORS} from '../theme/theme';
-import {Images} from '../theme/Images';
+import {useCommonToast} from '../../common/CommonToast';
+import {COLORS} from '../../theme/theme';
+import {Images} from '../../theme/Images';
 import {useTranslation} from 'react-i18next';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
-import Fonts from '../theme/fonts';
-import PrimaryButton from '../components/PrimaryButton';
-import PrimaryButtonLabeled from '../components/PrimaryButtonLabeled';
-import PrimaryButtonOutlined from '../components/PrimaryButtonOutlined';
-import {apiService, postSignIn} from '../api/apiService';
-import {useAuth} from '../provider/AuthProvider';
+import Fonts from '../../theme/fonts';
+import PrimaryButton from '../../components/PrimaryButton';
+import PrimaryButtonLabeled from '../../components/PrimaryButtonLabeled';
+import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
+// import {apiService, postSignIn} from '../../api/apiService';
+import {useAuth} from '../../provider/AuthProvider';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -94,32 +94,32 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
     }
   };
 
-  const handleSignIn = async (phoneNumber: string, uid: string) => {
-    setLoading(true);
-    try {
-      const params = {
-        mobile: phoneNumber,
-        firebase_uid: uid,
-      };
-      const response = await postSignIn(params);
-      if (response) {
-        console.log('response :: ', response);
-        setIsAuthenticated(true);
-        // navigation.navigate('CompleteProfileScreen');
-      }
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSignIn = async (phoneNumber: string, uid: string) => {
+  //   setLoading(true);
+  //   try {
+  //     const params = {
+  //       mobile: phoneNumber,
+  //       firebase_uid: uid,
+  //     };
+  //     const response = await postSignIn(params);
+  //     if (response) {
+  //       console.log('response :: ', response);
+  //       setIsAuthenticated(true);
+  //       // navigation.navigate('CompleteProfileScreen');
+  //     }
+  //   } catch (error: any) {
+  //     showErrorToast(error?.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const verifyOtp = async (code: string) => {
     try {
       setLoading(true);
       const userCredential = await otpConfirmation.confirm(code);
       if (userCredential?.user) {
-        await handleSignIn(phoneNumber, userCredential.user.uid);
+        // await handleSignIn(phoneNumber, userCredential.user.uid);
       }
     } catch (error: any) {
       showErrorToast(error?.message);

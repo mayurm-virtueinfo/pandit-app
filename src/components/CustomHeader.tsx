@@ -22,7 +22,7 @@ import Fonts from '../theme/fonts';
 import {useTranslation} from 'react-i18next';
 import Feather from 'react-native-vector-icons/Feather';
 
-interface UserCustomHeaderProps {
+interface CustomHeaderProps {
   title?: string;
   showBackButton?: boolean;
   showMenuButton?: boolean;
@@ -36,7 +36,7 @@ interface UserCustomHeaderProps {
   onCirclePlusPress?: () => void;
 }
 
-const UserCustomHeader: React.FC<UserCustomHeaderProps> = ({
+const CustomHeader: React.FC<CustomHeaderProps> = ({
   title = '',
   showBackButton = false,
   showMenuButton = false,
@@ -229,4 +229,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserCustomHeader;
+export default CustomHeader;

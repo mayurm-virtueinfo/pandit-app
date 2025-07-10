@@ -165,5 +165,15 @@
   "select_your_caste": "Select your caste",
   "select_your_sub_caste": "Select your sub caste",
   "select_your_gotra": "Select your gotra",
-  "select_your_address": "Select your address"
+  "select_your_address": "Select your address",
+  "select_city": "Select City",
+  "select_city_description": "Select the city where you will be performing the puja.",
+  "select_area": "Select Area",
+  "select_area_description": "Select the area or locality where the puja will be performed.",
+  "search_area": "Search Area",
+  "search_city": "Search City",
+  "select_pooja": "Select Puja",
+  "select_pooja_desc": "Select the puja you will be performing from the list below.",
+  "select_language": "Select Languages",
+  "select_language_desc": "Select the languages you are comfortable speaking during the puja."
 }

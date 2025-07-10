@@ -2,7 +2,7 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {COLORS} from '../../theme/theme';
-import SignInScreen from '../../screens/SignInScreen';
+import SignInScreen from '../../screens/Auth/SignInScreen';
 import HomeScreen from '../../screens/HomeScreen/HomeScreen';
 import PujaDetailsScreen from '../../screens/HomeScreen/PujaDetailsScreen';
 import PujaSuccessfullScreen from '../../screens/HomeScreen/PujaSuccessfullScreen';

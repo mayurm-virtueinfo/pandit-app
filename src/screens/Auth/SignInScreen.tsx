@@ -14,25 +14,25 @@ import {
   ImageBackground,
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {AuthStackParamList} from '../navigation/AuthNavigator';
-import ThemedInput from '../components/ThemedInput';
+import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import ThemedInput from '../../components/ThemedInput';
 import {
   getAuth,
   onAuthStateChanged,
   signInWithPhoneNumber,
 } from '@react-native-firebase/auth';
-import {validatePhoneNumber} from '../helper/Validation';
-import Loader from '../components/Loader';
+import {validatePhoneNumber} from '../../helper/Validation';
+import Loader from '../../components/Loader';
 import {moderateScale} from 'react-native-size-matters';
-import {useCommonToast} from '../common/CommonToast';
-import {COLORS} from '../theme/theme';
+import {useCommonToast} from '../../common/CommonToast';
+import {COLORS} from '../../theme/theme';
 // import PrimaryButton from '../components/PrimaryButton';
 // import {Images} from '../theme/Images';
-import Fonts from '../theme/fonts';
+import Fonts from '../../theme/fonts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
-import PrimaryButton from '../components/PrimaryButton';
-import {Images} from '../theme/Images';
+import PrimaryButton from '../../components/PrimaryButton';
+import {Images} from '../../theme/Images';
 // import { firebaseAuth } from '../../App';
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
