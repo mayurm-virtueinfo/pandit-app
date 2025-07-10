@@ -94,7 +94,7 @@ const AuthNavigator = () => {
         name="Languages"
         component={LanguagesScreen}
         options={{
-          headerShown: false, // Assuming no header based on screenshot
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
