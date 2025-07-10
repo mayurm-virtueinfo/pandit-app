@@ -25,6 +25,8 @@ class ApiEndpoints {
   static readonly PUJA_ITEMS_API = `${ApiEndpoints.API_VERSION}/686d03318960c979a5b92ebd`;
   static readonly PUJA_DETAILS_API = `${ApiEndpoints.API_VERSION}/686d088a8561e97a50339c4d`;
   static readonly PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/685e858d8561e97a502cbc73`;
+  static readonly EARNINGS_HISTORY_API = `${ApiEndpoints.API_VERSION}/686e27ce9e410d0f5e41d8ea`;
+  static readonly NOTIFICATION_DATA_API = `${ApiEndpoints.API_VERSION}/6867ade78561e97a50315d3b`;
 
 }
 

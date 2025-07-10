@@ -34,6 +34,7 @@ interface CustomHeaderProps {
   onBackPress?: () => void;
   onNotificationPress?: () => void;
   onCirclePlusPress?: () => void;
+  onFilterPress?: () => void;
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -48,6 +49,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   onBackPress,
   onNotificationPress,
   onCirclePlusPress,
+  onFilterPress,
 }) => {
   const {t, i18n} = useTranslation();
   const navigation = useNavigation();
@@ -144,7 +146,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             )}
             {showSliderButton && (
               <TouchableOpacity
-                onPress={() => console.log('Slider Icon pressed')}
+                onPress={onFilterPress}
                 style={styles.iconButton}>
                 <Feather
                   name="sliders"

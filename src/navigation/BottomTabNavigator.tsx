@@ -1,28 +1,20 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import HomeScreen from '../screens/HomeScreen/HomeScreen';
-import PoojaListScreen from '../screens/PoojaListScreen';
-import AstroServicesScreen from '../screens/AstroServicesScreen';
-import EarningsScreen from '../screens/EarningsScreen';
-import PoojaRequestScreen from '../screens/PoojaRequestScreen';
 import {COLORS} from '../theme/theme';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import PoojaRequestNavigator from './PoojaRequestNavigator';
-import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
-import PoojaListNavigator from './PoojaListNavigator';
-import AstroServiceNavigator from './AstroServiceNavigator';
-import EarningsNavigator from './EarningsNavigator';
 import HomeNavigator from './HomeStack/HomeStack';
 import PujaListNavigator from './PujaListStack/PujaListStack';
+import ProfileNavigator from './ProfileStack/ProfileStack';
+import SettingsNavigator from './SettingsStack/SettingsStack';
 
 export type AppBottomTabParamList = {
   HomeNavigator: undefined;
   PujaListNavigator: undefined;
-  AstroServiceNavigator: undefined;
-  EarningsNavigator: undefined;
+  SettingsNavigator: undefined;
+  ProfileNavigator: undefined;
 };
 
 const Tab = createBottomTabNavigator<AppBottomTabParamList>();
@@ -61,8 +53,8 @@ const AppBottomTabNavigator: React.FC = () => {
         }}
       />
       <Tab.Screen
-        name="AstroServiceNavigator"
-        component={AstroServiceNavigator}
+        name="SettingsNavigator"
+        component={SettingsNavigator}
         options={{
           title: 'Settings',
           tabBarIcon: ({color, size}) => (
@@ -71,8 +63,8 @@ const AppBottomTabNavigator: React.FC = () => {
         }}
       />
       <Tab.Screen
-        name="EarningsNavigator"
-        component={EarningsNavigator}
+        name="ProfileNavigator"
+        component={ProfileNavigator}
         options={{
           title: 'Profile',
           tabBarIcon: ({color, size}) => (

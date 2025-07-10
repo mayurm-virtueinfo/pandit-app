@@ -17,6 +17,7 @@ import {useTranslation} from 'react-i18next';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {apiService, PujaListItemType} from '../../api/apiService';
 import PrimaryButton from '../../components/PrimaryButton';
+import {useNavigation} from '@react-navigation/native';
 
 interface PriceOption {
   id: 'system' | 'custom';
@@ -26,6 +27,7 @@ interface PriceOption {
 
 const AddPujaScreen: React.FC = () => {
   const {t} = useTranslation();
+  const navigation = useNavigation();
   const [selectedPuja, setSelectedPuja] = useState<number | null>(null);
   const [selectedPriceOption, setSelectedPriceOption] = useState<
     'system' | 'custom'
@@ -82,6 +84,7 @@ const AddPujaScreen: React.FC = () => {
       withItems: customPriceWithItems,
       withoutItems: customPriceWithoutItems,
     });
+    navigation.goBack();
   };
 
   const renderSeparator = () => <View style={styles.separator} />;

@@ -23,7 +23,7 @@ apiDev.interceptors.request.use(
     // const userId = await AsyncStorage.getItem(USER_DATA_KEY.userId); // get the access token from AsyncStorage
 
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
       // Only set multipart/form-data for specific requests (e.g., file uploads)
     }
     config.headers['X-Master-Key'] = ApiEndpoints.XMasterKey;
