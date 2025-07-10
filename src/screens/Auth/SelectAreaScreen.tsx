@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {COLORS, wp, hp} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -21,10 +21,15 @@ import CustomSelector from '../../components/CustomeSelector';
 import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
 
+type RouteParams = {
+  action?: string;
+};
+
 const SelectAreaScreen: React.FC = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
+  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
 
   const [areas] = useState<CustomeSelectorDataOption[]>([
     {id: 3, name: 'Andheri'},
@@ -35,6 +40,9 @@ const SelectAreaScreen: React.FC = () => {
   ]);
 
   const [selectedAreaIds, setSelectedAreaIds] = useState<number[]>([]);
+
+  // Get action from route params if present
+  const action = route.params?.action;
 
   const handleAreaSelect = (areaId: number) => {
     setSelectedAreaIds(prev =>
@@ -58,6 +66,9 @@ const SelectAreaScreen: React.FC = () => {
   };
 
   console.log('selectedAreaIds :: ', selectedAreaIds);
+
+  // Set button text based on action
+  const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
@@ -95,7 +106,7 @@ const SelectAreaScreen: React.FC = () => {
                   isMultiSelect={true}
                 />
                 <PrimaryButton
-                  title={t('next')}
+                  title={buttonText}
                   onPress={handleNext}
                   style={styles.nextButton}
                   disabled={selectedAreaIds.length === 0}

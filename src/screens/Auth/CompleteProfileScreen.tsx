@@ -23,6 +23,7 @@ import {moderateScale} from 'react-native-size-matters';
 import {casteOptions} from '../../helper/helper';
 import CustomDropdown from '../../components/CustomDropdown';
 import {useTranslation} from 'react-i18next';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 interface FormData {
   phoneNumber: string;
@@ -39,6 +40,7 @@ const CompleteProfileScreen: React.FC = () => {
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRefs = useRef<{[key: string]: TextInput | null}>({});
+  const inset = useSafeAreaInsets();
 
   const {t} = useTranslation();
 
@@ -75,93 +77,97 @@ const CompleteProfileScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.primaryBackground}
-      />
-      <CustomHeader title={t('complete_your_profile')} showBackButton={true} />
-
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.content}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}>
-          <View style={styles.formContainer}>
-            <CustomTextInput
-              label={t('phone_number')}
-              value={formData.phoneNumber}
-              onChangeText={value => handleInputChange('phoneNumber', value)}
-              placeholder={t('enter_phone_number')}
+    <View style={[styles.mainContainer, {paddingTop: inset.top}]}>
+      <SafeAreaView style={styles.container}>
+        <CustomHeader
+          title={t('complete_your_profile')}
+          showBackButton={true}
+        />
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}>
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContent}>
+            <View style={styles.formContainer}>
+              <CustomTextInput
+                label={t('phone_number')}
+                value={formData.phoneNumber}
+                onChangeText={value => handleInputChange('phoneNumber', value)}
+                placeholder={t('enter_phone_number')}
+              />
+              <CustomTextInput
+                label={t('first_name')}
+                value={formData.firstName}
+                onChangeText={value => handleInputChange('firstName', value)}
+                placeholder={t('enter_first_name')}
+              />
+              <CustomTextInput
+                label={t('last_name')}
+                value={formData.lastName}
+                onChangeText={value => handleInputChange('lastName', value)}
+                placeholder={t('enter_last_name')}
+              />
+              <CustomDropdown
+                label={t('city')}
+                items={casteOptions}
+                selectedValue={formData.city}
+                onSelect={value => handleInputChange('city', value)}
+                placeholder={t('select_your_city')}
+              />
+              <CustomDropdown
+                label={t('caste')}
+                items={casteOptions}
+                selectedValue={formData.caste}
+                onSelect={value => handleInputChange('caste', value)}
+                placeholder={t('select_your_caste')}
+              />
+              <CustomDropdown
+                label={t('sub_caste')}
+                items={casteOptions}
+                selectedValue={formData.subCaste}
+                onSelect={value => handleInputChange('subCaste', value)}
+                placeholder={t('select_your_sub_caste')}
+              />
+              <CustomDropdown
+                label={t('gotra')}
+                items={casteOptions}
+                selectedValue={formData.gotra}
+                onSelect={value => handleInputChange('gotra', value)}
+                placeholder={t('select_your_gotra')}
+              />
+              <CustomTextInput
+                label={t('address')}
+                value={formData.address}
+                onChangeText={value => handleInputChange('address', value)}
+                placeholder={t('enter_address')}
+              />
+            </View>
+            <View style={styles.textcontainer}>
+              <Text style={styles.text}>{t('address_desc')}</Text>
+            </View>
+            <PrimaryButton
+              title={t('next')}
+              onPress={handleNext}
+              style={styles.buttonContainer}
+              textStyle={styles.buttonText}
             />
-            <CustomTextInput
-              label={t('first_name')}
-              value={formData.firstName}
-              onChangeText={value => handleInputChange('firstName', value)}
-              placeholder={t('enter_first_name')}
-            />
-            <CustomTextInput
-              label={t('last_name')}
-              value={formData.lastName}
-              onChangeText={value => handleInputChange('lastName', value)}
-              placeholder={t('enter_last_name')}
-            />
-            <CustomDropdown
-              label={t('city')}
-              items={casteOptions}
-              selectedValue={formData.city}
-              onSelect={value => handleInputChange('city', value)}
-              placeholder={t('select_your_city')}
-            />
-            <CustomDropdown
-              label={t('caste')}
-              items={casteOptions}
-              selectedValue={formData.caste}
-              onSelect={value => handleInputChange('caste', value)}
-              placeholder={t('select_your_caste')}
-            />
-            <CustomDropdown
-              label={t('sub_caste')}
-              items={casteOptions}
-              selectedValue={formData.subCaste}
-              onSelect={value => handleInputChange('subCaste', value)}
-              placeholder={t('select_your_sub_caste')}
-            />
-            <CustomDropdown
-              label={t('gotra')}
-              items={casteOptions}
-              selectedValue={formData.gotra}
-              onSelect={value => handleInputChange('gotra', value)}
-              placeholder={t('select_your_gotra')}
-            />
-            <CustomTextInput
-              label={t('address')}
-              value={formData.address}
-              onChangeText={value => handleInputChange('address', value)}
-              placeholder={t('enter_address')}
-            />
-          </View>
-          <View style={styles.textcontainer}>
-            <Text style={styles.text}>{t('address_desc')}</Text>
-          </View>
-          <PrimaryButton
-            title={t('next')}
-            onPress={handleNext}
-            style={styles.buttonContainer}
-            textStyle={styles.buttonText}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: COLORS.primaryBackground,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.primaryBackground,

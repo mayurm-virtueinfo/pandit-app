@@ -6,10 +6,12 @@ import {
   onAuthStateChanged,
   signInWithPhoneNumber,
 } from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppConstant from '../utils/AppContent';
 // Authentication Context
 interface AuthContextType {
   isAuthenticated: boolean;
-  signIn: () => void;
+  signIn: (token: string) => Promise<void>;
   signOutApp: () => void;
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -24,6 +26,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const subscriber = onAuthStateChanged(getAuth(), user => {
@@ -33,14 +36,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   }, []);
 
   useEffect(() => {
-    setIsAuthenticated(!!user);
-    console.log('user changed, updated isAuthenticated to', !!user);
-  }, [user]);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async user => {
+      try {
+        if (user) {
+          const token = await AsyncStorage.getItem(AppConstant.ACCESS_TOKEN);
+          setIsAuthenticated(!!token);
+        } else {
+          await AsyncStorage.removeItem(AppConstant.ACCESS_TOKEN);
+          await AsyncStorage.removeItem(AppConstant.REFRESH_TOKEN);
+          await AsyncStorage.removeItem(AppConstant.FIREBASE_UID);
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Error checking authentication status:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    });
 
-  const signIn = () => {
-    setIsAuthenticated(true);
+    return () => unsubscribe();
+  }, []);
+
+  const signIn = async (token: string) => {
+    try {
+      await AsyncStorage.setItem(AppConstant.ACCESS_TOKEN, token);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Sign in error:', error);
+    }
   };
-
   const signOutApp = () => {
     handleSignOut();
   };
@@ -62,7 +88,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     setIsAuthenticated,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {isLoading ? null : children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

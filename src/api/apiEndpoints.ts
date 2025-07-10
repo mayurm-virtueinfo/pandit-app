@@ -31,3 +31,5 @@ class ApiEndpoints {
 }
 
 export default ApiEndpoints;
+
+export const POST_SIGNIN = '/auth/signin/';

@@ -12,6 +12,8 @@ import {COLORS} from '../theme/theme';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import SelectAreaScreen from '../screens/Auth/SelectAreaScreen';
 import SelectPoojaScreen from '../screens/Auth/SelectPoojaScreen';
+import CompleteProfileScreen from '../screens/Auth/CompleteProfileScreen';
+import AppBottomTabNavigator from './BottomTabNavigator';
 
 export type AuthStackParamList = {
   SignIn: undefined;
@@ -19,7 +21,7 @@ export type AuthStackParamList = {
     phoneNumber: string;
     confirmation: FirebaseAuthTypes.ConfirmationResult;
   };
-  PanditRegistration: undefined;
+  CompleteProfileScreen: {phoneNumber: string};
   SelectCityArea: undefined;
   SelectCityScreen: undefined;
   SelectAreaScreen: undefined;
@@ -27,6 +29,7 @@ export type AuthStackParamList = {
   Documents: undefined;
   PoojaAndAstrologyPerformed: undefined;
   Languages: undefined;
+  AppBottomTabNavigator: undefined;
 };
 
 const Stack = createStackNavigator<AuthStackParamList>();
@@ -42,8 +45,8 @@ const AuthNavigator = () => {
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
       <Stack.Screen
-        name="PanditRegistration"
-        component={PanditRegistrationScreen}
+        name="CompleteProfileScreen"
+        component={CompleteProfileScreen}
         options={{
           headerShown: false,
         }}
@@ -95,6 +98,13 @@ const AuthNavigator = () => {
         component={LanguagesScreen}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AppBottomTabNavigator"
+        component={AppBottomTabNavigator}
+        options={{
+          headerShown: false, // Assuming no header based on screenshot
         }}
       />
     </Stack.Navigator>

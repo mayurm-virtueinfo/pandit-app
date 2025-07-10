@@ -45,7 +45,8 @@ const SettingsScreen: React.FC = () => {
 
   const handleSettingPress = (screenName: string) => {
     console.log(`${screenName} pressed`);
-    navigation.navigate(screenName as never);
+    // @ts-ignore
+    navigation.navigate(screenName as never, {action: 'Update'} as never);
   };
 
   const settingsOptions = [
@@ -57,22 +58,22 @@ const SettingsScreen: React.FC = () => {
     {
       title: t('change_city'),
       key: 'changeCity',
-      navigation: 'AvailabilityScreen',
+      navigation: 'SelectCityScreen',
     },
     {
       title: t('change_area'),
       key: 'changeArea',
-      navigation: 'AvailabilityScreen',
+      navigation: 'SelectAreaScreen',
     },
     {
       title: t('change_puja'),
       key: 'changePuja',
-      navigation: 'AvailabilityScreen',
+      navigation: 'SelectPoojaScreen',
     },
     {
       title: t('change_languages'),
       key: 'changeLanguages',
-      navigation: 'AvailabilityScreen',
+      navigation: 'SelectLanguageScreen',
     },
     {
       title: t('change_documents'),
