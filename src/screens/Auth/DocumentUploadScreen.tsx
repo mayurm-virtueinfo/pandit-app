@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   SafeAreaView,
@@ -18,7 +18,9 @@ import Fonts from '../../theme/fonts';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
 import DocumentSection from '../../components/DocumentSection';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {postSignUp} from '../../api/apiService';
+import {postSignUp, SignUpRequest} from '../../api/apiService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppConstant from '../../utils/AppContent';
 
 interface DocumentUploadState {
   idProof: boolean;
@@ -44,6 +46,7 @@ type RouteParams = {
 };
 
 interface DocumentInfo {
+  file: any;
   name: string | null;
   url: string | null;
 }
@@ -53,6 +56,7 @@ const DocumentUploadScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
 
+  // Extract params from previous screen
   const {
     phoneNumber,
     firstName,
@@ -67,8 +71,6 @@ const DocumentUploadScreen: React.FC = () => {
     selectedPoojaId,
     selectedLanguageId,
   } = route.params || {};
-
-  console.log('params :: ', route.params);
 
   const [uploadedDocuments, setUploadedDocuments] =
     useState<DocumentUploadState>({
@@ -87,36 +89,32 @@ const DocumentUploadScreen: React.FC = () => {
     certifications: {name: null, url: null},
   });
 
-  console.log(documentInfo);
-
   const [loadingDocument, setLoadingDocument] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uid, setUid] = useState<string | null>('');
 
-  const handleSubmitDocument = async (signUpData: any) => {
-    setIsSubmitting(true);
+  useEffect(() => {
+    fetchUID();
+  }, []);
+
+  const fetchUID = async () => {
     try {
-      const response = await postSignUp(signUpData);
-      // Handle success (e.g., navigate to next screen or show success message)
-      // Example: navigation.navigate('NextScreen');
-      console.log('Sign up successful:', response);
+      const uid = await AsyncStorage.getItem(AppConstant.FIREBASE_UID);
+      setUid(uid);
     } catch (error) {
-      // Handle error (e.g., show error message)
-      console.error('Sign up failed:', error);
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error fetching UID:', error);
     }
   };
 
+  // Dummy upload function (simulate upload and return uri as url)
   const uploadDocument = async (
     document: DocumentPickerResponse,
-  ): Promise<{url: string}> => {
+  ): Promise<DocumentPickerResponse> => {
     try {
-      const url = document.uri;
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve({url});
-        }, 1000);
-      });
+      if (!document.uri || !document.type || !document.name) {
+        throw new Error('Invalid document');
+      }
+      return document; // Return the document object directly
     } catch (error) {
       console.error('Failed to process document:', error);
       throw new Error('Failed to process document');
@@ -148,7 +146,7 @@ const DocumentUploadScreen: React.FC = () => {
           ...prev,
           [documentType]: {
             name: document.name || 'Selected Document',
-            url: uploadResult.url,
+            file: uploadResult, // Store the file object
           },
         }));
 
@@ -163,7 +161,7 @@ const DocumentUploadScreen: React.FC = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isSubmitting || loadingDocument) return;
 
     const requiredDocuments = ['idProof', 'panCard'];
@@ -181,15 +179,80 @@ const DocumentUploadScreen: React.FC = () => {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const formData: any = new FormData();
+    formData.append('mobile', phoneNumber);
+    formData.append('firebase_uid', uid);
+    formData.append('first_name', firstName);
+    formData.append('last_name', lastName);
+    formData.append('email', 'user@example.com'); // Add email if required
+    formData.append('role', 2);
+    formData.append('address', address);
+    formData.append('city', selectCityId);
+
+    // Handle profile_img (optional, remove if not required)
+    formData.append('profile_img', ''); // Set to empty string or handle file upload
+
+    selectedPoojaId.forEach(id => formData.append('puja_ids', id));
+    selectedAreasId.forEach(id => formData.append('area_ids', id));
+
+    formData.append('pandit_detail.address_city', city);
+    formData.append('pandit_detail.caste', caste);
+    formData.append('pandit_detail.sub_caste', subCaste);
+    formData.append('pandit_detail.gotra', gotra);
+    const uniqueLanguageIds = [...new Set(selectedLanguageId)];
+    uniqueLanguageIds.forEach(id =>
+      formData.append('pandit_detail.supported_languages', id),
+    );
+
+    // Append document files
+    if (documentInfo.idProof.file) {
+      formData.append('pandit_documents.id_proof', {
+        uri: documentInfo.idProof.file.uri,
+        type: documentInfo.idProof.file.type,
+        name: documentInfo.idProof.file.name,
+      });
+    }
+    if (documentInfo.panCard.file) {
+      formData.append('pandit_documents.pan_card', {
+        uri: documentInfo.panCard.file.uri,
+        type: documentInfo.panCard.file.type,
+        name: documentInfo.panCard.file.name,
+      });
+    }
+    if (documentInfo.electricityBill.file) {
+      formData.append('pandit_documents.electricity_bill', {
+        uri: documentInfo.electricityBill.file.uri,
+        type: documentInfo.electricityBill.file.type,
+        name: documentInfo.electricityBill.file.name,
+      });
+    }
+    if (documentInfo.certifications.file) {
+      formData.append('pandit_documents.certifications', {
+        uri: documentInfo.certifications.file.uri,
+        type: documentInfo.certifications.file.type,
+        name: documentInfo.certifications.file.name,
+      });
+    }
+
+    try {
+      console.log('FormData:', formData._parts); // Debug FormData
+      await postSignUp(formData);
       Alert.alert('Success', 'Documents submitted successfully!', [
         {
           text: 'OK',
           onPress: () => navigation.goBack(),
         },
       ]);
-    }, 2000);
+    } catch (error) {
+      console.error('Submission error:', error.response?.data || error.message);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message ||
+          'Failed to submit documents. Please try again.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

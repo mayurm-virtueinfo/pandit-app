@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import CustomHeader from '../../components/CustomHeader';
 import {COLORS} from '../../theme/theme';
 import CustomTextInput from '../../components/CustomTextInput';
@@ -36,6 +36,10 @@ interface FormData {
   address: string;
 }
 
+type RouteParams = {
+  phoneNumber?: string;
+};
+
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
   'CompleteProfileScreen'
@@ -43,12 +47,15 @@ type ScreenNavigationProp = StackNavigationProp<
 
 const CompleteProfileScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
+  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const inset = useSafeAreaInsets();
   const {t} = useTranslation();
   const {showErrorToast} = useCommonToast();
 
+  const {phoneNumber} = route.params;
+
   const [formData, setFormData] = useState<FormData>({
-    phoneNumber: '',
+    phoneNumber: phoneNumber || '',
     firstName: '',
     lastName: '',
     city: '',

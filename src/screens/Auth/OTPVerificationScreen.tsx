@@ -112,11 +112,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
             phoneNumber: phoneNumber,
           });
         } else {
-          signIn(response.access_token);
-          await AsyncStorage.setItem(
-            AppConstant.REFRESH_TOKEN,
-            response.refresh_token,
-          );
+          signIn(response.access_token, response.refresh_token);
           navigation.navigate('AppBottomTabNavigator');
         }
       }

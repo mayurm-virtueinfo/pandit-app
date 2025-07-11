@@ -11,7 +11,7 @@ import AppConstant from '../utils/AppContent';
 // Authentication Context
 interface AuthContextType {
   isAuthenticated: boolean;
-  signIn: (token: string) => Promise<void>;
+  signIn: (token: string, refresh_token: string) => Promise<void>;
   signOutApp: () => void;
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -59,22 +59,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     return () => unsubscribe();
   }, []);
 
-  const signIn = async (token: string) => {
+  const signIn = async (access_token: string, refresh_token: string) => {
     try {
-      await AsyncStorage.setItem(AppConstant.ACCESS_TOKEN, token);
+      await AsyncStorage.setItem(AppConstant.ACCESS_TOKEN, access_token);
+      await AsyncStorage.setItem(AppConstant.REFRESH_TOKEN, refresh_token);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Sign in error:', error);
     }
   };
-  const signOutApp = () => {
-    handleSignOut();
-  };
-  const handleSignOut = async () => {
+  const signOutApp = async () => {
     try {
       const auth = getAuth();
       await signOut(auth);
-      console.log('User signed out!');
+      await AsyncStorage.removeItem(AppConstant.ACCESS_TOKEN);
+      await AsyncStorage.removeItem(AppConstant.REFRESH_TOKEN);
+      await AsyncStorage.removeItem(AppConstant.FIREBASE_UID);
+      setIsAuthenticated(false);
     } catch (error) {
       console.error('Sign out error:', error);
     }

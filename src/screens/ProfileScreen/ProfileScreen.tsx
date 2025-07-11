@@ -20,6 +20,9 @@ import {useAuth} from '../../provider/AuthProvider';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import {moderateScale} from 'react-native-size-matters';
 import {ProfileStackParamList} from '../../navigation/ProfileStack/ProfileStack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppConstant from '../../utils/AppContent';
+import {postLogout} from '../../api/apiService';
 
 type ProfileFieldProps = {
   label: string;
@@ -51,8 +54,22 @@ const ProfileScreen = () => {
   const handlePastPujaNavigation = () => {
     navigation.navigate('PastPujaScreen');
   };
-  const handleLogout = () => {
-    signOutApp();
+  const handleLogout = async () => {
+    try {
+      const refreshToken =
+        (await AsyncStorage.getItem(AppConstant.REFRESH_TOKEN)) || '';
+      console.log('refreshToken', refreshToken);
+      const params = {
+        refresh_token: refreshToken,
+      };
+      console.log(params);
+      const response: any = await postLogout(params);
+      if (response.data.success) {
+        signOutApp();
+      }
+    } catch (error: any) {
+      console.error('Logout error:', error);
+    }
   };
   const userData = {
     name: 'Rajesh Sharma',

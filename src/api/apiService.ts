@@ -1,4 +1,5 @@
 // import axios from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   GET_AREA,
@@ -8,6 +9,7 @@ import ApiEndpoints, {
   GET_LANGUAGES,
   GET_POOJA,
   GET_SUBCASTE,
+  POST_LOGOUT,
   POST_SIGNIN,
   POST_SIGNUP,
 } from './apiEndpoints';
@@ -159,7 +161,6 @@ export interface SignUpRequest {
   firebase_uid: string;
   first_name: string;
   last_name: string;
-  email: string;
   role: number;
   address: string;
   city: string;
@@ -179,6 +180,10 @@ export interface SignUpRequest {
     electricity_bill: string;
     certifications: string;
   };
+}
+
+export interface LogoutRequest {
+  refresh_token: string;
 }
 
 export const apiService = {
@@ -228,10 +233,10 @@ export const apiService = {
   getPujaListData: async (): Promise<PujaListDataResponse> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || {recommendedPuja: [], pujaList: []};
+      return response.data?.record || { recommendedPuja: [], pujaList: [] };
     } catch (error) {
       console.error('Error fetching puja list data:', error);
-      return {pujaList: []};
+      return { pujaList: [] };
     }
   },
 
@@ -382,14 +387,35 @@ export const getLanguage = () => {
 export const postSignUp = (data: SignUpRequest): Promise<SignInResponse> => {
   console.log('params data ::', data);
   let apiUrl = POST_SIGNUP;
+  const config: AxiosRequestConfig = {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  };
   return new Promise((resolve, reject) => {
     apiDev
-      .post(apiUrl, data)
+      .postForm(apiUrl, data, config)
       .then(response => {
         resolve(response.data);
       })
       .catch(error => {
-        console.error('Error fetching sign in data:', error);
+        console.error('Error fetching sign up data:', JSON.stringify(error));
+        reject(error);
+      });
+  });
+};
+
+
+export const postLogout = (data: LogoutRequest) => {
+  let apiUrl = POST_LOGOUT;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error logout', error);
         reject(error);
       });
   });
