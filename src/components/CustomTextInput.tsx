@@ -2,6 +2,7 @@ import {StyleSheet, Text, TextInput, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../theme/theme';
 import Fonts from '../theme/fonts';
+import {moderateScale} from 'react-native-size-matters';
 
 interface InputFieldProps {
   label: string;
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
   inputTitle: {
     color: COLORS.inputLabelText,
     fontFamily: Fonts.Sen_Medium,
-    fontSize: 14,
+    fontSize: moderateScale(14),
   },
   inputArea: {
     height: 46,
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
   inputText: {
     color: COLORS.textPrimary,
     fontFamily: Fonts.Sen_Regular,
-    fontSize: 14,
+    fontSize: moderateScale(14),
     padding: 0,
     margin: 0,
   },

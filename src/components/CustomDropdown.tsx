@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   label: {
     color: COLORS.inputLabelText,
     fontFamily: Fonts.Sen_Medium,
-    fontSize: 14,
+    fontSize: moderateScale(14),
     marginBottom: moderateScale(5),
   },
   dropdown: {
@@ -74,8 +74,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.error, // Red border for error
   },
   dropdownText: {
-    fontFamily: Fonts.Sen_Regular,
-    fontSize: moderateScale(12),
+    fontFamily: Fonts.Sen_Medium,
+    fontSize: moderateScale(14),
     color: COLORS.textPrimary,
   },
   dropdownList: {

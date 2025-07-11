@@ -116,7 +116,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                 onPress={handleNotificationPress}
                 style={styles.iconButton}>
                 <MaterialIcons
-                  name="notifications"
+                  name="notifications-none"
                   size={24}
                   color={COLORS.white}
                 />
