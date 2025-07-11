@@ -7,6 +7,7 @@ import SelectCityScreen from '../../screens/Auth/SelectCityScreen';
 import SelectAreaScreen from '../../screens/Auth/SelectAreaScreen';
 import SelectPoojaScreen from '../../screens/Auth/SelectPoojaScreen';
 import SelectLanguageScreen from '../../screens/Auth/SelectLanguageScreen';
+import DocumentUploadScreen from '../../screens/Auth/DocumentUploadScreen';
 
 export type SettingsStackParamList = {
   navigate(arg0: string): void;
@@ -16,6 +17,7 @@ export type SettingsStackParamList = {
   SelectAreaScreen: undefined;
   SelectPoojaScreen: undefined;
   SelectLanguageScreen: undefined;
+  DocumentUploadScreen: undefined;
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -36,6 +38,10 @@ const SettingsNavigator = () => {
       <Stack.Screen
         name="SelectLanguageScreen"
         component={SelectLanguageScreen}
+      />
+      <Stack.Screen
+        name="DocumentUploadScreen"
+        component={DocumentUploadScreen}
       />
     </Stack.Navigator>
   );

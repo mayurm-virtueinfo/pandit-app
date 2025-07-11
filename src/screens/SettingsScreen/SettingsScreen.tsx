@@ -78,7 +78,7 @@ const SettingsScreen: React.FC = () => {
     {
       title: t('change_documents'),
       key: 'changeDocuments',
-      navigation: 'AvailabilityScreen',
+      navigation: 'DocumentUploadScreen',
     },
   ];
 

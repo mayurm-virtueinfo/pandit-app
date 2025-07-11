@@ -186,14 +186,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   formContainer: {
-    paddingHorizontal: moderateScale(16),
-    paddingVertical: 24,
+    padding: 24,
     gap: 16,
   },
   textcontainer: {
-    marginHorizontal: 20,
-    paddingVertical: 10,
-    marginTop: -20,
+    marginHorizontal: 24,
+    paddingBottom: 16,
+    marginTop: -10,
   },
   text: {
     fontFamily: Fonts.Sen_Regular,
@@ -202,7 +201,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     height: 46,
-    marginHorizontal: moderateScale(16),
+    marginHorizontal: moderateScale(24),
   },
   buttonText: {
     fontSize: 15,
