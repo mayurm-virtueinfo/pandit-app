@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, FlatList, StyleSheet} from 'react-native';
+import React from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 import {moderateScale} from 'react-native-size-matters';
-import {COLORS, FONTS, THEMESHADOW} from '../theme/theme';
+import {COLORS} from '../theme/theme';
 import Fonts from '../theme/fonts';
-import Icon from 'react-native-vector-icons/Feather';
+import {Dropdown} from 'react-native-element-dropdown';
 
 interface DropdownItem {
   label: string;
@@ -16,6 +16,7 @@ interface CustomDropdownProps {
   onSelect: (value: string) => void;
   placeholder?: string;
   label?: string;
+  error?: string;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -24,53 +25,38 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   onSelect,
   placeholder = 'Select an option',
   label,
+  error,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectedItem = items.find(item => item.value === selectedValue);
-
-  const renderItem = ({item}: {item: DropdownItem}) => (
-    <TouchableOpacity
-      style={styles.dropdownItem}
-      onPress={() => {
-        onSelect(item.value);
-        setIsOpen(false);
-      }}>
-      <Text style={styles.dropdownItemText}>{item.label}</Text>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <TouchableOpacity
-        style={[styles.dropdown, isOpen && styles.dropdownActive]}
-        onPress={() => setIsOpen(!isOpen)}>
-        <Text style={styles.dropdownText}>
-          {selectedItem ? selectedItem.label : placeholder}
-        </Text>
-        <Icon
-          name={isOpen ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color={COLORS.textPrimary}
-        />
-      </TouchableOpacity>
-      {isOpen && (
-        <View style={[styles.dropdownList, THEMESHADOW.shadow]}>
-          <FlatList
-            data={items}
-            renderItem={renderItem}
-            keyExtractor={item => item.value}
-            style={styles.flatList}
-          />
-        </View>
-      )}
+      <Dropdown
+        style={[styles.dropdown, error ? styles.dropdownError : null]}
+        data={items}
+        labelField="label"
+        valueField="value"
+        placeholder={placeholder}
+        value={selectedValue}
+        onChange={item => onSelect(item.value)}
+        placeholderStyle={styles.dropdownText}
+        selectedTextStyle={styles.dropdownText}
+        itemTextStyle={styles.dropdownItemText}
+        containerStyle={styles.dropdownList}
+        iconColor={COLORS.textPrimary}
+        iconStyle={{width: 20, height: 20}}
+      />
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 };
 
+export default CustomDropdown;
+
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    width: '100%',
+    gap: 5,
+  },
   label: {
     color: COLORS.inputLabelText,
     fontFamily: Fonts.Sen_Medium,
@@ -83,12 +69,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.inputBoder,
     padding: moderateScale(10),
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  dropdownActive: {
-    borderColor: COLORS.primary,
+  dropdownError: {
+    borderColor: COLORS.error, // Red border for error
   },
   dropdownText: {
     fontFamily: Fonts.Sen_Regular,
@@ -103,19 +86,15 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(5),
     maxHeight: moderateScale(150),
   },
-  dropdownItem: {
-    padding: moderateScale(12),
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderColor,
-  },
   dropdownItemText: {
     fontFamily: Fonts.Sen_Regular,
     fontSize: moderateScale(14),
     color: COLORS.textPrimary,
   },
-  flatList: {
-    flexGrow: 0,
+  errorText: {
+    color: COLORS.error, // Red text for error message
+    fontFamily: Fonts.Sen_Regular,
+    fontSize: 12,
+    marginTop: 2,
   },
 });
-
-export default CustomDropdown;

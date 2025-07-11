@@ -1,6 +1,12 @@
 // import axios from 'axios';
 import apiDev from './apiDev';
-import ApiEndpoints, { POST_SIGNIN } from './apiEndpoints';
+import ApiEndpoints, {
+  GET_CASTE,
+  GET_CITY,
+  GET_GOTRA,
+  GET_SUBCASTE,
+  POST_SIGNIN,
+} from './apiEndpoints';
 
 // Types for dropdown data
 export interface PanditPujaList {
@@ -96,7 +102,7 @@ export interface PujaListItemType {
   image: string;
   description: string;
   visualSection: string;
-  status: string
+  status: string;
 }
 
 export interface PujaListDataResponse {
@@ -108,7 +114,7 @@ export interface EarningsHistoryResponse {
   id: number;
   poojaName: string;
   price: number;
-  date: string
+  date: string;
 }
 
 export interface NotificationData {
@@ -191,10 +197,10 @@ export const apiService = {
   getPujaListData: async (): Promise<PujaListDataResponse> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || { recommendedPuja: [], pujaList: [] };
+      return response.data?.record || {recommendedPuja: [], pujaList: []};
     } catch (error) {
       console.error('Error fetching puja list data:', error);
-      return { pujaList: [] };
+      return {pujaList: []};
     }
   },
 
@@ -211,7 +217,6 @@ export const apiService = {
         price: 0,
         date: '',
       };
-
     }
   },
 
@@ -224,7 +229,7 @@ export const apiService = {
       return [];
     }
   },
-}
+};
 
 export const postSignIn = (data: SignInRequest): Promise<SignInResponse> => {
   console.log('params data ::', data);
@@ -237,6 +242,64 @@ export const postSignIn = (data: SignInRequest): Promise<SignInResponse> => {
       })
       .catch(error => {
         console.error('Error fetching sign in data:', error);
+        reject(error);
+      });
+  });
+};
+
+export const getCity = () => {
+  let apiUrl = GET_CITY;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching city data:', error);
+        reject(error);
+      });
+  });
+};
+
+export const getCaste = () => {
+  let apiUrl = GET_CASTE;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching caste data:', error);
+        reject(error);
+      });
+  });
+};
+
+export const getSubCaste = (id: any) => {
+  let apiUrl = GET_SUBCASTE.replace('{casteId}', id);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+};
+
+export const getGotra = (id: any) => {
+  let apiUrl = GET_GOTRA.replace('{subCasteId}', id);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
         reject(error);
       });
   });

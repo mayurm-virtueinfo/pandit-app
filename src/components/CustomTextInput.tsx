@@ -9,6 +9,7 @@ interface InputFieldProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   keyboardType?: 'default' | 'email-address' | 'phone-pad';
+  error?: string;
 }
 
 const CustomTextInput: React.FC<InputFieldProps> = ({
@@ -17,11 +18,12 @@ const CustomTextInput: React.FC<InputFieldProps> = ({
   onChangeText,
   placeholder,
   keyboardType = 'default',
+  error,
 }) => {
   return (
     <View style={styles.inputField}>
       <Text style={styles.inputTitle}>{label}</Text>
-      <View style={styles.inputArea}>
+      <View style={[styles.inputArea, error ? styles.inputAreaError : null]}>
         <TextInput
           style={styles.inputText}
           value={value}
@@ -31,6 +33,7 @@ const CustomTextInput: React.FC<InputFieldProps> = ({
           keyboardType={keyboardType}
         />
       </View>
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 };
@@ -63,5 +66,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     padding: 0,
     margin: 0,
+  },
+  inputAreaError: {
+    borderColor: COLORS.error,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontFamily: Fonts.Sen_Regular,
+    fontSize: 12,
+    marginTop: 2,
   },
 });

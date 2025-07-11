@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,10 @@ import CustomHeader from '../../components/CustomHeader';
 import {useTranslation} from 'react-i18next';
 import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomSelector from '../../components/CustomeSelector';
+import {getCity} from '../../api/apiService';
+import {SelectorDataOption} from './type';
+import {useCommonToast} from '../../common/CommonToast';
+import CustomeLoader from '../../components/CustomLoader';
 
 type RouteParams = {
   action?: string;
@@ -29,17 +33,34 @@ const SelectCityScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {t} = useTranslation();
+  const {showErrorToast} = useCommonToast();
 
-  const [cities] = useState<CustomeSelectorDataOption[]>([
-    {id: 1, name: 'Mumbai'},
-    {id: 2, name: 'Delhi'},
-    {id: 3, name: 'Bangalore'},
-    {id: 4, name: 'Kolkata'},
-  ]);
+  const [cities, setCities] = useState<CustomeSelectorDataOption[]>([]);
 
   const [selectedCityId, setSelectedCityId] = useState<number | null>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Get action from route params if present
+  useEffect(() => {
+    fetchCityData();
+  }, []);
+
+  const fetchCityData = async () => {
+    setIsLoading(true);
+    try {
+      const response = (await getCity()) as SelectorDataOption;
+      const data = response?.data || [];
+      const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+      }));
+      setCities(mappedData);
+    } catch (error: any) {
+      showErrorToast(error?.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const action = route.params?.action;
 
   console.log('selectedCityId :: ', selectedCityId);
@@ -59,11 +80,11 @@ const SelectCityScreen: React.FC = () => {
     }
   };
 
-  // Set button text based on action
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
+      <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
         backgroundColor="transparent"

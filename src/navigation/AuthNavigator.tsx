@@ -23,7 +23,16 @@ export type AuthStackParamList = {
   };
   CompleteProfileScreen: {phoneNumber: string};
   SelectCityArea: undefined;
-  SelectCityScreen: undefined;
+  SelectCityScreen: {
+    phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    city: string | number;
+    caste: string | number;
+    subCaste: string | number;
+    gotra: string | number;
+    address: string;
+  };
   SelectAreaScreen: undefined;
   SelectPoojaScreen: undefined;
   Documents: undefined;

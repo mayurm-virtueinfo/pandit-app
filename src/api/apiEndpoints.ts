@@ -1,5 +1,6 @@
 class ApiEndpoints {
-  static readonly XMasterKey = '$2a$10$XR82L3T4Q4gtDUAvZKwioOsmNaU2X7QVpkZbtKJ90jdcoVal/Pd4a';
+  static readonly XMasterKey =
+    '$2a$10$XR82L3T4Q4gtDUAvZKwioOsmNaU2X7QVpkZbtKJ90jdcoVal/Pd4a';
 
   static readonly CITY_API = 'https://api.postalpincode.in/pincode';
   static readonly BASE_URL = 'https://api.jsonbin.io';
@@ -27,9 +28,12 @@ class ApiEndpoints {
   static readonly PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/685e858d8561e97a502cbc73`;
   static readonly EARNINGS_HISTORY_API = `${ApiEndpoints.API_VERSION}/686e27ce9e410d0f5e41d8ea`;
   static readonly NOTIFICATION_DATA_API = `${ApiEndpoints.API_VERSION}/6867ade78561e97a50315d3b`;
-
 }
 
 export default ApiEndpoints;
 
 export const POST_SIGNIN = '/auth/signin/';
+export const GET_CITY = '/auth/areas/';
+export const GET_CASTE = '/panditji/castes/';
+export const GET_SUBCASTE = '/panditji/castes/{casteId}/subcastes/';
+export const GET_GOTRA = '/panditji/subcastes/{subCasteId}/gotras/';
