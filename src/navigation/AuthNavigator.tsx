@@ -14,6 +14,8 @@ import SelectAreaScreen from '../screens/Auth/SelectAreaScreen';
 import SelectPoojaScreen from '../screens/Auth/SelectPoojaScreen';
 import CompleteProfileScreen from '../screens/Auth/CompleteProfileScreen';
 import AppBottomTabNavigator from './BottomTabNavigator';
+import SelectLanguageScreen from '../screens/Auth/SelectLanguageScreen';
+import DocumentUploadScreen from '../screens/Auth/DocumentUploadScreen';
 
 export type AuthStackParamList = {
   SignIn: undefined;
@@ -33,8 +35,56 @@ export type AuthStackParamList = {
     gotra: string | number;
     address: string;
   };
-  SelectAreaScreen: undefined;
-  SelectPoojaScreen: undefined;
+  SelectAreaScreen: {
+    phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    city: string | number;
+    caste: string | number;
+    subCaste: string | number;
+    gotra: string | number;
+    address: string;
+    selectCityId: number | string;
+  };
+  SelectPoojaScreen: {
+    phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    city: string | number;
+    caste: string | number;
+    subCaste: string | number;
+    gotra: string | number;
+    address: string;
+    selectCityId: number | string;
+    selectedAreasId: number[];
+  };
+  SelectLanguageScreen: {
+    phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    city: string | number;
+    caste: string | number;
+    subCaste: string | number;
+    gotra: string | number;
+    address: string;
+    selectCityId: number | string;
+    selectedAreasId: number[];
+    selectedPoojaId: number[];
+  };
+  DocumentUploadScreen: {
+    phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    city: string | number;
+    caste: string | number;
+    subCaste: string | number;
+    gotra: string | number;
+    address: string;
+    selectCityId: number | string;
+    selectedAreasId: number[];
+    selectedPoojaId: number[];
+    selectedLanguageId: number[];
+  };
   Documents: undefined;
   PoojaAndAstrologyPerformed: undefined;
   Languages: undefined;
@@ -84,6 +134,20 @@ const AuthNavigator = () => {
       <Stack.Screen
         name="SelectPoojaScreen"
         component={SelectPoojaScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SelectLanguageScreen"
+        component={SelectLanguageScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="DocumentUploadScreen"
+        component={DocumentUploadScreen}
         options={{
           headerShown: false,
         }}

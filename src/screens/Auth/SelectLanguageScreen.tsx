@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -19,36 +19,81 @@ import CustomHeader from '../../components/CustomHeader';
 import {useTranslation} from 'react-i18next';
 import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
+import {getLanguage} from '../../api/apiService';
+import {SelectorDataOption} from './type';
+import CustomeLoader from '../../components/CustomLoader';
+import {useCommonToast} from '../../common/CommonToast';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '../../navigation/AuthNavigator';
 
 type RouteParams = {
   action?: string;
+  phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  caste?: string;
+  subCaste?: string;
+  gotra?: string;
+  address?: string;
+  selectCityId?: number | string;
+  selectedAreasId?: number[];
+  selectedPoojaId?: number[];
 };
 
+type ScreenNavigationProp = StackNavigationProp<
+  AuthStackParamList,
+  'SelectLanguageScreen'
+>;
+
 const SelectLanguageScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {t} = useTranslation();
+  const {showErrorToast} = useCommonToast();
 
-  const [languages] = useState<CustomeSelectorDataOption[]>([
-    {
-      id: 37,
-      name: 'English',
-    },
-    {
-      id: 39,
-      name: 'Gujarati',
-    },
-    {
-      id: 38,
-      name: 'Hindi',
-    },
-  ]);
+  const [languages, setLanguages] = useState<CustomeSelectorDataOption[]>([]);
 
   const [selectedLanguageId, setSelectedLanguageId] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Get action from route params if present
   const action = route.params?.action;
+
+  const {
+    phoneNumber,
+    firstName,
+    lastName,
+    city,
+    caste,
+    subCaste,
+    gotra,
+    address,
+    selectCityId,
+    selectedAreasId,
+    selectedPoojaId,
+  } = route.params || {};
+
+  useEffect(() => {
+    fetchPoojaData();
+  }, []);
+
+  const fetchPoojaData = async () => {
+    setIsLoading(true);
+    try {
+      const response = (await getLanguage()) as SelectorDataOption;
+      const data = response?.data || [];
+      const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+      }));
+      setLanguages(mappedData);
+    } catch (error: any) {
+      showErrorToast(error?.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLanguageSelect = (languageId: number) => {
     setSelectedLanguageId(prev =>
@@ -63,20 +108,28 @@ const SelectLanguageScreen: React.FC = () => {
       selectedLanguageId.includes(language.id),
     );
     if (selectedLanguage.length > 0) {
-      console.log(
-        'Selected language:',
-        selectedLanguage.map(language => language.name).join(', '),
-      );
+      navigation.navigate('DocumentUploadScreen', {
+        phoneNumber: phoneNumber ?? '',
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        city: city ?? '',
+        caste: caste ?? '',
+        subCaste: subCaste ?? '',
+        gotra: gotra ?? '',
+        address: address ?? '',
+        selectCityId: selectCityId ?? '',
+        selectedAreasId: selectedAreasId ?? [],
+        selectedPoojaId: selectedPoojaId ?? [],
+        selectedLanguageId: selectedLanguageId ?? [],
+      });
     }
   };
 
-  console.log('selectedLanguageId :: ', selectedLanguageId);
-
-  // Set button text based on action
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
+      <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
         backgroundColor="transparent"

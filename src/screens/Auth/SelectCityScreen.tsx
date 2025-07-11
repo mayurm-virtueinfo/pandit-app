@@ -23,17 +23,43 @@ import {getCity} from '../../api/apiService';
 import {SelectorDataOption} from './type';
 import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
+import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import {StackNavigationProp} from '@react-navigation/stack';
 
 type RouteParams = {
   action?: string;
+  phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  caste?: string;
+  subCaste?: string;
+  gotra?: string;
+  address?: string;
 };
 
+type ScreenNavigationProp = StackNavigationProp<
+  AuthStackParamList,
+  'SelectCityScreen'
+>;
+
 const SelectCityScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {t} = useTranslation();
   const {showErrorToast} = useCommonToast();
+
+  const {
+    phoneNumber,
+    firstName,
+    lastName,
+    city,
+    caste,
+    subCaste,
+    gotra,
+    address,
+  } = route.params || {};
 
   const [cities, setCities] = useState<CustomeSelectorDataOption[]>([]);
 
@@ -76,7 +102,19 @@ const SelectCityScreen: React.FC = () => {
   const handleNext = () => {
     const selectedCity = cities.find(city => city.id === selectedCityId);
     if (selectedCity) {
-      console.log('Selected city:', selectedCity.name);
+      navigation.navigate('SelectAreaScreen', {
+        phoneNumber: phoneNumber ?? '',
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        city: city ?? '',
+        caste: caste ?? '',
+        subCaste: subCaste ?? '',
+        gotra: gotra ?? '',
+        address: address ?? '',
+        selectCityId: selectedCityId ?? '',
+      });
+    } else {
+      showErrorToast('Please select city');
     }
   };
 

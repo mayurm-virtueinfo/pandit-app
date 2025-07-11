@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -17,32 +17,78 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
 import CustomHeader from '../../components/CustomHeader';
 import {useTranslation} from 'react-i18next';
-import CustomSelector from '../../components/CustomeSelector';
 import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
+import {useCommonToast} from '../../common/CommonToast';
+import {getAreas} from '../../api/apiService';
+import {SelectorDataOption} from './type';
+import CustomeLoader from '../../components/CustomLoader';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '../../navigation/AuthNavigator';
 
 type RouteParams = {
   action?: string;
+  phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  caste?: string;
+  subCaste?: string;
+  gotra?: string;
+  address?: string;
+  selectCityId?: number | string;
 };
 
+type ScreenNavigationProp = StackNavigationProp<
+  AuthStackParamList,
+  'SelectAreaScreen'
+>;
+
 const SelectAreaScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
 
-  const [areas] = useState<CustomeSelectorDataOption[]>([
-    {id: 3, name: 'Andheri'},
-    {id: 2, name: 'Bandra'},
-    {id: 6, name: 'Colaba'},
-    {id: 4, name: 'Juhu'},
-    {id: 5, name: 'Powai'},
-  ]);
-
+  const {showErrorToast} = useCommonToast();
+  const [areas, setAreas] = useState<CustomeSelectorDataOption[]>([]);
   const [selectedAreaIds, setSelectedAreaIds] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Get action from route params if present
+  const {
+    phoneNumber,
+    firstName,
+    lastName,
+    city,
+    caste,
+    subCaste,
+    gotra,
+    address,
+    selectCityId,
+  } = route.params || {};
+
   const action = route.params?.action;
+
+  useEffect(() => {
+    fetchAreaData();
+  }, [selectCityId]);
+
+  const fetchAreaData = async () => {
+    setIsLoading(true);
+    try {
+      const response = (await getAreas(selectCityId)) as SelectorDataOption;
+      const data = response?.data || [];
+      const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+      }));
+      setAreas(mappedData);
+    } catch (error: any) {
+      showErrorToast(error?.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAreaSelect = (areaId: number) => {
     setSelectedAreaIds(prev =>
@@ -57,21 +103,30 @@ const SelectAreaScreen: React.FC = () => {
       selectedAreaIds.includes(area.id),
     );
     if (selectedAreas.length > 0) {
-      console.log(
-        'Selected areas:',
-        selectedAreas.map(area => area.name),
-      );
-      navigation.goBack();
+      navigation.navigate('SelectPoojaScreen', {
+        phoneNumber: phoneNumber ?? '',
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        city: city ?? '',
+        caste: caste ?? '',
+        subCaste: subCaste ?? '',
+        gotra: gotra ?? '',
+        address: address ?? '',
+        selectCityId: selectCityId ?? '',
+        selectedAreasId: selectedAreaIds ?? [],
+      });
+    } else {
+      showErrorToast('Please select Area');
     }
   };
 
   console.log('selectedAreaIds :: ', selectedAreaIds);
 
-  // Set button text based on action
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
+      <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
         backgroundColor="transparent"

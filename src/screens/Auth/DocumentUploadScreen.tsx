@@ -7,7 +7,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import DocumentPicker, {
   DocumentPickerResponse,
 } from 'react-native-document-picker';
@@ -26,6 +26,22 @@ interface DocumentUploadState {
   certifications: boolean;
 }
 
+type RouteParams = {
+  action?: string;
+  phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  caste?: string;
+  subCaste?: string;
+  gotra?: string;
+  address?: string;
+  selectCityId?: number | string;
+  selectedAreasId?: number[];
+  selectedPoojaId?: number[];
+  selectedLanguageId?: number[];
+};
+
 interface DocumentInfo {
   name: string | null;
   url: string | null;
@@ -34,6 +50,24 @@ interface DocumentInfo {
 const DocumentUploadScreen: React.FC = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
+
+  const {
+    phoneNumber,
+    firstName,
+    lastName,
+    city,
+    caste,
+    subCaste,
+    gotra,
+    address,
+    selectCityId,
+    selectedAreasId,
+    selectedPoojaId,
+    selectedLanguageId,
+  } = route.params || {};
+
+  console.log('params :: ', route.params);
 
   const [uploadedDocuments, setUploadedDocuments] =
     useState<DocumentUploadState>({

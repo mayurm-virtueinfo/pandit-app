@@ -37,3 +37,6 @@ export const GET_CITY = '/auth/areas/';
 export const GET_CASTE = '/panditji/castes/';
 export const GET_SUBCASTE = '/panditji/castes/{casteId}/subcastes/';
 export const GET_GOTRA = '/panditji/subcastes/{subCasteId}/gotras/';
+export const GET_AREA = '/auth/api/areas/?city_id={id}';
+export const GET_POOJA = '/panditji/poojas/';
+export const GET_LANGUAGES = '/panditji/languages/';

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -17,47 +17,87 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
 import CustomHeader from '../../components/CustomHeader';
 import {useTranslation} from 'react-i18next';
-import CustomSelector from '../../components/CustomeSelector';
-import {poojaDataOption} from '../../types/cityTypes';
+import {
+  CustomeSelectorDataOption,
+  poojaDataOption,
+} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
+import {getPooja} from '../../api/apiService';
+import {SelectorDataOption} from './type';
+import {useCommonToast} from '../../common/CommonToast';
+import CustomeLoader from '../../components/CustomLoader';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '../../navigation/AuthNavigator';
 
 type RouteParams = {
   action?: string;
+  phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  caste?: string;
+  subCaste?: string;
+  gotra?: string;
+  address?: string;
+  selectCityId?: number | string;
+  selectedAreasId?: number[];
 };
 
+type ScreenNavigation = StackNavigationProp<
+  AuthStackParamList,
+  'SelectPoojaScreen'
+>;
+
 const SelectPoojaScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ScreenNavigation>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {t} = useTranslation();
+  const {showErrorToast} = useCommonToast();
 
-  const [poojaData] = useState<poojaDataOption[]>([
-    {
-      id: 255,
-      title: 'Annaprashan',
-      short_description: 'Annaprashan performed by qualified Panditji.',
-    },
-    {
-      id: 258,
-      title: 'Antyeshti Sanskar',
-      short_description: 'Antyeshti Sanskar performed by qualified Panditji.',
-    },
-    {
-      id: 257,
-      title: 'Bhumi Pujan',
-      short_description: 'Bhumi Pujan performed by qualified Panditji.',
-    },
-    {
-      id: 260,
-      title: 'Brihaspati Vrat',
-      short_description: 'Brihaspati Vrat performed by qualified Panditji.',
-    },
-  ]);
+  console.log('route.params : ', route.params);
+
+  const [poojaData, setPoojaData] = useState<poojaDataOption[]>([]);
 
   const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Get action from route params if present
+  const {
+    phoneNumber,
+    firstName,
+    lastName,
+    city,
+    caste,
+    subCaste,
+    gotra,
+    address,
+    selectCityId,
+    selectedAreasId,
+  } = route.params || {};
+
   const action = route.params?.action;
+
+  useEffect(() => {
+    fetchPoojaData();
+  }, []);
+
+  const fetchPoojaData = async () => {
+    setIsLoading(true);
+    try {
+      const response = (await getPooja()) as SelectorDataOption;
+      const data = response?.data || [];
+      const mappedData: poojaDataOption[] = data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        short_description: item.short_description,
+      }));
+      setPoojaData(mappedData);
+    } catch (error: any) {
+      showErrorToast(error?.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePoojaSelect = (poojaId: number) => {
     setSelectedPoojaId(prev =>
@@ -72,20 +112,29 @@ const SelectPoojaScreen: React.FC = () => {
       selectedPoojaId.includes(area.id),
     );
     if (selectedPooja.length > 0) {
-      console.log(
-        'Selected pooja:',
-        selectedPooja.map(area => area.title).join(', '),
-      );
+      navigation.navigate('SelectLanguageScreen', {
+        phoneNumber: phoneNumber ?? '',
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        city: city ?? '',
+        caste: caste ?? '',
+        subCaste: subCaste ?? '',
+        gotra: gotra ?? '',
+        address: address ?? '',
+        selectCityId: selectCityId ?? '',
+        selectedAreasId: selectedAreasId ?? [],
+        selectedPoojaId: selectedPoojaId ?? [],
+      });
     }
   };
 
   console.log('selectedPoojaId :: ', selectedPoojaId);
 
-  // Set button text based on action
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
     <View style={styles.container}>
+      <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
         backgroundColor="transparent"

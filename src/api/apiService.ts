@@ -1,9 +1,12 @@
 // import axios from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
+  GET_AREA,
   GET_CASTE,
   GET_CITY,
   GET_GOTRA,
+  GET_LANGUAGES,
+  GET_POOJA,
   GET_SUBCASTE,
   POST_SIGNIN,
 } from './apiEndpoints';
@@ -300,6 +303,50 @@ export const getGotra = (id: any) => {
         resolve(response);
       })
       .catch(error => {
+        reject(error);
+      });
+  });
+};
+
+export const getAreas = (id: any) => {
+  let apiUrl = GET_AREA.replace('{id}', id);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+};
+
+export const getPooja = () => {
+  let apiUrl = GET_POOJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching pooja data:', error);
+        reject(error);
+      });
+  });
+};
+
+export const getLanguage = () => {
+  let apiUrl = GET_LANGUAGES;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching language data:', error);
         reject(error);
       });
   });

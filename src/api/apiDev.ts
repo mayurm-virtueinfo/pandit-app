@@ -6,8 +6,7 @@ import ApiEndpoints from './apiEndpoints';
 
 const apiDev = axios.create({
   // baseURL: Config.BASE_URL,
-  baseURL:
-    'https://bbd3fa423b43.ngrok-free.app',
+  baseURL: 'https://81aceddf025e.ngrok-free.app',
   // ApiEndpoints.BASE_URL,
   headers: {
     'Content-Type': 'application/json',
