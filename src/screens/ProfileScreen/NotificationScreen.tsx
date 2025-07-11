@@ -23,6 +23,8 @@ const NotificationScreen: React.FC = () => {
   const inset = useSafeAreaInsets();
   const {t} = useTranslation();
 
+  //This is the state to hold notifications data
+
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
