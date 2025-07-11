@@ -58,7 +58,6 @@ const DocumentUploadScreen: React.FC = () => {
   const [loadingDocument, setLoadingDocument] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Function to handle submit and call postSignUp API
   const handleSubmitDocument = async (signUpData: any) => {
     setIsSubmitting(true);
     try {
