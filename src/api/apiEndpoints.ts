@@ -40,3 +40,4 @@ export const GET_GOTRA = '/panditji/subcastes/{subCasteId}/gotras/';
 export const GET_AREA = '/auth/api/areas/?city_id={id}';
 export const GET_POOJA = '/panditji/poojas/';
 export const GET_LANGUAGES = '/panditji/languages/';
+export const POST_SIGNUP = '/auth/register/';

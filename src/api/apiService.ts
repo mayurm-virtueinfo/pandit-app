@@ -9,6 +9,7 @@ import ApiEndpoints, {
   GET_POOJA,
   GET_SUBCASTE,
   POST_SIGNIN,
+  POST_SIGNUP,
 } from './apiEndpoints';
 
 // Types for dropdown data
@@ -151,6 +152,33 @@ export interface User {
   gender: number;
   profile_img: string;
   pandit_details: string;
+}
+
+export interface SignUpRequest {
+  mobile: string;
+  firebase_uid: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: number;
+  address: string;
+  city: string;
+  profile_img: string;
+  puja_ids: number[];
+  area_ids: number[];
+  pandit_detail: {
+    address_city: number;
+    caste: number;
+    sub_caste: number;
+    gotra: number;
+    supported_languages: number[];
+  };
+  pandit_documents: {
+    id_proof: string;
+    pan_card: string;
+    electricity_bill: string;
+    certifications: string;
+  };
 }
 
 export const apiService = {
@@ -347,6 +375,21 @@ export const getLanguage = () => {
       })
       .catch(error => {
         console.error('Error fetching language data:', error);
+        reject(error);
+      });
+  });
+};
+export const postSignUp = (data: SignUpRequest): Promise<SignInResponse> => {
+  console.log('params data ::', data);
+  let apiUrl = POST_SIGNUP;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching sign in data:', error);
         reject(error);
       });
   });
