@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 16,
   },
-  textcontainer: {
+  textContainer: {
     marginHorizontal: 24,
     paddingBottom: 16,
     marginTop: -10,
