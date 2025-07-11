@@ -20,7 +20,6 @@ export interface Message {
   isOwn: boolean;
 }
 
-//smaple comment
 const ChatScreen: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
