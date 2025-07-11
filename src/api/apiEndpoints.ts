@@ -37,3 +37,4 @@ export const GET_CITY = '/auth/areas/';
 export const GET_CASTE = '/panditji/castes/';
 export const GET_SUBCASTE = '/panditji/castes/{casteId}/subcastes/';
 export const GET_GOTRA = '/panditji/subcastes/{subCasteId}/gotras/';
+export const POST_SIGNUP = '/auth/register/';

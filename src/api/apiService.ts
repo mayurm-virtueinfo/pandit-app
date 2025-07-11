@@ -6,6 +6,7 @@ import ApiEndpoints, {
   GET_GOTRA,
   GET_SUBCASTE,
   POST_SIGNIN,
+  POST_SIGNUP,
 } from './apiEndpoints';
 
 // Types for dropdown data
@@ -150,6 +151,33 @@ export interface User {
   pandit_details: string;
 }
 
+export interface SignUpRequest {
+  mobile: string;
+  firebase_uid: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: number;
+  address: string;
+  city: string;
+  profile_img: string;
+  puja_ids: number[];
+  area_ids: number[];
+  pandit_detail: {
+    address_city: number,
+    caste: number,
+    sub_caste: number,
+    gotra: number,
+    supported_languages: number[]
+  },
+  pandit_documents: {
+    id_proof: string,
+    pan_card: string,
+    electricity_bill: string,
+    certifications: string
+  }
+}
+
 export const apiService = {
   // Fetch castes (mock data)
   getPujaList: async (): Promise<PujaList[]> => {
@@ -197,10 +225,10 @@ export const apiService = {
   getPujaListData: async (): Promise<PujaListDataResponse> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || {recommendedPuja: [], pujaList: []};
+      return response.data?.record || { recommendedPuja: [], pujaList: [] };
     } catch (error) {
       console.error('Error fetching puja list data:', error);
-      return {pujaList: []};
+      return { pujaList: [] };
     }
   },
 
@@ -300,6 +328,22 @@ export const getGotra = (id: any) => {
         resolve(response);
       })
       .catch(error => {
+        reject(error);
+      });
+  });
+};
+
+export const postSignUp = (data: SignUpRequest): Promise<SignInResponse> => {
+  console.log('params data ::', data);
+  let apiUrl = POST_SIGNUP;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching sign in data:', error);
         reject(error);
       });
   });

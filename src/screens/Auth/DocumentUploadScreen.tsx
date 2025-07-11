@@ -18,6 +18,7 @@ import Fonts from '../../theme/fonts';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
 import DocumentSection from '../../components/DocumentSection';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {postSignUp} from '../../api/apiService';
 
 interface DocumentUploadState {
   idProof: boolean;
@@ -56,6 +57,22 @@ const DocumentUploadScreen: React.FC = () => {
 
   const [loadingDocument, setLoadingDocument] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Function to handle submit and call postSignUp API
+  const handleSubmitDocument = async (signUpData: any) => {
+    setIsSubmitting(true);
+    try {
+      const response = await postSignUp(signUpData);
+      // Handle success (e.g., navigate to next screen or show success message)
+      // Example: navigation.navigate('NextScreen');
+      console.log('Sign up successful:', response);
+    } catch (error) {
+      // Handle error (e.g., show error message)
+      console.error('Sign up failed:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const uploadDocument = async (
     document: DocumentPickerResponse,
