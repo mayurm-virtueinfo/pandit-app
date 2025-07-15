@@ -32,13 +32,17 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
-export const POST_SIGNIN = '/auth/signin/';
-export const GET_CITY = '/auth/areas/';
+export const POST_SIGNIN = '/app/auth/signin/';
+export const GET_CITY = '/app/areas/';
 export const GET_CASTE = '/panditji/castes/';
 export const GET_SUBCASTE = '/panditji/castes/{casteId}/subcastes/';
 export const GET_GOTRA = '/panditji/subcastes/{subCasteId}/gotras/';
-export const GET_AREA = '/auth/api/areas/?city_id={id}';
+export const GET_AREA = '/app/api/areas/?city_id={id}';
 export const GET_POOJA = '/panditji/poojas/';
 export const GET_LANGUAGES = '/panditji/languages/';
-export const POST_SIGNUP = '/auth/register/';
-export const POST_LOGOUT = '/auth/logout/'
+export const POST_SIGNUP = '/app/auth/register/';
+export const POST_LOGOUT = '/app/auth/logout/';
+export const POST_REFRESH_TOKEN = '/app/auth/refresh-token/';
+export const GET_EDIT_PUJA = '/panditji/my-puja/';
+export const GET_UNASSIGN_PUJA = '/panditji/unassign-poojas/'
+export const POST_ADD_PUJA = '/panditji/add-pandit-puja/'

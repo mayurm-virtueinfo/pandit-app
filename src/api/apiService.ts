@@ -5,11 +5,15 @@ import ApiEndpoints, {
   GET_AREA,
   GET_CASTE,
   GET_CITY,
+  GET_EDIT_PUJA,
   GET_GOTRA,
   GET_LANGUAGES,
   GET_POOJA,
   GET_SUBCASTE,
+  GET_UNASSIGN_PUJA,
+  POST_ADD_PUJA,
   POST_LOGOUT,
+  POST_REFRESH_TOKEN,
   POST_SIGNIN,
   POST_SIGNUP,
 } from './apiEndpoints';
@@ -145,6 +149,7 @@ export interface SignInResponse {
 }
 
 export interface User {
+  id(id: any): string;
   mobile: string;
   firebase_uid: string;
   first_name: string;
@@ -184,6 +189,37 @@ export interface SignUpRequest {
 
 export interface LogoutRequest {
   refresh_token: string;
+}
+
+export interface EditRequest {
+  id: number,
+  user: number,
+  image: string,
+  pooja: number,
+  name: string,
+  pujaPurpose: string,
+  price_with_samagri: number,
+  price_without_samagri: number,
+  custom_samagri_list: string,
+  price_status: number
+}
+
+export interface EditPuja {
+  id: number,
+  user: number,
+  pooja: number,
+  price_with_samagri: number,
+  price_without_samagri: number,
+  custom_samagri_list: string,
+  price_status: number
+}
+
+export interface AddPuja {
+  user: number,
+  pooja: number,
+  price_with_samagri: number,
+  price_without_samagri: number,
+  price_status: number
 }
 
 export const apiService = {
@@ -416,6 +452,81 @@ export const postLogout = (data: LogoutRequest) => {
       })
       .catch(error => {
         console.error('Error logout', error);
+        reject(error);
+      });
+  });
+};
+
+export const postRefreshToken = (data: LogoutRequest) => {
+  let apiUrl = POST_REFRESH_TOKEN;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error refreshing token', error);
+        reject(error);
+      });
+  });
+};
+
+export const getPuja = () => {
+  let apiUrl = GET_EDIT_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error get puja', error);
+        reject(error);
+      });
+  });
+};
+
+export const putPuja = (data: EditRequest) => {
+  let apiUrl = GET_EDIT_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .put(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error get puja', error);
+        reject(error);
+      });
+  });
+};
+
+export const getUnassignPuja = () => {
+  let apiUrl = GET_UNASSIGN_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error get UnassignPuja ', error);
+        reject(error);
+      });
+  });
+};
+
+export const postAddPuja = (data: AddPuja) => {
+  let apiUrl = POST_ADD_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error Add Puja ', error);
         reject(error);
       });
   });

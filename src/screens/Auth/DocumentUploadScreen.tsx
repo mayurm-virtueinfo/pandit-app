@@ -21,6 +21,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {postSignUp, SignUpRequest} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
+import {AuthStackParamList} from '../../navigation/AuthNavigator';
 
 interface DocumentUploadState {
   idProof: boolean;
@@ -52,7 +53,7 @@ interface DocumentInfo {
 }
 
 const DocumentUploadScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<AuthStackParamList>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
 
@@ -236,20 +237,35 @@ const DocumentUploadScreen: React.FC = () => {
 
     try {
       console.log('FormData:', formData._parts); // Debug FormData
-      await postSignUp(formData);
+      const response = await postSignUp(formData);
+
+      // Store id in AsyncStorage if present in response
+      if (response && response.user.id) {
+        await AsyncStorage.setItem('user_id', String(response.user.id));
+      }
+
       Alert.alert('Success', 'Documents submitted successfully!', [
         {
           text: 'OK',
-          onPress: () => navigation.goBack(),
+          onPress: () => navigation.navigate('AppBottomTabNavigator'),
         },
       ]);
-    } catch (error) {
-      console.error('Submission error:', error.response?.data || error.message);
-      Alert.alert(
-        'Error',
-        error.response?.data?.message ||
-          'Failed to submit documents. Please try again.',
-      );
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null) {
+        const err = error as {
+          response?: {data?: {message?: string}};
+          message?: string;
+        };
+        console.error('Submission error:', err.response?.data || err.message);
+        Alert.alert(
+          'Error',
+          err.response?.data?.message ||
+            'Failed to submit documents. Please try again.',
+        );
+      } else {
+        console.error('Submission error:', String(error));
+        Alert.alert('Error', 'Failed to submit documents. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -352,3 +368,6 @@ const styles = StyleSheet.create({
 });
 
 export default DocumentUploadScreen;
+function setIsSubmitting(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}

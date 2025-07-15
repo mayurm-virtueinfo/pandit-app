@@ -65,6 +65,8 @@ const ProfileScreen = () => {
       console.log(params);
       const response: any = await postLogout(params);
       if (response.data.success) {
+        // Remove user_id from AsyncStorage on logout
+        await AsyncStorage.removeItem('user_id');
         signOutApp();
       }
     } catch (error: any) {

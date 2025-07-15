@@ -15,6 +15,7 @@ export type PujaListStackParamList = {
   navigate(arg0: string): void;
   PujaListScreen: undefined;
   AddPujaScreen: undefined;
+  EditPujaScreen: {pujaId: number};
 };
 
 const Stack = createStackNavigator<PujaListStackParamList>();
@@ -29,6 +30,7 @@ const PujaListNavigator = () => {
       }}>
       <Stack.Screen name="PujaListScreen" component={PujaListScreen} />
       <Stack.Screen name="AddPujaScreen" component={AddPujaScreen} />
+      <Stack.Screen name="EditPujaScreen" component={AddPujaScreen} />
     </Stack.Navigator>
   );
 };

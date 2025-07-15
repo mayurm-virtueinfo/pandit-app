@@ -103,10 +103,15 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
       const params = {
         mobile: phoneNumber,
         firebase_uid: uid,
+        role: 2,
       };
       const response = await postSignIn(params);
       if (response) {
         console.log('response :: ', response);
+        // Store id in AsyncStorage if present in response
+        if (response?.user?.id) {
+          await AsyncStorage.setItem('user_id', String(response.user.id));
+        }
         if (response?.is_register === false) {
           navigation.navigate('CompleteProfileScreen', {
             phoneNumber: phoneNumber,

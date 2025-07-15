@@ -1,20 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import {useTranslation} from 'react-i18next';
-import {apiService, PujaListItemType} from '../../api/apiService';
-import {useNavigation} from '@react-navigation/native';
+import {getPuja} from '../../api/apiService';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {PujaListStackParamList} from '../../navigation/PujaListStack/PujaListStack';
 
@@ -23,26 +23,47 @@ type PujaListScreenNavigationProp = StackNavigationProp<
   'PujaListScreen'
 >;
 
+interface PujaItemType {
+  id: number;
+  pooja: number;
+  pooja_image_url: string;
+  pooja_title: string;
+  pooja_short_description: string;
+  price_with_samagri: string;
+  price_without_samagri: string;
+  price_status: number;
+}
+
 interface PujaItemProps {
-  puja: PujaListItemType;
-  onEdit: (id: number) => void;
+  puja: PujaItemType;
+  onEdit: (puja: PujaItemType) => void;
 }
 
 const PujaListScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<PujaListScreenNavigationProp>();
-  const [pujaList, setPujaList] = useState<PujaListItemType[]>([]);
+  const [pujaList, setPujaList] = useState<PujaItemType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    fetchPujaList();
-  }, []);
 
   const fetchPujaList = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getPujaListData();
-      setPujaList(response.pujaList || []);
+      const response: any = await getPuja();
+      // Map only required fields for display
+      console.log('response', response);
+      const mapped = Array.isArray(response.data)
+        ? response.data.map((item: any) => ({
+            id: item.id,
+            pooja: item.pooja, // Fixed: use item.pooja instead of undefined 'pooja'
+            pooja_image_url: item.pooja_image_url,
+            pooja_title: item.pooja_title,
+            pooja_short_description: item.pooja_short_description,
+            price_with_samagri: item.price_with_samagri,
+            price_without_samagri: item.price_without_samagri,
+            price_status: item.price_status,
+          }))
+        : [];
+      setPujaList(mapped);
     } catch (error) {
       setPujaList([]);
     } finally {
@@ -50,25 +71,51 @@ const PujaListScreen: React.FC = () => {
     }
   };
 
+  // Call API on mount and when screen is focused
+  useEffect(() => {
+    fetchPujaList();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPujaList();
+    }, []),
+  );
+
   const PujaItem: React.FC<PujaItemProps> = ({puja, onEdit}) => {
-    // Price formatting: show as ₹ <amount>
-    const formattedPrice =
-      typeof puja.price === 'number'
-        ? `₹ ${puja.price.toLocaleString('en-IN')}`
-        : puja.price;
+    // Show both prices, fallback to 0 if not present
+    const formattedPriceWith =
+      puja.price_with_samagri && puja.price_with_samagri !== '0.00'
+        ? `₹ ${Number(puja.price_with_samagri).toLocaleString('en-IN')}`
+        : '₹ 0';
+    const formattedPriceWithout =
+      puja.price_without_samagri && puja.price_without_samagri !== '0.00'
+        ? `₹ ${Number(puja.price_without_samagri).toLocaleString('en-IN')}`
+        : '₹ 0';
 
     return (
       <View style={styles.pujaItemContainer}>
         <View style={styles.pujaContent}>
-          <Image source={{uri: puja.image}} style={styles.pujaImage} />
+          {puja.pooja_image_url ? (
+            <Image
+              source={{uri: puja.pooja_image_url}}
+              style={styles.pujaImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.pujaImagePlaceholder} />
+          )}
           <View style={styles.pujaTextContainer}>
-            <Text style={styles.pujaName}>{puja.name}</Text>
-            <Text style={styles.pujaDescription}>{puja.pujaPurpose}</Text>
+            <Text style={styles.pujaName}>{puja.pooja_title}</Text>
+            <Text style={styles.pujaDescription}>
+              {puja.pooja_short_description}
+            </Text>
             <View style={styles.priceAndEditContainer}>
-              <Text style={styles.pujaPrice}>{formattedPrice}</Text>
+              <Text style={styles.pujaPrice}>{formattedPriceWithout}</Text>
+
               <TouchableOpacity
                 style={styles.editButton}
-                onPress={() => onEdit(puja.id)}>
+                onPress={() => onEdit(puja)}>
                 <Text style={styles.editButtonText}>{t('edit')}</Text>
               </TouchableOpacity>
             </View>
@@ -78,9 +125,9 @@ const PujaListScreen: React.FC = () => {
     );
   };
 
-  const handleEditPuja = (pujaId: number) => {
-    console.log('Edit puja with ID:', pujaId);
-    // Navigate to edit screen or show edit modal
+  // On Edit Click, navigate to AddPujaScreen, passing the puja data for editing
+  const handleEditPuja = (puja: PujaItemType) => {
+    navigation.navigate('EditPujaScreen', {pujaId: puja.id, pujaData: puja});
   };
 
   const handleAddPuja = () => {
@@ -165,10 +212,18 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   pujaImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 0,
-    backgroundColor: COLORS.lightGray,
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    backgroundColor: COLORS.white,
+    marginRight: 14,
+  },
+  pujaImagePlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    backgroundColor: COLORS.white,
+    marginRight: 14,
   },
   pujaTextContainer: {
     flex: 1,
@@ -187,19 +242,37 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.Sen_Medium,
     fontWeight: '500',
-    marginBottom: 10,
+    marginBottom: 4,
   },
-  priceAndEditContainer: {
+  priceRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
+    marginBottom: 2,
   },
   pujaPrice: {
     color: COLORS.primary,
     fontSize: 18,
     fontFamily: Fonts.Sen_SemiBold,
     fontWeight: '600',
+  },
+  priceLabel: {
+    color: COLORS.pujaCardSubtext,
+    fontSize: 13,
+    fontFamily: Fonts.Sen_Medium,
+    fontWeight: '500',
+  },
+  priceValue: {
+    color: COLORS.primaryTextDark,
+    fontSize: 13,
+    fontFamily: Fonts.Sen_Medium,
+    fontWeight: '500',
+  },
+  priceAndEditContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 8,
   },
   editButton: {
     backgroundColor: COLORS.primaryBackgroundButton,

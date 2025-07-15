@@ -18,6 +18,7 @@ import SelectLanguageScreen from '../screens/Auth/SelectLanguageScreen';
 import DocumentUploadScreen from '../screens/Auth/DocumentUploadScreen';
 
 export type AuthStackParamList = {
+  navigate(arg0: string): void;
   SignIn: undefined;
   OTPVerification: {
     phoneNumber: string;
