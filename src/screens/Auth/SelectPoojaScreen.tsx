@@ -32,6 +32,7 @@ import {AuthStackParamList} from '../../navigation/AuthNavigator';
 type RouteParams = {
   action?: string;
   phoneNumber?: string;
+  email?: string;
   firstName?: string;
   lastName?: string;
   city?: string;
@@ -41,6 +42,7 @@ type RouteParams = {
   address?: string;
   selectCityId?: number | string;
   selectedAreasId?: number[];
+  profile_img?: any;
 };
 
 type ScreenNavigation = StackNavigationProp<
@@ -64,6 +66,7 @@ const SelectPoojaScreen: React.FC = () => {
 
   const {
     phoneNumber,
+    email,
     firstName,
     lastName,
     city,
@@ -71,6 +74,7 @@ const SelectPoojaScreen: React.FC = () => {
     subCaste,
     gotra,
     address,
+    profile_img,
     selectCityId,
     selectedAreasId,
   } = route.params || {};
@@ -114,6 +118,7 @@ const SelectPoojaScreen: React.FC = () => {
     if (selectedPooja.length > 0) {
       navigation.navigate('SelectLanguageScreen', {
         phoneNumber: phoneNumber ?? '',
+        email: email ?? '',
         firstName: firstName ?? '',
         lastName: lastName ?? '',
         city: city ?? '',
@@ -121,6 +126,7 @@ const SelectPoojaScreen: React.FC = () => {
         subCaste: subCaste ?? '',
         gotra: gotra ?? '',
         address: address ?? '',
+        profile_img: profile_img ?? '',
         selectCityId: selectCityId ?? '',
         selectedAreasId: selectedAreasId ?? [],
         selectedPoojaId: selectedPoojaId ?? [],

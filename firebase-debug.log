@@ -1,0 +1,43 @@
+[debug] [2025-07-18T09:07:16.339Z] ----------------------------------------------------------------------
+[debug] [2025-07-18T09:07:16.343Z] Command:       /Users/tarang/.nvm/versions/node/v20.11.1/bin/node /Users/tarang/.nvm/versions/node/v20.11.1/bin/firebase emulators:start --only auth
+[debug] [2025-07-18T09:07:16.343Z] CLI Version:   14.2.1
+[debug] [2025-07-18T09:07:16.343Z] Platform:      darwin
+[debug] [2025-07-18T09:07:16.343Z] Node Version:  v20.11.1
+[debug] [2025-07-18T09:07:16.343Z] Time:          Fri Jul 18 2025 14:37:16 GMT+0530 (India Standard Time)
+[debug] [2025-07-18T09:07:16.343Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-18T09:07:16.676Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
+[debug] [2025-07-18T09:07:16.687Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] Failed to authenticate, have you run firebase login?
+[warn] ⚠  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI. 
+[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
+[debug] [2025-07-18T09:07:17.858Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-07-18T09:07:17.858Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-07-18T09:07:17.858Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-07-18T09:07:17.862Z] [hub] writing locator at /var/folders/y2/m246sh752b7gmg0d911c4wmr0000gn/T/hub-panditji-42b4a.json
+[debug] [2025-07-18T09:07:25.887Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI        │
+├────────────────┼────────────────┼────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth │
+└────────────────┴────────────────┴────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[info] i  To verify the phone number +911111111111, use the code 028911. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 028911."}}
+[info] i  To verify the phone number +911111111111, use the code 706158. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 706158."}}
+[info] i  To verify the phone number +911111111111, use the code 818119. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 818119."}}
+[info] i  To verify the phone number +911111111111, use the code 783021. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 783021."}}
+[info] i  To verify the phone number +911111111111, use the code 663563. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 663563."}}
+[info] i  To verify the phone number +911111111111, use the code 594271. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 594271."}}
+[info] i  To verify the phone number +911111111111, use the code 114138. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 114138."}}
+[info] i  To verify the phone number +911111111111, use the code 772050. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 772050."}}
+[debug] [2025-07-18T13:56:52.500Z] Received signal SIGHUP 1

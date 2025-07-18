@@ -7,6 +7,10 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
+  Image,
+  Keyboard,
+  Alert,
 } from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import CustomHeader from '../../components/CustomHeader';
@@ -24,9 +28,12 @@ import CustomeLoader from '../../components/CustomLoader';
 import {useCommonToast} from '../../common/CommonToast';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import ImagePicker from 'react-native-image-crop-picker';
+import Feather from 'react-native-vector-icons/Feather';
 
 interface FormData {
   phoneNumber: string;
+  email: string;
   firstName: string;
   lastName: string;
   city: string;
@@ -34,6 +41,11 @@ interface FormData {
   subCaste: string;
   gotra: string;
   address: string;
+  profile_img: {
+    uri: any;
+    type: any;
+    name: string;
+  };
 }
 
 type RouteParams = {
@@ -56,6 +68,7 @@ const CompleteProfileScreen: React.FC = () => {
 
   const [formData, setFormData] = useState<FormData>({
     phoneNumber: phoneNumber || '',
+    email: '',
     firstName: '',
     lastName: '',
     city: '',
@@ -63,6 +76,11 @@ const CompleteProfileScreen: React.FC = () => {
     subCaste: '',
     gotra: '',
     address: '',
+    profile_img: {
+      uri: '',
+      type: '',
+      name: '',
+    },
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [cityData, setCityData] = useState<any[]>([]);
@@ -181,9 +199,19 @@ const CompleteProfileScreen: React.FC = () => {
     }
   };
 
+  const validateEmail = (email: string) => {
+    // Simple email regex
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+  };
+
   const validateField = (field: keyof FormData, value: string) => {
     if (field === 'phoneNumber') {
       if (!value) return 'phone number is required';
+    }
+    if (field === 'email') {
+      if (!value) return 'email is required';
+      if (!validateEmail(value)) return 'invalid email address';
     }
     if (field === 'firstName') {
       if (!value) return 'first name is required';
@@ -214,27 +242,99 @@ const CompleteProfileScreen: React.FC = () => {
     setErrors(prev => ({...prev, [field]: validateField(field, value)}));
   };
 
+  // Fixed photo selection logic: set profile_img, not photoUri
+  const handlePhotoSelect = () => {
+    Keyboard.dismiss();
+    Alert.alert(t('select_profile_picture'), t('choose_an_option'), [
+      {text: t('take_photo'), onPress: () => openCamera()},
+      {text: t('choose_from_gallery'), onPress: () => openGallery()},
+      {text: t('cancel'), style: 'cancel'},
+    ]);
+  };
+
+  const openCamera = async () => {
+    try {
+      const image = await ImagePicker.openCamera({
+        width: 300,
+        height: 300,
+        cropping: true,
+        cropperCircleOverlay: true,
+        compressImageQuality: 0.7,
+      });
+      await processImage(image);
+    } catch (error: any) {
+      if (error.code !== 'E_PICKER_CANCELLED') {
+        console.log('Error accessing camera:', error);
+        showErrorToast(t('camera_access_failed'));
+      }
+    }
+  };
+
+  const openGallery = async () => {
+    try {
+      const image = await ImagePicker.openPicker({
+        width: 300,
+        height: 300,
+        cropping: true,
+        cropperCircleOverlay: true,
+        compressImageQuality: 0.7,
+      });
+      await processImage(image);
+    } catch (error: any) {
+      if (error.code !== 'E_PICKER_CANCELLED') {
+        console.log('Error accessing gallery:', error);
+        showErrorToast(t('gallery_access_failed'));
+      }
+    }
+  };
+
+  const processImage = async (image: any) => {
+    try {
+      const imageData = {
+        uri:
+          Platform.OS === 'ios'
+            ? image.path.replace('file://', '')
+            : image.path,
+        type: image.mime,
+        name: `profile_${Date.now()}.${image.mime.split('/')[1]}`,
+      };
+      handleInputChange('profile_img', imageData);
+    } catch (error) {
+      console.log('Error processing image:', error);
+      showErrorToast(t('image_processing_failed'));
+    }
+  };
+
   const handleNext = () => {
     const newErrors: Partial<FormData> = {};
     let firstError = '';
 
     for (const field in formData) {
+      // Don't validate photoUri (no longer in formData)
       const error = validateField(
         field as keyof FormData,
-        formData[field as keyof FormData],
+        formData[field as keyof FormData] as string,
       );
       if (error) {
-        newErrors[field as keyof FormData] = error;
-        if (!firstError) firstError = error;
+        // Only assign error string to fields that expect a string, not to profile_img (which expects an object)
+        if (field !== 'profile_img') {
+          newErrors[field as Exclude<keyof FormData, 'profile_img'>] =
+            error as string;
+          if (!firstError) firstError = error;
+        }
+        // Do not assign error to profile_img, but still capture the first error if not set
+        else if (!firstError) {
+          firstError = error;
+        }
       }
     }
-
     setErrors(newErrors);
     if (firstError) {
       return;
     }
     navigation.navigate('SelectCityScreen', {
       phoneNumber: formData.phoneNumber,
+      email: formData.email,
       firstName: formData.firstName,
       lastName: formData.lastName,
       city: formData.city,
@@ -242,6 +342,7 @@ const CompleteProfileScreen: React.FC = () => {
       subCaste: formData.subCaste,
       gotra: formData.gotra,
       address: formData.address,
+      profile_img: formData.profile_img,
     });
   };
 
@@ -263,6 +364,31 @@ const CompleteProfileScreen: React.FC = () => {
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.scrollContent}>
             <View style={styles.formContainer}>
+              {/* Photo Picker */}
+              <View style={styles.photoSection}>
+                <TouchableOpacity
+                  style={styles.photoPicker}
+                  onPress={handlePhotoSelect}
+                  activeOpacity={0.7}
+                  testID="photo-picker">
+                  {formData.profile_img ? (
+                    <Image
+                      source={{uri: formData.profile_img.uri}}
+                      style={styles.photo}
+                    />
+                  ) : (
+                    <View style={styles.photoPlaceholder}>
+                      <Text style={styles.photoPlaceholderText}>
+                        <Feather name="camera" size={32} color={COLORS.gray} />
+                        <Text>{t('select_photo')}</Text>
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+                <Text style={styles.photoLabel}>
+                  {t('profile_photo') || 'Profile Photo'}
+                </Text>
+              </View>
               <CustomTextInput
                 label={t('phone_number')}
                 value={formData.phoneNumber}
@@ -270,6 +396,14 @@ const CompleteProfileScreen: React.FC = () => {
                 placeholder={t('enter_phone_number')}
                 keyboardType="phone-pad"
                 error={errors.phoneNumber}
+              />
+              <CustomTextInput
+                label={t('email')}
+                value={formData.email}
+                onChangeText={value => handleInputChange('email', value)}
+                placeholder={t('enter_email')}
+                keyboardType="email-address"
+                error={errors.email}
               />
               <CustomTextInput
                 label={t('first_name')}
@@ -384,6 +518,47 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 15,
     fontFamily: Fonts.Sen_Medium,
+  },
+  photoSection: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  photoPicker: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: COLORS.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border || '#ddd',
+  },
+  photo: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    resizeMode: 'cover',
+  },
+  photoPlaceholder: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.lightGray,
+  },
+  photoPlaceholderText: {
+    color: COLORS.lighttext,
+    fontSize: 13,
+    textAlign: 'center',
+    fontFamily: Fonts.Sen_Regular,
+  },
+  photoLabel: {
+    marginTop: 6,
+    fontSize: 13,
+    color: COLORS.lighttext,
+    fontFamily: Fonts.Sen_Regular,
   },
 });
 

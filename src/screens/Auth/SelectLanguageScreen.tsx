@@ -29,6 +29,7 @@ import {AuthStackParamList} from '../../navigation/AuthNavigator';
 type RouteParams = {
   action?: string;
   phoneNumber?: string;
+  email?: string;
   firstName?: string;
   lastName?: string;
   city?: string;
@@ -36,6 +37,7 @@ type RouteParams = {
   subCaste?: string;
   gotra?: string;
   address?: string;
+  profile_img?: any;
   selectCityId?: number | string;
   selectedAreasId?: number[];
   selectedPoojaId?: number[];
@@ -62,6 +64,7 @@ const SelectLanguageScreen: React.FC = () => {
 
   const {
     phoneNumber,
+    email,
     firstName,
     lastName,
     city,
@@ -69,6 +72,7 @@ const SelectLanguageScreen: React.FC = () => {
     subCaste,
     gotra,
     address,
+    profile_img,
     selectCityId,
     selectedAreasId,
     selectedPoojaId,
@@ -110,6 +114,7 @@ const SelectLanguageScreen: React.FC = () => {
     if (selectedLanguage.length > 0) {
       navigation.navigate('DocumentUploadScreen', {
         phoneNumber: phoneNumber ?? '',
+        email: email ?? '',
         firstName: firstName ?? '',
         lastName: lastName ?? '',
         city: city ?? '',
@@ -117,6 +122,7 @@ const SelectLanguageScreen: React.FC = () => {
         subCaste: subCaste ?? '',
         gotra: gotra ?? '',
         address: address ?? '',
+        profile_img: profile_img ?? '',
         selectCityId: selectCityId ?? '',
         selectedAreasId: selectedAreasId ?? [],
         selectedPoojaId: selectedPoojaId ?? [],

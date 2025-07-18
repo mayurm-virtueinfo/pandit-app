@@ -196,5 +196,18 @@
   "change_puja": "Change Puja",
   "change_languages": "Change Languages",
   "change_documents": "Change Documents",
-  "enter_address": "Enter Address"
+  "enter_address": "Enter Address",
+  "enter_email": "Enter Email",
+  "profile_photo": "Profile Photo",
+  "select_photo": "Select Photo",
+  "take_photo": "Take Photo",
+  "choose_from_gallery": "Choose from gallery",
+  "select_profile_picture": "Select profile picture",
+  "choose_an_option": "Choose an option",
+  "no_pending_puja": "No Pending Puja",
+  "pending_puja": "Pending Puja's",
+  "accept_puja_title": "Accept Puja",
+  "reject_puja_title": "Reject Puja",
+  "accept_puja_message": "Are you sure you want to accept this puja ?",
+  "reject_puja_message": "Are you sure you want to reject this puja ?"
 }

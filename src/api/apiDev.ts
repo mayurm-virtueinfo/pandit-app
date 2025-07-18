@@ -7,7 +7,7 @@ import AppConstant from '../utils/AppContent';
 
 const apiDev = axios.create({
   // baseURL: Config.BASE_URL,
-  baseURL: 'https://fe0f0f1e60dd.ngrok-free.app',
+  baseURL: 'https://01d7232dc59d.ngrok-free.app',
   // baseURL: ApiEndpoints.BASE_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const refreshAccessToken = async (refreshToken: string) => {
   try {
     // Use axios directly to avoid circular dependency and issues with postRefreshToken
     const response = await axios.post(
-      'https://fe0f0f1e60dd.ngrok-free.app/app/auth/refresh-token/',
+      'https://01d7232dc59d.ngrok-free.app/app/auth/refresh-token/',
       { refresh_token: refreshToken },
       {
         headers: {

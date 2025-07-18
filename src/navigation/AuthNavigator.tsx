@@ -18,6 +18,7 @@ import SelectLanguageScreen from '../screens/Auth/SelectLanguageScreen';
 import DocumentUploadScreen from '../screens/Auth/DocumentUploadScreen';
 
 export type AuthStackParamList = {
+  replace(arg0: string): void;
   navigate(arg0: string): void;
   SignIn: undefined;
   OTPVerification: {
@@ -28,6 +29,7 @@ export type AuthStackParamList = {
   SelectCityArea: undefined;
   SelectCityScreen: {
     phoneNumber: string;
+    email: string;
     firstName: string;
     lastName: string;
     city: string | number;
@@ -35,9 +37,11 @@ export type AuthStackParamList = {
     subCaste: string | number;
     gotra: string | number;
     address: string;
+    profile_img: any;
   };
   SelectAreaScreen: {
     phoneNumber: string;
+    email: string;
     firstName: string;
     lastName: string;
     city: string | number;
@@ -45,10 +49,12 @@ export type AuthStackParamList = {
     subCaste: string | number;
     gotra: string | number;
     address: string;
+    profile_img: any;
     selectCityId: number | string;
   };
   SelectPoojaScreen: {
     phoneNumber: string;
+    email: string;
     firstName: string;
     lastName: string;
     city: string | number;
@@ -56,11 +62,13 @@ export type AuthStackParamList = {
     subCaste: string | number;
     gotra: string | number;
     address: string;
+    profile_img: any;
     selectCityId: number | string;
     selectedAreasId: number[];
   };
   SelectLanguageScreen: {
     phoneNumber: string;
+    email: string;
     firstName: string;
     lastName: string;
     city: string | number;
@@ -68,12 +76,14 @@ export type AuthStackParamList = {
     subCaste: string | number;
     gotra: string | number;
     address: string;
+    profile_img: any;
     selectCityId: number | string;
     selectedAreasId: number[];
     selectedPoojaId: number[];
   };
   DocumentUploadScreen: {
     phoneNumber: string;
+    email: string;
     firstName: string;
     lastName: string;
     city: string | number;
@@ -81,6 +91,7 @@ export type AuthStackParamList = {
     subCaste: string | number;
     gotra: string | number;
     address: string;
+    profile_img: any;
     selectCityId: number | string;
     selectedAreasId: number[];
     selectedPoojaId: number[];

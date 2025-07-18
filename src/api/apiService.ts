@@ -5,17 +5,21 @@ import ApiEndpoints, {
   GET_AREA,
   GET_CASTE,
   GET_CITY,
+  GET_COMPLETED_PUA,
   GET_EDIT_PUJA,
   GET_GOTRA,
   GET_LANGUAGES,
+  GET_PANDING_PUJA,
   GET_POOJA,
   GET_SUBCASTE,
   GET_UNASSIGN_PUJA,
+  GET_UPCOMING_PUJA,
   POST_ADD_PUJA,
   POST_LOGOUT,
   POST_REFRESH_TOKEN,
   POST_SIGNIN,
   POST_SIGNUP,
+  POST_UPDATE_STATUS,
 } from './apiEndpoints';
 
 // Types for dropdown data
@@ -220,6 +224,11 @@ export interface AddPuja {
   price_with_samagri: number,
   price_without_samagri: number,
   price_status: number
+}
+
+export interface UpdateStatus {
+  booking_id: number,
+  action: string
 }
 
 export const apiService = {
@@ -527,6 +536,66 @@ export const postAddPuja = (data: AddPuja) => {
       })
       .catch(error => {
         console.error('Error Add Puja ', error);
+        reject(error);
+      });
+  });
+};
+
+export const getPandingPuja = () => {
+  let apiUrl = GET_PANDING_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.log("error", error)
+        reject(error);
+      });
+  });
+};
+
+export const getUpcomingPuja = () => {
+  let apiUrl = GET_UPCOMING_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.log("error", error)
+        reject(error);
+      });
+  });
+};
+
+export const getCompletedPuja = () => {
+  let apiUrl = GET_COMPLETED_PUA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.log("error", error)
+        reject(error);
+      });
+  });
+};
+
+export const postUpdateStatus = (data: UpdateStatus) => {
+  let apiUrl = POST_UPDATE_STATUS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error Update Puja Status', JSON.stringify(error.response.data.message));
         reject(error);
       });
   });

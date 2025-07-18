@@ -29,6 +29,8 @@ import {StackNavigationProp} from '@react-navigation/stack';
 type RouteParams = {
   action?: string;
   phoneNumber?: string;
+  email: string;
+  profile_img: any;
   firstName?: string;
   lastName?: string;
   city?: string;
@@ -52,6 +54,7 @@ const SelectCityScreen: React.FC = () => {
 
   const {
     phoneNumber,
+    email,
     firstName,
     lastName,
     city,
@@ -59,6 +62,7 @@ const SelectCityScreen: React.FC = () => {
     subCaste,
     gotra,
     address,
+    profile_img,
   } = route.params || {};
 
   const [cities, setCities] = useState<CustomeSelectorDataOption[]>([]);
@@ -104,6 +108,7 @@ const SelectCityScreen: React.FC = () => {
     if (selectedCity) {
       navigation.navigate('SelectAreaScreen', {
         phoneNumber: phoneNumber ?? '',
+        email: email,
         firstName: firstName ?? '',
         lastName: lastName ?? '',
         city: city ?? '',
@@ -112,6 +117,7 @@ const SelectCityScreen: React.FC = () => {
         gotra: gotra ?? '',
         address: address ?? '',
         selectCityId: selectedCityId ?? '',
+        profile_img: profile_img,
       });
     } else {
       showErrorToast('Please select city');

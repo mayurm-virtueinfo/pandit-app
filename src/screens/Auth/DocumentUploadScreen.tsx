@@ -33,12 +33,14 @@ interface DocumentUploadState {
 type RouteParams = {
   action?: string;
   phoneNumber?: string;
+  email: string;
   firstName?: string;
   lastName?: string;
   city?: string;
   caste?: string;
   subCaste?: string;
   gotra?: string;
+  profile_img: any;
   address?: string;
   selectCityId?: number | string;
   selectedAreasId?: number[];
@@ -60,6 +62,7 @@ const DocumentUploadScreen: React.FC = () => {
   // Extract params from previous screen
   const {
     phoneNumber,
+    email,
     firstName,
     lastName,
     city,
@@ -67,6 +70,7 @@ const DocumentUploadScreen: React.FC = () => {
     subCaste,
     gotra,
     address,
+    profile_img,
     selectCityId,
     selectedAreasId,
     selectedPoojaId,
@@ -84,10 +88,26 @@ const DocumentUploadScreen: React.FC = () => {
   const [documentInfo, setDocumentInfo] = useState<{
     [key in keyof DocumentUploadState]: DocumentInfo;
   }>({
-    idProof: {name: null, url: null},
-    panCard: {name: null, url: null},
-    electricityBill: {name: null, url: null},
-    certifications: {name: null, url: null},
+    idProof: {
+      name: null,
+      url: null,
+      file: undefined,
+    },
+    panCard: {
+      name: null,
+      url: null,
+      file: undefined,
+    },
+    electricityBill: {
+      name: null,
+      url: null,
+      file: undefined,
+    },
+    certifications: {
+      name: null,
+      url: null,
+      file: undefined,
+    },
   });
 
   const [loadingDocument, setLoadingDocument] = useState<string | null>(null);
@@ -182,6 +202,7 @@ const DocumentUploadScreen: React.FC = () => {
 
     const formData: any = new FormData();
     formData.append('mobile', phoneNumber);
+    formData.append('email', email);
     formData.append('firebase_uid', uid);
     formData.append('first_name', firstName);
     formData.append('last_name', lastName);
@@ -191,10 +212,18 @@ const DocumentUploadScreen: React.FC = () => {
     formData.append('city', selectCityId);
 
     // Handle profile_img (optional, remove if not required)
-    formData.append('profile_img', ''); // Set to empty string or handle file upload
+    // Handle profile_img (optional, remove if not required)
+    if (profile_img) {
+      formData.append('profile_img', profile_img);
+    }
 
-    selectedPoojaId.forEach(id => formData.append('puja_ids', id));
-    selectedAreasId.forEach(id => formData.append('area_ids', id));
+    if (Array.isArray(selectedPoojaId)) {
+      selectedPoojaId.forEach(id => formData.append('puja_ids', id));
+    }
+
+    if (Array.isArray(selectedAreasId)) {
+      selectedAreasId.forEach(id => formData.append('area_ids', id));
+    }
 
     formData.append('pandit_detail.address_city', city);
     formData.append('pandit_detail.caste', caste);
@@ -247,7 +276,7 @@ const DocumentUploadScreen: React.FC = () => {
       Alert.alert('Success', 'Documents submitted successfully!', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('AppBottomTabNavigator'),
+          onPress: () => navigation.replace('SignIn'),
         },
       ]);
     } catch (error: unknown) {

@@ -37,6 +37,8 @@ type RouteParams = {
   gotra?: string;
   address?: string;
   selectCityId?: number | string;
+  email?: string;
+  profile_img?: any;
 };
 
 type ScreenNavigationProp = StackNavigationProp<
@@ -57,6 +59,7 @@ const SelectAreaScreen: React.FC = () => {
 
   const {
     phoneNumber,
+    email,
     firstName,
     lastName,
     city,
@@ -65,6 +68,7 @@ const SelectAreaScreen: React.FC = () => {
     gotra,
     address,
     selectCityId,
+    profile_img,
   } = route.params || {};
 
   const action = route.params?.action;
@@ -105,6 +109,8 @@ const SelectAreaScreen: React.FC = () => {
     if (selectedAreas.length > 0) {
       navigation.navigate('SelectPoojaScreen', {
         phoneNumber: phoneNumber ?? '',
+        email: email ?? '',
+        profile_img: profile_img,
         firstName: firstName ?? '',
         lastName: lastName ?? '',
         city: city ?? '',

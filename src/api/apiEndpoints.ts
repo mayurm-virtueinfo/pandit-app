@@ -46,3 +46,7 @@ export const POST_REFRESH_TOKEN = '/app/auth/refresh-token/';
 export const GET_EDIT_PUJA = '/panditji/my-puja/';
 export const GET_UNASSIGN_PUJA = '/panditji/unassign-poojas/'
 export const POST_ADD_PUJA = '/panditji/add-pandit-puja/'
+export const GET_PANDING_PUJA = '/panditji/booking-requests/'
+export const GET_UPCOMING_PUJA = '/panditji/upcoming-poojas/'
+export const GET_COMPLETED_PUA = "/panditji/completed-poojas/"
+export const POST_UPDATE_STATUS = "/panditji/update-status/"
