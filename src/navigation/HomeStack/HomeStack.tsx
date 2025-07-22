@@ -10,7 +10,7 @@ import NotificationScreen from '../../screens/ProfileScreen/NotificationScreen';
 export type HomeStackParamList = {
   navigate(arg0: string): void;
   HomeScreen: undefined;
-  PujaDetailsScreen: undefined;
+  PujaDetailsScreen: any;
   PujaSuccessfull: undefined;
   ChatScreen: undefined;
   NotificationScreen: undefined;

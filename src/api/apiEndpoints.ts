@@ -50,3 +50,6 @@ export const GET_PANDING_PUJA = '/panditji/booking-requests/'
 export const GET_UPCOMING_PUJA = '/panditji/upcoming-poojas/'
 export const GET_COMPLETED_PUA = "/panditji/completed-poojas/"
 export const POST_UPDATE_STATUS = "/panditji/update-status/"
+export const GET_UPCOMING_PUJA_DETAILS = "/panditji/upcoming-poojas/?id={id}"
+export const POST_START_PUJA = "/panditji/start-pooja/"
+export const POST_COMPETE_PUJA = "/panditji/complete-pooja/"

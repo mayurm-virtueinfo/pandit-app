@@ -32,6 +32,8 @@ const CodeVerificationModal: React.FC<CodeVerificationModalProps> = ({
   const {t} = useTranslation();
 
   const [code, setCode] = useState(['', '', '', '']);
+  const [error, setError] = useState<string | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const handleCodeChange = (value: string, index: number) => {
@@ -40,6 +42,9 @@ const CodeVerificationModal: React.FC<CodeVerificationModalProps> = ({
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
+
+    // Clear error on input
+    if (error) setError(null);
 
     // Auto-focus next input
     if (value && index < 3) {
@@ -55,20 +60,27 @@ const CodeVerificationModal: React.FC<CodeVerificationModalProps> = ({
 
   const handleSubmit = () => {
     const fullCode = code.join('');
-    if (fullCode.length === 4) {
+    if (fullCode.length === 4 && code.every(d => d !== '')) {
+      setError(null);
       onSubmit(fullCode);
       // Reset code after submission
       setCode(['', '', '', '']);
+    } else {
+      setError(
+        t('Please_enter_valid_code') || 'Please enter a valid 4-digit code',
+      );
     }
   };
 
   const handleCancel = () => {
     setCode(['', '', '', '']);
+    setError(null);
     onCancel();
   };
 
   const handleModalClose = () => {
     setCode(['', '', '', '']);
+    setError(null);
     onClose();
   };
 
@@ -98,7 +110,11 @@ const CodeVerificationModal: React.FC<CodeVerificationModalProps> = ({
                       <TextInput
                         key={index}
                         ref={ref => (inputRefs.current[index] = ref)}
-                        style={styles.codeInput}
+                        style={[
+                          styles.codeInput,
+                          focusedIndex === index && styles.codeInputFocused,
+                          error && styles.codeInputError,
+                        ]}
                         value={digit}
                         onChangeText={value => handleCodeChange(value, index)}
                         onKeyPress={e => handleKeyPress(e, index)}
@@ -106,9 +122,13 @@ const CodeVerificationModal: React.FC<CodeVerificationModalProps> = ({
                         maxLength={1}
                         textAlign="center"
                         selectTextOnFocus
+                        onFocus={() => setFocusedIndex(index)}
+                        onBlur={() => setFocusedIndex(null)}
                       />
                     ))}
                   </View>
+
+                  {error && <Text style={styles.errorText}>{error}</Text>}
 
                   <PrimaryButton
                     title={t('submit')}
@@ -192,6 +212,24 @@ const styles = StyleSheet.create({
     color: COLORS.primaryTextDark,
     textAlign: 'center',
     backgroundColor: COLORS.white,
+  },
+  codeInputFocused: {
+    borderColor: COLORS.primaryBackgroundButton,
+    shadowColor: COLORS.primaryBackgroundButton,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  codeInputError: {
+    borderColor: COLORS.error,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: moderateScale(13),
+    fontFamily: Fonts.Sen_Medium,
+    marginBottom: verticalScale(10),
+    textAlign: 'center',
   },
   submitButton: {
     backgroundColor: COLORS.primaryBackgroundButton,

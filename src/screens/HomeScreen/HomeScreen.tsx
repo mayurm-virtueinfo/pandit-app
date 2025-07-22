@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import {
   getPandingPuja,
   getUpcomingPuja,
   getCompletedPuja,
-  postUpdateStatus, // <-- Import the API
+  postUpdateStatus,
 } from '../../api/apiService';
 import {useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
@@ -62,77 +62,75 @@ const HomeScreen: React.FC = () => {
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedPendingPuja, setSelectedPendingPuja] =
     useState<PendingPujaItem | null>(null);
-  console.log('selectedPendingPuja', selectedPendingPuja);
   // For accept/reject loading
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    // Fetch all puja data in parallel
-    const fetchAllPujas = async () => {
-      setLoading(true);
-      setPendingLoading(true);
-      try {
-        // Fetch all three in parallel
-        const [pendingResponse, upcomingResponse, completedResponse] =
-          await Promise.all([
-            getPandingPuja(),
-            getUpcomingPuja(),
-            getCompletedPuja(),
-          ]);
+  // Refactored: fetchAllPujas as a stable function for reuse
+  const fetchAllPujas = useCallback(async () => {
+    setLoading(true);
+    setPendingLoading(true);
+    try {
+      const [pendingResponse, upcomingResponse, completedResponse] =
+        await Promise.all([
+          getPandingPuja(),
+          getUpcomingPuja(),
+          getCompletedPuja(),
+        ]);
 
-        // Pending Puja
-        let pendingList: PendingPujaItem[] = [];
-        if (
-          pendingResponse &&
-          typeof pendingResponse === 'object' &&
-          'data' in pendingResponse
-        ) {
-          const data = (pendingResponse as {data?: unknown}).data;
-          pendingList = Array.isArray(data) ? (data as PendingPujaItem[]) : [];
-        } else if (Array.isArray(pendingResponse)) {
-          pendingList = pendingResponse;
-        }
-        setPendingPujas(pendingList);
-
-        // Upcoming Puja
-        let upcomingList: PujaItem[] = [];
-        if (
-          upcomingResponse &&
-          typeof upcomingResponse === 'object' &&
-          'data' in upcomingResponse
-        ) {
-          const data = (upcomingResponse as {data?: unknown}).data;
-          upcomingList = Array.isArray(data) ? (data as PujaItem[]) : [];
-        } else if (Array.isArray(upcomingResponse)) {
-          upcomingList = upcomingResponse;
-        }
-        setUpcomingPujas(upcomingList);
-
-        // Completed Puja
-        let completedList: PujaItem[] = [];
-        if (
-          completedResponse &&
-          typeof completedResponse === 'object' &&
-          'data' in completedResponse
-        ) {
-          const data = (completedResponse as {data?: unknown}).data;
-          completedList = Array.isArray(data) ? (data as PujaItem[]) : [];
-        } else if (Array.isArray(completedResponse)) {
-          completedList = completedResponse;
-        }
-        setCompletedPujas(completedList);
-      } catch (error) {
-        setPendingPujas([]);
-        setUpcomingPujas([]);
-        setCompletedPujas([]);
-      } finally {
-        setPendingLoading(false);
-        setLoading(false);
+      // Pending Puja
+      let pendingList: PendingPujaItem[] = [];
+      if (
+        pendingResponse &&
+        typeof pendingResponse === 'object' &&
+        'data' in pendingResponse
+      ) {
+        const data = (pendingResponse as {data?: unknown}).data;
+        pendingList = Array.isArray(data) ? (data as PendingPujaItem[]) : [];
+      } else if (Array.isArray(pendingResponse)) {
+        pendingList = pendingResponse;
       }
-    };
+      setPendingPujas(pendingList);
 
-    fetchAllPujas();
+      // Upcoming Puja
+      let upcomingList: PujaItem[] = [];
+      if (
+        upcomingResponse &&
+        typeof upcomingResponse === 'object' &&
+        'data' in upcomingResponse
+      ) {
+        const data = (upcomingResponse as {data?: unknown}).data;
+        upcomingList = Array.isArray(data) ? (data as PujaItem[]) : [];
+      } else if (Array.isArray(upcomingResponse)) {
+        upcomingList = upcomingResponse;
+      }
+      setUpcomingPujas(upcomingList);
+
+      // Completed Puja
+      let completedList: PujaItem[] = [];
+      if (
+        completedResponse &&
+        typeof completedResponse === 'object' &&
+        'data' in completedResponse
+      ) {
+        const data = (completedResponse as {data?: unknown}).data;
+        completedList = Array.isArray(data) ? (data as PujaItem[]) : [];
+      } else if (Array.isArray(completedResponse)) {
+        completedList = completedResponse;
+      }
+      setCompletedPujas(completedList);
+    } catch (error) {
+      setPendingPujas([]);
+      setUpcomingPujas([]);
+      setCompletedPujas([]);
+    } finally {
+      setPendingLoading(false);
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchAllPujas();
+  }, [fetchAllPujas]);
 
   // Modal handlers
   const openModal = (type: ModalType, item: PendingPujaItem) => {
@@ -149,18 +147,19 @@ const HomeScreen: React.FC = () => {
   };
 
   const handleAccept = (item: PendingPujaItem) => {
-    // Show modal for confirmation
     openModal('accept', item);
   };
 
   const handleReject = (item: PendingPujaItem) => {
-    // Show modal for confirmation
     openModal('reject', item);
   };
 
+  // After accept/reject, set loading and reload all API
   const confirmModalAction = async () => {
     if (!selectedPendingPuja) return;
     setActionLoading(true);
+    setLoading(true); // Show loading page
+    setPendingLoading(true);
     try {
       const status =
         modalType === 'accept'
@@ -168,20 +167,17 @@ const HomeScreen: React.FC = () => {
           : modalType === 'reject'
           ? 'reject'
           : '';
-      // Call the API
-      console.log('status', status);
-      console.log('selectedPendingPuja.id,', selectedPendingPuja.id);
       await postUpdateStatus({
         booking_id: selectedPendingPuja.id,
         action: status,
       });
-      // Remove from pending list
-      setPendingPujas(prev =>
-        prev.filter(p => p.id !== selectedPendingPuja.id),
-      );
-      // Optionally, show a toast or feedback here
+      // Instead of just removing from pending, reload all data
+      await fetchAllPujas();
     } catch (error) {
-      console.log('error', error);
+      // Optionally handle error
+      setPendingPujas([]);
+      setUpcomingPujas([]);
+      setCompletedPujas([]);
     } finally {
       setActionLoading(false);
       closeModal();
@@ -190,8 +186,7 @@ const HomeScreen: React.FC = () => {
 
   const renderPujaItem = (item: PujaItem, isLast: boolean) => (
     <TouchableOpacity
-      key={item.id}
-      onPress={() => navigation.navigate('PujaDetailsScreen')}>
+      onPress={() => navigation.navigate('PujaDetailsScreen', {id: item.id})}>
       <View style={styles.pujaItem}>
         <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
@@ -206,14 +201,32 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
+  // Helper to get ordinal suffix for a day
+  const getOrdinal = (n: number) => {
+    const s = ['th', 'st', 'nd', 'rd'],
+      v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  // Format date as "19th September"
+  const formatDateWithOrdinal = (dateString: string) => {
+    if (!dateString) return '';
+    const dateObj = new Date(dateString);
+    if (isNaN(dateObj.getTime())) return dateString; // fallback if invalid
+    const day = dateObj.getDate();
+    const month = dateObj.toLocaleString('default', {month: 'long'});
+    return `${getOrdinal(day)} ${month}`;
+  };
+
   const renderCompletedPuja = (item: PujaItem, isLast: boolean) => (
     <View>
       <View style={styles.pujaItem}>
         <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
-          <Text
-            style={styles.pujaDate}>{`Scheduled on ${item.booking_date}`}</Text>
+          <Text style={styles.pujaDate}>
+            {`Scheduled on ${formatDateWithOrdinal(item.booking_date)}`}
+          </Text>
         </View>
       </View>
       {!isLast && <View style={styles.separator} />}

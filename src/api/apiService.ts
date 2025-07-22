@@ -14,11 +14,14 @@ import ApiEndpoints, {
   GET_SUBCASTE,
   GET_UNASSIGN_PUJA,
   GET_UPCOMING_PUJA,
+  GET_UPCOMING_PUJA_DETAILS,
   POST_ADD_PUJA,
+  POST_COMPETE_PUJA,
   POST_LOGOUT,
   POST_REFRESH_TOKEN,
   POST_SIGNIN,
   POST_SIGNUP,
+  POST_START_PUJA,
   POST_UPDATE_STATUS,
 } from './apiEndpoints';
 
@@ -229,6 +232,11 @@ export interface AddPuja {
 export interface UpdateStatus {
   booking_id: number,
   action: string
+}
+
+export interface StartCompetePuja {
+  booking_id: number,
+  pin: string
 }
 
 export const apiService = {
@@ -596,6 +604,50 @@ export const postUpdateStatus = (data: UpdateStatus) => {
       })
       .catch(error => {
         console.error('Error Update Puja Status', JSON.stringify(error.response.data.message));
+        reject(error);
+      });
+  });
+};
+
+export const getUpcingPujaDetails = (id: any) => {
+  let apiUrl = GET_UPCOMING_PUJA_DETAILS.replace('{id}', id);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+};
+
+export const postStartPuja = (data: StartCompetePuja) => {
+  let apiUrl = POST_START_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error Start Puja', JSON.stringify(error.response.data.message));
+        reject(error);
+      });
+  });
+};
+
+export const postCompetePuja = (data: StartCompetePuja) => {
+  let apiUrl = POST_COMPETE_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error Start Puja', JSON.stringify(error.response.data.message));
         reject(error);
       });
   });
