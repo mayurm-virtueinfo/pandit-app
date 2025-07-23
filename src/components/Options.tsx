@@ -7,6 +7,8 @@ import {
   Modal,
   Dimensions,
   TouchableWithoutFeedback,
+  Platform,
+  ActionSheetIOS,
 } from 'react-native';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
 import {COLORS, THEMESHADOW} from '../theme/theme';
@@ -59,7 +61,6 @@ const Options: React.FC<OptionsProps> = ({
   selectedYear,
 }) => {
   const {t} = useTranslation();
-  // For "show all data", use empty string for month/year
   const [month, setMonth] = useState(selectedMonth ?? '');
   const [year, setYear] = useState(selectedYear ?? '');
 
@@ -83,6 +84,51 @@ const Options: React.FC<OptionsProps> = ({
 
   const handleBackdropPress = () => {
     onClose();
+  };
+
+  // iOS ActionSheet for Month
+  const showMonthActionSheet = () => {
+    const options = [t('clear'), ...monthNames, t('cancel')];
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.length - 1,
+        destructiveButtonIndex: 0,
+        title: `${t('select')} ${t('month')}`,
+      },
+      buttonIndex => {
+        if (buttonIndex === 0) {
+          setMonth('');
+        } else if (buttonIndex === options.length - 1) {
+          // Cancel
+        } else {
+          setMonth(monthNames[buttonIndex - 1]);
+        }
+      },
+    );
+  };
+
+  // iOS ActionSheet for Year
+  const showYearActionSheet = () => {
+    const years = getYearList();
+    const options = [t('clear'), ...years, t('cancel')];
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.length - 1,
+        destructiveButtonIndex: 0,
+        title: t('select_year'),
+      },
+      buttonIndex => {
+        if (buttonIndex === 0) {
+          setYear('');
+        } else if (buttonIndex === options.length - 1) {
+          // Cancel
+        } else {
+          setYear(years[buttonIndex - 1]);
+        }
+      },
+    );
   };
 
   return (
@@ -112,29 +158,53 @@ const Options: React.FC<OptionsProps> = ({
                     {t('select')} {t('month')}
                   </Text>
                 </View>
-                <View style={styles.inputArea}>
-                  <Picker
-                    selectedValue={month}
-                    onValueChange={itemValue => setMonth(itemValue)}
-                    style={styles.picker}
-                    dropdownIconColor={COLORS.primaryTextDark}
-                    mode="dropdown">
-                    <Picker.Item
-                      key="all-months"
-                      label="All Months"
-                      value=""
-                      style={styles.pickerItem}
+                {Platform.OS === 'ios' ? (
+                  <TouchableOpacity
+                    style={[
+                      styles.inputArea,
+                      {justifyContent: 'center', paddingHorizontal: 8},
+                    ]}
+                    onPress={showMonthActionSheet}
+                    activeOpacity={0.7}>
+                    <Text
+                      style={[
+                        styles.pickerText,
+                        {color: month ? COLORS.primaryTextDark : COLORS.gray},
+                      ]}>
+                      {month ? month : t('select')}
+                    </Text>
+                    <Icon
+                      name="chevron-down"
+                      size={20}
+                      color={COLORS.primaryTextDark}
+                      style={{position: 'absolute', right: 10}}
                     />
-                    {monthNames.map(m => (
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.inputArea}>
+                    <Picker
+                      selectedValue={month}
+                      onValueChange={itemValue => setMonth(itemValue)}
+                      style={styles.picker}
+                      dropdownIconColor={COLORS.primaryTextDark}
+                      mode="dropdown">
                       <Picker.Item
-                        key={m}
-                        label={m}
-                        value={m}
+                        key="all-months"
+                        label="All Months"
+                        value=""
                         style={styles.pickerItem}
                       />
-                    ))}
-                  </Picker>
-                </View>
+                      {monthNames.map(m => (
+                        <Picker.Item
+                          key={m}
+                          label={m}
+                          value={m}
+                          style={styles.pickerItem}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                )}
               </View>
 
               {/* Year Picker */}
@@ -142,29 +212,53 @@ const Options: React.FC<OptionsProps> = ({
                 <View style={styles.titleContainer}>
                   <Text style={styles.inputLabel}>{t('select_year')}</Text>
                 </View>
-                <View style={styles.inputArea}>
-                  <Picker
-                    selectedValue={year}
-                    onValueChange={itemValue => setYear(itemValue)}
-                    style={styles.picker}
-                    dropdownIconColor={COLORS.primaryTextDark}
-                    mode="dropdown">
-                    <Picker.Item
-                      key="all-years"
-                      label="All Years"
-                      value=""
-                      style={styles.pickerItem}
+                {Platform.OS === 'ios' ? (
+                  <TouchableOpacity
+                    style={[
+                      styles.inputArea,
+                      {justifyContent: 'center', paddingHorizontal: 8},
+                    ]}
+                    onPress={showYearActionSheet}
+                    activeOpacity={0.7}>
+                    <Text
+                      style={[
+                        styles.pickerText,
+                        {color: year ? COLORS.primaryTextDark : COLORS.gray},
+                      ]}>
+                      {year ? year : t('select')}
+                    </Text>
+                    <Icon
+                      name="chevron-down"
+                      size={20}
+                      color={COLORS.primaryTextDark}
+                      style={{position: 'absolute', right: 10}}
                     />
-                    {getYearList().map(y => (
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.inputArea}>
+                    <Picker
+                      selectedValue={year}
+                      onValueChange={itemValue => setYear(itemValue)}
+                      style={styles.picker}
+                      dropdownIconColor={COLORS.primaryTextDark}
+                      mode="dropdown">
                       <Picker.Item
-                        key={y}
-                        label={y}
-                        value={y}
+                        key="all-years"
+                        label="All Years"
+                        value=""
                         style={styles.pickerItem}
                       />
-                    ))}
-                  </Picker>
-                </View>
+                      {getYearList().map(y => (
+                        <Picker.Item
+                          key={y}
+                          label={y}
+                          value={y}
+                          style={styles.pickerItem}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                )}
               </View>
 
               <View style={styles.buttonContainer}>
@@ -234,16 +328,25 @@ const styles = StyleSheet.create({
     borderColor: COLORS.borderColor,
     borderRadius: moderateScale(10),
     backgroundColor: COLORS.white,
+    flexDirection: 'row',
+    alignItems: 'center',
+    // For iOS, height will be overridden in component
   },
   picker: {
     height: verticalScale(46),
     color: COLORS.primaryTextDark,
     fontFamily: Fonts.Sen_Medium,
+    flex: 1,
   },
   pickerItem: {
-    backgroundColor: COLORS.white, // Explicitly set white background for dropdown items
+    backgroundColor: COLORS.white,
     color: COLORS.primaryTextDark,
     fontFamily: Fonts.Sen_Medium,
+  },
+  pickerText: {
+    fontSize: moderateScale(16),
+    fontFamily: Fonts.Sen_Medium,
+    flex: 1,
   },
   buttonContainer: {
     flexDirection: 'row',

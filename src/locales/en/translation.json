@@ -210,5 +210,10 @@
   "reject_puja_title": "Reject Puja",
   "accept_puja_message": "Are you sure you want to accept this puja ?",
   "reject_puja_message": "Are you sure you want to reject this puja ?",
-  "Please_enter_valid_code": "Please enter a valid 4-digit code"
+  "Please_enter_valid_code": "Please enter a valid 4-digit code",
+  "are_you_sure_logout": "Are you sure you want to logout?",
+  "logging_out": "Logging out...",
+  "Please_enter_valid_number": "Please enter a valid 10-digit mobile number",
+  "otp_sent": "OTP has been sent to your phone.",
+  "otp_send_failed": "Failed to send OTP. Please try again."
 }

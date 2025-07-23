@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -23,6 +23,7 @@ import {ProfileStackParamList} from '../../navigation/ProfileStack/ProfileStack'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import {postLogout} from '../../api/apiService';
+import CustomModal from '../../components/CustomModal';
 
 type ProfileFieldProps = {
   label: string;
@@ -42,6 +43,9 @@ const ProfileScreen = () => {
   const {t, i18n} = useTranslation();
   const {signOutApp} = useAuth();
 
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
   const handleWalletNavigation = () => {
     navigation.navigate('EarningsHistoryScreen');
   };
@@ -55,6 +59,7 @@ const ProfileScreen = () => {
     navigation.navigate('PastPujaScreen');
   };
   const handleLogout = async () => {
+    setLogoutLoading(true);
     try {
       const refreshToken =
         (await AsyncStorage.getItem(AppConstant.REFRESH_TOKEN)) || '';
@@ -72,6 +77,7 @@ const ProfileScreen = () => {
     } catch (error: any) {
       console.error('Logout error:', error);
     }
+    setLogoutLoading(false);
   };
   const userData = {
     name: 'Rajesh Sharma',
@@ -161,7 +167,7 @@ const ProfileScreen = () => {
           {/* <LanguageSwitcher /> */}
           <TouchableOpacity
             style={[styles.editSection, THEMESHADOW.shadow]}
-            onPress={handleLogout}>
+            onPress={() => setLogoutModalVisible(true)}>
             <View style={styles.editFieldContainer}>
               <Text style={styles.logoutLabel}>{t('logout')}</Text>
               <Ionicons
@@ -173,6 +179,15 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </ScrollView>
       </View>
+      <CustomModal
+        visible={logoutModalVisible}
+        title={t('logout')}
+        message={t('are_you_sure_logout')}
+        confirmText={logoutLoading ? t('logging_out') : t('logout')}
+        cancelText={t('cancel')}
+        onConfirm={handleLogout}
+        onCancel={() => setLogoutModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };
