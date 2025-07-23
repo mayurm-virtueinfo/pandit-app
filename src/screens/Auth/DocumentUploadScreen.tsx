@@ -14,11 +14,10 @@ import DocumentPicker, {
 import CustomHeader from '../../components/CustomHeader';
 import {COLORS} from '../../theme/theme';
 import PrimaryButton from '../../components/PrimaryButton';
-import Fonts from '../../theme/fonts';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
 import DocumentSection from '../../components/DocumentSection';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {postSignUp, SignUpRequest} from '../../api/apiService';
+import {postSignUp} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
@@ -59,7 +58,6 @@ const DocumentUploadScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
 
-  // Extract params from previous screen
   const {
     phoneNumber,
     email,
@@ -127,7 +125,6 @@ const DocumentUploadScreen: React.FC = () => {
     }
   };
 
-  // Dummy upload function (simulate upload and return uri as url)
   const uploadDocument = async (
     document: DocumentPickerResponse,
   ): Promise<DocumentPickerResponse> => {
@@ -135,7 +132,7 @@ const DocumentUploadScreen: React.FC = () => {
       if (!document.uri || !document.type || !document.name) {
         throw new Error('Invalid document');
       }
-      return document; // Return the document object directly
+      return document;
     } catch (error) {
       console.error('Failed to process document:', error);
       throw new Error('Failed to process document');
@@ -167,7 +164,7 @@ const DocumentUploadScreen: React.FC = () => {
           ...prev,
           [documentType]: {
             name: document.name || 'Selected Document',
-            file: uploadResult, // Store the file object
+            file: uploadResult,
           },
         }));
 
@@ -206,13 +203,11 @@ const DocumentUploadScreen: React.FC = () => {
     formData.append('firebase_uid', uid);
     formData.append('first_name', firstName);
     formData.append('last_name', lastName);
-    formData.append('email', 'user@example.com'); // Add email if required
+    formData.append('email', 'user@example.com');
     formData.append('role', 2);
     formData.append('address', address);
     formData.append('city', selectCityId);
 
-    // Handle profile_img (optional, remove if not required)
-    // Handle profile_img (optional, remove if not required)
     if (profile_img) {
       formData.append('profile_img', profile_img);
     }
@@ -265,20 +260,17 @@ const DocumentUploadScreen: React.FC = () => {
     }
 
     try {
-      console.log('FormData:', formData._parts); // Debug FormData
+      console.log('FormData:', formData._parts);
       const response = await postSignUp(formData);
 
-      // Store id in AsyncStorage if present in response
       if (response && response.user.id) {
-        await AsyncStorage.setItem('user_id', String(response.user.id));
+        await AsyncStorage.setItem(
+          AppConstant.USER_ID,
+          String(response.user.id),
+        );
       }
 
-      Alert.alert('Success', 'Documents submitted successfully!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.replace('SignIn'),
-        },
-      ]);
+      navigation.replace('AppBottomTabNavigator');
     } catch (error: unknown) {
       if (typeof error === 'object' && error !== null) {
         const err = error as {

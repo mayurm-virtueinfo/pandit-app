@@ -31,10 +31,10 @@ export const THEMESHADOW = {
 
 // Colors
 export const COLORS = {
-  primary: '#F21825', // The teal/turquoise color from your button
-  primaryDisabled: '#B2EAF1', // Lighter shade for disabled state
+  primary: '#F21825',
+  primaryDisabled: '#B2EAF1',
   primaryBackground: '#FB3440',
-  primaryBackgroundButton: '#FFB900', // Background color for primary button
+  primaryBackgroundButton: '#FFB900',
   primaryTextDark: '#191313',
   white: '#FFFFFF',
   black: '#000000',
@@ -44,13 +44,13 @@ export const COLORS = {
   backGroundSecondary: '#ebeded',
   textPrimary: '#222222',
   textSecondary: '#888888',
-  success: '#32CD32', // Green for "Completed"
-  warning: '#FF4500', // Orange-Red for "Cancelled by User"
-  error: '#FF0000', // Red for "Rejected"
-  textDark: '#1A1A1A', // Primary dark text (e.g. pooja name)
-  textGray: '#7D7D7D', // Secondary gray text (e.g. date, maharaj name)
-  background: '#F7F9FC', // Light background color for screens
-  border: '#DDDDDD', // Border/light separator if needed
+  success: '#32CD32',
+  warning: '#FF4500',
+  error: '#FF0000',
+  textDark: '#1A1A1A',
+  textGray: '#7D7D7D',
+  background: '#F7F9FC',
+  border: '#DDDDDD',
   darkText: '#1F2937',
   inputBg: '#ECEEF2',
   inputLabelText: '#6C7278',
