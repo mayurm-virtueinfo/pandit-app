@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -22,7 +21,9 @@ import {moderateScale} from 'react-native-size-matters';
 import {ProfileStackParamList} from '../../navigation/ProfileStack/ProfileStack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
-import {postLogout} from '../../api/apiService';
+import {getPanditProfileDetails, postLogout} from '../../api/apiService';
+import {useCommonToast} from '../../common/CommonToast';
+import CustomeLoader from '../../components/CustomLoader';
 
 type ProfileFieldProps = {
   label: string;
@@ -39,8 +40,18 @@ const ProfileField: React.FC<ProfileFieldProps> = ({label, value}) => (
 const ProfileScreen = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation<ProfileStackParamList>();
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const {signOutApp} = useAuth();
+  const {showErrorToast} = useCommonToast();
+
+  const [profileData, setProfileData] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  console.log('profileData :: ', profileData);
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
 
   const handleWalletNavigation = () => {
     navigation.navigate('EarningsHistoryScreen');
@@ -54,25 +65,38 @@ const ProfileScreen = () => {
   const handlePastPujaNavigation = () => {
     navigation.navigate('PastPujaScreen');
   };
+
   const handleLogout = async () => {
     try {
       const refreshToken =
         (await AsyncStorage.getItem(AppConstant.REFRESH_TOKEN)) || '';
-      console.log('refreshToken', refreshToken);
       const params = {
         refresh_token: refreshToken,
       };
-      console.log(params);
       const response: any = await postLogout(params);
       if (response.data.success) {
-        // Remove user_id from AsyncStorage on logout
-        await AsyncStorage.removeItem('user_id');
         signOutApp();
       }
     } catch (error: any) {
       console.error('Logout error:', error);
     }
   };
+
+  const fetchProfileData = async () => {
+    try {
+      setIsLoading(true);
+      const response: any = await getPanditProfileDetails();
+      if (response.data.success) {
+        setProfileData(response.data.data);
+      }
+    } catch (error: any) {
+      console.error('Profile data error:', error);
+      showErrorToast(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const userData = {
     name: 'Rajesh Sharma',
     email: 'rajeshsharma@gmail.com',
@@ -82,6 +106,7 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, {paddingTop: inset.top}]}>
+      <CustomeLoader loading={isLoading} />
       <LinearGradient
         colors={[COLORS.gradientStart, COLORS.gradientEnd]}
         style={[styles.headerGradient]}
@@ -91,7 +116,9 @@ const ProfileScreen = () => {
       <View style={styles.profileImageContainer}>
         <Image
           source={{
-            uri: 'https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D',
+            uri:
+              // profileData.profile_img ||
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy3IRQZYt7VgvYzxEqdhs8R6gNE6cYdeJueyHS-Es3MXb9XVRQQmIq7tI0grb8GTlzBRU&usqp=CAU',
           }}
           style={styles.profileImage}
         />
@@ -100,15 +127,23 @@ const ProfileScreen = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={styles.scrollView}>
-          <View style={[styles.infoSection, THEMESHADOW.shadow]}>
-            <ProfileField label={t('name')} value={userData.name} />
-            <View style={styles.divider} />
-            <ProfileField label={t('email')} value={userData.email} />
-            <View style={styles.divider} />
-            <ProfileField label={t('phone')} value={userData.phone} />
-            <View style={styles.divider} />
-            <ProfileField label={t('location')} value={userData.location} />
-          </View>
+          {profileData && (
+            <View style={[styles.infoSection, THEMESHADOW.shadow]}>
+              <ProfileField label={t('name')} value={profileData.pandit_name} />
+              <View style={styles.divider} />
+              <ProfileField
+                label={t('email')}
+                value={profileData.pandit_email}
+              />
+              <View style={styles.divider} />
+              <ProfileField
+                label={t('phone')}
+                value={profileData.pandit_mobile}
+              />
+              <View style={styles.divider} />
+              <ProfileField label={t('location')} value={userData.location} />
+            </View>
+          )}
           <View style={[styles.editSection, THEMESHADOW.shadow]}>
             <TouchableOpacity
               style={styles.editFieldContainer}
@@ -188,7 +223,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 184,
-    // backgroundColor: COLORS.primaryBackground,
   },
   profileImageContainer: {
     position: 'absolute',
@@ -200,8 +234,8 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 2,
-    borderColor: COLORS.pujaBackground,
+    borderWidth: 1,
+    borderColor: COLORS.white,
   },
   contentContainer: {
     position: 'absolute',
@@ -226,7 +260,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     backgroundColor: COLORS.white,
     marginTop: 10,
-    // shadow styles removed, now handled by THEMESHADOW
   },
   editSection: {
     borderRadius: 10,
@@ -234,7 +267,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     marginBottom: 24,
     backgroundColor: COLORS.white,
-    // shadow styles removed, now handled by THEMESHADOW
   },
   fieldContainer: {
     flexDirection: 'row',

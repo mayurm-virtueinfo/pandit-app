@@ -1,5 +1,5 @@
 // import axios from 'axios';
-import { AxiosRequestConfig } from 'axios';
+import {AxiosRequestConfig} from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   GET_AREA,
@@ -10,6 +10,7 @@ import ApiEndpoints, {
   GET_GOTRA,
   GET_LANGUAGES,
   GET_PANDING_PUJA,
+  GET_PANDIT_PROFILE,
   GET_POOJA,
   GET_SUBCASTE,
   GET_UNASSIGN_PUJA,
@@ -199,44 +200,44 @@ export interface LogoutRequest {
 }
 
 export interface EditRequest {
-  id: number,
-  user: number,
-  image: string,
-  pooja: number,
-  name: string,
-  pujaPurpose: string,
-  price_with_samagri: number,
-  price_without_samagri: number,
-  custom_samagri_list: string,
-  price_status: number
+  id: number;
+  user: number;
+  image: string;
+  pooja: number;
+  name: string;
+  pujaPurpose: string;
+  price_with_samagri: number;
+  price_without_samagri: number;
+  custom_samagri_list: string;
+  price_status: number;
 }
 
 export interface EditPuja {
-  id: number,
-  user: number,
-  pooja: number,
-  price_with_samagri: number,
-  price_without_samagri: number,
-  custom_samagri_list: string,
-  price_status: number
+  id: number;
+  user: number;
+  pooja: number;
+  price_with_samagri: number;
+  price_without_samagri: number;
+  custom_samagri_list: string;
+  price_status: number;
 }
 
 export interface AddPuja {
-  user: number,
-  pooja: number,
-  price_with_samagri: number,
-  price_without_samagri: number,
-  price_status: number
+  user: number;
+  pooja: number;
+  price_with_samagri: number;
+  price_without_samagri: number;
+  price_status: number;
 }
 
 export interface UpdateStatus {
-  booking_id: number,
-  action: string
+  booking_id: number;
+  action: string;
 }
 
 export interface StartCompetePuja {
-  booking_id: number,
-  pin: string
+  booking_id: number;
+  pin: string;
 }
 
 export const apiService = {
@@ -286,10 +287,10 @@ export const apiService = {
   getPujaListData: async (): Promise<PujaListDataResponse> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || { recommendedPuja: [], pujaList: [] };
+      return response.data?.record || {recommendedPuja: [], pujaList: []};
     } catch (error) {
       console.error('Error fetching puja list data:', error);
-      return { pujaList: [] };
+      return {pujaList: []};
     }
   },
 
@@ -458,7 +459,6 @@ export const postSignUp = (data: SignUpRequest): Promise<SignInResponse> => {
   });
 };
 
-
 export const postLogout = (data: LogoutRequest) => {
   let apiUrl = POST_LOGOUT;
   return new Promise((resolve, reject) => {
@@ -558,7 +558,7 @@ export const getPandingPuja = () => {
         resolve(response);
       })
       .catch(error => {
-        console.log("error", error)
+        console.log('error', error);
         reject(error);
       });
   });
@@ -573,7 +573,7 @@ export const getUpcomingPuja = () => {
         resolve(response);
       })
       .catch(error => {
-        console.log("error", error)
+        console.log('error', error);
         reject(error);
       });
   });
@@ -588,7 +588,7 @@ export const getCompletedPuja = () => {
         resolve(response);
       })
       .catch(error => {
-        console.log("error", error)
+        console.log('error', error);
         reject(error);
       });
   });
@@ -603,7 +603,10 @@ export const postUpdateStatus = (data: UpdateStatus) => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error Update Puja Status', JSON.stringify(error.response.data.message));
+        console.error(
+          'Error Update Puja Status',
+          JSON.stringify(error.response.data.message),
+        );
         reject(error);
       });
   });
@@ -632,7 +635,10 @@ export const postStartPuja = (data: StartCompetePuja) => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error Start Puja', JSON.stringify(error.response.data.message));
+        console.error(
+          'Error Start Puja',
+          JSON.stringify(error.response.data.message),
+        );
         reject(error);
       });
   });
@@ -647,7 +653,25 @@ export const postCompetePuja = (data: StartCompetePuja) => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error Start Puja', JSON.stringify(error.response.data.message));
+        console.error(
+          'Error Start Puja',
+          JSON.stringify(error.response.data.message),
+        );
+        reject(error);
+      });
+  });
+};
+
+export const getPanditProfileDetails = () => {
+  let apiUrl = GET_PANDIT_PROFILE;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching pandit profile data:', error);
         reject(error);
       });
   });

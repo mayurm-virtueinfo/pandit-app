@@ -32,6 +32,8 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
+export const BASE_URL = 'https://75c2be5e5cea.ngrok-free.app';
+
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';
 export const GET_CASTE = '/panditji/castes/';
@@ -44,12 +46,13 @@ export const POST_SIGNUP = '/app/auth/register/';
 export const POST_LOGOUT = '/app/auth/logout/';
 export const POST_REFRESH_TOKEN = '/app/auth/refresh-token/';
 export const GET_EDIT_PUJA = '/panditji/my-puja/';
-export const GET_UNASSIGN_PUJA = '/panditji/unassign-poojas/'
-export const POST_ADD_PUJA = '/panditji/add-pandit-puja/'
-export const GET_PANDING_PUJA = '/panditji/booking-requests/'
-export const GET_UPCOMING_PUJA = '/panditji/upcoming-poojas/'
-export const GET_COMPLETED_PUA = "/panditji/completed-poojas/"
-export const POST_UPDATE_STATUS = "/panditji/update-status/"
-export const GET_UPCOMING_PUJA_DETAILS = "/panditji/upcoming-poojas/?id={id}"
-export const POST_START_PUJA = "/panditji/start-pooja/"
-export const POST_COMPETE_PUJA = "/panditji/complete-pooja/"
+export const GET_UNASSIGN_PUJA = '/panditji/unassign-poojas/';
+export const POST_ADD_PUJA = '/panditji/add-pandit-puja/';
+export const GET_PANDING_PUJA = '/panditji/booking-requests/';
+export const GET_UPCOMING_PUJA = '/panditji/upcoming-poojas/';
+export const GET_COMPLETED_PUA = '/panditji/completed-poojas/';
+export const POST_UPDATE_STATUS = '/panditji/update-status/';
+export const GET_UPCOMING_PUJA_DETAILS = '/panditji/upcoming-poojas/?id={id}';
+export const POST_START_PUJA = '/panditji/start-pooja/';
+export const POST_COMPETE_PUJA = '/panditji/complete-pooja/';
+export const GET_PANDIT_PROFILE = '/panditji/my-details';

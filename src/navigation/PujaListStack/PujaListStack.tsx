@@ -15,7 +15,7 @@ export type PujaListStackParamList = {
   navigate(arg0: string): void;
   PujaListScreen: undefined;
   AddPujaScreen: undefined;
-  EditPujaScreen: {pujaId: number};
+  EditPujaScreen: {pujaId: number; pujaData: any};
 };
 
 const Stack = createStackNavigator<PujaListStackParamList>();

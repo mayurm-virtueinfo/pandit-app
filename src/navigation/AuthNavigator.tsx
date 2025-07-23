@@ -2,12 +2,11 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import SignInScreen from '../screens/Auth/SignInScreen';
 import OTPVerificationScreen from '../screens/Auth/OTPVerificationScreen';
-import PanditRegistrationScreen from '../screens/PanditRegistrationScreen';
 import SelectCityAreaScreen from '../screens/SelectCityAreaScreen';
 import SelectCityScreen from '../screens/Auth/SelectCityScreen';
 import DocumentsScreen from '../screens/DocumentsScreen';
 import PoojaAndAstrologyPerformedScreen from '../screens/PoojaAndAstrologyPerformedScreen';
-import LanguagesScreen from '../screens/LanguagesScreen'; // Import new screen
+import LanguagesScreen from '../screens/LanguagesScreen';
 import {COLORS} from '../theme/theme';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import SelectAreaScreen from '../screens/Auth/SelectAreaScreen';
@@ -189,7 +188,7 @@ const AuthNavigator = () => {
         name="AppBottomTabNavigator"
         component={AppBottomTabNavigator}
         options={{
-          headerShown: false, // Assuming no header based on screenshot
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

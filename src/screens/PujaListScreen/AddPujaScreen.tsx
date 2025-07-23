@@ -27,6 +27,7 @@ import PrimaryButton from '../../components/PrimaryButton';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useCommonToast} from '../../common/CommonToast';
+import AppConstant from '../../utils/AppContent';
 
 interface PriceOption {
   id: 'system' | 'custom';
@@ -156,7 +157,7 @@ const AddPujaScreen: React.FC = () => {
     try {
       let userId: number | null = null;
       try {
-        const userIdStr = await AsyncStorage.getItem('user_id');
+        const userIdStr = await AsyncStorage.getItem(AppConstant.USER_ID);
         if (userIdStr) {
           userId = parseInt(userIdStr, 10);
         }
@@ -213,7 +214,7 @@ const AddPujaScreen: React.FC = () => {
     try {
       let userId: number | null = null;
       try {
-        const userIdStr = await AsyncStorage.getItem('user_id');
+        const userIdStr = await AsyncStorage.getItem(AppConstant.USER_ID);
         if (userIdStr) {
           userId = parseInt(userIdStr, 10);
         }

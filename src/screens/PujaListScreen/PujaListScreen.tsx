@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  Platform,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
@@ -17,6 +18,7 @@ import {getPuja} from '../../api/apiService';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {PujaListStackParamList} from '../../navigation/PujaListStack/PujaListStack';
+import CustomeLoader from '../../components/CustomLoader';
 
 type PujaListScreenNavigationProp = StackNavigationProp<
   PujaListStackParamList,
@@ -49,21 +51,21 @@ const PujaListScreen: React.FC = () => {
     setLoading(true);
     try {
       const response: any = await getPuja();
-      // Map only required fields for display
-      console.log('response', response);
-      const mapped = Array.isArray(response.data)
-        ? response.data.map((item: any) => ({
-            id: item.id,
-            pooja: item.pooja, // Fixed: use item.pooja instead of undefined 'pooja'
-            pooja_image_url: item.pooja_image_url,
-            pooja_title: item.pooja_title,
-            pooja_short_description: item.pooja_short_description,
-            price_with_samagri: item.price_with_samagri,
-            price_without_samagri: item.price_without_samagri,
-            price_status: item.price_status,
-          }))
-        : [];
-      setPujaList(mapped);
+
+      if (response.data.success) {
+        const data = response.data.data;
+        const mapped = data.map((item: any) => ({
+          id: item.id,
+          pooja: item.pooja,
+          pooja_image_url: item.pooja_image_url,
+          pooja_title: item.pooja_title,
+          pooja_short_description: item.pooja_short_description,
+          price_with_samagri: item.price_with_samagri,
+          price_without_samagri: item.price_without_samagri,
+          price_status: item.price_status,
+        }));
+        setPujaList(mapped);
+      }
     } catch (error) {
       setPujaList([]);
     } finally {
@@ -71,7 +73,6 @@ const PujaListScreen: React.FC = () => {
     }
   };
 
-  // Call API on mount and when screen is focused
   useEffect(() => {
     fetchPujaList();
   }, []);
@@ -83,7 +84,6 @@ const PujaListScreen: React.FC = () => {
   );
 
   const PujaItem: React.FC<PujaItemProps> = ({puja, onEdit}) => {
-    // Show both prices, fallback to 0 if not present
     const formattedPriceWith =
       puja.price_with_samagri && puja.price_with_samagri !== '0.00'
         ? `₹ ${Number(puja.price_with_samagri).toLocaleString('en-IN')}`
@@ -112,7 +112,6 @@ const PujaListScreen: React.FC = () => {
             </Text>
             <View style={styles.priceAndEditContainer}>
               <Text style={styles.pujaPrice}>{formattedPriceWithout}</Text>
-
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => onEdit(puja)}>
@@ -125,7 +124,6 @@ const PujaListScreen: React.FC = () => {
     );
   };
 
-  // On Edit Click, navigate to AddPujaScreen, passing the puja data for editing
   const handleEditPuja = (puja: PujaItemType) => {
     navigation.navigate('EditPujaScreen', {pujaId: puja.id, pujaData: puja});
   };
@@ -138,23 +136,24 @@ const PujaListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <CustomeLoader loading={loading} />
       <UserCustomHeader
         title={t('puja_list')}
         showCirclePlusButton={true}
         onCirclePlusPress={handleAddPuja}
       />
-
       <View style={styles.contentContainer}>
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingBottom: Platform.OS === 'ios' ? 20 : 50,
+            },
+          ]}
           showsVerticalScrollIndicator={false}>
           <View style={[styles.listContainer, THEMESHADOW.shadow]}>
-            {loading ? (
-              <View style={{alignItems: 'center', marginTop: 40}}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-              </View>
-            ) : pujaList.length === 0 ? (
+            {loading ? null : pujaList.length === 0 ? (
               <Text
                 style={{
                   textAlign: 'center',
@@ -195,7 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 20,
   },
   listContainer: {
     backgroundColor: COLORS.white,

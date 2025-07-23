@@ -1,25 +1,15 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from 'react';
-import {
-  createStackNavigator,
-  StackNavigationOptions,
-} from '@react-navigation/stack';
-import {NavigatorScreenParams} from '@react-navigation/native'; // Import NavigatorScreenParams
+import React, {useEffect} from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
+import {NavigatorScreenParams} from '@react-navigation/native';
 import AuthNavigator from './AuthNavigator';
-import AppDrawerNavigator, {AppDrawerParamList} from './DrawerNavigator'; // Corrected import path
 import {COLORS} from '../theme/theme';
 import {useAuth} from '../provider/AuthProvider';
-import AppBottomTabNavigator from './BottomTabNavigator';
+import AppBottomTabNavigator, {
+  AppBottomTabParamList,
+} from './BottomTabNavigator';
 
-// Root Stack Types
-// Define the param list for the stack that includes LanguagesScreen and AppDrawerNavigator
 export type MainAppStackParamList = {
-  AppDrawer: NavigatorScreenParams<AppDrawerParamList>; // AppDrawerNavigator itself
+  AppBottomTabNavigator: NavigatorScreenParams<AppBottomTabParamList>;
 };
 
 const MainApp = createStackNavigator<MainAppStackParamList>();
@@ -35,15 +25,17 @@ const MainAppStackNavigator = () => {
         headerTintColor: COLORS.white,
         cardStyle: {backgroundColor: COLORS.backgroundPrimary},
       }}>
-      <MainApp.Screen name="AppDrawer" component={AppBottomTabNavigator} />
+      <MainApp.Screen
+        name="AppBottomTabNavigator"
+        component={AppBottomTabNavigator}
+      />
     </MainApp.Navigator>
   );
 };
 
-// Root Stack Types - Main now points to MainAppStack
 export type RootStackParamList = {
-  Auth: undefined; // AuthNavigator for unauthenticated users
-  Main: NavigatorScreenParams<MainAppStackParamList>; // MainAppStackNavigator for authenticated users
+  Auth: undefined;
+  Main: NavigatorScreenParams<MainAppStackParamList>;
 };
 
 const RootStack = createStackNavigator<RootStackParamList>();
@@ -58,13 +50,9 @@ const RootNavigator = () => {
     <RootStack.Navigator
       screenOptions={{
         headerShown: false,
-        // contentStyle: {backgroundColor: 'transparent'}, // Removed to fix error, apply to screens if needed
       }}>
       {isAuthenticated && (
-        <RootStack.Screen
-          name="Main"
-          component={MainAppStackNavigator} // Use the new MainAppStackNavigator
-        />
+        <RootStack.Screen name="Main" component={MainAppStackNavigator} />
       )}
       {!isAuthenticated && (
         <RootStack.Screen name="Auth" component={AuthNavigator} />
