@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   Button,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
@@ -22,10 +22,12 @@ import {
   getUpcomingPuja,
   getCompletedPuja,
   postUpdateStatus,
+  getInProgressPuja,
 } from '../../api/apiService';
 import {useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
 import CustomModal from '../../components/CustomModal';
+import {useCommonToast} from '../../common/CommonToast';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -45,18 +47,32 @@ interface PendingPujaItem {
   // Add other fields as needed from the API response
 }
 
+interface InProgressPujaItem {
+  id: string | number;
+  pooja_name: string;
+  when_is_pooja?: string;
+  pooja_image_url?: string;
+  booking_date: string;
+  // Add other fields as needed from the API response
+}
+
 type ModalType = 'accept' | 'reject' | null;
 
 const HomeScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<HomeStackParamList>();
-
+  const inset = useSafeAreaInsets();
+  const {showErrorToast} = useCommonToast();
   const [upcomingPujas, setUpcomingPujas] = useState<PujaItem[]>([]);
   const [completedPujas, setCompletedPujas] = useState<PujaItem[]>([]);
   const [pendingPujas, setPendingPujas] = useState<PendingPujaItem[]>([]);
+  const [inProgressPujas, setInProgressPujas] = useState<InProgressPujaItem[]>(
+    [],
+  );
+  console.log('pendingPujas', pendingPujas);
   const [loading, setLoading] = useState<boolean>(true);
   const [pendingLoading, setPendingLoading] = useState<boolean>(true);
-
+  const [inProgressLoading, setInProgressLoading] = useState<boolean>(true);
   // Modal state
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -69,13 +85,19 @@ const HomeScreen: React.FC = () => {
   const fetchAllPujas = useCallback(async () => {
     setLoading(true);
     setPendingLoading(true);
+    setInProgressLoading(true);
     try {
-      const [pendingResponse, upcomingResponse, completedResponse] =
-        await Promise.all([
-          getPandingPuja(),
-          getUpcomingPuja(),
-          getCompletedPuja(),
-        ]);
+      const [
+        pendingResponse,
+        upcomingResponse,
+        completedResponse,
+        inProgressResponse,
+      ] = await Promise.all([
+        getPandingPuja(),
+        getUpcomingPuja(),
+        getCompletedPuja(),
+        getInProgressPuja(),
+      ]);
 
       // Pending Puja
       let pendingList: PendingPujaItem[] = [];
@@ -118,13 +140,31 @@ const HomeScreen: React.FC = () => {
         completedList = completedResponse;
       }
       setCompletedPujas(completedList);
+
+      // In-Progress Puja
+      let inProgressList: InProgressPujaItem[] = [];
+      if (
+        inProgressResponse &&
+        typeof inProgressResponse === 'object' &&
+        'data' in inProgressResponse
+      ) {
+        const data = (inProgressResponse as {data?: unknown}).data;
+        inProgressList = Array.isArray(data)
+          ? (data as InProgressPujaItem[])
+          : [];
+      } else if (Array.isArray(inProgressResponse)) {
+        inProgressList = inProgressResponse;
+      }
+      setInProgressPujas(inProgressList);
     } catch (error) {
       setPendingPujas([]);
       setUpcomingPujas([]);
       setCompletedPujas([]);
+      setInProgressPujas([]);
     } finally {
       setPendingLoading(false);
       setLoading(false);
+      setInProgressLoading(false);
     }
   }, []);
 
@@ -160,6 +200,7 @@ const HomeScreen: React.FC = () => {
     setActionLoading(true);
     setLoading(true); // Show loading page
     setPendingLoading(true);
+    setInProgressLoading(true);
     try {
       const status =
         modalType === 'accept'
@@ -174,12 +215,27 @@ const HomeScreen: React.FC = () => {
       // Instead of just removing from pending, reload all data
       await fetchAllPujas();
     } catch (error) {
-      // Optionally handle error
-      setPendingPujas([]);
-      setUpcomingPujas([]);
-      setCompletedPujas([]);
-    } finally {
+      // Extract error message from API response
+      let errorMsg = 'Something went wrong';
+      if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
+      // setPendingPujas([]);
+      // setUpcomingPujas([]);
+      // setCompletedPujas([]);
+      // setInProgressPujas([]);
+      setLoading(false);
       setActionLoading(false);
+      setPendingLoading(false);
+      setInProgressLoading(false);
+    } finally {
+      setLoading(false);
+      setActionLoading(false);
+      setPendingLoading(false);
+      setInProgressLoading(false);
       closeModal();
     }
   };
@@ -267,8 +323,35 @@ const HomeScreen: React.FC = () => {
     </View>
   );
 
+  // Render In-Progress Puja Item
+  const renderInProgressPujaItem = (
+    item: InProgressPujaItem,
+    isLast: boolean,
+  ) => (
+    <TouchableOpacity
+      key={item.id}
+      onPress={() =>
+        navigation.navigate('PujaDetailsScreen', {progress: true})
+      }>
+      <View style={styles.pujaItem}>
+        <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
+        <View style={styles.pujaContent}>
+          <Text style={styles.pujaName}>{item.pooja_name}</Text>
+          <Text style={styles.pujaDate}>
+            {item.when_is_pooja
+              ? `Scheduled on ${item.when_is_pooja}`
+              : item.booking_date
+              ? `Scheduled on ${formatDateWithOrdinal(item.booking_date)}`
+              : ''}
+          </Text>
+        </View>
+      </View>
+      {!isLast && <View style={styles.separator} />}
+    </TouchableOpacity>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, {paddingTop: inset.top}]}>
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -284,7 +367,7 @@ const HomeScreen: React.FC = () => {
 
       {/* Main Content */}
       <View style={styles.contentContainer}>
-        {loading || pendingLoading ? (
+        {loading || pendingLoading || inProgressLoading ? (
           <View
             style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <ActivityIndicator size="large" color={COLORS.primaryTextDark} />
@@ -294,6 +377,23 @@ const HomeScreen: React.FC = () => {
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}>
+            {/* In-Progress Puja's Section (at the top) */}
+            {inProgressPujas && inProgressPujas.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>
+                  {t('in_progress_puja') || 'In-Progress Puja'}
+                </Text>
+                <View style={[styles.pujaCard, THEMESHADOW.shadow]}>
+                  {inProgressPujas.map((item, index) =>
+                    renderInProgressPujaItem(
+                      item,
+                      index === inProgressPujas.length - 1,
+                    ),
+                  )}
+                </View>
+              </View>
+            )}
+
             {/* Pending Puja's Section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('pending_puja')}</Text>
@@ -402,7 +502,7 @@ const HomeScreen: React.FC = () => {
         onCancel={closeModal}
         loading={actionLoading}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

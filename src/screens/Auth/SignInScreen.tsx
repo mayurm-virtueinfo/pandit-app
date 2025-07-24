@@ -41,13 +41,22 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
   const [isLoading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{phoneNumber?: string}>({});
 
-  // Proper validation: Only allow 10 digit numbers, no letters, no special chars, must start with 6-9
+  // Improved validation: Only allow 10 digit numbers, no letters, no special chars, must start with 6-9
+  // Also, do not show error if exactly 10 digits and starts with 6-9
   const validateInput = (input: string) => {
     const trimmed = input.trim().replace(/\s+/g, '');
     if (!trimmed) {
       return t('enter_mobile_number');
     }
-    if (!/^[6-9]\d{9}$/.test(trimmed)) {
+    // Only check length first
+    if (trimmed.length !== 10) {
+      return (
+        t('Please_enter_valid_number') ||
+        'Please enter a valid 10-digit mobile number'
+      );
+    }
+    // Only check pattern if length is exactly 10
+    if (trimmed.length === 10 && !/^[0-9]\d{9}$/.test(trimmed)) {
       return (
         t('Please_enter_valid_number') ||
         'Please enter a valid 10-digit mobile number'
@@ -66,7 +75,7 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
 
     setErrors({});
     const formattedPhone = `+91${phoneNumber.trim().replace(/\s+/g, '')}`;
-    if (!validatePhoneNumber(formattedPhone)) {
+    if (!/^\+91[0-9]\d{9}$/.test(formattedPhone)) {
       const errorText =
         t('Please_enter_valid_number') ||
         'Please enter a valid 10-digit mobile number';

@@ -32,7 +32,7 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
-export const BASE_URL = 'https://75c2be5e5cea.ngrok-free.app';
+export const BASE_URL = 'https://c692148aa3f9.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';
@@ -55,4 +55,9 @@ export const POST_UPDATE_STATUS = '/panditji/update-status/';
 export const GET_UPCOMING_PUJA_DETAILS = '/panditji/upcoming-poojas/?id={id}';
 export const POST_START_PUJA = '/panditji/start-pooja/';
 export const POST_COMPETE_PUJA = '/panditji/complete-pooja/';
-export const GET_PANDIT_PROFILE = '/panditji/my-details';
+export const GET_PANDIT_PROFILE = '/panditji/my-details/';
+export const POST_PANDIT_AVAILABILITY = "/panditji/availability/"
+export const POST_CANCEL_BOOKING = "/panditji/bookings/{id}/cancel/"
+export const GET_IN_PROGRESS_PUJA = "/panditji/bookings/in_progress/"
+export const GET_WALLET = "/panditji/wallet/"
+export const GET_TRANSACTIONS = "/panditji/wallet/transactions/"

@@ -1,5 +1,5 @@
 // import axios from 'axios';
-import {AxiosRequestConfig} from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   GET_AREA,
@@ -8,17 +8,22 @@ import ApiEndpoints, {
   GET_COMPLETED_PUA,
   GET_EDIT_PUJA,
   GET_GOTRA,
+  GET_IN_PROGRESS_PUJA,
   GET_LANGUAGES,
   GET_PANDING_PUJA,
   GET_PANDIT_PROFILE,
   GET_POOJA,
   GET_SUBCASTE,
+  GET_TRANSACTIONS,
   GET_UNASSIGN_PUJA,
   GET_UPCOMING_PUJA,
   GET_UPCOMING_PUJA_DETAILS,
+  GET_WALLET,
   POST_ADD_PUJA,
+  POST_CANCEL_BOOKING,
   POST_COMPETE_PUJA,
   POST_LOGOUT,
+  POST_PANDIT_AVAILABILITY,
   POST_REFRESH_TOKEN,
   POST_SIGNIN,
   POST_SIGNUP,
@@ -240,6 +245,16 @@ export interface StartCompetePuja {
   pin: string;
 }
 
+export interface PanditAvailability {
+  available_dates: string[],
+  unavailable_dates: string[]
+}
+
+export interface bookingCancellation {
+  cancellation_reason_type: string,
+  cancellation_reason_other?: string
+}
+
 export const apiService = {
   // Fetch castes (mock data)
   getPujaList: async (): Promise<PujaList[]> => {
@@ -287,10 +302,10 @@ export const apiService = {
   getPujaListData: async (): Promise<PujaListDataResponse> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || {recommendedPuja: [], pujaList: []};
+      return response.data?.record || { recommendedPuja: [], pujaList: [] };
     } catch (error) {
       console.error('Error fetching puja list data:', error);
-      return {pujaList: []};
+      return { pujaList: [] };
     }
   },
 
@@ -573,7 +588,7 @@ export const getUpcomingPuja = () => {
         resolve(response);
       })
       .catch(error => {
-        console.log('error', error);
+        console.log('error', error.response.data);
         reject(error);
       });
   });
@@ -612,7 +627,7 @@ export const postUpdateStatus = (data: UpdateStatus) => {
   });
 };
 
-export const getUpcingPujaDetails = (id: any) => {
+export const getUpcomingPujaDetails = (id: any) => {
   let apiUrl = GET_UPCOMING_PUJA_DETAILS.replace('{id}', id);
   return new Promise((resolve, reject) => {
     apiDev
@@ -671,7 +686,104 @@ export const getPanditProfileDetails = () => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error fetching pandit profile data:', error);
+        console.error('Error fetching pandit profile data:', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const postPanditAvailability = (data: PanditAvailability) => {
+  let apiUrl = POST_PANDIT_AVAILABILITY;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error(
+          'Error Pandit availability',
+          JSON.stringify(error),
+        );
+        reject(error);
+      });
+  });
+};
+
+
+export const getPanditAvailability = () => {
+  let apiUrl = POST_PANDIT_AVAILABILITY;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error(
+          'Error Pandit availability',
+          JSON.stringify(error.response.data),
+        );
+        reject(error);
+      });
+  });
+};
+
+export const postCancelBooking = (id: string, data: bookingCancellation): Promise<any> => {
+  const apiUrl = POST_CANCEL_BOOKING.replace('{id}', id);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error cancel booking:', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getInProgressPuja = () => {
+  let apiUrl = GET_IN_PROGRESS_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error In-progress puja :', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getWallet = () => {
+  let apiUrl = GET_WALLET;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error Wallet api :', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getTransactions = () => {
+  let apiUrl = GET_TRANSACTIONS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error Transactions :', error.response.data);
         reject(error);
       });
   });

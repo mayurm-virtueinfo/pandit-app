@@ -1,6 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ApiEndpoints, {BASE_URL, POST_REFRESH_TOKEN} from './apiEndpoints';
+import ApiEndpoints, { BASE_URL, POST_REFRESH_TOKEN } from './apiEndpoints';
 import AppConstant from '../utils/AppContent';
 
 const apiDev = axios.create({
@@ -48,8 +48,8 @@ const onRefreshed = (newAccessToken: string) => {
 const refreshAccessToken = async (refreshToken: string) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}${POST_REFRESH_TOKEN}`,
-      {refresh_token: refreshToken},
+      'https://c692148aa3f9.ngrok-free.app/app/auth/refresh-token/',
+      { refresh_token: refreshToken },
       {
         headers: {
           'Content-Type': 'application/json',

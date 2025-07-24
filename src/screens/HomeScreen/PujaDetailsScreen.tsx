@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -23,37 +23,62 @@ import PrimaryButton from '../../components/PrimaryButton';
 import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
 import {useTranslation} from 'react-i18next';
 import {
-  getUpcingPujaDetails,
+  getUpcomingPujaDetails,
   postCompetePuja,
   postStartPuja,
+  getInProgressPuja,
 } from '../../api/apiService';
-import {useRoute} from '@react-navigation/native';
+import {useRoute, useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width: screenWidth} = Dimensions.get('window');
 
 type PujaDetailsType = {
-  address_details: {
-    full_address: string;
-    id: number;
+  address_details?: {
+    full_address?: string;
+    id?: number;
   };
+  address?: {
+    address_line1?: string;
+    address_line2?: string | null;
+    city_name?: string;
+    id?: number;
+    name?: string;
+    phone_number?: string;
+    pincode?: string | null;
+    state?: string | null;
+    country?: string | null;
+    latitude?: string | null;
+    longitude?: string | null;
+    address_type?: string | null;
+  };
+  location_display?: string;
   amount: string;
   booking_date: string;
   booking_status: string;
-  booking_user_mobile: string;
-  booking_user_name: string;
+  booking_user_mobile?: string;
+  booking_user_name?: string;
   created_at: string;
   id: number;
   muhurat_time: string;
   muhurat_type: string;
-  notes: string;
+  notes?: string;
   payment_status: string;
-  pooja_id: number;
+  pooja_id?: number;
   pooja_image_url: string;
   pooja_name: string;
   samagri_required: boolean;
   uuid: string;
-  when_is_pooja: string;
+  when_is_pooja?: string;
+  tirth_place_name?: string;
+  updated_at?: string;
+  user_info?: {
+    email?: string;
+    full_name?: string;
+    id?: number;
+    mobile?: string;
+    profile_img_url?: string | null;
+  };
 };
 
 const STORAGE_KEY_PREFIX = 'puja_status_';
@@ -61,38 +86,62 @@ const STORAGE_KEY_PREFIX = 'puja_status_';
 const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const {t} = useTranslation();
   const route = useRoute();
-  const {id} = route.params as any;
-  console.log('id', id);
+  const {id, progress} = route.params as any;
+  const inset = useSafeAreaInsets();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [pujaStarted, setPujaStarted] = useState(false);
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [isPujaItemsModalVisible, setIsPujaItemsModalVisible] = useState(false);
   const [pujaDetails, setPujaDetails] = useState<PujaDetailsType | null>(null);
-
-  // For storing the pin entered in the modal
+  const [progressPujaDetails, setProgressPujaDetails] =
+    useState<PujaDetailsType | null>(null);
   const [enteredPin, setEnteredPin] = useState<string>('');
+  // Helper to get the correct booking id for status
+  console.log('progressPujaDetails', progressPujaDetails);
+  const getBookingId = () => {
+    if (progress) {
+      return progressPujaDetails?.id;
+    }
+    return pujaDetails?.id || id;
+  };
 
-  // Load puja started/completed status from AsyncStorage
-  useEffect(() => {
-    const fetchPujaDetails = async () => {
-      try {
-        const response = await getUpcingPujaDetails(id);
-        console.log('response', JSON.stringify(response));
-
+  // Fetch puja details
+  const fetchPujaDetails = useCallback(async () => {
+    try {
+      let response;
+      if (progress) {
+        response = await getInProgressPuja();
+        const data = Array.isArray(response)
+          ? response[0]
+          : response?.data?.[0] || response?.[0];
+        if (data) {
+          setProgressPujaDetails(data);
+        }
+      } else {
+        response = await getUpcomingPujaDetails(id);
         const data = Array.isArray(response)
           ? response[0]
           : response?.data?.[0] || response?.[0];
         if (data) {
           setPujaDetails(data);
         }
-      } catch (error) {
-        console.error('Error fetching puja details:', error);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching puja details:', error);
+    }
+  }, [id, progress]);
 
-    const loadPujaStatus = async () => {
+  // Load puja started/completed status from AsyncStorage
+  const loadPujaStatus = useCallback(
+    async (bookingId: number | string | undefined) => {
+      if (!bookingId) {
+        setPujaStarted(false);
+        return;
+      }
       try {
-        const status = await AsyncStorage.getItem(`${STORAGE_KEY_PREFIX}${id}`);
+        const status = await AsyncStorage.getItem(
+          `${STORAGE_KEY_PREFIX}${bookingId}`,
+        );
         if (status === 'started') {
           setPujaStarted(true);
         } else {
@@ -101,27 +150,48 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       } catch (error) {
         console.error('Error loading puja status from storage:', error);
       }
-    };
+    },
+    [],
+  );
 
-    fetchPujaDetails();
-    loadPujaStatus();
-  }, [id]);
+  // Fetch details and status on focus (when coming to this screen)
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      const fetchAll = async () => {
+        await fetchPujaDetails();
+      };
+      fetchAll();
+      return () => {
+        isActive = false;
+      };
+    }, [fetchPujaDetails]),
+  );
+
+  // When pujaDetails or progressPujaDetails changes, load status
+  useEffect(() => {
+    const bookingId = getBookingId();
+    if (bookingId) {
+      loadPujaStatus(bookingId);
+    }
+  }, [pujaDetails, progressPujaDetails, id, progress, loadPujaStatus]);
 
   // Call Start Puja API and store status in AsyncStorage
   const handleStartPujaApi = async (pin: string) => {
-    if (!pujaDetails?.id) {
+    const bookingId = pujaDetails?.id || progressPujaDetails?.id;
+    if (!bookingId) {
       console.error('No booking id found for starting puja');
       return;
     }
     try {
       const data = {
-        booking_id: pujaDetails.id,
+        booking_id: bookingId,
         pin: pin,
       };
       await postStartPuja(data);
       setPujaStarted(true);
       await AsyncStorage.setItem(
-        `${STORAGE_KEY_PREFIX}${pujaDetails.id}`,
+        `${STORAGE_KEY_PREFIX}${bookingId}`,
         'started',
       );
     } catch (error) {
@@ -131,19 +201,20 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // Call Complete Puja API and update status in AsyncStorage
   const handleCompletePujaApi = async (pin: string) => {
-    if (!pujaDetails?.id) {
+    const bookingId = progressPujaDetails?.id || pujaDetails?.id;
+    if (!bookingId) {
       console.error('No booking id found for completing puja');
       return;
     }
     try {
       const data = {
-        booking_id: pujaDetails.id,
+        booking_id: bookingId,
         pin: pin,
       };
       await postCompetePuja(data);
       setPujaStarted(false);
       await AsyncStorage.setItem(
-        `${STORAGE_KEY_PREFIX}${pujaDetails.id}`,
+        `${STORAGE_KEY_PREFIX}${bookingId}`,
         'completed',
       );
       navigation?.navigate('PujaSuccessfull');
@@ -189,8 +260,39 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     setIsPujaItemsModalVisible(false);
   };
 
+  // Helper to get address string for display
+  const getAddressDisplay = () => {
+    // For progressPujaDetails, prefer location_display, else build from address
+    if (progress && progressPujaDetails) {
+      if (progressPujaDetails.location_display) {
+        return progressPujaDetails.location_display;
+      }
+      if (progressPujaDetails.address) {
+        const {address_line1, city_name} = progressPujaDetails.address;
+        let addressStr = '';
+        if (address_line1) addressStr += address_line1;
+        if (city_name) addressStr += (addressStr ? ', ' : '') + city_name;
+        return addressStr;
+      }
+      // fallback to tirth_place_name
+      if (progressPujaDetails.tirth_place_name) {
+        return progressPujaDetails.tirth_place_name;
+      }
+    }
+    // For pujaDetails (upcoming), fallback to old logic
+    if (pujaDetails) {
+      if (pujaDetails.address_details?.full_address) {
+        return pujaDetails.address_details.full_address;
+      }
+      if (pujaDetails.tirth_place_name) {
+        return pujaDetails.tirth_place_name;
+      }
+    }
+    return '';
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, {paddingTop: inset.top}]}>
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -198,7 +300,11 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       />
 
       <UserCustomHeader
-        title={pujaDetails?.pooja_name || 'Puja Details'}
+        title={
+          pujaDetails?.pooja_name ||
+          progressPujaDetails?.pooja_name ||
+          'Puja Details'
+        }
         showBackButton
         showBellButton
         onBackPress={handleBackPress}
@@ -214,7 +320,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           contentContainerStyle={styles.scrollContent}>
           <Image
             source={{
-              uri: pujaDetails?.pooja_image_url,
+              uri:
+                pujaDetails?.pooja_image_url ||
+                progressPujaDetails?.pooja_image_url,
             }}
             style={[
               styles.heroImage,
@@ -228,7 +336,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               paddingHorizontal: moderateScale(24),
               paddingTop: verticalScale(24),
             }}>
-            <Text style={styles.pujaTitle}>{pujaDetails?.pooja_name}</Text>
+            <Text style={styles.pujaTitle}>
+              {pujaDetails?.pooja_name || progressPujaDetails?.pooja_name}
+            </Text>
 
             <View style={[styles.detailsCard, THEMESHADOW.shadow]}>
               <View style={styles.detailItem}>
@@ -239,9 +349,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   style={styles.detailIcon}
                 />
                 <View style={styles.detailContent}>
-                  <Text style={styles.detailText}>
-                    {pujaDetails?.address_details?.full_address}
-                  </Text>
+                  <Text style={styles.detailText}>{getAddressDisplay()}</Text>
                 </View>
               </View>
               <View style={styles.separator} />
@@ -255,7 +363,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailText}>
-                    {pujaDetails?.when_is_pooja}
+                    {pujaDetails?.when_is_pooja ||
+                      progressPujaDetails?.booking_date}
                   </Text>
                 </View>
               </View>
@@ -270,7 +379,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailText}>
-                    {pujaDetails?.muhurat_time}
+                    {pujaDetails?.muhurat_time ||
+                      progressPujaDetails?.muhurat_time}
                   </Text>
                 </View>
               </View>
@@ -297,14 +407,17 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 <View style={styles.priestImageContainer}>
                   <Image
                     source={{
-                      uri: 'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=80',
+                      uri:
+                        progressPujaDetails?.user_info?.profile_img_url ||
+                        'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=80',
                     }}
                     style={styles.priestImage}
                   />
                   <View style={styles.priestImageBorder} />
                 </View>
                 <Text style={styles.priestName}>
-                  {pujaDetails?.booking_user_name}
+                  {pujaDetails?.booking_user_name ||
+                    progressPujaDetails?.user_info?.full_name}
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
@@ -325,13 +438,16 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               <View style={styles.pricingContent}>
                 <Text style={styles.pricingLabel}>Pooja Pricing</Text>
                 <Text style={styles.pricingSubtext}>
-                  {pujaDetails?.samagri_required
+                  {pujaDetails?.samagri_required ||
+                  progressPujaDetails?.samagri_required
                     ? 'With Puja Items'
                     : 'Without Puja Items'}
                 </Text>
               </View>
               <Text style={styles.pricingAmount}>
-                {pujaDetails?.amount ? `₹${pujaDetails.amount}` : ''}
+                {pujaDetails?.amount
+                  ? `₹${pujaDetails.amount}`
+                  : `₹${progressPujaDetails?.amount}`}
               </Text>
             </View>
 
@@ -339,7 +455,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               <View style={styles.buttonContainer}>
                 <PrimaryButtonOutlined
                   title={t('cancel')}
-                  onPress={() => {}}
+                  onPress={() => {
+                    navigation.navigate('PujaCancellationScreen', {id: id});
+                  }}
                   style={styles.button}
                 />
                 <PrimaryButton
@@ -372,7 +490,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         visible={isPujaItemsModalVisible}
         onClose={handleClosePujaItemsModal}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -215,5 +215,17 @@
   "logging_out": "Logging out...",
   "Please_enter_valid_number": "Please enter a valid 10-digit mobile number",
   "otp_sent": "OTP has been sent to your phone.",
-  "otp_send_failed": "Failed to send OTP. Please try again."
+  "otp_send_failed": "Failed to send OTP. Please try again.",
+  "availability_updated_successfully": "Availability updated successfully.",
+  "availability_update_failed": "Failed to update availability. Please try again.",
+  "confirm_cancellation": "Confirm Cancellation",
+  "are_you_sure_you_want_to_cancel": "Are you sure you want to cancel this booking?",
+  "yes": "Yes",
+  "no": "No",
+  "please_select_cancellation_reason": "Please select a cancellation reason.",
+  "please_enter_cancellation_reason": "Please enter your cancellation reason.",
+  "cancellation_submitted_successfully": "Cancellation submitted successfully.",
+  "puja_cancellation": "Puja Cancellation",
+  "descriprion_for_cancel_puja": "Please note that cancellations are only applicable if made 24 hours prior to the scheduled Pooja. If you cancel within this period, you will not be eligible for a refund. We appreciate your understanding and cooperation.",
+  "in_progress_puja": "In-Progress Puja"
 }

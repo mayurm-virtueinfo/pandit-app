@@ -349,7 +349,7 @@ const CompleteProfileScreen: React.FC = () => {
   return (
     <View style={[styles.mainContainer, {paddingTop: inset.top}]}>
       <CustomeLoader loading={isLoading} />
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <CustomHeader
           title={t('complete_your_profile')}
           showBackButton={true}
@@ -470,7 +470,7 @@ const CompleteProfileScreen: React.FC = () => {
             />
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 };

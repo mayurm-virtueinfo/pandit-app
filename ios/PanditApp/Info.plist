@@ -20,6 +20,14 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to provide personalized services.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to allow you to select and upload photos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to allow you to take and upload photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone for audio recording features.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

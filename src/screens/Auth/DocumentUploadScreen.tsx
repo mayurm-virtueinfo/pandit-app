@@ -203,7 +203,6 @@ const DocumentUploadScreen: React.FC = () => {
     formData.append('firebase_uid', uid);
     formData.append('first_name', firstName);
     formData.append('last_name', lastName);
-    formData.append('email', 'user@example.com');
     formData.append('role', 2);
     formData.append('address', address);
     formData.append('city', selectCityId);
@@ -293,7 +292,7 @@ const DocumentUploadScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <StatusBar
         barStyle="light-content"
         backgroundColor={COLORS.primaryBackground}
@@ -360,7 +359,7 @@ const DocumentUploadScreen: React.FC = () => {
           style={styles.submitButton}
         />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

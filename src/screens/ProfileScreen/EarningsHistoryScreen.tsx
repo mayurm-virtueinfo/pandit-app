@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {
   View,
   StyleSheet,
@@ -13,63 +13,87 @@ import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {apiService, EarningsHistoryResponse} from '../../api/apiService';
+import {getWallet, getTransactions} from '../../api/apiService';
 import {useTranslation} from 'react-i18next';
 import Options from '../../components/Options';
 
-interface EarningHistoryItem {
+interface TransactionItem {
   id: number;
   title: string;
-  date: string; // "5 January 2025"
+  date: string;
   amount: string;
-  rawDate: string; // keep original for filtering
+  rawDate: string;
+  rawAmount?: number;
 }
 
 const EarningsHistoryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
 
-  const [earningsData, setEarningsData] = useState<EarningHistoryItem[]>([]);
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
-  // console.log('earningsData', earningsData);
+  const [walletAmount, setWalletAmount] = useState<number>(0);
 
   useEffect(() => {
-    const fetchEarnings = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch data from API
-        const data = await apiService.getEaningsHistoryData();
-        let items: EarningsHistoryResponse[] = [];
-        if (Array.isArray(data)) {
-          items = data;
-        } else if (data && typeof data === 'object' && data.id !== 0) {
-          items = [data];
+        // Fetch wallet
+        const walletRes: any = await getWallet();
+        let walletValue = 0;
+        if (
+          walletRes &&
+          typeof walletRes === 'object' &&
+          walletRes.data &&
+          walletRes.data.data &&
+          walletRes.data.data.balance !== undefined
+        ) {
+          walletValue = Number(walletRes.data.data.balance) || 0;
+        }
+        setWalletAmount(walletValue);
+
+        // Fetch transactions
+        const txRes: any = await getTransactions();
+        let txItems: any[] = [];
+        if (Array.isArray(txRes)) {
+          txItems = txRes;
+        } else if (
+          txRes &&
+          typeof txRes === 'object' &&
+          txRes.data &&
+          Array.isArray(txRes.data.data)
+        ) {
+          txItems = txRes.data.data;
         }
         // Map API data to local display format
-        const mapped: EarningHistoryItem[] = items.map(item => ({
-          id: item.id,
-          title: item.poojaName,
-          date: item.date, // keep as "5 January 2025"
-          amount: `₹ ${item.price.toLocaleString()}`,
-          rawDate: item.date, // for filtering
-        }));
-        setEarningsData(mapped);
+        const mapped: TransactionItem[] = txItems.map(item => {
+          const rawAmount = Number(item.amount || item.price || 0);
+          return {
+            id: item.id,
+            title: item.title || item.description || t('transaction'),
+            date: item.date,
+            amount: `₹ ${rawAmount.toLocaleString()}`,
+            rawDate: item.date,
+            rawAmount: rawAmount,
+          };
+        });
+        setTransactions(mapped);
       } catch (error) {
-        setEarningsData([]);
+        setWalletAmount(0);
+        setTransactions([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchEarnings();
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Helper to format date as "6 September 2024" (if needed for display)
   function formatDate(dateString: string) {
     if (!dateString) return '';
-    // If already in "5 January 2025" format, just return
     if (/^\d{1,2} [A-Za-z]+ \d{4}$/.test(dateString)) return dateString;
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -79,29 +103,30 @@ const EarningsHistoryScreen: React.FC = () => {
     return `${day} ${month} ${year}`;
   }
 
-  // Filtering logic for "5 January 2025" format
-  const filteredEarnings = earningsData.filter(item => {
-    if (!selectedMonth && !selectedYear) return true;
-    // Defensive: ensure item.rawDate is a string and not undefined/null
-    if (!item.rawDate || typeof item.rawDate !== 'string') return false;
-    // item.rawDate is "5 January 2025"
-    // Split into [day, month, year]
-    const parts = item.rawDate.split(' ');
-    if (parts.length !== 3) return false;
-    const [day, month, year] = parts;
-    const monthMatch = selectedMonth ? month === selectedMonth : true;
-    const yearMatch = selectedYear ? year === selectedYear : true;
-    return monthMatch && yearMatch;
-  });
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(item => {
+      if (!selectedMonth && !selectedYear) return true;
+      if (!item.rawDate || typeof item.rawDate !== 'string') return false;
+      const parts = item.rawDate.split(' ');
+      if (parts.length !== 3) return false;
+      const [, month, year] = parts;
+      const monthMatch = selectedMonth ? month === selectedMonth : true;
+      const yearMatch = selectedYear ? year === selectedYear : true;
+      return monthMatch && yearMatch;
+    });
+  }, [transactions, selectedMonth, selectedYear]);
 
-  // Calculate total earnings AFTER filter
-  const totalEarnings = filteredEarnings.reduce(
-    (sum, item) => sum + parseInt(item.amount.replace(/[^\d]/g, ''), 10),
-    0,
-  );
+  // Calculate total earnings for filtered transactions if filter is applied
+  const totalFilteredEarnings = useMemo(() => {
+    if (!selectedMonth && !selectedYear) return walletAmount;
+    return filteredTransactions.reduce(
+      (sum, item) => sum + (item.rawAmount || 0),
+      0,
+    );
+  }, [filteredTransactions, selectedMonth, selectedYear, walletAmount]);
 
-  const renderEarningsItem = (item: EarningHistoryItem, index: number) => (
-    <View key={item.id}>
+  const renderTransactionItem = (item: TransactionItem, index: number) => (
+    <>
       <View style={styles.earningsItem}>
         <View style={styles.earningsItemLeft}>
           <Text style={styles.earningsTitle}>{item.title}</Text>
@@ -109,8 +134,10 @@ const EarningsHistoryScreen: React.FC = () => {
         </View>
         <Text style={styles.earningsAmount}>{item.amount}</Text>
       </View>
-      {index < filteredEarnings.length - 1 && <View style={styles.separator} />}
-    </View>
+      {index < filteredTransactions.length - 1 && (
+        <View style={styles.separator} />
+      )}
+    </>
   );
 
   return (
@@ -136,14 +163,13 @@ const EarningsHistoryScreen: React.FC = () => {
           <View style={styles.totalEarningsContent}>
             <Text style={styles.totalEarningsLabel}>{t('total_earnings')}</Text>
             <Text style={styles.totalEarningsAmount}>
-              ₹ {totalEarnings.toLocaleString()}
+              ₹ {totalFilteredEarnings.toLocaleString()}
             </Text>
           </View>
         </View>
 
         {/* History Section */}
         <View style={styles.historySection}>
-          {/* Show selected filter if applied */}
           {selectedMonth || selectedYear ? (
             <Text style={styles.historyTitle}>
               {selectedMonth && selectedYear
@@ -163,7 +189,7 @@ const EarningsHistoryScreen: React.FC = () => {
               <View style={{alignItems: 'center', padding: 20}}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
               </View>
-            ) : filteredEarnings.length === 0 ? (
+            ) : filteredTransactions.length === 0 ? (
               <View style={{alignItems: 'center', padding: 20}}>
                 <Text
                   style={{color: COLORS.gray, fontFamily: Fonts.Sen_Medium}}>
@@ -171,9 +197,9 @@ const EarningsHistoryScreen: React.FC = () => {
                 </Text>
               </View>
             ) : (
-              filteredEarnings.map((item, index) =>
-                renderEarningsItem(item, index),
-              )
+              filteredTransactions.map((item, index) => (
+                <View key={item.id}>{renderTransactionItem(item, index)}</View>
+              ))
             )}
           </View>
         </View>
@@ -208,7 +234,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: scale(24),
     paddingTop: verticalScale(24),
-    paddingBottom: verticalScale(100), // Extra padding for bottom navigation
+    paddingBottom: verticalScale(100),
   },
   totalEarningsCard: {
     backgroundColor: COLORS.white,

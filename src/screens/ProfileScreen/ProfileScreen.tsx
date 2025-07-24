@@ -92,6 +92,7 @@ const ProfileScreen = () => {
     try {
       setIsLoading(true);
       const response: any = await getPanditProfileDetails();
+      console.log('response', response);
       if (response.data.success) {
         setProfileData(response.data.data);
       }

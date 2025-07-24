@@ -134,7 +134,7 @@ const SelectCityScreen: React.FC = () => {
         backgroundColor="transparent"
         barStyle="light-content"
       />
-      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
+      <View style={[styles.container, {paddingTop: insets.top}]}>
         <CustomHeader
           title={t('complete_your_profile')}
           showBackButton={true}
@@ -170,7 +170,7 @@ const SelectCityScreen: React.FC = () => {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {Calendar as RNCalendar} from 'react-native-calendars';
 import {COLORS, wp, hp, THEMESHADOW} from '../theme/theme';
@@ -40,6 +40,10 @@ const Calendar: React.FC<CalendarProps> = ({
 }) => {
   const [selectedDates, setSelectedDates] = useState<string[]>(initialSelected);
 
+  useEffect(() => {
+    setSelectedDates(initialSelected);
+  }, [initialSelected]);
+
   const {month: monthIdx, year} = useMemo(() => {
     if (month) return getMonthYearFromString(month);
     const today = new Date();
@@ -73,32 +77,31 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const markedDates: {[date: string]: any} = {};
 
-  // Mark today
-  if (todayObj.getFullYear() === year && todayObj.getMonth() === monthIdx) {
-    markedDates[todayStr] = {
-      customStyles: {
-        container: {
-          backgroundColor: COLORS.gradientEnd,
-          borderRadius: 9999,
-          width: wp(8),
-          height: wp(8),
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignSelf: 'center',
-        },
-        text: {
-          color: COLORS.white,
-          fontFamily: Fonts.Sen_Medium,
-          fontSize: moderateScale(12),
-        },
-      },
-    };
-  }
-
   // Mark predefined and selected dates
   const allSelectedDates = [...new Set([...selectedDates, ...predefinedDates])]; // Combine and remove duplicates
   allSelectedDates.forEach(dateStr => {
-    if (!markedDates[dateStr]) {
+    // If today is selected, set background as red
+    if (dateStr === todayStr) {
+      markedDates[dateStr] = {
+        customStyles: {
+          container: {
+            backgroundColor: COLORS.primaryBackground,
+            borderRadius: 9999,
+            width: wp(8),
+            height: wp(8),
+            alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
+          },
+          text: {
+            color: COLORS.white,
+            fontFamily: Fonts.Sen_Medium,
+            fontSize: moderateScale(12),
+          },
+        },
+        selected: true,
+      };
+    } else if (!markedDates[dateStr]) {
       markedDates[dateStr] = {
         customStyles: {
           container: {
@@ -120,6 +123,32 @@ const Calendar: React.FC<CalendarProps> = ({
       };
     }
   });
+
+  // Mark today with yellow background only if not selected
+  if (
+    todayObj.getFullYear() === year &&
+    todayObj.getMonth() === monthIdx &&
+    !selectedDates.includes(todayStr)
+  ) {
+    markedDates[todayStr] = {
+      customStyles: {
+        container: {
+          backgroundColor: COLORS.primaryBackgroundButton, // yellow
+          borderRadius: 9999,
+          width: wp(8),
+          height: wp(8),
+          alignItems: 'center',
+          justifyContent: 'center',
+          alignSelf: 'center',
+        },
+        text: {
+          color: COLORS.primaryTextDark,
+          fontFamily: Fonts.Sen_Medium,
+          fontSize: moderateScale(12),
+        },
+      },
+    };
+  }
 
   const handleMonthChange = (dateObj: any) => {
     if (!onMonthChange) return;

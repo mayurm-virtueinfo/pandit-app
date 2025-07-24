@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
@@ -50,6 +51,7 @@ const AddPujaScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
+  const insets = useSafeAreaInsets();
   const {showErrorToast, showSuccessToast} = useCommonToast();
   const params = route.params as
     | {pujaId?: number; pujaData?: PujaDataType}
@@ -90,25 +92,41 @@ const AddPujaScreen: React.FC = () => {
     }
     return [];
   });
-
+  console.log('pujaList', pujaList);
   useEffect(() => {
     if (!isEditMode) {
       setLoading(true);
       getUnassignPuja()
         .then((response: any) => {
+          console.log('response', response);
+
+          // Defensive extraction: handle both Axios and fetch/other response shapes
           let data: any[] = [];
-          if (Array.isArray(response)) {
-            data = response;
-          } else if (response && Array.isArray(response.data)) {
-            data = response.data;
+          if (response && typeof response === 'object') {
+            // Axios: response.data may be the payload object or the array
+            if (Array.isArray(response.data)) {
+              data = response.data;
+            } else if (
+              response.data &&
+              typeof response.data === 'object' &&
+              Array.isArray(response.data.data)
+            ) {
+              // Axios: response.data.data is the array (as in your sample)
+              data = response.data.data;
+            } else if (Array.isArray(response)) {
+              // fallback, not expected
+              data = response;
+            }
           }
+          console.log('Extracted puja data:', data);
+
           if (Array.isArray(data)) {
             setPujaList(data.map(mapApiPujaToListItem));
           } else {
             setPujaList([]);
           }
         })
-        .catch(() => {
+        .catch(err => {
           setPujaList([]);
         })
         .finally(() => {
@@ -353,7 +371,7 @@ const AddPujaScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <UserCustomHeader
         title={isEditMode ? t('edit_puja') : t('add_puja')}
         showBackButton={true}
@@ -435,7 +453,7 @@ const AddPujaScreen: React.FC = () => {
           />
         </ScrollView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -456,7 +474,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 50,
   },
   sectionContainer: {
     backgroundColor: COLORS.white,

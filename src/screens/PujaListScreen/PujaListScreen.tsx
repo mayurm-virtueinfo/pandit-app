@@ -9,7 +9,7 @@ import {
   Image,
   Platform,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
@@ -43,6 +43,7 @@ interface PujaItemProps {
 
 const PujaListScreen: React.FC = () => {
   const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<PujaListScreenNavigationProp>();
   const [pujaList, setPujaList] = useState<PujaItemType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -135,7 +136,7 @@ const PujaListScreen: React.FC = () => {
   const renderSeparator = () => <View style={styles.separator} />;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <CustomeLoader loading={loading} />
       <UserCustomHeader
         title={t('puja_list')}
@@ -173,7 +174,7 @@ const PujaListScreen: React.FC = () => {
           </View>
         </ScrollView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

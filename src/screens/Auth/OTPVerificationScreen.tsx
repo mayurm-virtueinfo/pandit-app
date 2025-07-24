@@ -105,6 +105,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
         firebase_uid: uid,
         role: 2,
       };
+      console.log('params', params);
       const response = await postSignIn(params);
       if (response) {
         console.log('response :: ', response);
