@@ -346,7 +346,7 @@ export const postSignIn = (data: SignInRequest): Promise<SignInResponse> => {
         resolve(response.data);
       })
       .catch(error => {
-        console.error('Error fetching sign in data:', error);
+        console.error('Error fetching sign in data:', error.response.data);
         reject(error);
       });
   });
@@ -453,22 +453,77 @@ export const getLanguage = () => {
       });
   });
 };
-export const postSignUp = (data: SignUpRequest): Promise<SignInResponse> => {
-  console.log('params data ::', data);
-  let apiUrl = POST_SIGNUP;
+// export const postSignUp = (data: FormData): Promise<SignInResponse> => { // Change type to FormData
+//   console.log('params data ::', data); // This will now log the FormData object
+//   let apiUrl = POST_SIGNUP;
+//   // The config header is correct for multipart/form-data
+//   const config: AxiosRequestConfig = {
+//     headers: {
+//       'Content-Type': 'multipart/form-data',
+//     },
+//   };
+//   return new Promise((resolve, reject) => {
+//     console.log("Data of api =-=-=----====--=->", data) // This will also log the FormData object
+//     apiDev
+//       .post(apiUrl, data, config) // Pass the FormData object directly
+//       .then(response => {
+//         console.log("response ------=-=-=-=-=-=-=-=-==-=-=---==-=-=->", response)
+//         resolve(response.data);
+//       })
+//       .catch(error => {
+//         console.error('Error fetching sign up data:', JSON.stringify(error.response.data));
+//         reject(error);
+//       });
+//   });
+// };
+
+export const postSignUp = (data: FormData): Promise<SignInResponse> => {
+  // Changed data type to FormData
+  console.log('postSignUp params data (FormData object):', data); // This will log the FormData object
+
+  // The 'Content-Type' header is critical for multipart/form-data.
+  // Axios's postForm usually handles this, but explicitly setting it is good.
   const config: AxiosRequestConfig = {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   };
+
   return new Promise((resolve, reject) => {
     apiDev
-      .postForm(apiUrl, data, config)
+      .postForm(POST_SIGNUP, data, config) // Pass the FormData object directly, and the config
       .then(response => {
+        console.log('postSignUp response:', response);
         resolve(response.data);
       })
       .catch(error => {
-        console.error('Error fetching sign up data:', JSON.stringify(error));
+        // Log the full error response for better debugging
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error(
+            'postSignUp API Error Response Data:',
+            error.response.data,
+          );
+          console.error(
+            'postSignUp API Error Response Status:',
+            error.response.status,
+          );
+          console.error(
+            'postSignUp API Error Response Headers:',
+            error.response.headers,
+          );
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an http.ClientRequest in node.js
+          console.error(
+            'postSignUp API Error Request (No Response):',
+            error.request,
+          );
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error('postSignUp API Error Message:', error.message);
+        }
         reject(error);
       });
   });

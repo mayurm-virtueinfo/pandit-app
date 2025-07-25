@@ -48,7 +48,7 @@ const onRefreshed = (newAccessToken: string) => {
 const refreshAccessToken = async (refreshToken: string) => {
   try {
     const response = await axios.post(
-      'https://c692148aa3f9.ngrok-free.app/app/auth/refresh-token/',
+      'https://7953020ffd01.ngrok-free.app/app/auth/refresh-token/',
       { refresh_token: refreshToken },
       {
         headers: {

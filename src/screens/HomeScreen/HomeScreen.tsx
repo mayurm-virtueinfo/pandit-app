@@ -193,7 +193,6 @@ const HomeScreen: React.FC = () => {
   const handleReject = (item: PendingPujaItem) => {
     openModal('reject', item);
   };
-
   // After accept/reject, set loading and reload all API
   const confirmModalAction = async () => {
     if (!selectedPendingPuja) return;
