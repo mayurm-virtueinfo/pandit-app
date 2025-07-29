@@ -12,6 +12,7 @@ import ApiEndpoints, {
   GET_LANGUAGES,
   GET_PANDING_PUJA,
   GET_PANDIT_PROFILE,
+  GET_PAST_BOOKINGS,
   GET_POOJA,
   GET_SUBCASTE,
   GET_TRANSACTIONS,
@@ -29,6 +30,10 @@ import ApiEndpoints, {
   POST_SIGNUP,
   POST_START_PUJA,
   POST_UPDATE_STATUS,
+  PUT_EDIT_PANDIT_PUJA,
+  PUT_PANDIT_DOCUMENTS,
+  PUT_PANDIT_LANGUAGE,
+  PUT_SERVICES_AREAS,
 } from './apiEndpoints';
 
 // Types for dropdown data
@@ -254,6 +259,28 @@ export interface bookingCancellation {
   cancellation_reason_type: string,
   cancellation_reason_other?: string
 }
+
+export interface EditServiceArea {
+  service_areas: area[]
+}
+
+export interface area {
+  city: number,
+  area: number
+}
+
+export interface EditPanditPooja {
+  pooja_ids: number[]
+}
+
+export interface EditPanditLanguage {
+  language_ids: number[]
+}
+
+export interface EditPanditDocuments {
+  id_proof: string,
+}
+
 
 export const apiService = {
   // Fetch castes (mock data)
@@ -839,6 +866,149 @@ export const getTransactions = () => {
       })
       .catch(error => {
         console.error('Error Transactions :', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getServiceArea = () => {
+  let apiUrl = PUT_SERVICES_AREAS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in get service areas api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const putServiceArea = (data: EditServiceArea) => {
+  let apiUrl = PUT_SERVICES_AREAS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .put(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in put service areas api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getPanditPooja = () => {
+  let apiUrl = PUT_EDIT_PANDIT_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in get pandit puja api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const putPanditPooja = (data: EditPanditPooja) => {
+  let apiUrl = PUT_EDIT_PANDIT_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .put(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in put pandit puja api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getPanditLanguage = () => {
+  let apiUrl = PUT_PANDIT_LANGUAGE;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in get pandit language api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const putPanditLanguage = (data: EditPanditLanguage) => {
+  let apiUrl = PUT_PANDIT_LANGUAGE;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .put(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in put pandit language api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getPanditDocuments = () => {
+  let apiUrl = PUT_PANDIT_DOCUMENTS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in get pandit documents api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const putPanditDocuments = (formData: FormData) => {
+  const apiUrl = PUT_PANDIT_DOCUMENTS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .put(apiUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        if (error.response && error.response.data) {
+          console.error('Error in put pandit documents api', JSON.stringify(error.response.data));
+        } else {
+          console.error('Error in put pandit documents api', error);
+        }
+        reject(error);
+      });
+  });
+};
+
+export const getPastBookings = () => {
+  let apiUrl = GET_PAST_BOOKINGS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in get past bookings api', error.response.data);
         reject(error);
       });
   });

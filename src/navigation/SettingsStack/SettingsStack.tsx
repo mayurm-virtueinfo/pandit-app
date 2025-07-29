@@ -3,21 +3,21 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {COLORS} from '../../theme/theme';
 import SettingsScreen from '../../screens/SettingsScreen/SettingsScreen';
 import AvailabilityScreen from '../../screens/SettingsScreen/AvailabilityScreen';
-import SelectCityScreen from '../../screens/Auth/SelectCityScreen';
-import SelectAreaScreen from '../../screens/Auth/SelectAreaScreen';
-import SelectPoojaScreen from '../../screens/Auth/SelectPoojaScreen';
-import SelectLanguageScreen from '../../screens/Auth/SelectLanguageScreen';
-import DocumentUploadScreen from '../../screens/Auth/DocumentUploadScreen';
+import EditCityScreen from '../../screens/SettingsScreen/EditCityScreen';
+import EditAreaScreen from '../../screens/SettingsScreen/EditAreaScreen';
+import EditPanditPoojaScreen from '../../screens/SettingsScreen/EditPanditPoojaScreen';
+import EditPanditLanguageScreen from '../../screens/SettingsScreen/EditPanditLanguageScreen';
+import EditPanditDocumentsScreen from '../../screens/SettingsScreen/EditPanditDocumentsScreen';
 
 export type SettingsStackParamList = {
   navigate(arg0: string): void;
   SettingsScreen: undefined;
   AvailabilityScreen: undefined;
-  SelectCityScreen: undefined;
-  SelectAreaScreen: undefined;
-  SelectPoojaScreen: undefined;
-  SelectLanguageScreen: undefined;
-  DocumentUploadScreen: undefined;
+  EditCityScreen: any;
+  EditAreaScreen: any;
+  EditSelectedPooja: undefined;
+  EditPanditLanguageScreen: undefined;
+  EditPanditDocumentsScreen: undefined;
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -32,16 +32,19 @@ const SettingsNavigator = () => {
       }}>
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
       <Stack.Screen name="AvailabilityScreen" component={AvailabilityScreen} />
-      <Stack.Screen name="SelectCityScreen" component={SelectCityScreen} />
-      <Stack.Screen name="SelectAreaScreen" component={SelectAreaScreen} />
-      <Stack.Screen name="SelectPoojaScreen" component={SelectPoojaScreen} />
+      <Stack.Screen name="EditCityScreen" component={EditCityScreen} />
+      <Stack.Screen name="EditAreaScreen" component={EditAreaScreen} />
       <Stack.Screen
-        name="SelectLanguageScreen"
-        component={SelectLanguageScreen}
+        name="EditSelectedPooja"
+        component={EditPanditPoojaScreen}
       />
       <Stack.Screen
-        name="DocumentUploadScreen"
-        component={DocumentUploadScreen}
+        name="EditPanditLanguageScreen"
+        component={EditPanditLanguageScreen}
+      />
+      <Stack.Screen
+        name="EditPanditDocumentsScreen"
+        component={EditPanditDocumentsScreen}
       />
     </Stack.Navigator>
   );

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
-import {apiService, PujaListItemType} from '../../api/apiService';
+import {apiService, getPastBookings} from '../../api/apiService';
 import {useNavigation} from '@react-navigation/native';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
@@ -22,20 +22,21 @@ import {moderateScale} from 'react-native-size-matters';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
-// Helper: Map API data to booking item UI fields
-const mapPujaToBooking = (puja: PujaListItemType) => ({
-  poojaName: puja.name,
-  imageUrl: puja.image,
-  status: puja.status, // status comes from API
-  // For demo, use today's date as no date in API. In real, use puja.date or similar.
-  date: new Date().toISOString(),
-});
+// Type for a booking item as per API response
+type PastBookingType = {
+  id: number;
+  pooja_name: string;
+  pooja_image_url: string;
+  booking_status: string;
+  booking_date: string;
+  // ...other fields as needed
+};
 
 const PastPujaScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const [pastBookings, setPastBookings] = useState<PujaListItemType[]>([]);
+  const [pastBookings, setPastBookings] = useState<PastBookingType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
@@ -43,14 +44,9 @@ const PastPujaScreen: React.FC = () => {
   const fetchPastBookings = useCallback(async () => {
     setLoading(true);
     try {
-      const bookings = await apiService.getPujaListData();
-      // Set the status as received from API
-      setPastBookings(
-        (bookings.pujaList || []).map((puja: PujaListItemType) => ({
-          ...puja,
-          status: puja.status, // status from API
-        })),
-      );
+      const bookings: any = await getPastBookings();
+      // bookings.data is expected to be an array of booking objects
+      setPastBookings(Array.isArray(bookings?.data) ? bookings.data : []);
     } catch (error) {
       setPastBookings([]);
     } finally {
@@ -102,23 +98,29 @@ const PastPujaScreen: React.FC = () => {
   };
 
   // Render a single booking item
-  const renderBookingItem = ({item}: {item: PujaListItemType}) => {
-    // Use status as received from API
-    const mapped = mapPujaToBooking(item);
+  const renderBookingItem = ({item}: {item: PastBookingType}) => {
     return (
       <TouchableOpacity style={styles.bookingItem} activeOpacity={0.7}>
-        <Image source={{uri: mapped.imageUrl}} style={styles.bookingImage} />
+        <Image
+          source={{uri: item.pooja_image_url}}
+          style={styles.bookingImage}
+        />
         <View style={styles.bookingInfo}>
           <View style={styles.bookingHeader}>
             <Text style={styles.bookingTitle} numberOfLines={1}>
-              {mapped.poojaName}
+              {item.pooja_name}
             </Text>
             <Text
-              style={[styles.statusText, {color: getStatusColor(item.status)}]}>
-              {item.status}
+              style={[
+                styles.statusText,
+                {color: getStatusColor(item.booking_status)},
+              ]}>
+              {item.booking_status}
             </Text>
           </View>
-          <Text style={styles.bookingDate}>{formatDate(mapped.date)}</Text>
+          <Text style={styles.bookingDate}>
+            {formatDate(item.booking_date)}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -146,7 +148,7 @@ const PastPujaScreen: React.FC = () => {
             <FlatList
               data={pastBookings}
               renderItem={renderBookingItem}
-              keyExtractor={(item, index) => `${item.name}-${index}`}
+              keyExtractor={(item, index) => `${item.id}-${index}`}
               ItemSeparatorComponent={renderSeparator}
               contentContainerStyle={[styles.flatListContent]}
               showsVerticalScrollIndicator={false}
@@ -207,7 +209,7 @@ const styles = StyleSheet.create({
   bookingImage: {
     width: moderateScale(52),
     height: moderateScale(52),
-    borderRadius: 0,
+    borderRadius: 10,
     marginRight: 9,
     flexShrink: 0,
   },

@@ -56,29 +56,29 @@ const SettingsScreen: React.FC = () => {
       navigation: 'AvailabilityScreen',
     },
     {
-      title: t('change_city'),
+      title: t('service_city'),
       key: 'changeCity',
-      navigation: 'SelectCityScreen',
+      navigation: 'EditCityScreen',
     },
-    {
-      title: t('change_area'),
-      key: 'changeArea',
-      navigation: 'SelectAreaScreen',
-    },
+    // {
+    //   title: t('change_area'),
+    //   key: 'changeArea',
+    //   navigation: 'SelectAreaScreen',
+    // },
     {
       title: t('change_puja'),
       key: 'changePuja',
-      navigation: 'SelectPoojaScreen',
+      navigation: 'EditSelectedPooja',
     },
     {
       title: t('change_languages'),
       key: 'changeLanguages',
-      navigation: 'SelectLanguageScreen',
+      navigation: 'EditPanditLanguageScreen',
     },
     {
       title: t('change_documents'),
       key: 'changeDocuments',
-      navigation: 'DocumentUploadScreen',
+      navigation: 'EditPanditDocumentsScreen',
     },
   ];
 

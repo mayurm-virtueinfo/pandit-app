@@ -36,7 +36,7 @@ const EarningsHistoryScreen: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [walletAmount, setWalletAmount] = useState<number>(0);
-
+  console.log('transactions', transactions);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -57,6 +57,7 @@ const EarningsHistoryScreen: React.FC = () => {
 
         // Fetch transactions
         const txRes: any = await getTransactions();
+        console.log('txRes', txRes.data);
         let txItems: any[] = [];
         if (Array.isArray(txRes)) {
           txItems = txRes;
@@ -73,10 +74,10 @@ const EarningsHistoryScreen: React.FC = () => {
           const rawAmount = Number(item.amount || item.price || 0);
           return {
             id: item.id,
-            title: item.title || item.description || t('transaction'),
-            date: item.date,
+            title: item.puja_name || t('transaction'),
+            date: item.timestamp,
             amount: `₹ ${rawAmount.toLocaleString()}`,
-            rawDate: item.date,
+            rawDate: item.timestamp,
             rawAmount: rawAmount,
           };
         });

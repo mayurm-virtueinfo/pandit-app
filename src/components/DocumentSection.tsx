@@ -1,10 +1,17 @@
 import React from 'react';
-import {View, Text, StyleSheet, ActivityIndicator, Image} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
 import {COLORS} from '../theme/theme';
 import Fonts from '../theme/fonts';
 import PrimaryButtonOutlined from './PrimaryButtonOutlined';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Ensure you have this package installed
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface DocumentSectionProps {
   label: string;
@@ -16,6 +23,8 @@ interface DocumentSectionProps {
   documentName: string | null;
   isLoading?: boolean;
   documentUrl?: string | null;
+  onRemove?: () => void;
+  showRemove?: boolean;
 }
 
 const DocumentSection: React.FC<DocumentSectionProps> = ({
@@ -28,6 +37,8 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({
   documentName,
   isLoading = false,
   documentUrl,
+  onRemove,
+  showRemove = false,
 }) => {
   const isImage = documentName?.match(/\.(jpg|jpeg|png|gif)$/i);
 
@@ -55,6 +66,19 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({
               />
             </View>
           )}
+          {showRemove && onRemove && (
+            <TouchableOpacity
+              style={styles.removeButton}
+              onPress={onRemove}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+              accessibilityLabel="Remove document">
+              <Icon
+                name="close"
+                size={moderateScale(22)}
+                color={COLORS.primaryBackground}
+              />
+            </TouchableOpacity>
+          )}
         </View>
       ) : (
         <PrimaryButtonOutlined
@@ -64,6 +88,11 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({
           style={styles.uploadButton}
           textStyle={styles.uploadButtonText}
         />
+      )}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        </View>
       )}
     </View>
   );
@@ -96,6 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(8),
     padding: moderateScale(10),
     marginTop: verticalScale(8),
+    position: 'relative',
   },
   documentImage: {
     width: '100%',
@@ -109,6 +139,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.lightGray,
     borderRadius: moderateScale(8),
+  },
+  removeButton: {
+    position: 'absolute',
+    top: moderateScale(6),
+    right: moderateScale(6),
+    backgroundColor: COLORS.white,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(2),
+    elevation: 2,
+    zIndex: 2,
   },
   loadingContainer: {
     position: 'absolute',
