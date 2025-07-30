@@ -64,7 +64,7 @@ const ProfileScreen = () => {
     navigation.navigate('NotificationScreen');
   };
   const handleEditNavigation = () => {
-    navigation.navigate('CompleteProfileScreen');
+    navigation.navigate('EditProfileScreen');
   };
   const handlePastPujaNavigation = () => {
     navigation.navigate('PastPujaScreen');
@@ -104,13 +104,6 @@ const ProfileScreen = () => {
     }
   };
 
-  const userData = {
-    name: 'Rajesh Sharma',
-    email: 'rajeshsharma@gmail.com',
-    phone: '90909 09090',
-    location: 'Ahmedabad',
-  };
-
   return (
     <SafeAreaView style={[styles.container, {paddingTop: inset.top}]}>
       <CustomeLoader loading={isLoading} />
@@ -118,7 +111,7 @@ const ProfileScreen = () => {
         colors={[COLORS.gradientStart, COLORS.gradientEnd]}
         style={[styles.headerGradient]}
       />
-      <UserCustomHeader title={t('profile')} showBackButton={true} />
+      <UserCustomHeader title={t('profile')} />
 
       <View style={styles.profileImageContainer}>
         <Image
@@ -148,7 +141,10 @@ const ProfileScreen = () => {
                 value={profileData.pandit_mobile}
               />
               <View style={styles.divider} />
-              <ProfileField label={t('location')} value={userData.location} />
+              <ProfileField
+                label={t('location')}
+                value={profileData.address_city_name}
+              />
             </View>
           )}
           <View style={[styles.editSection, THEMESHADOW.shadow]}>

@@ -115,7 +115,8 @@ const PastPujaScreen: React.FC = () => {
                 styles.statusText,
                 {color: getStatusColor(item.booking_status)},
               ]}>
-              {item.booking_status}
+              {item.booking_status.charAt(0).toUpperCase() +
+                item.booking_status.slice(1)}
             </Text>
           </View>
           <Text style={styles.bookingDate}>

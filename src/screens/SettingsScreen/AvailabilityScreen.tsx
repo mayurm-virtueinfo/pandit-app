@@ -15,6 +15,7 @@ import {
   getPanditAvailability,
 } from '../../api/apiService';
 import {useCommonToast} from '../../common/CommonToast';
+import {useNavigation} from '@react-navigation/native';
 
 const AvailabilityScreen: React.FC = () => {
   const [monthOffset, setMonthOffset] = useState(0);
@@ -25,6 +26,7 @@ const AvailabilityScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
   const {showSuccessToast, showErrorToast} = useCommonToast();
+  const navigation = useNavigation();
   console.log(selectedDates);
 
   // Helper to ensure date is always in 'YYYY-MM-DD' format
@@ -132,6 +134,7 @@ const AvailabilityScreen: React.FC = () => {
       console.log('payload', payload);
       await postPanditAvailability(payload);
       showSuccessToast(t('availability_updated_successfully'));
+      navigation.goBack();
     } catch (error) {
       showErrorToast(t('availability_update_failed'));
     } finally {

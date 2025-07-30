@@ -27,9 +27,12 @@ import {
   postCompetePuja,
   postStartPuja,
   getInProgressPuja,
+  postConversations,
+  getMessageHistory,
 } from '../../api/apiService';
 import {useRoute, useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useCommonToast} from '../../common/CommonToast';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -96,8 +99,10 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const [progressPujaDetails, setProgressPujaDetails] =
     useState<PujaDetailsType | null>(null);
   const [enteredPin, setEnteredPin] = useState<string>('');
+  const {showSuccessToast, showErrorToast} = useCommonToast();
+
   // Helper to get the correct booking id for status
-  console.log('progressPujaDetails', progressPujaDetails);
+  console.log('pujaDetails', pujaDetails);
   const getBookingId = () => {
     if (progress) {
       return progressPujaDetails?.id;
@@ -114,6 +119,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         const data = Array.isArray(response)
           ? response[0]
           : response?.data?.[0] || response?.[0];
+        console.log('Data', data);
         if (data) {
           setProgressPujaDetails(data);
         }
@@ -194,7 +200,14 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         `${STORAGE_KEY_PREFIX}${bookingId}`,
         'started',
       );
-    } catch (error) {
+    } catch (error: any) {
+      let errorMsg = 'Something went wrong';
+      if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
       console.error('Error starting puja:', error);
     }
   };
@@ -218,7 +231,14 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         'completed',
       );
       navigation?.navigate('PujaSuccessfull');
-    } catch (error) {
+    } catch (error: any) {
+      let errorMsg = 'Something went wrong';
+      if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
       console.error('Error completing puja:', error);
     }
   };
@@ -289,6 +309,42 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       }
     }
     return '';
+  };
+
+  const handleOnChatClick = async () => {
+    try {
+      // Get the user id to chat with
+      const userId = 1;
+
+      if (!userId) {
+        showErrorToast?.('User information not available for chat');
+        return;
+      }
+
+      // 1. Create or get conversation
+      const conversationRes = await postConversations({other_user_id: userId});
+      const conversationData = conversationRes?.data || conversationRes;
+      console.log('conversationData', conversationData);
+      const conversationUuid =
+        conversationData?.uuid ||
+        conversationData?.data?.uuid ||
+        conversationData?.conversation?.uuid;
+
+      if (!conversationUuid) {
+        showErrorToast?.('Could not start chat. Please try again.');
+        return;
+      }
+
+      // 2. Navigate to ChatScreen with conversation uuid (no need to call getMessageHistory)
+      navigation.navigate('ChatScreen', {
+        uuid: conversationUuid,
+        other_user_name: conversationData.other_participant_name,
+        other_user_image: conversationData.other_participant_profile_img,
+      });
+    } catch (error) {
+      showErrorToast?.('Failed to start chat. Please try again.');
+      console.error('handleOnChatClick error:', error);
+    }
   };
 
   return (
@@ -420,9 +476,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                     progressPujaDetails?.user_info?.full_name}
                 </Text>
                 <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('ChatScreen');
-                  }}
+                  onPress={handleOnChatClick}
                   style={styles.chatButton}>
                   <Image
                     source={{

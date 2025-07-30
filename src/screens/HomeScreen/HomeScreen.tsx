@@ -24,7 +24,7 @@ import {
   postUpdateStatus,
   getInProgressPuja,
 } from '../../api/apiService';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
 import CustomModal from '../../components/CustomModal';
 import {useCommonToast} from '../../common/CommonToast';
@@ -168,9 +168,11 @@ const HomeScreen: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchAllPujas();
-  }, [fetchAllPujas]);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAllPujas();
+    }, []),
+  );
 
   // Modal handlers
   const openModal = (type: ModalType, item: PendingPujaItem) => {
@@ -291,13 +293,20 @@ const HomeScreen: React.FC = () => {
   const renderPendingPujaItem = (item: PendingPujaItem, isLast: boolean) => (
     <View key={item.id}>
       <View style={styles.pujaItem}>
-        <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
-          <Text style={styles.pujaName}>{item.pooja_name}</Text>
-          <Text
-            style={
-              styles.pujaDate
-            }>{`Scheduled on ${item.when_is_pooja}`}</Text>
+          <View style={{flexDirection: 'row'}}>
+            <Image
+              source={{uri: item.pooja_image_url}}
+              style={styles.pujaImage}
+            />
+            <View>
+              <Text style={styles.pujaName}>{item.pooja_name}</Text>
+              <Text
+                style={
+                  styles.pujaDate
+                }>{`Scheduled on ${item.when_is_pooja}`}</Text>
+            </View>
+          </View>
           <View style={styles.pendingButtonRow}>
             <TouchableOpacity
               style={[styles.pendingButton, {backgroundColor: COLORS.success}]}
@@ -583,7 +592,7 @@ const styles = StyleSheet.create({
   },
   pendingButtonRow: {
     flexDirection: 'row',
-    marginTop: verticalScale(8),
+    marginTop: verticalScale(14),
     gap: moderateScale(10),
   },
   pendingButton: {

@@ -32,7 +32,7 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
-export const BASE_URL = 'https://fb7124849e79.ngrok-free.app';
+export const BASE_URL = 'https://15be9ad9b5d8.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';
@@ -66,3 +66,5 @@ export const PUT_EDIT_PANDIT_PUJA = "/panditji/edit-pandit-poojas/"
 export const PUT_PANDIT_LANGUAGE = '/panditji/edit-pandit-languages/'
 export const PUT_PANDIT_DOCUMENTS = "/panditji/edit-pandit-documents/"
 export const GET_PAST_BOOKINGS = "/panditji/bookings/past/"
+export const POST_CONVERSATION = "/api/chat/conversations/start/"
+export const GET_MESSAGE_HISTORY = "/api/chat/conversations/{uuid}/messages/"

@@ -268,8 +268,9 @@ const EditPanditDocumentsScreen: React.FC = () => {
     );
 
     try {
+      console.log('formData', JSON.stringify(formData));
       const response = await putPanditDocuments(formData);
-      console.log('API Response:', response);
+      console.log('API Response:', JSON.stringify(response));
       if (response && response.success) {
         showSuccessToast(t('documents_updated_successfully'));
         await fetchDocuments();

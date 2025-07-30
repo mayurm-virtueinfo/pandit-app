@@ -10,6 +10,7 @@ import ApiEndpoints, {
   GET_GOTRA,
   GET_IN_PROGRESS_PUJA,
   GET_LANGUAGES,
+  GET_MESSAGE_HISTORY,
   GET_PANDING_PUJA,
   GET_PANDIT_PROFILE,
   GET_PAST_BOOKINGS,
@@ -23,6 +24,7 @@ import ApiEndpoints, {
   POST_ADD_PUJA,
   POST_CANCEL_BOOKING,
   POST_COMPETE_PUJA,
+  POST_CONVERSATION,
   POST_LOGOUT,
   POST_PANDIT_AVAILABILITY,
   POST_REFRESH_TOKEN,
@@ -281,6 +283,9 @@ export interface EditPanditDocuments {
   id_proof: string,
 }
 
+export interface postConversations {
+  other_user_id: number
+}
 
 export const apiService = {
   // Fetch castes (mock data)
@@ -1009,6 +1014,36 @@ export const getPastBookings = () => {
       })
       .catch(error => {
         console.error('Error in get past bookings api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const postConversations = (data: postConversations): Promise<any> => {
+  const apiUrl = POST_CONVERSATION
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error post conversation api:', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getMessageHistory = (uuid: string) => {
+  let apiUrl = GET_MESSAGE_HISTORY.replace('{uuid}', uuid);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in get message history api', error.response.data);
         reject(error);
       });
   });

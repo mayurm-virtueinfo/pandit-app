@@ -205,7 +205,8 @@ const AddPujaScreen: React.FC = () => {
         price_status: selectedPriceOption === 'system' ? 1 : 2,
       };
       const response = await postAddPuja(addRequest);
-      if (response && (response as any).data.status === true) {
+      console.log('add response =====>', response);
+      if (response && (response as any).data.success === true) {
         showSuccessToast(response.data.message);
         navigation.goBack();
       }
@@ -266,7 +267,8 @@ const AddPujaScreen: React.FC = () => {
         price_status: selectedPriceOption === 'system' ? 1 : 2,
       };
       const response = await putPuja(editRequest);
-      if (response && (response as any).data.status === true) {
+      console.log('edit response ===>', response.data.success);
+      if (response && (response as any).data.success === true) {
         showSuccessToast(response.data.message);
         navigation.goBack();
       } else {
