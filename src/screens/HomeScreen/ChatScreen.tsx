@@ -1,5 +1,12 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {View, StyleSheet, StatusBar, Platform} from 'react-native';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
+import {
+  View,
+  StyleSheet,
+  StatusBar,
+  Platform,
+  ScrollView,
+  KeyboardAvoidingView,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
 import {COLORS} from '../../theme/theme';
@@ -29,8 +36,8 @@ const ChatScreen: React.FC = () => {
   const [panditID, setPanditID] = useState<string | null>(null);
 
   const ws = useRef<WebSocket | null>(null);
-
-  console.log('messages :: ', messages);
+  const scrollViewRef = useRef<ScrollView | null>(null);
+  const isUserAtBottom = useRef(true); // Track if user is at the bottom
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -46,14 +53,13 @@ const ChatScreen: React.FC = () => {
     if (accessToken && uuid) {
       const socketURL = `ws://192.168.1.10:8001/ws/chat/${uuid}/?token=${accessToken}`;
       ws.current = new WebSocket(socketURL);
-
+      console.log('ws.current', JSON.stringify(ws.current));
       ws.current.onopen = () => {
         console.log('✅ Connected to WebSocket');
       };
 
       ws.current.onmessage = e => {
         const data = JSON.parse(e.data);
-        console.log('e :: ', JSON.parse(e.data));
         const newMsg: Message = {
           id: data.uuid,
           text: data.message,
@@ -80,10 +86,10 @@ const ChatScreen: React.FC = () => {
         }
       };
     }
-  }, [accessToken, uuid, panditID]);
+  }, [accessToken, panditID]);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       fetchChatHistory();
     }, [panditID]),
   );
@@ -103,6 +109,7 @@ const ChatScreen: React.FC = () => {
           isOwn: msg.sender == panditID,
         }));
         setMessages(normalized);
+        isUserAtBottom.current = true; // Ensure scrolling to bottom after load
       }
     } catch (error) {
       console.error('Error fetching chat history:', error);
@@ -111,13 +118,35 @@ const ChatScreen: React.FC = () => {
     }
   };
 
+  const scrollToBottom = useCallback((animated = true) => {
+    if (scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({animated});
+      }, 100); // Slight delay to ensure content is rendered
+    }
+  }, []);
+
   const handleSendMessage = (text: string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({message: text}));
+      isUserAtBottom.current = true; // Scroll to bottom after sending
     } else {
       console.warn('WebSocket not connected');
     }
   };
+
+  const handleScroll = (event: any) => {
+    const {contentOffset, contentSize, layoutMeasurement} = event.nativeEvent;
+    const isAtBottom =
+      contentOffset.y >= contentSize.height - layoutMeasurement.height - 10; // 10px threshold
+    isUserAtBottom.current = isAtBottom;
+  };
+
+  useEffect(() => {
+    if (isUserAtBottom.current) {
+      scrollToBottom();
+    }
+  }, [messages, scrollToBottom]);
 
   return (
     <View style={{flex: 1}}>
@@ -133,12 +162,28 @@ const ChatScreen: React.FC = () => {
           showBackButton={true}
           showCallButton={true}
         />
-        <View style={styles.chatContainer}>
-          <View style={styles.messagesContainer}>
+        <KeyboardAvoidingView
+          style={styles.chatContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={
+            Platform.OS === 'ios' ? moderateScale(90) : 0
+          }>
+          <ScrollView
+            style={styles.messagesContainer}
+            contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
+            ref={scrollViewRef}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            onContentSizeChange={() => {
+              if (isUserAtBottom.current) {
+                scrollToBottom();
+              }
+            }}
+            keyboardShouldPersistTaps="handled">
             <ChatMessages messages={messages} />
-          </View>
+          </ScrollView>
           <ChatInput onSendMessage={handleSendMessage} />
-        </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );
@@ -146,10 +191,8 @@ const ChatScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: COLORS.primaryBackground,
-  },
-  flex1: {
     flex: 1,
+    backgroundColor: COLORS.primaryBackground,
   },
   chatContainer: {
     flex: 1,
@@ -157,8 +200,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
     paddingTop: moderateScale(24),
-    minHeight: '100%',
-    paddingBottom: Platform.OS === 'ios' ? 90 : 100,
   },
   messagesContainer: {
     flex: 1,
