@@ -37,7 +37,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({text, time, isOwn}) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: moderateScale(16),
+    marginBottom: moderateScale(14),
     maxWidth: wp(75),
   },
   ownMessage: {

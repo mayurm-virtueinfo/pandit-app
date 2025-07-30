@@ -20,7 +20,7 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
   const [message, setMessage] = useState('');
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
 
   const handleSend = () => {
     if (message.trim()) {
@@ -31,7 +31,6 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
   };
 
   const handleEmojiPress = () => {
-    // Handle emoji picker functionality
     console.log('Emoji pressed');
   };
 
@@ -74,6 +73,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(16),
+    paddingTop: moderateScale(0),
     backgroundColor: COLORS.white,
     ...Platform.select({
       ios: {

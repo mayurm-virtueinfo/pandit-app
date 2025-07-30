@@ -37,7 +37,7 @@ const ChatScreen: React.FC = () => {
 
   const ws = useRef<WebSocket | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
-  const isUserAtBottom = useRef(true); // Track if user is at the bottom
+  const isUserAtBottom = useRef(true);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -51,7 +51,7 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     if (accessToken && uuid) {
-      const socketURL = `ws://192.168.1.10:8001/ws/chat/${uuid}/?token=${accessToken}`;
+      const socketURL = `ws://192.168.1.10:8081/ws/chat/${uuid}/?token=${accessToken}`;
       ws.current = new WebSocket(socketURL);
       console.log('ws.current', JSON.stringify(ws.current));
       ws.current.onopen = () => {
@@ -109,7 +109,7 @@ const ChatScreen: React.FC = () => {
           isOwn: msg.sender == panditID,
         }));
         setMessages(normalized);
-        isUserAtBottom.current = true; // Ensure scrolling to bottom after load
+        isUserAtBottom.current = true;
       }
     } catch (error) {
       console.error('Error fetching chat history:', error);
@@ -122,14 +122,14 @@ const ChatScreen: React.FC = () => {
     if (scrollViewRef.current) {
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({animated});
-      }, 100); // Slight delay to ensure content is rendered
+      }, 100);
     }
   }, []);
 
   const handleSendMessage = (text: string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({message: text}));
-      isUserAtBottom.current = true; // Scroll to bottom after sending
+      isUserAtBottom.current = true;
     } else {
       console.warn('WebSocket not connected');
     }
@@ -138,7 +138,7 @@ const ChatScreen: React.FC = () => {
   const handleScroll = (event: any) => {
     const {contentOffset, contentSize, layoutMeasurement} = event.nativeEvent;
     const isAtBottom =
-      contentOffset.y >= contentSize.height - layoutMeasurement.height - 10; // 10px threshold
+      contentOffset.y >= contentSize.height - layoutMeasurement.height - 10;
     isUserAtBottom.current = isAtBottom;
   };
 

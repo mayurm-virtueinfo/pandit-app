@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: moderateScale(20),
     minHeight: SCREEN_HEIGHT * 0.4,
   },
 });
