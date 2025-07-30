@@ -1,5 +1,5 @@
 // import axios from 'axios';
-import { AxiosRequestConfig } from 'axios';
+import {AxiosRequestConfig} from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   GET_AREA,
@@ -253,38 +253,38 @@ export interface StartCompetePuja {
 }
 
 export interface PanditAvailability {
-  available_dates: string[],
-  unavailable_dates: string[]
+  available_dates: string[];
+  unavailable_dates: string[];
 }
 
 export interface bookingCancellation {
-  cancellation_reason_type: string,
-  cancellation_reason_other?: string
+  cancellation_reason_type: string;
+  cancellation_reason_other?: string;
 }
 
 export interface EditServiceArea {
-  service_areas: area[]
+  service_areas: area[];
 }
 
 export interface area {
-  city: number,
-  area: number
+  city: number;
+  area: number;
 }
 
 export interface EditPanditPooja {
-  pooja_ids: number[]
+  pooja_ids: number[];
 }
 
 export interface EditPanditLanguage {
-  language_ids: number[]
+  language_ids: number[];
 }
 
 export interface EditPanditDocuments {
-  id_proof: string,
+  id_proof: string;
 }
 
 export interface postConversations {
-  other_user_id: number
+  other_user_id: number;
 }
 
 export const apiService = {
@@ -334,10 +334,10 @@ export const apiService = {
   getPujaListData: async (): Promise<PujaListDataResponse> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || { recommendedPuja: [], pujaList: [] };
+      return response.data?.record || {recommendedPuja: [], pujaList: []};
     } catch (error) {
       console.error('Error fetching puja list data:', error);
-      return { pujaList: [] };
+      return {pujaList: []};
     }
   },
 
@@ -773,7 +773,10 @@ export const getPanditProfileDetails = () => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error fetching pandit profile data:', error.response.data);
+        console.error(
+          'Error fetching pandit profile data:',
+          error.response.data,
+        );
         reject(error);
       });
   });
@@ -788,15 +791,11 @@ export const postPanditAvailability = (data: PanditAvailability) => {
         resolve(response);
       })
       .catch(error => {
-        console.error(
-          'Error Pandit availability',
-          JSON.stringify(error),
-        );
+        console.error('Error Pandit availability', JSON.stringify(error));
         reject(error);
       });
   });
 };
-
 
 export const getPanditAvailability = () => {
   let apiUrl = POST_PANDIT_AVAILABILITY;
@@ -816,7 +815,10 @@ export const getPanditAvailability = () => {
   });
 };
 
-export const postCancelBooking = (id: string, data: bookingCancellation): Promise<any> => {
+export const postCancelBooking = (
+  id: string,
+  data: bookingCancellation,
+): Promise<any> => {
   const apiUrl = POST_CANCEL_BOOKING.replace('{id}', id);
   return new Promise((resolve, reject) => {
     apiDev
@@ -995,7 +997,10 @@ export const putPanditDocuments = (formData: FormData) => {
       })
       .catch(error => {
         if (error.response && error.response.data) {
-          console.error('Error in put pandit documents api', JSON.stringify(error.response.data));
+          console.error(
+            'Error in put pandit documents api',
+            JSON.stringify(error.response.data),
+          );
         } else {
           console.error('Error in put pandit documents api', error);
         }
@@ -1020,7 +1025,7 @@ export const getPastBookings = () => {
 };
 
 export const postConversations = (data: postConversations): Promise<any> => {
-  const apiUrl = POST_CONVERSATION
+  const apiUrl = POST_CONVERSATION;
   return new Promise((resolve, reject) => {
     apiDev
       .post(apiUrl, data)
@@ -1040,7 +1045,7 @@ export const getMessageHistory = (uuid: string) => {
     apiDev
       .get(apiUrl)
       .then(response => {
-        resolve(response);
+        resolve(response.data);
       })
       .catch(error => {
         console.error('Error in get message history api', error.response.data);

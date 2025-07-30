@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {View, StyleSheet, StatusBar, Platform} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
@@ -6,12 +6,11 @@ import {COLORS} from '../../theme/theme';
 import UserCustomHeader from '../../components/CustomHeader';
 import ChatMessages from '../../components/ChatMessages';
 import ChatInput from '../../components/ChatInput';
-import io from 'socket.io-client';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {getMessageHistory} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Replace with your server's IP address or domain
+import AppConstant from '../../utils/AppContent';
+import CustomeLoader from '../../components/CustomLoader';
 
 export interface Message {
   id: string;
@@ -22,129 +21,107 @@ export interface Message {
 
 const ChatScreen: React.FC = () => {
   const route = useRoute() as any;
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [socket, setSocket] = useState<any>(null);
-
   const {uuid, other_user_name, other_user_image} = route.params;
 
-  // Get access token from AsyncStorage (or your auth provider)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [panditID, setPanditID] = useState<string | null>(null);
+
+  const ws = useRef<WebSocket | null>(null);
+
+  console.log('messages :: ', messages);
 
   useEffect(() => {
     const fetchToken = async () => {
       const token = await AsyncStorage.getItem('accessToken');
+      const panditID = await AsyncStorage.getItem(AppConstant.USER_ID);
       setAccessToken(token);
+      setPanditID(panditID);
     };
     fetchToken();
   }, []);
 
-  const SOCKET_URL = accessToken
-    ? `ws://127.0.0.1:8001/ws/chat/${uuid}/?token=${accessToken}`
-    : null;
+  useEffect(() => {
+    if (accessToken && uuid) {
+      const socketURL = `ws://192.168.1.10:8001/ws/chat/${uuid}/?token=${accessToken}`;
+      ws.current = new WebSocket(socketURL);
 
-  // Fetch message history on mount
-  useFocusEffect(() => {
-    let isMounted = true;
-    if (uuid) {
-      getMessageHistory(uuid)
-        .then((response: any) => {
-          // Assuming response.data is an array of messages
-          // You may need to adjust this mapping based on your API response
-          const history = (response?.data || response)?.map((msg: any) => ({
-            id: msg.id?.toString() || Date.now().toString() + Math.random(),
-            text: msg.text || msg.message || '',
-            time: msg.time
-              ? msg.time
-              : new Date().toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }),
-            isOwn: msg.is_own ?? msg.isOwn ?? false,
-          }));
-          if (isMounted && Array.isArray(history)) {
-            setMessages(history);
-          }
-        })
-        .catch(error => {
-          console.error('Failed to fetch message history:', error);
-        });
+      ws.current.onopen = () => {
+        console.log('✅ Connected to WebSocket');
+      };
+
+      ws.current.onmessage = e => {
+        const data = JSON.parse(e.data);
+        console.log('e :: ', JSON.parse(e.data));
+        const newMsg: Message = {
+          id: data.uuid,
+          text: data.message,
+          time: new Date(data.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          isOwn: data.sender_id == panditID,
+        };
+        setMessages(prev => [...prev, newMsg]);
+      };
+
+      ws.current.onerror = e => {
+        console.error('WebSocket error:', e.message);
+      };
+
+      ws.current.onclose = e => {
+        console.log('WebSocket closed:', e.code, e.reason);
+      };
+
+      return () => {
+        if (ws.current) {
+          ws.current.close();
+        }
+      };
     }
-    return () => {
-      isMounted = false;
-    };
-  });
+  }, [accessToken, uuid, panditID]);
 
-  // Initialize Socket.IO connection
-  useFocusEffect(() => {
-    const socketInstance = io(SOCKET_URL, {
-      transports: ['websocket'], // Force WebSocket transport
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchChatHistory();
+    }, [panditID]),
+  );
 
-    setSocket(socketInstance);
-
-    // Handle connection
-    socketInstance.on('connect', () => {
-      console.log('Connected to server:', socketInstance.id);
-    });
-
-    // Listen for incoming messages
-    socketInstance.on('message', (data: any) => {
-      // If data is a string, treat as text; if object, extract fields
-      let text = '';
-      let id = Date.now().toString();
-      let time = new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      if (typeof data === 'string') {
-        text = data;
-      } else if (typeof data === 'object' && data !== null) {
-        text = data.text || data.message || '';
-        id = data.id?.toString() || id;
-        time = data.time ? data.time : time;
+  const fetchChatHistory = async () => {
+    setLoading(true);
+    try {
+      const response: any = await getMessageHistory(uuid);
+      if (response) {
+        const normalized = response.map((msg: any) => ({
+          id: msg.uuid,
+          text: msg.content || msg.message,
+          time: new Date(msg.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          isOwn: msg.sender == panditID,
+        }));
+        setMessages(normalized);
       }
-      const newMessage: Message = {
-        id,
-        text,
-        time,
-        isOwn: false, // Assume messages from server are not from the user
-      };
-      setMessages(prev => [...prev, newMessage]);
-    });
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Handle connection errors
-    socketInstance.on('connect_error', (error: Error) => {
-      console.error('Connection error:', error);
-    });
-
-    // Cleanup on component unmount
-    return () => {
-      socketInstance.disconnect();
-    };
-  });
-
-  // Send message to server
   const handleSendMessage = (text: string) => {
-    if (socket && text.trim()) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        text,
-        time: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        isOwn: true,
-      };
-      socket.emit('message', text); // Send message to server
-      setMessages(prev => [...prev, newMessage]); // Add to local messages
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({message: text}));
+    } else {
+      console.warn('WebSocket not connected');
     }
   };
 
   return (
     <View style={{flex: 1}}>
+      <CustomeLoader loading={loading} />
       <StatusBar
         barStyle="light-content"
         backgroundColor={COLORS.primaryBackground}

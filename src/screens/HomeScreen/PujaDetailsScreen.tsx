@@ -101,8 +101,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const [enteredPin, setEnteredPin] = useState<string>('');
   const {showSuccessToast, showErrorToast} = useCommonToast();
 
-  // Helper to get the correct booking id for status
-  console.log('pujaDetails', pujaDetails);
+  console.log('pujaDetails :: ', pujaDetails);
+
   const getBookingId = () => {
     if (progress) {
       return progressPujaDetails?.id;
@@ -313,7 +313,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   const handleOnChatClick = async () => {
     try {
-      // Get the user id to chat with
       const userId = 1;
 
       if (!userId) {
@@ -321,10 +320,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         return;
       }
 
-      // 1. Create or get conversation
       const conversationRes = await postConversations({other_user_id: userId});
       const conversationData = conversationRes?.data || conversationRes;
-      console.log('conversationData', conversationData);
+      console.log('conversationData :: ', conversationData);
       const conversationUuid =
         conversationData?.uuid ||
         conversationData?.data?.uuid ||
@@ -335,7 +333,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         return;
       }
 
-      // 2. Navigate to ChatScreen with conversation uuid (no need to call getMessageHistory)
       navigation.navigate('ChatScreen', {
         uuid: conversationUuid,
         other_user_name: conversationData.other_participant_name,
