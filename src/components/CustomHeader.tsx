@@ -35,6 +35,7 @@ interface CustomHeaderProps {
   onNotificationPress?: () => void;
   onCirclePlusPress?: () => void;
   onFilterPress?: () => void;
+  onCallPress?: () => void;
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -50,6 +51,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   onNotificationPress,
   onCirclePlusPress,
   onFilterPress,
+  onCallPress,
 }) => {
   const {t, i18n} = useTranslation();
   const navigation = useNavigation();
@@ -138,9 +140,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
               </TouchableOpacity>
             )}
             {showCallButton && (
-              <TouchableOpacity
-                onPress={() => console.log('Call Icon pressed')}
-                style={styles.iconButton}>
+              <TouchableOpacity onPress={onCallPress} style={styles.iconButton}>
                 <Ionicons name="call-outline" size={24} color={COLORS.white} />
               </TouchableOpacity>
             )}

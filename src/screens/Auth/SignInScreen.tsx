@@ -67,6 +67,7 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
 
   const handleSignIn = async () => {
     const errorMsg = validateInput(phoneNumber);
+    console.log('errorMsg', errorMsg);
     if (errorMsg) {
       setErrors({phoneNumber: errorMsg});
       showErrorToast(errorMsg);
@@ -85,13 +86,12 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
       showErrorToast(errorText);
       return;
     }
-
+    const auth = getAuth();
     try {
       setLoading(true);
-      const confirmation = await signInWithPhoneNumber(
-        getAuth(),
-        formattedPhone,
-      );
+      console.log(auth, formattedPhone);
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone);
+      console.log('confirmation', confirmation);
       setLoading(false);
       showSuccessToast(t('otp_sent') || 'OTP has been sent to your phone.');
       navigation.navigate('OTPVerification', {

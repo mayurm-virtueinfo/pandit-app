@@ -144,7 +144,12 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
         );
       }
     } catch (error: any) {
-      showErrorToast(error?.message);
+      console.log('error', error.code);
+      if (error.code === 'auth/invalid-verification-id') {
+        showErrorToast(t('invalid_otp'));
+      } else {
+        showErrorToast(error?.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -167,8 +172,13 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
       showSuccessToast(t('otp_resent'));
       setShowResend(false);
       setTimer(30);
+      setOtp(['', '', '', '', '', '']);
+      // Focus the first input after resetting OTP
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
     } catch (error: any) {
-      showErrorToast(error?.message || t('resend_otp_failed'));
+      showErrorToast(t('resend_otp_failed'));
     } finally {
       setLoading(false);
     }

@@ -10,6 +10,7 @@ import {
   StatusBar,
   Dimensions,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
@@ -130,7 +131,7 @@ const PastPujaScreen: React.FC = () => {
   const renderSeparator = () => <View style={styles.separator} />;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -139,45 +140,51 @@ const PastPujaScreen: React.FC = () => {
       <UserCustomHeader title={t('past_bookings')} showBackButton={true} />
 
       <View style={styles.contentContainer}>
-        <View style={[styles.listContainer, THEMESHADOW.shadow]}>
-          {loading ? (
-            <View
-              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-              <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-          ) : (
-            <FlatList
-              data={pastBookings}
-              renderItem={renderBookingItem}
-              keyExtractor={(item, index) => `${item.id}-${index}`}
-              ItemSeparatorComponent={renderSeparator}
-              contentContainerStyle={[styles.flatListContent]}
-              showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  tintColor={COLORS.primary}
-                  colors={[COLORS.primary]}
-                />
-              }
-              ListEmptyComponent={
-                <View style={{alignItems: 'center', marginTop: 40}}>
-                  <Text
-                    style={{
-                      color: COLORS.gray,
-                      fontFamily: Fonts.Sen_Medium,
-                      fontSize: 16,
-                    }}>
-                    {t('no_item_available')}
-                  </Text>
-                </View>
-              }
-            />
-          )}
-        </View>
+        <ScrollView>
+          <View style={[styles.listContainer, THEMESHADOW.shadow]}>
+            {loading ? (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              </View>
+            ) : (
+              <FlatList
+                data={pastBookings}
+                renderItem={renderBookingItem}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
+                ItemSeparatorComponent={renderSeparator}
+                contentContainerStyle={[styles.flatListContent]}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={COLORS.primary}
+                    colors={[COLORS.primary]}
+                  />
+                }
+                ListEmptyComponent={
+                  <View style={{alignItems: 'center', marginTop: 40}}>
+                    <Text
+                      style={{
+                        color: COLORS.gray,
+                        fontFamily: Fonts.Sen_Medium,
+                        fontSize: 16,
+                      }}>
+                      {t('no_item_available')}
+                    </Text>
+                  </View>
+                }
+              />
+            )}
+          </View>
+        </ScrollView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -199,7 +206,7 @@ const styles = StyleSheet.create({
     margin: 24,
   },
   flatListContent: {
-    flexGrow: 1,
+    // flexGrow: 1,
   },
   bookingItem: {
     flexDirection: 'row',

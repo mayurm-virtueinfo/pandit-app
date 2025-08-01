@@ -6,8 +6,10 @@ import {
   Platform,
   ScrollView,
   KeyboardAvoidingView,
+  Linking,
+  Alert,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
 import {COLORS} from '../../theme/theme';
 import UserCustomHeader from '../../components/CustomHeader';
@@ -18,6 +20,7 @@ import {getMessageHistory} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
+import {request, PERMISSIONS} from 'react-native-permissions';
 
 export interface Message {
   id: string;
@@ -28,8 +31,9 @@ export interface Message {
 
 const ChatScreen: React.FC = () => {
   const route = useRoute() as any;
-  const {uuid, other_user_name, other_user_image} = route.params;
-
+  const {uuid, other_user_name, other_user_image, other_user_phone} =
+    route.params;
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -148,19 +152,88 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages, scrollToBottom]);
 
+  const requestCallPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const result = await request(PERMISSIONS.ANDROID.CALL_PHONE);
+        return result === 'granted';
+      } catch (err) {
+        console.error('Permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS doesn't require explicit permission for tel:
+  };
+
+  const handleOnCallPress = async () => {
+    if (
+      !other_user_phone ||
+      typeof other_user_phone !== 'string' ||
+      other_user_phone.trim() === ''
+    ) {
+      Alert.alert(
+        'No Phone Number',
+        'No valid phone number available for this user.',
+      );
+      return;
+    }
+
+    let sanitizedPhoneNumber = other_user_phone.replace(/[^0-9+]/g, '');
+    if (
+      !sanitizedPhoneNumber.startsWith('+91') &&
+      sanitizedPhoneNumber.length === 10
+    ) {
+      sanitizedPhoneNumber = `+91${sanitizedPhoneNumber}`;
+    }
+
+    if (!/^\+91[6-9][0-9]{9}$/.test(sanitizedPhoneNumber)) {
+      Alert.alert(
+        'Invalid Phone Number',
+        'Please provide a valid 10-digit Indian mobile number.',
+      );
+      return;
+    }
+
+    const phoneUrl = `tel:${sanitizedPhoneNumber}`;
+    console.log('phoneUrl:', phoneUrl);
+
+    const hasPermission = await requestCallPermission();
+    if (!hasPermission) {
+      Alert.alert(
+        'Permission Denied',
+        'Cannot make a call without permission.',
+      );
+      return;
+    }
+
+    Linking.openURL(phoneUrl).catch(err => {
+      console.error('Error opening dialer:', err);
+      Alert.alert(
+        'Error',
+        'Unable to open the dialer. Please check the phone number or try again.',
+      );
+    });
+  };
+
   return (
-    <View style={{flex: 1}}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: COLORS.primaryBackground,
+        paddingTop: insets.top,
+      }}>
       <CustomeLoader loading={loading} />
       <StatusBar
         barStyle="light-content"
         backgroundColor={COLORS.primaryBackground}
         translucent
       />
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
         <UserCustomHeader
           title={other_user_name || 'Chat'}
           showBackButton={true}
           showCallButton={true}
+          onCallPress={handleOnCallPress}
         />
         <KeyboardAvoidingView
           style={styles.chatContainer}
@@ -184,7 +257,7 @@ const ChatScreen: React.FC = () => {
           </ScrollView>
           <ChatInput onSendMessage={handleSendMessage} />
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 };

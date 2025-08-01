@@ -101,8 +101,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const [enteredPin, setEnteredPin] = useState<string>('');
   const {showSuccessToast, showErrorToast} = useCommonToast();
 
-  console.log('pujaDetails :: ', pujaDetails);
-
   const getBookingId = () => {
     if (progress) {
       return progressPujaDetails?.id;
@@ -322,7 +320,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
       const conversationRes = await postConversations({other_user_id: userId});
       const conversationData = conversationRes?.data || conversationRes;
-      console.log('conversationData :: ', conversationData);
       const conversationUuid =
         conversationData?.uuid ||
         conversationData?.data?.uuid ||
@@ -337,6 +334,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         uuid: conversationUuid,
         other_user_name: conversationData.other_participant_name,
         other_user_image: conversationData.other_participant_profile_img,
+        other_user_phone:
+          conversationData.other_participant_number || '2222222222',
       });
     } catch (error) {
       showErrorToast?.('Failed to start chat. Please try again.');
