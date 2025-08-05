@@ -68,3 +68,4 @@ export const PUT_PANDIT_DOCUMENTS = '/panditji/edit-pandit-documents/';
 export const GET_PAST_BOOKINGS = '/panditji/bookings/past/';
 export const POST_CONVERSATION = '/api/chat/conversations/start/';
 export const GET_MESSAGE_HISTORY = '/api/chat/conversations/{uuid}/messages/';
+export const POST_REGISTER_FCM = '/app/register-device-token/';

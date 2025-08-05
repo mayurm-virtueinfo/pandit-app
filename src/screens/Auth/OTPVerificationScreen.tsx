@@ -28,8 +28,9 @@ import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
 // import {apiService, postSignIn} from '../../api/apiService';
 import {useAuth} from '../../provider/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {postSignIn} from '../../api/apiService';
+import {postRegisterFCMToken, postSignIn} from '../../api/apiService';
 import AppConstant from '../../utils/AppContent';
+import {getMessaging, getToken} from '@react-native-firebase/messaging';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -122,6 +123,12 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
             );
           }
           signIn(response.access_token, response.refresh_token);
+          const messaging = getMessaging();
+          const fcmToken = await getToken(messaging);
+
+          if (fcmToken) {
+            postRegisterFCMToken(fcmToken, 'pandit');
+          }
           navigation.navigate('AppBottomTabNavigator');
         }
       }

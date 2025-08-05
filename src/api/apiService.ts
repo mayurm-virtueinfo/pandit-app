@@ -28,6 +28,7 @@ import ApiEndpoints, {
   POST_LOGOUT,
   POST_PANDIT_AVAILABILITY,
   POST_REFRESH_TOKEN,
+  POST_REGISTER_FCM,
   POST_SIGNIN,
   POST_SIGNUP,
   POST_START_PUJA,
@@ -1049,6 +1050,24 @@ export const getMessageHistory = (uuid: string) => {
       })
       .catch(error => {
         console.error('Error in get message history api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const postRegisterFCMToken = (
+  device_token: string,
+  app_type: string,
+): Promise<any> => {
+  let apiUrl = POST_REGISTER_FCM;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, {device_token, app_type})
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error in registering fcm token :: ', error);
         reject(error);
       });
   });

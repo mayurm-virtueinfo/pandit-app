@@ -18,10 +18,11 @@ import PrimaryButton from '../../components/PrimaryButton';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
 import DocumentSection from '../../components/DocumentSection';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {postSignUp} from '../../api/apiService';
+import {postRegisterFCMToken, postSignUp} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import {getMessaging, getToken} from '@react-native-firebase/messaging';
 
 interface DocumentUploadState {
   idProof: boolean;
@@ -295,6 +296,12 @@ const DocumentUploadScreen: React.FC = () => {
           AppConstant.REFRESH_TOKEN,
           response.refresh_token,
         );
+        const messaging = getMessaging();
+        const fcmToken = await getToken(messaging);
+
+        if (fcmToken) {
+          postRegisterFCMToken(fcmToken, 'pandit');
+        }
         navigation.replace('AppBottomTabNavigator');
       } else {
         console.warn('Signup response did not contain user.id:', response);
