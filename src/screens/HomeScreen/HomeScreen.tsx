@@ -28,6 +28,7 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
 import CustomModal from '../../components/CustomModal';
 import {useCommonToast} from '../../common/CommonToast';
+import CustomeLoader from '../../components/CustomLoader';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -275,8 +276,15 @@ const HomeScreen: React.FC = () => {
     return `${getOrdinal(day)} ${month}`;
   };
 
+  // Modified to pass puja_name, pooja_image_url, and booking_date to RateYourExperienceScreen
   const renderCompletedPuja = (item: PujaItem, isLast: boolean) => (
-    <View>
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('RateYourExperienceScreen', {
+          completePujaData: item,
+        })
+      }>
+      console.log("item",item)
       <View style={styles.pujaItem}>
         <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
@@ -287,7 +295,7 @@ const HomeScreen: React.FC = () => {
         </View>
       </View>
       {!isLast && <View style={styles.separator} />}
-    </View>
+    </TouchableOpacity>
   );
 
   const renderPendingPujaItem = (item: PendingPujaItem, isLast: boolean) => (
@@ -376,10 +384,9 @@ const HomeScreen: React.FC = () => {
       {/* Main Content */}
       <View style={styles.contentContainer}>
         {loading || pendingLoading || inProgressLoading ? (
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <ActivityIndicator size="large" color={COLORS.primaryTextDark} />
-          </View>
+          <CustomeLoader
+            loading={loading || pendingLoading || inProgressLoading}
+          />
         ) : (
           <ScrollView
             style={styles.scrollView}

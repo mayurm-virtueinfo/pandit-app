@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -358,117 +357,129 @@ const CompleteProfileScreen: React.FC = () => {
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}>
-          <ScrollView
-            style={styles.content}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.scrollContent}>
-            <View style={styles.formContainer}>
-              {/* Photo Picker */}
-              <View style={styles.photoSection}>
-                <TouchableOpacity
-                  style={styles.photoPicker}
-                  onPress={handlePhotoSelect}
-                  activeOpacity={0.7}
-                  testID="photo-picker">
-                  {formData.profile_img ? (
-                    <Image
-                      source={{uri: formData.profile_img.uri}}
-                      style={styles.photo}
-                    />
-                  ) : (
-                    <View style={styles.photoPlaceholder}>
-                      <Text style={styles.photoPlaceholderText}>
-                        <Feather name="camera" size={32} color={COLORS.gray} />
-                        <Text>{t('select_photo')}</Text>
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-                <Text style={styles.photoLabel}>
-                  {t('profile_photo') || 'Profile Photo'}
-                </Text>
+          <View style={styles.flexGrow}>
+            <ScrollView
+              style={styles.content}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.scrollContent}>
+              <View style={styles.formContainer}>
+                {/* Photo Picker */}
+                <View style={styles.photoSection}>
+                  <TouchableOpacity
+                    style={styles.photoPicker}
+                    onPress={handlePhotoSelect}
+                    activeOpacity={0.7}
+                    testID="photo-picker">
+                    {formData.profile_img && formData.profile_img.uri ? (
+                      <Image
+                        source={{uri: formData.profile_img.uri}}
+                        style={styles.photo}
+                      />
+                    ) : (
+                      <View style={styles.photoPlaceholder}>
+                        <Feather name="camera" size={30} color={COLORS.gray} />
+                        <Text style={styles.photoPlaceholderText}>
+                          {t('select_photo')}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                  <Text style={styles.photoLabel}>
+                    {t('profile_photo') || 'Profile Photo'}
+                  </Text>
+                </View>
+                <CustomTextInput
+                  label={t('phone_number')}
+                  value={formData.phoneNumber}
+                  onChangeText={value =>
+                    handleInputChange('phoneNumber', value)
+                  }
+                  placeholder={t('enter_phone_number')}
+                  keyboardType="phone-pad"
+                  error={errors.phoneNumber}
+                />
+                <CustomTextInput
+                  label={t('email')}
+                  value={formData.email}
+                  onChangeText={value => handleInputChange('email', value)}
+                  placeholder={t('enter_email')}
+                  keyboardType="email-address"
+                  error={errors.email}
+                />
+                <CustomTextInput
+                  label={t('first_name')}
+                  value={formData.firstName}
+                  onChangeText={value => handleInputChange('firstName', value)}
+                  placeholder={t('enter_first_name')}
+                  error={errors.firstName}
+                />
+                <CustomTextInput
+                  label={t('last_name')}
+                  value={formData.lastName}
+                  onChangeText={value => handleInputChange('lastName', value)}
+                  placeholder={t('enter_last_name')}
+                  error={errors.lastName}
+                />
+                <CustomDropdown
+                  label={t('city')}
+                  items={cityData}
+                  selectedValue={formData.city}
+                  onSelect={value => handleInputChange('city', value)}
+                  placeholder={t('select_your_city')}
+                  error={errors.city}
+                />
+                <CustomDropdown
+                  label={t('caste')}
+                  items={casteData}
+                  selectedValue={formData.caste}
+                  onSelect={value => handleInputChange('caste', value)}
+                  placeholder={t('select_your_caste')}
+                  error={errors.caste}
+                />
+                <CustomDropdown
+                  label={t('sub_caste')}
+                  items={subCasteData}
+                  selectedValue={formData.subCaste}
+                  onSelect={value => handleInputChange('subCaste', value)}
+                  placeholder={t('select_your_sub_caste')}
+                  error={errors.subCaste}
+                />
+                <CustomDropdown
+                  label={t('gotra')}
+                  items={gotraData}
+                  selectedValue={formData.gotra}
+                  onSelect={value => handleInputChange('gotra', value)}
+                  placeholder={t('select_your_gotra')}
+                  error={errors.gotra}
+                />
+                <CustomTextInput
+                  label={t('address')}
+                  value={formData.address}
+                  onChangeText={value => handleInputChange('address', value)}
+                  placeholder={t('enter_address')}
+                  error={errors.address}
+                />
               </View>
-              <CustomTextInput
-                label={t('phone_number')}
-                value={formData.phoneNumber}
-                onChangeText={value => handleInputChange('phoneNumber', value)}
-                placeholder={t('enter_phone_number')}
-                keyboardType="phone-pad"
-                error={errors.phoneNumber}
-              />
-              <CustomTextInput
-                label={t('email')}
-                value={formData.email}
-                onChangeText={value => handleInputChange('email', value)}
-                placeholder={t('enter_email')}
-                keyboardType="email-address"
-                error={errors.email}
-              />
-              <CustomTextInput
-                label={t('first_name')}
-                value={formData.firstName}
-                onChangeText={value => handleInputChange('firstName', value)}
-                placeholder={t('enter_first_name')}
-                error={errors.firstName}
-              />
-              <CustomTextInput
-                label={t('last_name')}
-                value={formData.lastName}
-                onChangeText={value => handleInputChange('lastName', value)}
-                placeholder={t('enter_last_name')}
-                error={errors.lastName}
-              />
-              <CustomDropdown
-                label={t('city')}
-                items={cityData}
-                selectedValue={formData.city}
-                onSelect={value => handleInputChange('city', value)}
-                placeholder={t('select_your_city')}
-                error={errors.city}
-              />
-              <CustomDropdown
-                label={t('caste')}
-                items={casteData}
-                selectedValue={formData.caste}
-                onSelect={value => handleInputChange('caste', value)}
-                placeholder={t('select_your_caste')}
-                error={errors.caste}
-              />
-              <CustomDropdown
-                label={t('sub_caste')}
-                items={subCasteData}
-                selectedValue={formData.subCaste}
-                onSelect={value => handleInputChange('subCaste', value)}
-                placeholder={t('select_your_sub_caste')}
-                error={errors.subCaste}
-              />
-              <CustomDropdown
-                label={t('gotra')}
-                items={gotraData}
-                selectedValue={formData.gotra}
-                onSelect={value => handleInputChange('gotra', value)}
-                placeholder={t('select_your_gotra')}
-                error={errors.gotra}
-              />
-              <CustomTextInput
-                label={t('address')}
-                value={formData.address}
-                onChangeText={value => handleInputChange('address', value)}
-                placeholder={t('enter_address')}
-                error={errors.address}
+              <View style={styles.textContainer}>
+                <Text style={styles.text}>{t('address_desc')}</Text>
+              </View>
+              {/* Remove button from scrollable area */}
+            </ScrollView>
+            {/* Fixed button at bottom */}
+            <View
+              style={[
+                styles.fixedButtonContainer,
+                {paddingBottom: inset.bottom || 16},
+              ]}>
+              <PrimaryButton
+                title={t('next')}
+                onPress={handleNext}
+                style={styles.buttonContainer}
+                textStyle={styles.buttonText}
               />
             </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.text}>{t('address_desc')}</Text>
-            </View>
-            <PrimaryButton
-              title={t('next')}
-              onPress={handleNext}
-              style={styles.buttonContainer}
-              textStyle={styles.buttonText}
-            />
-          </ScrollView>
+          </View>
         </KeyboardAvoidingView>
       </View>
     </View>
@@ -487,6 +498,9 @@ const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,
   },
+  flexGrow: {
+    flex: 1,
+  },
   content: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -495,7 +509,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
+    // paddingBottom: 20,
   },
   formContainer: {
     padding: 24,
@@ -518,6 +532,10 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 15,
     fontFamily: Fonts.Sen_Medium,
+  },
+  fixedButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingTop: 8,
   },
   photoSection: {
     alignItems: 'center',
@@ -550,7 +568,7 @@ const styles = StyleSheet.create({
   },
   photoPlaceholderText: {
     color: COLORS.lighttext,
-    fontSize: 13,
+    fontSize: 10,
     textAlign: 'center',
     fontFamily: Fonts.Sen_Regular,
   },

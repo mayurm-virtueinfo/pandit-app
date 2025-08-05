@@ -22,6 +22,8 @@ import CustomModal from '../../components/CustomModal';
 import Fonts from '../../theme/fonts';
 import CancellationPolicyModal from '../../components/CancellationPolicyModal';
 import {postCancelBooking} from '../../api/apiService';
+import {getMessaging, sendMessage} from '@react-native-firebase/messaging';
+import {getApp} from '@react-native-firebase/app';
 
 interface CancellationReason {
   key: string;
@@ -30,7 +32,6 @@ interface CancellationReason {
 }
 
 const PANDIT_CANCELLATION_REASONS: CancellationReason[] = [
-  // Pandit-initiated reasons
   {key: 'pandit_unavailable', label: 'Pandit: Unavailable'},
   {key: 'pandit_emergency', label: 'Pandit: Emergency'},
   {key: 'pandit_scheduling_conflict', label: 'Pandit: Scheduling Conflict'},
@@ -60,8 +61,67 @@ const PujaCancellationScreen = () => {
   ] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-
   const {showErrorToast, showSuccessToast} = useCommonToast();
+
+  const messaging = getMessaging(getApp());
+
+  const sendCancellationNotification = async (
+    bookingId: string,
+    reason: string,
+  ) => {
+    try {
+      // Assume an API call to fetch the user's FCM token based on bookingId
+      // This is a placeholder; replace with actual API call to get user token
+      const userFcmToken =
+        (await fetchUserFcmToken(bookingId)) ||
+        'cB_DAvomRvCvLCm2iI4GJL:APA91bH3-MnAjT6ATheRcGMaFlLj_Q6DtxvRTkJ0tw19lxJN_OIUmTf0kFbI4fwMaLebBA0S10SVd-Whq9YtyoD1EAGipjrD6nSGzHZssvAO0qePNqoeMCs'; // Implement this function
+      if (!userFcmToken) {
+        console.error('🚫 No FCM token found for user');
+        return;
+      }
+
+      const message = {
+        to: userFcmToken,
+        notification: {
+          title:
+            t('puja_cancellation_notification_title') ||
+            'Pooja Booking Cancelled',
+          body: `${
+            t('puja_cancellation_notification_body') ||
+            'Your Pooja booking has been cancelled by the pandit.'
+          } Reason: ${reason}`,
+        },
+        data: {
+          bookingId,
+          type: 'cancellation',
+        },
+      };
+
+      // Fix: Adapt message to match RemoteMessage type (add required fcmOptions property)
+      const remoteMessage = {
+        ...message,
+        fcmOptions: {
+          // You may need to set analyticsLabel or other required fields depending on your setup
+          analyticsLabel: 'puja_cancellation',
+        },
+      };
+
+      await sendMessage(messaging, remoteMessage as any);
+      console.log('📩 Cancellation notification sent successfully');
+    } catch (error) {
+      console.error('🚫 Failed to send cancellation notification:', error);
+    }
+  };
+
+  // Placeholder function to fetch user FCM token
+  const fetchUserFcmToken = async (
+    bookingId: string,
+  ): Promise<string | null> => {
+    // Implement API call to your backend to get the user's FCM token
+    // Example: const response = await api.get(`/bookings/${bookingId}/user-fcm-token`);
+    // return response.data.fcmToken;
+    return null; // Replace with actual implementation
+  };
 
   const handleSubmit = () => {
     const selectedReason = cancellationReasons.find(
@@ -95,6 +155,13 @@ const PujaCancellationScreen = () => {
       console.log('payload', payload);
       await postCancelBooking(id, payload);
       showSuccessToast(t('cancellation_submitted_successfully'));
+
+      // Send push notification to the user
+      const reasonText = selectedReason?.requiresSpecification
+        ? `${selectedReason.label}: ${customReason}`
+        : selectedReason?.label || 'Unknown';
+      await sendCancellationNotification(id, reasonText);
+
       navigation.replace('HomeScreen');
     } catch (error: any) {
       showErrorToast(
@@ -256,10 +323,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(10),
     marginBottom: verticalScale(24),
     shadowColor: COLORS.black,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.01,
     shadowRadius: 2,
     elevation: 3,

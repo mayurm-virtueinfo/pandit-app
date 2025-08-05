@@ -44,11 +44,28 @@ const EditPanditPoojaScreen: React.FC = () => {
   const [poojaData, setPoojaData] = useState<poojaDataOption[]>([]);
   const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState<string>('');
+  const [filteredPoojaData, setFilteredPoojaData] = useState<poojaDataOption[]>(
+    [],
+  );
 
   // Fetch all puja list and selected puja list on mount
   useEffect(() => {
     fetchAllPujaAndSelected();
   }, []);
+
+  useEffect(() => {
+    // Filter poojaData based on searchText
+    if (searchText.trim() === '') {
+      setFilteredPoojaData(poojaData);
+    } else {
+      setFilteredPoojaData(
+        poojaData.filter(item =>
+          item.title.toLowerCase().includes(searchText.toLowerCase()),
+        ),
+      );
+    }
+  }, [searchText, poojaData]);
 
   const fetchAllPujaAndSelected = async () => {
     setIsLoading(true);
@@ -66,6 +83,7 @@ const EditPanditPoojaScreen: React.FC = () => {
         short_description: item.short_description,
       }));
       setPoojaData(mappedAllPuja);
+      setFilteredPoojaData(mappedAllPuja);
 
       // Fetch selected puja ids
       const selectedPujaResponse = await getPanditPooja();
@@ -88,7 +106,7 @@ const EditPanditPoojaScreen: React.FC = () => {
         : [];
       setSelectedPoojaId(selectedIds);
     } catch (error: any) {
-      showErrorToast(error?.message || 'Failed to fetch puja list');
+      showErrorToast(error?.message || 'Failed to fetch pooja list');
     } finally {
       setIsLoading(false);
     }
@@ -102,12 +120,16 @@ const EditPanditPoojaScreen: React.FC = () => {
     );
   };
 
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+  };
+
   const handleNext = async () => {
     const selectedPooja = poojaData.filter(area =>
       selectedPoojaId.includes(area.id),
     );
     if (selectedPooja.length === 0) {
-      showErrorToast(t('please_select_pooja') || 'Please select Puja');
+      showErrorToast(t('please_select_pooja') || 'Please select pooja');
       return;
     }
 
@@ -116,11 +138,11 @@ const EditPanditPoojaScreen: React.FC = () => {
       const payload = {pooja_ids: selectedPoojaId};
       await putPanditPooja(payload);
       showSuccessToast(
-        t('puja_updated_successfully') || 'Puja updated successfully',
+        t('puja_updated_successfully') || 'Pooja updated successfully',
       );
       navigation.goBack();
     } catch (error: any) {
-      showErrorToast(error?.message || 'Failed to update puja');
+      showErrorToast(error?.message || 'Failed to update pooja');
     } finally {
       setIsLoading(false);
     }
@@ -151,20 +173,33 @@ const EditPanditPoojaScreen: React.FC = () => {
                 <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
                 <Text style={styles.description}>{t('select_pooja_desc')}</Text>
                 <CustomeMultiSelector
-                  data={poojaData}
+                  data={filteredPoojaData}
                   selectedDataIds={selectedPoojaId}
                   onDataSelect={handlePoojaSelect}
                   searchPlaceholder={t('select_pooja')}
                   isMultiSelect={true}
+                  onSearch={handleSearch}
                 />
-                <PrimaryButton
-                  title={t('update')}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={selectedPoojaId.length === 0}
-                />
+                {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
+                  <Text style={styles.noResultText}>
+                    {t('no_pooja_found') || 'No Pooja found'}
+                  </Text>
+                )}
               </View>
             </ScrollView>
+            {/* Button fixed at bottom */}
+            <View
+              style={[
+                styles.bottomButtonContainer,
+                {paddingBottom: insets.bottom || moderateScale(16)},
+              ]}>
+              <PrimaryButton
+                title={t('update')}
+                onPress={handleNext}
+                style={styles.nextButton}
+                disabled={selectedPoojaId.length === 0}
+              />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -191,12 +226,13 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
-    paddingBottom: moderateScale(20),
+    // Remove bottom padding here, handled by bottomButtonContainer
+    paddingBottom: 0,
   },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    flex: 1,
+    // Remove flex: 1 to allow ScrollView to size naturally
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -212,7 +248,20 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     height: moderateScale(46),
-    marginTop: moderateScale(24),
+    // marginTop: moderateScale(24), // Remove marginTop, handled by bottomButtonContainer
+  },
+  noResultText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(30),
+    textAlign: 'center',
+  },
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+    paddingTop: moderateScale(12),
+    // paddingBottom handled inline for safe area
   },
 });
 

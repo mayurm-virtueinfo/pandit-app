@@ -20,9 +20,9 @@ import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomSelector from '../../components/CustomeSelector';
 import {getCity, getServiceArea} from '../../api/apiService';
 import {useCommonToast} from '../../common/CommonToast';
-import CustomeLoader from '../../components/CustomLoader';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {SettingsStackParamList} from '../../navigation/SettingsStack/SettingsStack';
+import CustomeLoader from '../../components/CustomLoader';
 
 type ScreenNavigationProp = StackNavigationProp<
   SettingsStackParamList,
@@ -39,9 +39,26 @@ const EditCityScreen: React.FC = () => {
   const [data, setData] = useState([]);
   const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchText, setSearchText] = useState<string>('');
+  const [filteredCities, setFilteredCities] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
+
   useEffect(() => {
     fetchCityAndServiceArea();
   }, []);
+
+  useEffect(() => {
+    // Filter cities based on searchText
+    if (searchText.trim() === '') {
+      setFilteredCities(cities);
+    } else {
+      const lowerSearch = searchText.toLowerCase();
+      setFilteredCities(
+        cities.filter(city => city.name.toLowerCase().includes(lowerSearch)),
+      );
+    }
+  }, [searchText, cities]);
 
   const fetchCityAndServiceArea = async () => {
     setIsLoading(true);
@@ -61,6 +78,7 @@ const EditCityScreen: React.FC = () => {
         }),
       );
       setCities(mappedData);
+      setFilteredCities(mappedData);
 
       // Fetch current service area to get city_id
       const serviceAreaResponse = await getServiceArea();
@@ -101,6 +119,11 @@ const EditCityScreen: React.FC = () => {
     }
   };
 
+  // Custom search handler for CustomSelector
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+  };
+
   return (
     <View style={styles.container}>
       <CustomeLoader loading={isLoading} />
@@ -127,19 +150,32 @@ const EditCityScreen: React.FC = () => {
                   {t('select_city_description')}
                 </Text>
                 <CustomSelector
-                  data={cities}
+                  data={filteredCities}
                   selectedDataId={selectedCityId || null}
                   onDataSelect={handleCitySelect}
                   searchPlaceholder={t('search_city')}
+                  onSearch={handleSearch}
                 />
-                <PrimaryButton
-                  title={t('next')}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={!selectedCityId}
-                />
+                {filteredCities.length === 0 && searchText.trim() !== '' && (
+                  <Text style={styles.noResultText}>
+                    {t('no_city_found') || 'No city found'}
+                  </Text>
+                )}
               </View>
             </ScrollView>
+            {/* Button fixed at bottom */}
+            <View
+              style={[
+                styles.bottomButtonContainer,
+                {paddingBottom: insets.bottom || moderateScale(16)},
+              ]}>
+              <PrimaryButton
+                title={t('next')}
+                onPress={handleNext}
+                style={styles.nextButton}
+                disabled={!selectedCityId}
+              />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -166,12 +202,13 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
-    paddingBottom: moderateScale(20),
+    // Remove bottom padding here, handled by bottomButtonContainer
+    paddingBottom: 0,
   },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    flex: 1,
+    // Remove flex: 1 to allow ScrollView to size naturally
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -187,7 +224,20 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     height: moderateScale(46),
-    marginTop: moderateScale(24),
+    // marginTop: moderateScale(24), // Remove marginTop, handled by bottomButtonContainer
+  },
+  noResultText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(30),
+    textAlign: 'center',
+  },
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+    paddingTop: moderateScale(12),
+    // paddingBottom handled inline for safe area
   },
 });
 

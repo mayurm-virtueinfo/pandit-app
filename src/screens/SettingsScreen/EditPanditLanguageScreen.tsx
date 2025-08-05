@@ -42,6 +42,10 @@ const EditPanditLanguageScreen: React.FC = () => {
   const [languages, setLanguages] = useState<CustomeSelectorDataOption[]>([]);
   const [selectedLanguageId, setSelectedLanguageId] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState<string>('');
+  const [filteredLanguages, setFilteredLanguages] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
 
   // Fetch all languages and user's selected languages
   useEffect(() => {
@@ -60,6 +64,7 @@ const EditPanditLanguageScreen: React.FC = () => {
         name: item.name,
       }));
       setLanguages(mappedData);
+      setFilteredLanguages(mappedData);
     } catch (error: any) {
       showErrorToast(error?.message || 'Failed to fetch languages');
     } finally {
@@ -72,7 +77,6 @@ const EditPanditLanguageScreen: React.FC = () => {
     setIsLoading(true);
     try {
       const response: any = await getPanditLanguage();
-      console.log('response', response);
       const data =
         response && response?.data?.languages ? response?.data?.languages : [];
       const selectedIds = Array.isArray(data)
@@ -110,6 +114,18 @@ const EditPanditLanguageScreen: React.FC = () => {
     }
   };
 
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (!text.trim()) {
+      setFilteredLanguages(languages);
+    } else {
+      const lowerText = text.toLowerCase();
+      setFilteredLanguages(
+        languages.filter(lang => lang.name.toLowerCase().includes(lowerText)),
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <CustomeLoader loading={isLoading} />
@@ -138,20 +154,33 @@ const EditPanditLanguageScreen: React.FC = () => {
                   {t('select_language_desc')}
                 </Text>
                 <CustomeMultiSelector
-                  data={languages}
+                  data={filteredLanguages}
                   selectedDataIds={selectedLanguageId}
                   onDataSelect={handleLanguageSelect}
                   searchPlaceholder={t('select_language')}
                   isMultiSelect={true}
+                  onSearch={handleSearch}
                 />
-                <PrimaryButton
-                  title={t('update')}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={!selectedLanguageId.length}
-                />
+                {filteredLanguages.length === 0 && searchText.trim() !== '' && (
+                  <Text style={styles.noResultText}>
+                    {t('no_language_found') || 'No language found'}
+                  </Text>
+                )}
               </View>
             </ScrollView>
+            {/* Button fixed at bottom */}
+            <View
+              style={[
+                styles.bottomButtonContainer,
+                {paddingBottom: insets.bottom || moderateScale(16)},
+              ]}>
+              <PrimaryButton
+                title={t('update')}
+                onPress={handleNext}
+                style={styles.nextButton}
+                disabled={!selectedLanguageId.length}
+              />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -178,12 +207,12 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
-    paddingBottom: moderateScale(20),
+    paddingBottom: 0, // Remove bottom padding here, handled by bottomButtonContainer
   },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    flex: 1,
+    // Remove flex: 1 to allow ScrollView to size naturally
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -199,7 +228,19 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     height: moderateScale(46),
-    marginTop: moderateScale(24),
+    marginTop: moderateScale(0),
+  },
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+    paddingTop: moderateScale(8),
+  },
+  noResultText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(15),
+    fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(16),
+    textAlign: 'center',
   },
 });
 

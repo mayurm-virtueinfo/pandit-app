@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   KeyboardAvoidingView,
@@ -56,7 +55,10 @@ const SelectLanguageScreen: React.FC = () => {
   const {showErrorToast} = useCommonToast();
 
   const [languages, setLanguages] = useState<CustomeSelectorDataOption[]>([]);
-
+  const [filteredLanguages, setFilteredLanguages] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
+  const [searchText, setSearchText] = useState('');
   const [selectedLanguageId, setSelectedLanguageId] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -92,6 +94,7 @@ const SelectLanguageScreen: React.FC = () => {
         name: item.name,
       }));
       setLanguages(mappedData);
+      setFilteredLanguages(mappedData);
     } catch (error: any) {
       showErrorToast(error?.message);
     } finally {
@@ -105,6 +108,18 @@ const SelectLanguageScreen: React.FC = () => {
         ? prev.filter(id => id !== languageId)
         : [...prev, languageId],
     );
+  };
+
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (text.trim() === '') {
+      setFilteredLanguages(languages);
+    } else {
+      const filtered = languages.filter(lang =>
+        lang.name.toLowerCase().includes(text.toLowerCase()),
+      );
+      setFilteredLanguages(filtered);
+    }
   };
 
   const handleNext = () => {
@@ -136,11 +151,6 @@ const SelectLanguageScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <CustomeLoader loading={isLoading} />
-      <StatusBar
-        translucent
-        backgroundColor="transparent"
-        barStyle="light-content"
-      />
       <View style={[styles.container, {paddingTop: insets.top}]}>
         <CustomHeader
           title={t('complete_your_profile')}
@@ -152,10 +162,9 @@ const SelectLanguageScreen: React.FC = () => {
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
           <View style={styles.contentContainer}>
             <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContentContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled">
+              contentContainerStyle={{flexGrow: 1}}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}>
               <View style={styles.mainContent}>
                 <Text style={styles.selectCityTitle}>
                   {t('select_language')}
@@ -164,20 +173,30 @@ const SelectLanguageScreen: React.FC = () => {
                   {t('select_language_desc')}
                 </Text>
                 <CustomeMultiSelector
-                  data={languages}
+                  data={filteredLanguages}
                   selectedDataIds={selectedLanguageId}
                   onDataSelect={handleLanguageSelect}
                   searchPlaceholder={t('select_language')}
                   isMultiSelect={true}
+                  onSearch={handleSearch}
+                  // onSearch={searchText}
                 />
-                <PrimaryButton
-                  title={buttonText}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={!selectedLanguageId}
-                />
+                {filteredLanguages.length === 0 && searchText.trim() !== '' && (
+                  <Text style={styles.noDataText}>
+                    {t('no_data_found') || 'No data found'}
+                  </Text>
+                )}
               </View>
             </ScrollView>
+          </View>
+          {/* Button fixed at the bottom */}
+          <View style={styles.bottomButtonContainer}>
+            <PrimaryButton
+              title={buttonText}
+              onPress={handleNext}
+              style={styles.nextButton}
+              disabled={selectedLanguageId.length === 0}
+            />
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -199,13 +218,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContentContainer: {
-    flexGrow: 1,
-    paddingBottom: moderateScale(20),
-  },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
@@ -223,9 +235,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     marginBottom: moderateScale(18),
   },
+  noDataText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(15),
+    fontFamily: Fonts.Sen_Regular,
+    textAlign: 'center',
+    marginTop: moderateScale(20),
+  },
   nextButton: {
     height: moderateScale(46),
-    marginTop: moderateScale(24),
+    marginTop: moderateScale(0),
+  },
+  bottomButtonContainer: {
+    paddingHorizontal: wp(6.5),
+    paddingBottom: moderateScale(24),
+    backgroundColor: COLORS.white,
   },
 });
 

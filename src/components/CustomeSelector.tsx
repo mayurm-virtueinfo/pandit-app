@@ -28,6 +28,7 @@ interface CustomeSelectorProps {
   searchPlaceholder?: string;
   showSearch?: boolean;
   containerStyle?: any;
+  onSearch?: (text: string) => void; // Added for on search
 }
 
 const CustomSelector: React.FC<CustomeSelectorProps> = ({
@@ -37,6 +38,7 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
   searchPlaceholder,
   showSearch = true,
   containerStyle,
+  onSearch, // Added for on search
 }) => {
   const [searchText, setSearchText] = useState('');
 
@@ -49,6 +51,13 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
   const filteredData = data.filter(item =>
     getDisplayName(item).toLowerCase().includes(searchText.toLowerCase()),
   );
+
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
+    if (onSearch) {
+      onSearch(text);
+    }
+  };
 
   const renderCityItem = ({
     item,
@@ -107,7 +116,7 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
               placeholder={searchPlaceholder}
               placeholderTextColor={COLORS.searchbartext}
               value={searchText}
-              onChangeText={setSearchText}
+              onChangeText={handleSearchTextChange}
             />
           </View>
           <View style={styles.separator} />

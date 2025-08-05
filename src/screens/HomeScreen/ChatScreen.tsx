@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
 import {request, PERMISSIONS} from 'react-native-permissions';
+import messaging from '@react-native-firebase/messaging';
 
 export interface Message {
   id: string;
@@ -33,15 +34,50 @@ const ChatScreen: React.FC = () => {
   const route = useRoute() as any;
   const {uuid, other_user_name, other_user_image, other_user_phone} =
     route.params;
+
+  console.log('uuid :: ', uuid);
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [panditID, setPanditID] = useState<string | null>(null);
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
 
   const ws = useRef<WebSocket | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const isUserAtBottom = useRef(true);
+
+  // Set up FCM token and onMessage handler
+  useEffect(() => {
+    let unsubscribeOnMessage: (() => void) | undefined;
+
+    const setupFCM = async () => {
+      try {
+        // Get FCM token
+        const token = await messaging().getToken();
+        setFcmToken(token);
+        // Optionally, send this token to your backend here
+        // await api.post('/save-fcm-token', { token });
+
+        // Listen for foreground messages
+        unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+          // Handle the incoming message as needed
+          // For example, you could show a local notification or update chat UI
+          console.log('📩 FCM Message Received in foreground:', remoteMessage);
+        });
+      } catch (err) {
+        console.error('Error getting FCM token or setting onMessage:', err);
+      }
+    };
+
+    setupFCM();
+
+    return () => {
+      if (unsubscribeOnMessage) {
+        unsubscribeOnMessage();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -130,10 +166,64 @@ const ChatScreen: React.FC = () => {
     }
   }, []);
 
+  // Send notification only on Android, otherwise skip and log warning
+  const sendNotification = async (text: string) => {
+    if (Platform.OS !== 'android') {
+      console.warn(
+        'sendNotification: firebase.messaging().sendMessage() is only supported on Android devices. Skipping notification send.',
+      );
+      return;
+    }
+    try {
+      // Fetch recipient's FCM token (replace with actual API call)
+      const recipientFcmToken =
+        'cB_DAvomRvCvLCm2iI4GJL:APA91bH3-MnAjT6ATheRcGMaFlLj_Q6DtxvRTkJ0tw19lxJN_OIUmTf0kFbI4fwMaLebBA0S10SVd-Whq9YtyoD1EAGipjrD6nSGzHZssvAO0qePNqoeMCs';
+      if (!recipientFcmToken) {
+        console.error('🚫 No FCM token found for recipient');
+        return;
+      }
+
+      const message = {
+        to: recipientFcmToken,
+        notification: {
+          title: `New Message from ${other_user_name || 'User'}`,
+          body: text.length > 50 ? `${text.substring(0, 47)}...` : text,
+        },
+        data: {
+          chatUuid: uuid,
+          type: 'chat_message',
+        },
+      };
+
+      // Use the messaging instance to send the message (Android only)
+      // @ts-ignore
+      await messaging().sendMessage(message);
+      console.log('📩 Chat notification sent successfully');
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('🚫 Failed to send chat notification:', error.message);
+      } else {
+        console.error('🚫 Failed to send chat notification:', error);
+      }
+    }
+  };
+
+  // Placeholder function to fetch recipient's FCM token
+  const fetchRecipientFcmToken = async (
+    phone: string,
+  ): Promise<string | null> => {
+    // Implement API call to your backend to get the recipient's FCM token
+    // Example: const response = await api.get(`/users/phone/${phone}/fcm-token`);
+    // return response.data.fcmToken;
+    return null; // Replace with actual implementation
+  };
+
   const handleSendMessage = (text: string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({message: text}));
       isUserAtBottom.current = true;
+      // Send push notification to recipient
+      sendNotification(text);
     } else {
       console.warn('WebSocket not connected');
     }

@@ -108,7 +108,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     return pujaDetails?.id || id;
   };
 
-  // Fetch puja details
+  // Fetch Pooja details
   const fetchPujaDetails = useCallback(async () => {
     try {
       let response;
@@ -131,11 +131,11 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         }
       }
     } catch (error) {
-      console.error('Error fetching puja details:', error);
+      console.error('Error fetching pooja details:', error);
     }
   }, [id, progress]);
 
-  // Load puja started/completed status from AsyncStorage
+  // Load Pooja started/completed status from AsyncStorage
   const loadPujaStatus = useCallback(
     async (bookingId: number | string | undefined) => {
       if (!bookingId) {
@@ -152,7 +152,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           setPujaStarted(false);
         }
       } catch (error) {
-        console.error('Error loading puja status from storage:', error);
+        console.error('Error loading Pooja status from storage:', error);
       }
     },
     [],
@@ -180,11 +180,11 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     }
   }, [pujaDetails, progressPujaDetails, id, progress, loadPujaStatus]);
 
-  // Call Start Puja API and store status in AsyncStorage
+  // Call Start Pooja API and store status in AsyncStorage
   const handleStartPujaApi = async (pin: string) => {
     const bookingId = pujaDetails?.id || progressPujaDetails?.id;
     if (!bookingId) {
-      console.error('No booking id found for starting puja');
+      console.error('No booking id found for starting pooja');
       return;
     }
     try {
@@ -206,15 +206,15 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         errorMsg = error.message;
       }
       showErrorToast(errorMsg);
-      console.error('Error starting puja:', error);
+      console.error('Error starting pooja:', error);
     }
   };
 
-  // Call Complete Puja API and update status in AsyncStorage
+  // Call Complete Pooja API and update status in AsyncStorage
   const handleCompletePujaApi = async (pin: string) => {
     const bookingId = progressPujaDetails?.id || pujaDetails?.id;
     if (!bookingId) {
-      console.error('No booking id found for completing puja');
+      console.error('No booking id found for completing pooja');
       return;
     }
     try {
@@ -237,7 +237,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         errorMsg = error.message;
       }
       showErrorToast(errorMsg);
-      console.error('Error completing puja:', error);
+      console.error('Error completing pooja:', error);
     }
   };
 
@@ -310,6 +310,13 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   };
 
   const handleOnChatClick = async () => {
+    // If Pooja has started, do not allow chat and show a toast
+    if (pujaStarted) {
+      showErrorToast?.(
+        'You cannot chat with the pandit after the pooja has started.',
+      );
+      return;
+    }
     try {
       const userId = 1;
 
@@ -355,7 +362,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         title={
           pujaDetails?.pooja_name ||
           progressPujaDetails?.pooja_name ||
-          'Puja Details'
+          'Pooja Details'
         }
         showBackButton
         showBellButton
@@ -380,7 +387,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               styles.heroImage,
               {width: screenWidth, height: verticalScale(200)},
             ]}
-            resizeMode="cover"
+            resizeMode="stretch"
           />
           <View
             style={{
@@ -448,9 +455,13 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   style={styles.detailIcon}
                 />
                 <View style={styles.detailContent}>
-                  <Text style={styles.detailText}>Puja items list</Text>
+                  <Text style={styles.detailText}>Pooja items list</Text>
                 </View>
-                <Feather name="eye" size={20} color="#FFBE11" />
+                <Feather
+                  name="eye"
+                  size={20}
+                  color={COLORS.primaryBackgroundButton}
+                />
               </TouchableOpacity>
             </View>
 
@@ -473,15 +484,34 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 </Text>
                 <TouchableOpacity
                   onPress={handleOnChatClick}
-                  style={styles.chatButton}>
+                  style={styles.chatButton}
+                  disabled={pujaStarted}>
                   <Image
                     source={{
                       uri: 'https://api.builder.io/api/v1/image/assets/TEMP/4c01dc3358caeee996c8d4195776dbf1f8045f61?width=40',
                     }}
-                    style={styles.chatIcon}
+                    style={[styles.chatIcon, pujaStarted && {opacity: 0.5}]}
                   />
                 </TouchableOpacity>
               </View>
+              {pujaStarted && (
+                <Text
+                  style={{
+                    color: COLORS.error,
+                    marginTop: 8,
+                    fontSize: moderateScale(12),
+                  }}>
+                  {t(
+                    'You cannot chat with the {{name}} after the pooja has started.',
+                    {
+                      name:
+                        pujaDetails?.booking_user_name ||
+                        progressPujaDetails?.user_info?.full_name ||
+                        '',
+                    },
+                  )}
+                </Text>
+              )}
             </View>
 
             <View style={[styles.pricingCard, THEMESHADOW.shadow]}>
@@ -490,8 +520,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 <Text style={styles.pricingSubtext}>
                   {pujaDetails?.samagri_required ||
                   progressPujaDetails?.samagri_required
-                    ? 'With Puja Items'
-                    : 'Without Puja Items'}
+                    ? 'With Pooja Items'
+                    : 'Without Pooja Items'}
                 </Text>
               </View>
               <Text style={styles.pricingAmount}>

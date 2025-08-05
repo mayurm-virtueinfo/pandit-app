@@ -285,7 +285,8 @@ const AddPujaScreen: React.FC = () => {
     {
       id: 'system',
       title: 'System Price',
-      description: 'Rs. 5000 - With puja items\nRs. 3000 - Without puja items',
+      description:
+        'Rs. 5000 - With pooja items\nRs. 3000 - Without pooja items',
     },
     {
       id: 'custom',
@@ -409,7 +410,7 @@ const AddPujaScreen: React.FC = () => {
                 <View style={styles.inputFieldContainer}>
                   <View style={styles.inputTitleContainer}>
                     <Text style={styles.inputLabel}>
-                      Custom Price With Puja Items
+                      Custom Price With Pooja Items
                     </Text>
                   </View>
                   <View style={styles.inputAreaContainer}>
@@ -427,7 +428,7 @@ const AddPujaScreen: React.FC = () => {
                 <View style={styles.inputFieldContainer}>
                   <View style={styles.inputTitleContainer}>
                     <Text style={styles.inputLabel}>
-                      Custom Price Without Puja Items
+                      Custom Price Without Pooja Items
                     </Text>
                   </View>
                   <View style={styles.inputAreaContainer}>

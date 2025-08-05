@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.chatColor,
-    borderRadius: moderateScale(23),
+    borderRadius: moderateScale(50),
     minHeight: moderateScale(46),
     maxWidth: wp(95),
     alignContent: 'center',

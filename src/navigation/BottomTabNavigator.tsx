@@ -46,7 +46,7 @@ const AppBottomTabNavigator: React.FC = () => {
         name="PujaListNavigator"
         component={PujaListNavigator}
         options={{
-          title: 'Puja List',
+          title: 'Pooja List',
           tabBarIcon: ({color, size}) => (
             <FontAwesome name="institution" size={size} color={color} />
           ),

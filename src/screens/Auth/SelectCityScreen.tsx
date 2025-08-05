@@ -3,14 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {COLORS, wp, hp} from '../../theme/theme';
+import {COLORS, wp} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -66,8 +65,11 @@ const SelectCityScreen: React.FC = () => {
   } = route.params || {};
 
   const [cities, setCities] = useState<CustomeSelectorDataOption[]>([]);
-
-  const [selectedCityId, setSelectedCityId] = useState<number | null>();
+  const [filteredCities, setFilteredCities] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
+  const [searchText, setSearchText] = useState<string>('');
+  const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -84,6 +86,7 @@ const SelectCityScreen: React.FC = () => {
         name: item.name,
       }));
       setCities(mappedData);
+      setFilteredCities(mappedData);
     } catch (error: any) {
       showErrorToast(error?.message);
     } finally {
@@ -93,7 +96,7 @@ const SelectCityScreen: React.FC = () => {
 
   const action = route.params?.action;
 
-  console.log('selectedCityId :: ', selectedCityId);
+  // console.log('selectedCityId :: ', selectedCityId);
 
   const handleCitySelect = (cityId: number) => {
     if (selectedCityId === cityId) {
@@ -101,6 +104,20 @@ const SelectCityScreen: React.FC = () => {
     } else {
       setSelectedCityId(cityId);
     }
+  };
+
+  // Handle search in CustomSelector
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (!text) {
+      setFilteredCities(cities);
+      return;
+    }
+    const lowerText = text.toLowerCase();
+    const filtered = cities.filter(city =>
+      city.name.toLowerCase().includes(lowerText),
+    );
+    setFilteredCities(filtered);
   };
 
   const handleNext = () => {
@@ -125,6 +142,9 @@ const SelectCityScreen: React.FC = () => {
   };
 
   const buttonText = action === 'Update' ? t('update') : t('next');
+
+  // Determine if no results for search
+  const showNoResult = searchText.length > 0 && filteredCities.length === 0;
 
   return (
     <View style={styles.container}>
@@ -155,19 +175,29 @@ const SelectCityScreen: React.FC = () => {
                   {t('select_city_description')}
                 </Text>
                 <CustomSelector
-                  data={cities}
+                  data={filteredCities}
                   selectedDataId={selectedCityId || null}
                   onDataSelect={handleCitySelect}
                   searchPlaceholder={t('search_city')}
+                  onSearch={handleSearch}
                 />
-                <PrimaryButton
-                  title={buttonText}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={!selectedCityId}
-                />
+                {showNoResult && (
+                  <Text style={styles.noResultText}>{t('no_city_found')}</Text>
+                )}
               </View>
             </ScrollView>
+            <View
+              style={[
+                styles.bottomButtonContainer,
+                {paddingBottom: insets.bottom || moderateScale(16)},
+              ]}>
+              <PrimaryButton
+                title={buttonText}
+                onPress={handleNext}
+                style={styles.nextButton}
+                disabled={!selectedCityId}
+              />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -194,12 +224,12 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
-    paddingBottom: moderateScale(20),
+    paddingBottom: 0, // Remove padding, handled by bottomButtonContainer
   },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    flex: 1,
+    // Remove flex: 1 to allow ScrollView to size naturally
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -215,6 +245,19 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     height: moderateScale(46),
+    marginTop: moderateScale(0),
+  },
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+    paddingTop: moderateScale(8),
+    // paddingBottom handled inline for safe area
+  },
+  noResultText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(15),
+    fontFamily: Fonts.Sen_Regular,
+    textAlign: 'center',
     marginTop: moderateScale(24),
   },
 });

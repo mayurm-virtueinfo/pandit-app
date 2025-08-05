@@ -87,14 +87,14 @@ const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
         (!data.userItems.items || data.userItems.items.length === 0) &&
         (!data.panditjiItems.items || data.panditjiItems.items.length === 0)
       ) {
-        setError('No puja items found.');
+        setError('No pooja items found.');
       }
     } catch (err) {
       setUserItems([]);
       setUserItemsDescription('');
       setPanditjiItems([]);
       setPanditjiItemsDescription('');
-      setError('Failed to fetch puja items. Please try again.');
+      setError('Failed to fetch pooja items. Please try again.');
     } finally {
       setLoading(false);
     }

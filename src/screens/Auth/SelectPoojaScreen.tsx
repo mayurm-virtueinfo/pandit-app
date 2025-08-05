@@ -3,14 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {COLORS, wp, hp} from '../../theme/theme';
+import {COLORS, wp} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -57,12 +56,13 @@ const SelectPoojaScreen: React.FC = () => {
   const {t} = useTranslation();
   const {showErrorToast} = useCommonToast();
 
-  console.log('route.params : ', route.params);
-
   const [poojaData, setPoojaData] = useState<poojaDataOption[]>([]);
-
   const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [filteredPoojaData, setFilteredPoojaData] = useState<poojaDataOption[]>(
+    [],
+  );
 
   const {
     phoneNumber,
@@ -85,6 +85,21 @@ const SelectPoojaScreen: React.FC = () => {
     fetchPoojaData();
   }, []);
 
+  useEffect(() => {
+    if (searchText.trim() === '') {
+      setFilteredPoojaData(poojaData);
+    } else {
+      const lowerSearch = searchText.toLowerCase();
+      setFilteredPoojaData(
+        poojaData.filter(
+          item =>
+            item.title?.toLowerCase().includes(lowerSearch) ||
+            item.short_description?.toLowerCase().includes(lowerSearch),
+        ),
+      );
+    }
+  }, [searchText, poojaData]);
+
   const fetchPoojaData = async () => {
     setIsLoading(true);
     try {
@@ -96,6 +111,7 @@ const SelectPoojaScreen: React.FC = () => {
         short_description: item.short_description,
       }));
       setPoojaData(mappedData);
+      setFilteredPoojaData(mappedData);
     } catch (error: any) {
       showErrorToast(error?.message);
     } finally {
@@ -134,8 +150,6 @@ const SelectPoojaScreen: React.FC = () => {
     }
   };
 
-  console.log('selectedPoojaId :: ', selectedPoojaId);
-
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
@@ -157,31 +171,37 @@ const SelectPoojaScreen: React.FC = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
           <View style={styles.contentContainer}>
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContentContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled">
-              <View style={styles.mainContent}>
-                <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
-                <Text style={styles.description}>{t('select_pooja_desc')}</Text>
-                <CustomeMultiSelector
-                  data={poojaData}
-                  selectedDataIds={selectedPoojaId}
-                  onDataSelect={handlePoojaSelect}
-                  searchPlaceholder={t('select_pooja')}
-                  isMultiSelect={true}
-                />
-                <PrimaryButton
-                  title={buttonText}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={!selectedPoojaId}
-                />
-              </View>
-            </ScrollView>
+            <View style={styles.mainContent}>
+              <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
+              <Text style={styles.description}>{t('select_pooja_desc')}</Text>
+              <CustomeMultiSelector
+                data={filteredPoojaData}
+                selectedDataIds={selectedPoojaId}
+                onDataSelect={handlePoojaSelect}
+                searchPlaceholder={t('select_pooja')}
+                isMultiSelect={true}
+                onSearch={setSearchText}
+              />
+              {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
+                <Text style={styles.noDataText}>
+                  {t('no_pooja_found') || 'No pooja found'}
+                </Text>
+              )}
+            </View>
           </View>
         </KeyboardAvoidingView>
+        <View
+          style={[
+            styles.buttonContainer,
+            {paddingBottom: insets.bottom + moderateScale(12)},
+          ]}>
+          <PrimaryButton
+            title={buttonText}
+            onPress={handleNext}
+            style={styles.nextButton}
+            disabled={selectedPoojaId.length === 0}
+          />
+        </View>
       </View>
     </View>
   );
@@ -228,6 +248,17 @@ const styles = StyleSheet.create({
   nextButton: {
     height: moderateScale(46),
     marginTop: moderateScale(24),
+  },
+  buttonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+  },
+  noDataText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(12),
+    textAlign: 'center',
   },
 });
 

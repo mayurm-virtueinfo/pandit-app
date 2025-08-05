@@ -29,6 +29,7 @@ interface CustomeMultiSelectorProps {
   showSearch?: boolean;
   containerStyle?: any;
   isMultiSelect?: boolean;
+  onSearch?: (text: string) => void; // Added for search
 }
 
 const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
@@ -39,6 +40,7 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
   showSearch = true,
   containerStyle,
   isMultiSelect = false,
+  onSearch, // Added for search
 }) => {
   const [searchText, setSearchText] = useState('');
 
@@ -48,15 +50,26 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
     return isCustomeSelectorDataOption(item) ? item.name : item.title;
   };
 
-  const filteredData = data.filter(item =>
-    getDisplayName(item).toLowerCase().includes(searchText.toLowerCase()),
-  );
+  // Remove local filtering if onSearch is provided, else filter locally
+  const filteredData =
+    typeof onSearch === 'function'
+      ? data
+      : data.filter(item =>
+          getDisplayName(item).toLowerCase().includes(searchText.toLowerCase()),
+        );
 
   const handleItemPress = (dataId: number) => {
     if (isMultiSelect) {
       onDataSelect(dataId);
     } else {
       onDataSelect(dataId);
+    }
+  };
+
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
+    if (onSearch) {
+      onSearch(text);
     }
   };
 
@@ -117,7 +130,7 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
               placeholder={searchPlaceholder}
               placeholderTextColor={COLORS.searchbartext}
               value={searchText}
-              onChangeText={setSearchText}
+              onChangeText={handleSearchTextChange}
             />
           </View>
           <View style={styles.separator} />

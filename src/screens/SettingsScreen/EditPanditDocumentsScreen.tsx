@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, StatusBar, ScrollView, StyleSheet} from 'react-native';
+import {View, StatusBar, ScrollView, StyleSheet, Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
 import CustomHeader from '../../components/CustomHeader';
@@ -309,93 +309,100 @@ const EditPanditDocumentsScreen: React.FC = () => {
         backgroundColor={COLORS.primaryBackground}
       />
       <CustomHeader title="Documents" showBackButton={true} />
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}>
-        <View style={styles.formContainer}>
-          <DocumentSection
-            label="ID Proof (Aadhar Card)"
-            buttonText="UPLOAD ID PROOF"
-            isRequired={true}
-            isUploaded={uploadedDocuments.idProof}
-            documentType="idProof"
-            onUpload={() => handleDocumentUpload('idProof')}
-            documentName={documentInfo.idProof.name}
-            documentUrl={documentInfo.idProof.url}
-            isLoading={loadingDocument === 'idProof'}
-            onRemove={() => handleRemoveDocument('idProof')}
-            showRemove={
-              !!(
-                uploadedDocuments.idProof &&
-                (documentInfo.idProof.url || documentInfo.idProof.file)
-              )
-            }
-          />
-          <DocumentSection
-            label="PAN Card"
-            buttonText="UPLOAD PAN CARD"
-            isRequired={true}
-            isUploaded={uploadedDocuments.panCard}
-            documentType="panCard"
-            onUpload={() => handleDocumentUpload('panCard')}
-            documentName={documentInfo.panCard.name}
-            documentUrl={documentInfo.panCard.url}
-            isLoading={loadingDocument === 'panCard'}
-            onRemove={() => handleRemoveDocument('panCard')}
-            showRemove={
-              !!(
-                uploadedDocuments.panCard &&
-                (documentInfo.panCard.url || documentInfo.panCard.file)
-              )
-            }
-          />
-          <DocumentSection
-            label="Electricity Bill (Optional)"
-            buttonText="UPLOAD ELECTRICITY BILL"
-            isRequired={false}
-            isUploaded={uploadedDocuments.electricityBill}
-            documentType="electricityBill"
-            onUpload={() => handleDocumentUpload('electricityBill')}
-            documentName={documentInfo.electricityBill.name}
-            documentUrl={documentInfo.electricityBill.url}
-            isLoading={loadingDocument === 'electricityBill'}
-            onRemove={() => handleRemoveDocument('electricityBill')}
-            showRemove={
-              !!(
-                uploadedDocuments.electricityBill &&
-                (documentInfo.electricityBill.url ||
-                  documentInfo.electricityBill.file)
-              )
-            }
-          />
-          <DocumentSection
-            label="Certifications"
-            buttonText="UPLOAD CERTIFICATIONS"
-            isRequired={false}
-            isUploaded={uploadedDocuments.certifications}
-            documentType="certifications"
-            onUpload={() => handleDocumentUpload('certifications')}
-            documentName={documentInfo.certifications.name}
-            documentUrl={documentInfo.certifications.url}
-            isLoading={loadingDocument === 'certifications'}
-            onRemove={() => handleRemoveDocument('certifications')}
-            showRemove={
-              !!(
-                uploadedDocuments.certifications &&
-                (documentInfo.certifications.url ||
-                  documentInfo.certifications.file)
-              )
-            }
+      <View style={styles.content}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}>
+          <View style={styles.formContainer}>
+            <DocumentSection
+              label="ID Proof (Aadhar Card)"
+              buttonText="UPLOAD ID PROOF"
+              isRequired={true}
+              isUploaded={uploadedDocuments.idProof}
+              documentType="idProof"
+              onUpload={() => handleDocumentUpload('idProof')}
+              documentName={documentInfo.idProof.name}
+              documentUrl={documentInfo.idProof.url}
+              isLoading={loadingDocument === 'idProof'}
+              onRemove={() => handleRemoveDocument('idProof')}
+              showRemove={
+                !!(
+                  uploadedDocuments.idProof &&
+                  (documentInfo.idProof.url || documentInfo.idProof.file)
+                )
+              }
+            />
+            <DocumentSection
+              label="PAN Card"
+              buttonText="UPLOAD PAN CARD"
+              isRequired={true}
+              isUploaded={uploadedDocuments.panCard}
+              documentType="panCard"
+              onUpload={() => handleDocumentUpload('panCard')}
+              documentName={documentInfo.panCard.name}
+              documentUrl={documentInfo.panCard.url}
+              isLoading={loadingDocument === 'panCard'}
+              onRemove={() => handleRemoveDocument('panCard')}
+              showRemove={
+                !!(
+                  uploadedDocuments.panCard &&
+                  (documentInfo.panCard.url || documentInfo.panCard.file)
+                )
+              }
+            />
+            <DocumentSection
+              label="Electricity Bill (Optional)"
+              buttonText="UPLOAD ELECTRICITY BILL"
+              isRequired={false}
+              isUploaded={uploadedDocuments.electricityBill}
+              documentType="electricityBill"
+              onUpload={() => handleDocumentUpload('electricityBill')}
+              documentName={documentInfo.electricityBill.name}
+              documentUrl={documentInfo.electricityBill.url}
+              isLoading={loadingDocument === 'electricityBill'}
+              onRemove={() => handleRemoveDocument('electricityBill')}
+              showRemove={
+                !!(
+                  uploadedDocuments.electricityBill &&
+                  (documentInfo.electricityBill.url ||
+                    documentInfo.electricityBill.file)
+                )
+              }
+            />
+            <DocumentSection
+              label="Certifications"
+              buttonText="UPLOAD CERTIFICATIONS"
+              isRequired={false}
+              isUploaded={uploadedDocuments.certifications}
+              documentType="certifications"
+              onUpload={() => handleDocumentUpload('certifications')}
+              documentName={documentInfo.certifications.name}
+              documentUrl={documentInfo.certifications.url}
+              isLoading={loadingDocument === 'certifications'}
+              onRemove={() => handleRemoveDocument('certifications')}
+              showRemove={
+                !!(
+                  uploadedDocuments.certifications &&
+                  (documentInfo.certifications.url ||
+                    documentInfo.certifications.file)
+                )
+              }
+            />
+          </View>
+        </ScrollView>
+        <View
+          style={[
+            styles.bottomButtonContainer,
+            {paddingBottom: insets.bottom || moderateScale(16)},
+          ]}>
+          <PrimaryButton
+            title={t('update')}
+            onPress={handleSubmit}
+            disabled={isSubmitting || !!loadingDocument}
+            style={styles.submitButton}
           />
         </View>
-        <PrimaryButton
-          title={t('update')}
-          onPress={handleSubmit}
-          disabled={isSubmitting || !!loadingDocument}
-          style={styles.submitButton}
-        />
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -410,9 +417,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
+    overflow: 'hidden',
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: moderateScale(24), // To ensure content is not hidden behind button
   },
   formContainer: {
     paddingHorizontal: scale(20),
@@ -420,7 +429,13 @@ const styles = StyleSheet.create({
   submitButton: {
     minHeight: moderateScale(46),
     marginHorizontal: scale(20),
-    marginTop: verticalScale(24),
+    // marginTop: verticalScale(24), // Remove marginTop, handled by bottomButtonContainer
+  },
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: scale(0),
+    paddingTop: moderateScale(12),
+    // paddingBottom handled inline for safe area
   },
 });
 

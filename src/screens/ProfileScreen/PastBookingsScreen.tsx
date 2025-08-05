@@ -168,7 +168,7 @@ const PastPujaScreen: React.FC = () => {
                   />
                 }
                 ListEmptyComponent={
-                  <View style={{alignItems: 'center', marginTop: 40}}>
+                  <View style={{alignItems: 'center', margin: 20}}>
                     <Text
                       style={{
                         color: COLORS.gray,

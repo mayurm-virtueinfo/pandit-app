@@ -63,6 +63,10 @@ const EditAreaScreen: React.FC = () => {
   const [areas, setAreas] = useState<CustomeSelectorDataOption[]>([]);
   const [selectedAreaIds, setSelectedAreaIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [filteredAreas, setFilteredAreas] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
 
   const {selectCityId, area} = route.params || {};
   // area is expected to be AreaItem[] or undefined
@@ -85,6 +89,19 @@ const EditAreaScreen: React.FC = () => {
     fetchAreaData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectCityId]);
+
+  useEffect(() => {
+    // Filter areas based on searchText
+    if (searchText.trim() === '') {
+      setFilteredAreas(areas);
+    } else {
+      setFilteredAreas(
+        areas.filter(area =>
+          area.name.toLowerCase().includes(searchText.trim().toLowerCase()),
+        ),
+      );
+    }
+  }, [areas, searchText]);
 
   const fetchAreaData = async () => {
     setIsLoading(true);
@@ -140,6 +157,10 @@ const EditAreaScreen: React.FC = () => {
     }
   };
 
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+  };
+
   return (
     <View style={styles.container}>
       <CustomeLoader loading={isLoading} />
@@ -167,20 +188,33 @@ const EditAreaScreen: React.FC = () => {
                   {t('select_area_description')}
                 </Text>
                 <CustomeMultiSelector
-                  data={areas}
+                  data={filteredAreas}
                   selectedDataIds={selectedAreaIds}
                   onDataSelect={handleAreaSelect}
                   searchPlaceholder={t('search_area')}
                   isMultiSelect={true}
+                  onSearch={handleSearch}
                 />
-                <PrimaryButton
-                  title={t('update')}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={selectedAreaIds.length === 0}
-                />
+                {filteredAreas.length === 0 && searchText.trim() !== '' && (
+                  <Text style={styles.noResultText}>
+                    {t('no_area_found') || 'No area found'}
+                  </Text>
+                )}
               </View>
             </ScrollView>
+            {/* Button fixed at bottom */}
+            <View
+              style={[
+                styles.bottomButtonContainer,
+                {paddingBottom: insets.bottom || moderateScale(16)},
+              ]}>
+              <PrimaryButton
+                title={t('update')}
+                onPress={handleNext}
+                style={styles.nextButton}
+                disabled={selectedAreaIds.length === 0}
+              />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -207,12 +241,13 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
-    paddingBottom: moderateScale(20),
+    // Remove bottom padding here, handled by bottomButtonContainer
+    paddingBottom: 0,
   },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    flex: 1,
+    // Remove flex: 1 to allow ScrollView to size naturally
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -228,6 +263,19 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     height: moderateScale(46),
+    marginTop: moderateScale(0),
+  },
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+    paddingTop: moderateScale(8),
+    // paddingBottom handled inline for safe area
+  },
+  noResultText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(15),
+    fontFamily: Fonts.Sen_Regular,
+    textAlign: 'center',
     marginTop: moderateScale(24),
   },
 });

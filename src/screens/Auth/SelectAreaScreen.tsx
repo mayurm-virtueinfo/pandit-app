@@ -3,14 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {COLORS, wp, hp} from '../../theme/theme';
+import {COLORS, wp} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -56,6 +55,10 @@ const SelectAreaScreen: React.FC = () => {
   const [areas, setAreas] = useState<CustomeSelectorDataOption[]>([]);
   const [selectedAreaIds, setSelectedAreaIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [filteredAreas, setFilteredAreas] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
 
   const {
     phoneNumber,
@@ -77,6 +80,17 @@ const SelectAreaScreen: React.FC = () => {
     fetchAreaData();
   }, [selectCityId]);
 
+  useEffect(() => {
+    if (searchText.trim() === '') {
+      setFilteredAreas(areas);
+    } else {
+      const lower = searchText.toLowerCase();
+      setFilteredAreas(
+        areas.filter(area => area.name.toLowerCase().includes(lower)),
+      );
+    }
+  }, [searchText, areas]);
+
   const fetchAreaData = async () => {
     setIsLoading(true);
     try {
@@ -87,6 +101,7 @@ const SelectAreaScreen: React.FC = () => {
         name: item.name,
       }));
       setAreas(mappedData);
+      setFilteredAreas(mappedData);
     } catch (error: any) {
       showErrorToast(error?.message);
     } finally {
@@ -126,7 +141,8 @@ const SelectAreaScreen: React.FC = () => {
     }
   };
 
-  console.log('selectedAreaIds :: ', selectedAreaIds);
+  // For debugging
+  // console.log('selectedAreaIds :: ', selectedAreaIds);
 
   const buttonText = action === 'Update' ? t('update') : t('next');
 
@@ -149,33 +165,39 @@ const SelectAreaScreen: React.FC = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
           <View style={styles.contentContainer}>
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContentContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled">
-              <View style={styles.mainContent}>
-                <Text style={styles.selectCityTitle}>{t('select_area')}</Text>
-                <Text style={styles.description}>
-                  {t('select_area_description')}
+            <View style={styles.mainContent}>
+              <Text style={styles.selectCityTitle}>{t('select_area')}</Text>
+              <Text style={styles.description}>
+                {t('select_area_description')}
+              </Text>
+              <CustomeMultiSelector
+                data={filteredAreas}
+                selectedDataIds={selectedAreaIds}
+                onDataSelect={handleAreaSelect}
+                searchPlaceholder={t('search_area')}
+                isMultiSelect={true}
+                onSearch={setSearchText}
+              />
+              {filteredAreas.length === 0 && searchText.trim() !== '' && (
+                <Text style={styles.noDataText}>
+                  {t('no_area_found') || 'No area found'}
                 </Text>
-                <CustomeMultiSelector
-                  data={areas}
-                  selectedDataIds={selectedAreaIds}
-                  onDataSelect={handleAreaSelect}
-                  searchPlaceholder={t('search_area')}
-                  isMultiSelect={true}
-                />
-                <PrimaryButton
-                  title={buttonText}
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                  disabled={selectedAreaIds.length === 0}
-                />
-              </View>
-            </ScrollView>
+              )}
+            </View>
           </View>
         </KeyboardAvoidingView>
+        <View
+          style={[
+            styles.buttonContainer,
+            {paddingBottom: insets.bottom + moderateScale(12)},
+          ]}>
+          <PrimaryButton
+            title={buttonText}
+            onPress={handleNext}
+            style={styles.nextButton}
+            disabled={selectedAreaIds.length === 0}
+          />
+        </View>
       </View>
     </View>
   );
@@ -195,13 +217,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContentContainer: {
-    flexGrow: 1,
-    paddingBottom: moderateScale(20),
-  },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
@@ -219,9 +234,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     marginBottom: moderateScale(18),
   },
+  noDataText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(15),
+    fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(16),
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+    paddingTop: moderateScale(8),
+  },
   nextButton: {
     height: moderateScale(46),
-    marginTop: moderateScale(24),
+    marginTop: 0,
   },
 });
 
