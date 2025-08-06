@@ -1,5 +1,5 @@
 // import axios from 'axios';
-import {AxiosRequestConfig} from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   GET_AREA,
@@ -27,6 +27,7 @@ import ApiEndpoints, {
   POST_CONVERSATION,
   POST_LOGOUT,
   POST_PANDIT_AVAILABILITY,
+  POST_RATE_USER,
   POST_REFRESH_TOKEN,
   POST_REGISTER_FCM,
   POST_SIGNIN,
@@ -285,7 +286,13 @@ export interface EditPanditDocuments {
 }
 
 export interface postConversations {
-  other_user_id: number;
+  booking_id: number;
+}
+
+export interface postRateUser {
+  booking: number,
+  rating: number,
+  review: string
 }
 
 export const apiService = {
@@ -335,10 +342,10 @@ export const apiService = {
   getPujaListData: async (): Promise<PujaListDataResponse> => {
     try {
       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || {recommendedPuja: [], pujaList: []};
+      return response.data?.record || { recommendedPuja: [], pujaList: [] };
     } catch (error) {
       console.error('Error fetching puja list data:', error);
-      return {pujaList: []};
+      return { pujaList: [] };
     }
   },
 
@@ -1040,8 +1047,8 @@ export const postConversations = (data: postConversations): Promise<any> => {
   });
 };
 
-export const getMessageHistory = (uuid: string) => {
-  let apiUrl = GET_MESSAGE_HISTORY.replace('{uuid}', uuid);
+export const getMessageHistory = (bookingID: string) => {
+  let apiUrl = GET_MESSAGE_HISTORY.replace('{bookingID}', bookingID);
   return new Promise((resolve, reject) => {
     apiDev
       .get(apiUrl)
@@ -1062,12 +1069,27 @@ export const postRegisterFCMToken = (
   let apiUrl = POST_REGISTER_FCM;
   return new Promise((resolve, reject) => {
     apiDev
-      .post(apiUrl, {device_token, app_type})
+      .post(apiUrl, { device_token, app_type })
       .then(response => {
         resolve(response.data);
       })
       .catch(error => {
         console.error('Error in registering fcm token :: ', error);
+        reject(error);
+      });
+  });
+};
+
+export const postRateUser = (data: postRateUser): Promise<any> => {
+  const apiUrl = POST_RATE_USER;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error post rate user api:', error.response.data);
         reject(error);
       });
   });

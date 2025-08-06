@@ -282,7 +282,7 @@ const DocumentUploadScreen: React.FC = () => {
 
     try {
       const response = await postSignUp(formData);
-
+      console.log('response :::::::::::::::::::::::::::::>', response);
       if (response && response?.user && response?.user?.id) {
         await AsyncStorage.setItem(
           AppConstant.USER_ID,
@@ -449,8 +449,6 @@ const styles = StyleSheet.create({
   },
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
-    borderTopWidth: 1,
-    borderColor: COLORS.lightGray || '#eee',
     paddingTop: verticalScale(8),
     // paddingBottom: verticalScale(16), // Set dynamically with insets
   },

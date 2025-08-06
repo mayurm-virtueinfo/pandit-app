@@ -24,17 +24,22 @@ import CustomHeader from '../../components/CustomHeader';
 import PrimaryButton from '../../components/PrimaryButton';
 import Fonts from '../../theme/fonts';
 
+// Import the postRateUser API
+import {postRateUser} from '../../api/apiService';
+import {useCommonToast} from '../../common/CommonToast';
+
 const RateYourExperienceScreen: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [photos, setPhotos] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   type ScreenNavigationProp = StackNavigationProp<
     HomeStackParamList,
     'RateYourExperienceScreen'
   >;
   const {t} = useTranslation();
-
+  const {showErrorToast, showSuccessToast} = useCommonToast();
   const inset = useSafeAreaInsets();
 
   const navigation = useNavigation<ScreenNavigationProp>();
@@ -60,9 +65,7 @@ const RateYourExperienceScreen: React.FC = () => {
         compressImageQuality: 0.8,
         cropping: false,
       });
-      // images can be an array or a single object depending on multiple
       let selectedImages = Array.isArray(images) ? images : [images];
-      // Map to a consistent format with uri for Image
       const formatted = selectedImages.map(img => ({
         uri: Platform.OS === 'ios' ? img.sourceURL || img.path : img.path,
         mime: img.mime,
@@ -70,10 +73,9 @@ const RateYourExperienceScreen: React.FC = () => {
         height: img.height,
         size: img.size,
       }));
-      setPhotos(prev => [...prev, ...formatted].slice(0, 10)); // Limit to 10 photos
+      setPhotos(prev => [...prev, ...formatted].slice(0, 10));
     } catch (error: any) {
       if (error?.code !== 'E_PICKER_CANCELLED') {
-        // Optionally handle error
         console.error('Failed to pick images:', error);
       }
     }
@@ -83,9 +85,10 @@ const RateYourExperienceScreen: React.FC = () => {
     setPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Pandit review for user side: user is reviewing the pandit
+  // Call postRateUser API for rating
   const handleSubmit = async () => {
     try {
+      setLoading(true);
       // Get booking id and pandit id from completePujaData or params
       const bookingId = completePujaData?.id;
       const panditId = panditjiData?.id || selectManualPanitData?.id || null;
@@ -93,24 +96,29 @@ const RateYourExperienceScreen: React.FC = () => {
       const reviewText = feedback;
       const photoUris = photos.map(p => p.uri);
 
-      // TODO: Call your API to submit the review, e.g.:
-      // await postPanditReview({
-      //   booking: bookingId,
-      //   pandit: panditId,
-      //   rating: ratingValue,
-      //   review: reviewText,
-      //   photos: photoUris,
-      // });
+      // Prepare payload for postRateUser
+      const payload: any = {
+        booking: bookingId,
+        // pandit: panditId,
+        rating: ratingValue,
+        review: reviewText,
+        // photos: photoUris,
+      };
 
-      // Reset state after submit
+      await postRateUser(payload);
+
       setRating(0);
       setFeedback('');
       setPhotos([]);
-      // Optionally navigate or show a success message
-      // navigation.navigate('UserPujaDetailsScreen', {id: bookingId});
-    } catch (error) {
-      // Optionally handle error, e.g. show a toast
+      showSuccessToast(t('rate_submit_successfully'));
+      navigation.goBack();
+    } catch (error: any) {
+      showErrorToast(
+        error?.response?.data?.message || t('something_went_wrong'),
+      );
       console.error('Failed to submit rating:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,6 +140,18 @@ const RateYourExperienceScreen: React.FC = () => {
     );
   };
 
+  // Extract pooja image and name from completePujaData for the card
+  const poojaImage =
+    completePujaData?.pooja_image_url ||
+    panditjiData?.profile_img ||
+    selectManualPanitData?.image ||
+    'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160';
+
+  const poojaName = completePujaData?.pooja_name || 'For family well-being';
+  const poojaDate = completePujaData?.booking_date
+    ? `Date: ${completePujaData.booking_date}`
+    : '';
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <CustomHeader title={t('rate_experience')} showBackButton={true} />
@@ -142,15 +162,12 @@ const RateYourExperienceScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         <View style={styles.mainContent}>
-          {/* Pandit Details Card */}
+          {/* Puja Details Card */}
           <View style={styles.panditCard}>
             <View style={styles.panditImageContainer}>
               <Image
                 source={{
-                  uri:
-                    panditjiData?.profile_img ||
-                    selectManualPanitData?.image ||
-                    'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
+                  uri: poojaImage,
                 }}
                 style={styles.panditImage}
                 resizeMode="cover"
@@ -158,16 +175,12 @@ const RateYourExperienceScreen: React.FC = () => {
             </View>
             <View style={styles.panditInfo}>
               <Text style={styles.panditName}>
-                {panditjiData?.full_name || selectManualPanitData?.name}
+                {completePujaData?.booking_user_name ||
+                  panditjiData?.full_name ||
+                  selectManualPanitData?.name}
               </Text>
-              <Text style={styles.panditPurpose}>
-                {completePujaData?.pooja_name || 'For family well-being'}
-              </Text>
-              <Text style={styles.panditPurpose}>
-                {completePujaData?.booking_date
-                  ? `Date: ${completePujaData.booking_date}`
-                  : ''}
-              </Text>
+              <Text style={styles.panditPurpose}>{poojaName}</Text>
+              <Text style={styles.panditPurpose}>{poojaDate}</Text>
               {/* <PrimaryButton
                 title={t('view_details')}
                 onPress={() =>
@@ -193,7 +206,7 @@ const RateYourExperienceScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Pandit can add multiple photos */}
+          {/* Add multiple photos */}
           <View style={styles.photoSection}>
             <Text style={styles.photoSectionTitle}>
               {t('add_photos_optional') || 'Add Photos (optional)'}
@@ -251,6 +264,7 @@ const RateYourExperienceScreen: React.FC = () => {
             onPress={handleSubmit}
             style={styles.buttonContainer}
             textStyle={styles.buttonText}
+            disabled={loading}
           />
         </View>
       </ScrollView>

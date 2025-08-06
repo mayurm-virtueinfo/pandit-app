@@ -117,7 +117,7 @@ const ProfileScreen = () => {
         <Image
           source={{
             uri:
-              // profileData.profile_img ||
+              profileData.profile_img ||
               'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy3IRQZYt7VgvYzxEqdhs8R6gNE6cYdeJueyHS-Es3MXb9XVRQQmIq7tI0grb8GTlzBRU&usqp=CAU',
           }}
           style={styles.profileImage}

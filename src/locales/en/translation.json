@@ -8,8 +8,8 @@
   "home": "Home",
   "upcoming_puja": "Upcoming Pooja's",
   "completed_puja": "Completed Pooja's",
-  "no_upcoming_puja": "No Upcoming Pooja",
-  "no_completed_puja": "No Completed Pooja",
+  "no_upcoming_puja": "No upcoming pooja",
+  "no_completed_puja": "No completed pooja",
   "complete_puja": "COMPLETE Pooja",
   "code_verification": "Code Verification",
   "Please_enter_the_4-digit": "Please enter the 4-digit user code\nto start the Pooja.",
@@ -207,8 +207,8 @@
   "choose_from_gallery": "Choose from gallery",
   "select_profile_picture": "Select profile picture",
   "choose_an_option": "Choose an option",
-  "no_pending_puja": "No Pending Pooja",
-  "pending_puja": "Pending Pooja's",
+  "no_pending_puja": "No booking found.",
+  "pending_puja": "Waiting for approval",
   "accept_puja_title": "Accept Pooja",
   "reject_puja_title": "Reject Pooja",
   "accept_puja_message": "Are you sure you want to accept this Pooja ?",
@@ -254,5 +254,6 @@
   "no_city_found": "No city found.",
   "no_area_found": "No area found.",
   "no_language_found": "No language found.",
-  "no_pooja_found": "No Pooja found."
+  "no_pooja_found": "No pooja found.",
+  "rate_submit_successfully": "Rating submitted successfully."
 }

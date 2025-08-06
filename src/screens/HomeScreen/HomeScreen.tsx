@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -7,27 +7,22 @@ import {
   Image,
   Dimensions,
   StatusBar,
-  ActivityIndicator,
   TouchableOpacity,
-  Button,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
+import {moderateScale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 import {
   getPandingPuja,
   getUpcomingPuja,
   getCompletedPuja,
-  postUpdateStatus,
   getInProgressPuja,
 } from '../../api/apiService';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
-import CustomModal from '../../components/CustomModal';
-import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 
 const {width: screenWidth} = Dimensions.get('window');
@@ -57,30 +52,19 @@ interface InProgressPujaItem {
   // Add other fields as needed from the API response
 }
 
-type ModalType = 'accept' | 'reject' | null;
-
 const HomeScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<HomeStackParamList>();
   const inset = useSafeAreaInsets();
-  const {showErrorToast} = useCommonToast();
   const [upcomingPujas, setUpcomingPujas] = useState<PujaItem[]>([]);
   const [completedPujas, setCompletedPujas] = useState<PujaItem[]>([]);
   const [pendingPujas, setPendingPujas] = useState<PendingPujaItem[]>([]);
   const [inProgressPujas, setInProgressPujas] = useState<InProgressPujaItem[]>(
     [],
   );
-  console.log('pendingPujas', pendingPujas);
   const [loading, setLoading] = useState<boolean>(true);
   const [pendingLoading, setPendingLoading] = useState<boolean>(true);
   const [inProgressLoading, setInProgressLoading] = useState<boolean>(true);
-  // Modal state
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [modalType, setModalType] = useState<ModalType>(null);
-  const [selectedPendingPuja, setSelectedPendingPuja] =
-    useState<PendingPujaItem | null>(null);
-  // For accept/reject loading
-  const [actionLoading, setActionLoading] = useState<boolean>(false);
 
   // Refactored: fetchAllPujas as a stable function for reuse
   const fetchAllPujas = useCallback(async () => {
@@ -172,75 +156,8 @@ const HomeScreen: React.FC = () => {
   useFocusEffect(
     React.useCallback(() => {
       fetchAllPujas();
-    }, []),
+    }, [fetchAllPujas]),
   );
-
-  // Modal handlers
-  const openModal = (type: ModalType, item: PendingPujaItem) => {
-    setModalType(type);
-    setSelectedPendingPuja(item);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    setModalType(null);
-    setSelectedPendingPuja(null);
-    setActionLoading(false);
-  };
-
-  const handleAccept = (item: PendingPujaItem) => {
-    openModal('accept', item);
-  };
-
-  const handleReject = (item: PendingPujaItem) => {
-    openModal('reject', item);
-  };
-  // After accept/reject, set loading and reload all API
-  const confirmModalAction = async () => {
-    if (!selectedPendingPuja) return;
-    setActionLoading(true);
-    setLoading(true); // Show loading page
-    setPendingLoading(true);
-    setInProgressLoading(true);
-    try {
-      const status =
-        modalType === 'accept'
-          ? 'accept'
-          : modalType === 'reject'
-          ? 'reject'
-          : '';
-      await postUpdateStatus({
-        booking_id: selectedPendingPuja.id,
-        action: status,
-      });
-      // Instead of just removing from pending, reload all data
-      await fetchAllPujas();
-    } catch (error) {
-      // Extract error message from API response
-      let errorMsg = 'Something went wrong';
-      if (error?.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      } else if (error?.message) {
-        errorMsg = error.message;
-      }
-      showErrorToast(errorMsg);
-      // setPendingPujas([]);
-      // setUpcomingPujas([]);
-      // setCompletedPujas([]);
-      // setInProgressPujas([]);
-      setLoading(false);
-      setActionLoading(false);
-      setPendingLoading(false);
-      setInProgressLoading(false);
-    } finally {
-      setLoading(false);
-      setActionLoading(false);
-      setPendingLoading(false);
-      setInProgressLoading(false);
-      closeModal();
-    }
-  };
 
   const renderPujaItem = (item: PujaItem, isLast: boolean) => (
     <TouchableOpacity
@@ -284,7 +201,6 @@ const HomeScreen: React.FC = () => {
           completePujaData: item,
         })
       }>
-      console.log("item",item)
       <View style={styles.pujaItem}>
         <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
@@ -298,8 +214,13 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
+  // Pending Puja: No accept/reject, just navigate to WaitingApprovalPujaScreen
   const renderPendingPujaItem = (item: PendingPujaItem, isLast: boolean) => (
-    <View key={item.id}>
+    <TouchableOpacity
+      key={item.id}
+      onPress={() =>
+        navigation.navigate('WaitingApprovalPujaScreen', {id: item.id})
+      }>
       <View style={styles.pujaItem}>
         <View style={styles.pujaContent}>
           <View style={{flexDirection: 'row'}}>
@@ -315,28 +236,10 @@ const HomeScreen: React.FC = () => {
                 }>{`Scheduled on ${item.when_is_pooja}`}</Text>
             </View>
           </View>
-          <View style={styles.pendingButtonRow}>
-            <TouchableOpacity
-              style={[styles.pendingButton, {backgroundColor: COLORS.success}]}
-              onPress={() => handleAccept(item)}
-              disabled={actionLoading}>
-              <Text style={styles.pendingButtonText}>
-                {t('accept') || 'Accept'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.pendingButton, {backgroundColor: COLORS.error}]}
-              onPress={() => handleReject(item)}
-              disabled={actionLoading}>
-              <Text style={styles.pendingButtonText}>
-                {t('reject') || 'Reject'}
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
       {!isLast && <View style={styles.separator} />}
-    </View>
+    </TouchableOpacity>
   );
 
   // Render In-Progress Puja Item
@@ -480,43 +383,6 @@ const HomeScreen: React.FC = () => {
           </ScrollView>
         )}
       </View>
-      {/* Accept/Reject Modal */}
-      <CustomModal
-        visible={modalVisible}
-        title={
-          modalType === 'accept'
-            ? t('accept_puja_title') || 'Accept Puja'
-            : modalType === 'reject'
-            ? t('reject_puja_title') || 'Reject Puja'
-            : ''
-        }
-        message={
-          modalType === 'accept'
-            ? t('accept_puja_message', {
-                pujaName: selectedPendingPuja
-                  ? `: ${selectedPendingPuja.pooja_name}`
-                  : '',
-              })
-            : modalType === 'reject'
-            ? t('reject_puja_message', {
-                pujaName: selectedPendingPuja
-                  ? `: ${selectedPendingPuja.pooja_name}`
-                  : '',
-              })
-            : ''
-        }
-        confirmText={
-          modalType === 'accept'
-            ? t('accept') || 'Accept'
-            : modalType === 'reject'
-            ? t('reject') || 'Reject'
-            : ''
-        }
-        cancelText={t('cancel') || 'Cancel'}
-        onConfirm={confirmModalAction}
-        onCancel={closeModal}
-        loading={actionLoading}
-      />
     </View>
   );
 };

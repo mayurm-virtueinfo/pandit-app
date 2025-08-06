@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -14,25 +14,17 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import Octicons from 'react-native-vector-icons/Octicons';
 import UserCustomHeader from '../../components/CustomHeader';
-import CodeVerificationModal from '../../components/CodeVerificationModal';
 import PujaItemsModal from '../../components/PujaItemsModal';
+import CustomModal from '../../components/CustomModal'; // Import the custom modal
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import {moderateScale, verticalScale} from 'react-native-size-matters';
 import PrimaryButton from '../../components/PrimaryButton';
 import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
 import {useTranslation} from 'react-i18next';
-import {
-  getUpcomingPujaDetails,
-  postCompetePuja,
-  postStartPuja,
-  getInProgressPuja,
-  postConversations,
-  getMessageHistory,
-} from '../../api/apiService';
 import {useRoute, useFocusEffect} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useCommonToast} from '../../common/CommonToast';
+import {getPandingPuja, postUpdateStatus} from '../../api/apiService';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -84,190 +76,48 @@ type PujaDetailsType = {
   };
 };
 
-const STORAGE_KEY_PREFIX = 'puja_status_';
-
-const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
+const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
   const {t} = useTranslation();
   const route = useRoute();
-  const {id, progress} = route.params as any;
+  const {id} = route.params as any;
   const inset = useSafeAreaInsets();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [pujaStarted, setPujaStarted] = useState(false);
-  const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [isPujaItemsModalVisible, setIsPujaItemsModalVisible] = useState(false);
   const [pujaDetails, setPujaDetails] = useState<PujaDetailsType | null>(null);
-  const [progressPujaDetails, setProgressPujaDetails] =
-    useState<PujaDetailsType | null>(null);
-  const [enteredPin, setEnteredPin] = useState<string>('');
+  const [loading, setLoading] = useState(false);
   const {showSuccessToast, showErrorToast} = useCommonToast();
+  console.log('pujaDetails', pujaDetails);
+  // Modal state for approval/reject
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<'approve' | 'reject' | null>(null);
 
-  const getBookingId = () => {
-    if (progress) {
-      return progressPujaDetails?.id;
-    }
-    return pujaDetails?.id || id;
-  };
-
-  // Fetch Pooja details
+  // Fetch Waiting Approval Pooja details using getPandingPuja
   const fetchPujaDetails = useCallback(async () => {
+    setLoading(true);
     try {
-      let response;
-      if (progress) {
-        response = await getInProgressPuja();
-        const data = Array.isArray(response)
-          ? response[0]
-          : response?.data?.[0] || response?.[0];
-        console.log('Data', data);
-        if (data) {
-          setProgressPujaDetails(data);
-        }
-      } else {
-        response = await getUpcomingPujaDetails(id);
-        const data = Array.isArray(response)
-          ? response[0]
-          : response?.data?.[0] || response?.[0];
-        if (data) {
-          setPujaDetails(data);
-        }
+      const response = await getPandingPuja();
+      // Assume response is either an array or an object with data array
+      const data = Array.isArray(response)
+        ? response[0]
+        : response?.data?.[0] || response?.[0];
+      if (data) {
+        setPujaDetails(data);
       }
     } catch (error) {
-      console.error('Error fetching pooja details:', error);
+      showErrorToast?.('Error fetching pooja details');
+      console.error('Error fetching waiting approval pooja details:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [id, progress]);
+  }, [id, showErrorToast]);
 
-  // Load Pooja started/completed status from AsyncStorage
-  const loadPujaStatus = useCallback(
-    async (bookingId: number | string | undefined) => {
-      if (!bookingId) {
-        setPujaStarted(false);
-        return;
-      }
-      try {
-        const status = await AsyncStorage.getItem(
-          `${STORAGE_KEY_PREFIX}${bookingId}`,
-        );
-        if (status === 'started') {
-          setPujaStarted(true);
-        } else {
-          setPujaStarted(false);
-        }
-      } catch (error) {
-        console.error('Error loading Pooja status from storage:', error);
-      }
-    },
-    [],
-  );
-
-  // Fetch details and status on focus (when coming to this screen)
   useFocusEffect(
     useCallback(() => {
-      let isActive = true;
-      const fetchAll = async () => {
-        await fetchPujaDetails();
-      };
-      fetchAll();
-      return () => {
-        isActive = false;
-      };
-    }, [fetchPujaDetails]),
+      fetchPujaDetails();
+    }, []),
   );
-
-  // When pujaDetails or progressPujaDetails changes, load status
-  useEffect(() => {
-    const bookingId = getBookingId();
-    if (bookingId) {
-      loadPujaStatus(bookingId);
-    }
-  }, [pujaDetails, progressPujaDetails, id, progress, loadPujaStatus]);
-
-  // Call Start Pooja API and store status in AsyncStorage
-  const handleStartPujaApi = async (pin: string) => {
-    const bookingId = pujaDetails?.id || progressPujaDetails?.id;
-    if (!bookingId) {
-      console.error('No booking id found for starting pooja');
-      return;
-    }
-    try {
-      const data = {
-        booking_id: bookingId,
-        pin: pin,
-      };
-      await postStartPuja(data);
-      setPujaStarted(true);
-      await AsyncStorage.setItem(
-        `${STORAGE_KEY_PREFIX}${bookingId}`,
-        'started',
-      );
-    } catch (error: any) {
-      let errorMsg = 'Something went wrong';
-      if (error?.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      } else if (error?.message) {
-        errorMsg = error.message;
-      }
-      showErrorToast(errorMsg);
-      console.error('Error starting pooja:', error);
-    }
-  };
-
-  // Call Complete Pooja API and update status in AsyncStorage
-  const handleCompletePujaApi = async (pin: string) => {
-    const bookingId = progressPujaDetails?.id || pujaDetails?.id;
-    if (!bookingId) {
-      console.error('No booking id found for completing pooja');
-      return;
-    }
-    try {
-      const data = {
-        booking_id: bookingId,
-        pin: pin,
-      };
-      await postCompetePuja(data);
-      setPujaStarted(false);
-      await AsyncStorage.setItem(
-        `${STORAGE_KEY_PREFIX}${bookingId}`,
-        'completed',
-      );
-      navigation?.navigate('PujaSuccessfull');
-    } catch (error: any) {
-      let errorMsg = 'Something went wrong';
-      if (error?.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      } else if (error?.message) {
-        errorMsg = error.message;
-      }
-      showErrorToast(errorMsg);
-      console.error('Error completing pooja:', error);
-    }
-  };
 
   const handleBackPress = () => {
     navigation?.goBack();
-  };
-
-  const handleStartPuja = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleCodeSubmit = (pin: string) => {
-    setEnteredPin(pin);
-    if (isModalVisible) {
-      setIsModalVisible(false);
-      handleStartPujaApi(pin);
-    }
-    if (isCompleteModalVisible) {
-      setIsCompleteModalVisible(false);
-      handleCompletePujaApi(pin);
-    }
-  };
-
-  const handleModalClose = () => {
-    setIsModalVisible(false);
-    setIsCompleteModalVisible(false);
-  };
-
-  const handleCompletePuja = () => {
-    setIsCompleteModalVisible(true);
   };
 
   const handleOpenPujaItemsModal = () => {
@@ -280,24 +130,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // Helper to get address string for display
   const getAddressDisplay = () => {
-    // For progressPujaDetails, prefer location_display, else build from address
-    if (progress && progressPujaDetails) {
-      if (progressPujaDetails.location_display) {
-        return progressPujaDetails.location_display;
-      }
-      if (progressPujaDetails.address) {
-        const {address_line1, city_name} = progressPujaDetails.address;
-        let addressStr = '';
-        if (address_line1) addressStr += address_line1;
-        if (city_name) addressStr += (addressStr ? ', ' : '') + city_name;
-        return addressStr;
-      }
-      // fallback to tirth_place_name
-      if (progressPujaDetails.tirth_place_name) {
-        return progressPujaDetails.tirth_place_name;
-      }
-    }
-    // For pujaDetails (upcoming), fallback to old logic
     if (pujaDetails) {
       if (pujaDetails.address_details?.full_address) {
         return pujaDetails.address_details.full_address;
@@ -305,48 +137,80 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       if (pujaDetails.tirth_place_name) {
         return pujaDetails.tirth_place_name;
       }
+      if (pujaDetails.address) {
+        const {address_line1, city_name} = pujaDetails.address;
+        let addressStr = '';
+        if (address_line1) addressStr += address_line1;
+        if (city_name) addressStr += (addressStr ? ', ' : '') + city_name;
+        return addressStr;
+      }
     }
     return '';
   };
 
-  const handleOnChatClick = async () => {
-    // If Pooja has started, do not allow chat and show a toast
-    if (pujaStarted) {
-      showErrorToast?.(
-        'You cannot chat with the pandit after the pooja has started.',
-      );
-      return;
-    }
+  // Use postUpdateStatus for both approve and reject
+  const handleApprove = async () => {
+    if (!pujaDetails?.id) return;
     try {
-      if (!id) {
-        showErrorToast?.('User information not available for chat');
-        return;
-      }
-
-      const conversationRes = await postConversations({booking_id: id});
-      const conversationData = conversationRes?.data || conversationRes;
-      const conversationUuid =
-        conversationData?.uuid ||
-        conversationData?.data?.uuid ||
-        conversationData?.conversation?.uuid;
-
-      if (!conversationUuid) {
-        showErrorToast?.('Could not start chat. Please try again.');
-        return;
-      }
-
-      navigation.navigate('ChatScreen', {
-        booking_id: id,
-        other_user_name: conversationData.other_participant_name,
-        other_user_image: conversationData.other_participant_profile_img,
-        other_user_phone:
-          conversationData.other_participant_number || '2222222222',
-      });
-    } catch (error) {
-      showErrorToast?.('Failed to start chat. Please try again.');
-      console.error('handleOnChatClick error:', error);
+      setLoading(true);
+      await postUpdateStatus({booking_id: pujaDetails.id, action: 'accept'});
+      showSuccessToast?.('Puja approved successfully');
+      navigation.goBack();
+    } catch (error: any) {
+      showErrorToast?.(error?.response?.data?.message);
+      console.error('Approve error:', error);
+    } finally {
+      setLoading(false);
+      setModalVisible(false);
+      setModalType(null);
     }
   };
+
+  const handleReject = async () => {
+    if (!pujaDetails?.id) return;
+    try {
+      setLoading(true);
+      await postUpdateStatus({booking_id: pujaDetails.id, action: 'reject'});
+      showSuccessToast?.('Puja rejected successfully');
+      navigation.goBack();
+    } catch (error) {
+      showErrorToast?.('Failed to reject puja');
+      console.error('Reject error:', error);
+    } finally {
+      setLoading(false);
+      setModalVisible(false);
+      setModalType(null);
+    }
+  };
+
+  // Open modal for approve/reject
+  const openModal = (type: 'approve' | 'reject') => {
+    setModalType(type);
+    setModalVisible(true);
+  };
+
+  // Modal content
+  const getModalContent = () => {
+    if (modalType === 'approve') {
+      return {
+        title: t('Approve Puja'),
+        message: t('Are you sure you want to approve this puja?'),
+        confirmText: t('Approve'),
+        onConfirm: handleApprove,
+      };
+    }
+    if (modalType === 'reject') {
+      return {
+        title: t('Reject Puja'),
+        message: t('Are you sure you want to reject this puja?'),
+        confirmText: t('Reject'),
+        onConfirm: handleReject,
+      };
+    }
+    return null;
+  };
+
+  const modalContent = getModalContent();
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -357,11 +221,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       />
 
       <UserCustomHeader
-        title={
-          pujaDetails?.pooja_name ||
-          progressPujaDetails?.pooja_name ||
-          'Pooja Details'
-        }
+        title={pujaDetails?.pooja_name || 'Pooja Details'}
         showBackButton
         showBellButton
         onBackPress={handleBackPress}
@@ -377,9 +237,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           contentContainerStyle={styles.scrollContent}>
           <Image
             source={{
-              uri:
-                pujaDetails?.pooja_image_url ||
-                progressPujaDetails?.pooja_image_url,
+              uri: pujaDetails?.pooja_image_url,
             }}
             style={[
               styles.heroImage,
@@ -393,9 +251,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               paddingHorizontal: moderateScale(24),
               paddingTop: verticalScale(24),
             }}>
-            <Text style={styles.pujaTitle}>
-              {pujaDetails?.pooja_name || progressPujaDetails?.pooja_name}
-            </Text>
+            <Text style={styles.pujaTitle}>{pujaDetails?.pooja_name}</Text>
 
             <View style={[styles.detailsCard, THEMESHADOW.shadow]}>
               <View style={styles.detailItem}>
@@ -420,8 +276,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailText}>
-                    {pujaDetails?.when_is_pooja ||
-                      progressPujaDetails?.booking_date}
+                    {pujaDetails?.when_is_pooja || pujaDetails?.booking_date}
                   </Text>
                 </View>
               </View>
@@ -436,8 +291,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailText}>
-                    {pujaDetails?.muhurat_time ||
-                      progressPujaDetails?.muhurat_time}
+                    {pujaDetails?.muhurat_time}
                   </Text>
                 </View>
               </View>
@@ -469,7 +323,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   <Image
                     source={{
                       uri:
-                        progressPujaDetails?.user_info?.profile_img_url ||
+                        pujaDetails?.user_info?.profile_img_url ||
                         'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=80',
                     }}
                     style={styles.priestImage}
@@ -478,95 +332,60 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 </View>
                 <Text style={styles.priestName}>
                   {pujaDetails?.booking_user_name ||
-                    progressPujaDetails?.user_info?.full_name}
+                    pujaDetails?.user_info?.full_name}
                 </Text>
-                <TouchableOpacity
-                  onPress={handleOnChatClick}
-                  style={styles.chatButton}
-                  disabled={pujaStarted}>
-                  <Image
-                    source={{
-                      uri: 'https://api.builder.io/api/v1/image/assets/TEMP/4c01dc3358caeee996c8d4195776dbf1f8045f61?width=40',
-                    }}
-                    style={[styles.chatIcon, pujaStarted && {opacity: 0.5}]}
-                  />
-                </TouchableOpacity>
               </View>
-              {pujaStarted && (
-                <Text
-                  style={{
-                    color: COLORS.error,
-                    marginTop: 8,
-                    fontSize: moderateScale(12),
-                  }}>
-                  {t(
-                    'You cannot chat with the {{name}} after the pooja has started.',
-                    {
-                      name:
-                        pujaDetails?.booking_user_name ||
-                        progressPujaDetails?.user_info?.full_name ||
-                        '',
-                    },
-                  )}
-                </Text>
-              )}
             </View>
 
             <View style={[styles.pricingCard, THEMESHADOW.shadow]}>
               <View style={styles.pricingContent}>
                 <Text style={styles.pricingLabel}>Pooja Pricing</Text>
                 <Text style={styles.pricingSubtext}>
-                  {pujaDetails?.samagri_required ||
-                  progressPujaDetails?.samagri_required
+                  {pujaDetails?.samagri_required
                     ? 'With Pooja Items'
                     : 'Without Pooja Items'}
                 </Text>
               </View>
               <Text style={styles.pricingAmount}>
-                {pujaDetails?.amount
-                  ? `₹${pujaDetails.amount}`
-                  : `₹${progressPujaDetails?.amount}`}
+                {pujaDetails?.amount ? `₹${pujaDetails.amount}` : ''}
               </Text>
             </View>
 
-            {!pujaStarted ? (
-              <View style={styles.buttonContainer}>
-                <PrimaryButtonOutlined
-                  title={t('cancel')}
-                  onPress={() => {
-                    navigation.navigate('PujaCancellationScreen', {id: id});
-                  }}
-                  style={styles.button}
-                />
-                <PrimaryButton
-                  title={t('start')}
-                  onPress={handleStartPuja}
-                  style={styles.button}
-                />
-              </View>
-            ) : (
-              <View style={{marginBottom: verticalScale(24)}}>
-                <PrimaryButton
-                  title={t('complete_puja')}
-                  onPress={handleCompletePuja}
-                  style={styles.button}
-                />
-              </View>
-            )}
+            <View style={styles.buttonContainer}>
+              <PrimaryButtonOutlined
+                title={t('Reject')}
+                onPress={() => openModal('reject')}
+                style={styles.button}
+                disabled={loading}
+              />
+              <PrimaryButton
+                title={t('Approve')}
+                onPress={() => openModal('approve')}
+                style={styles.button}
+                disabled={loading}
+              />
+            </View>
           </View>
         </ScrollView>
       </View>
 
-      <CodeVerificationModal
-        visible={isModalVisible || isCompleteModalVisible}
-        onClose={handleModalClose}
-        onSubmit={handleCodeSubmit}
-        onCancel={handleModalClose}
-      />
-
       <PujaItemsModal
         visible={isPujaItemsModalVisible}
         onClose={handleClosePujaItemsModal}
+      />
+
+      {/* Custom Modal for Approve/Reject */}
+      <CustomModal
+        visible={modalVisible}
+        title={modalContent?.title}
+        message={modalContent?.message}
+        confirmText={modalContent?.confirmText}
+        onConfirm={modalContent?.onConfirm}
+        onCancel={() => {
+          setModalVisible(false);
+          setModalType(null);
+        }}
+        loading={loading}
       />
     </View>
   );
@@ -664,13 +483,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: -0.33,
   },
-  chatButton: {
-    padding: moderateScale(4),
-  },
-  chatIcon: {
-    width: moderateScale(20),
-    height: moderateScale(20),
-  },
   pricingCard: {
     backgroundColor: COLORS.white,
     borderRadius: moderateScale(10),
@@ -720,4 +532,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PujaDetailsScreen;
+export default WaitingApprovalPujaScreen;

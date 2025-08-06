@@ -3,11 +3,11 @@ import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 
 interface CustomModalProps {
   visible: boolean;
-  title: string;
-  message: string;
+  title: any;
+  message: any;
   confirmText?: string;
   cancelText?: string;
-  onConfirm: () => void;
+  onConfirm: any;
   onCancel: () => void;
   loading?: boolean;
 }
