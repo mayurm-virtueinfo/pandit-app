@@ -32,7 +32,7 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
-export const BASE_URL = 'https://15eae532361b.ngrok-free.app';
+export const BASE_URL = 'https://3e9dc7059688.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';
@@ -70,3 +70,4 @@ export const POST_CONVERSATION = '/api/chat/conversations/start-by-booking/';
 export const GET_MESSAGE_HISTORY = '/api/chat/conversations/{bookingID}/messages/';
 export const POST_REGISTER_FCM = '/app/register-device-token/';
 export const POST_RATE_USER = "/panditji/rate-user/"
+export const GET_PUT_UPDATE_PROFILE = "/panditji/update-profile/"

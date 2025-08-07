@@ -11,13 +11,16 @@ import {
   registerDeviceForRemoteMessages,
 } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
+import notifee, { AndroidImportance } from '@notifee/react-native';
+import { useNavigation } from '@react-navigation/native';
+import { navigate } from '../helper/navigationRef';
 
 // Get Firebase messaging instance
 const messaging = getMessaging(getApp());
 
 /**
- * Request notification permission and fetch FCM token
- */
+* Request notification permission and fetch FCM token
+*/
 export async function requestUserPermission(): Promise<boolean> {
   const authStatus = await requestPermission(messaging);
   const enabled =
@@ -46,15 +49,15 @@ export async function requestUserPermission(): Promise<boolean> {
   } else {
     Alert.alert(
       'Notifications Disabled',
-      'Please enable push notifications in settings to receive alerts.'
+      'Please enable push notifications in settings to receive alerts.',
     );
     return false;
   }
 }
 
 /**
- * Fetch current FCM token
- */
+* Fetch current FCM token
+*/
 export async function getFcmToken(): Promise<string | null> {
   try {
     const fcmToken = await getToken(messaging);
@@ -65,29 +68,60 @@ export async function getFcmToken(): Promise<string | null> {
   }
 }
 
-/**
- * Register all notification listeners (foreground, background, taps)
- */
-export function registerNotificationListeners() {
-  // Foreground message handler
-  onMessage(messaging, async remoteMessage => {
+const handleNotificationNavigation = (remoteMessage: any) => {
+  if (remoteMessage?.data?.navigation) {
+    const { booking_id, sender_id, screen } = remoteMessage.data;
+
+    const targetScreen = screen;
+
+    navigate(targetScreen, {
+      booking_id: booking_id,
+      pandit_id: sender_id,
+    });
+  }
+};
+
+export async function registerNotificationListeners() {
+  await notifee.requestPermission();
+
+  const channelId = await notifee.createChannel({
+    id: 'default',
+    name: 'Default Channel',
+    importance: AndroidImportance.HIGH,
+  });
+
+  messaging.onMessage(async (remoteMessage: any) => {
     console.log('📩 Foreground FCM message:', remoteMessage);
-    // Optionally show local notification here
+
+    const { title, body } = remoteMessage.notification || {};
+
+    await notifee.displayNotification({
+      title: title || 'New Notification',
+      body: body || 'You have a new message!',
+      android: {
+        channelId,
+        smallIcon: 'ic_notifcation',
+        pressAction: {
+          id: 'default',
+        },
+      },
+      ios: {},
+    });
   });
 
   // App opened from background notification
-  onNotificationOpenedApp(messaging, remoteMessage => {
+  messaging.onNotificationOpenedApp((remoteMessage: any) => {
     if (remoteMessage) {
-      console.log('🔁 Opened from background:', remoteMessage.notification);
-      // Navigate or update state
+      console.log('🔁 Opened from background:', remoteMessage);
+      handleNotificationNavigation(remoteMessage);
     }
   });
 
   // App opened from quit state
-  getInitialNotification(messaging).then(remoteMessage => {
+  messaging.getInitialNotification().then((remoteMessage: any) => {
     if (remoteMessage) {
       console.log('🚀 Opened from quit state:', remoteMessage.notification);
-      // Navigate or update state
+      handleNotificationNavigation(remoteMessage);
     }
   });
 }

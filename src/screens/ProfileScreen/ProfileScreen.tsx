@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   StyleSheet,
   View,
@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -48,11 +48,14 @@ const ProfileScreen = () => {
   const [profileData, setProfileData] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  console.log('profileData :: ', profileData);
+  // console.log('profileData :: ', profileData);
 
-  useEffect(() => {
-    fetchProfileData();
-  }, []);
+  // Use useFocusEffect to reload profile data when coming back from EditProfileScreen
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfileData();
+    }, []),
+  );
 
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -92,7 +95,7 @@ const ProfileScreen = () => {
     try {
       setIsLoading(true);
       const response: any = await getPanditProfileDetails();
-      console.log('response', response);
+      // console.log('response', response);
       if (response.data.success) {
         setProfileData(response.data.data);
       }
@@ -117,7 +120,7 @@ const ProfileScreen = () => {
         <Image
           source={{
             uri:
-              profileData.profile_img ||
+              profileData?.profile_img ||
               'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy3IRQZYt7VgvYzxEqdhs8R6gNE6cYdeJueyHS-Es3MXb9XVRQQmIq7tI0grb8GTlzBRU&usqp=CAU',
           }}
           style={styles.profileImage}

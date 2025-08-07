@@ -1,9 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -12,7 +11,7 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import CustomHeader from '../../components/CustomHeader';
 import {COLORS} from '../../theme/theme';
 import CustomTextInput from '../../components/CustomTextInput';
@@ -22,7 +21,14 @@ import {moderateScale} from 'react-native-size-matters';
 import CustomDropdown from '../../components/CustomDropdown';
 import {useTranslation} from 'react-i18next';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {getCaste, getCity, getGotra, getSubCaste} from '../../api/apiService';
+import {
+  getCaste,
+  getCity,
+  getGotra,
+  getSubCaste,
+  getProfileData,
+  putUpdateProfile,
+} from '../../api/apiService';
 import CustomeLoader from '../../components/CustomLoader';
 import {useCommonToast} from '../../common/CommonToast';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -48,10 +54,6 @@ interface FormData {
   };
 }
 
-type RouteParams = {
-  phoneNumber?: string;
-};
-
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
   'CompleteProfileScreen'
@@ -61,7 +63,7 @@ const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const inset = useSafeAreaInsets();
   const {t} = useTranslation();
-  const {showErrorToast} = useCommonToast();
+  const {showErrorToast, showSuccessToast} = useCommonToast();
 
   const [formData, setFormData] = useState<FormData>({
     phoneNumber: '',
@@ -79,6 +81,12 @@ const EditProfileScreen: React.FC = () => {
       name: '',
     },
   });
+  // Track the original image URI to detect if user changed image
+  const [originalProfileImgUri, setOriginalProfileImgUri] =
+    useState<string>('');
+  const [isImageChanged, setIsImageChanged] = useState<boolean>(false);
+
+  console.log('formData', formData);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [cityData, setCityData] = useState<any[]>([]);
   const [casteData, setCasteData] = useState<any[]>([]);
@@ -86,16 +94,201 @@ const EditProfileScreen: React.FC = () => {
   const [gotraData, setGotraData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // To prevent double fetch of subcaste/gotra on initial profile load
+  const isProfileLoaded = useRef(false);
+
+  // Fetch profile and dropdown data on mount
   useEffect(() => {
-    fetchCityData();
-    fetchCasteData();
+    fetchInitialData();
   }, []);
 
+  // Fetch all dropdowns and profile, then set selected values
+  const fetchInitialData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch all dropdowns in parallel
+      const [cityRes, casteRes, profileRes] = await Promise.all([
+        getCity(),
+        getCaste(),
+        getProfileData(),
+      ]);
+
+      // Set cityData
+      if (Array.isArray(cityRes?.data)) {
+        const cities = cityRes.data.map(item => ({
+          label: 'name' in item ? item.name : item.title,
+          value: item.id?.toString?.() ?? item.id,
+        }));
+        setCityData(cities);
+      } else {
+        setCityData([]);
+      }
+
+      // Set casteData
+      if (Array.isArray(casteRes?.data)) {
+        const castes = casteRes.data.map(item => ({
+          label: 'name' in item ? item.name : item.title,
+          value: item.id?.toString?.() ?? item.id,
+        }));
+        setCasteData(castes);
+      } else {
+        setCasteData([]);
+      }
+
+      // Set formData from profile
+      const data = profileRes?.data ?? profileRes;
+      console.log('Data :::: >>>', data);
+      if (data && typeof data === 'object') {
+        const cityValue =
+          data.address?.city !== undefined && data.address?.city !== null
+            ? data.address.city.toString()
+            : '';
+        const casteValue =
+          data.caste !== undefined && data.caste !== null
+            ? data.caste.toString()
+            : '';
+        const subCasteValue =
+          data.subcaste !== undefined && data.subcaste !== null
+            ? data.subcaste.toString()
+            : '';
+        const gotraValue =
+          data.gotra !== undefined && data.gotra !== null
+            ? data.gotra.toString()
+            : '';
+        const profileImgUri =
+          data.profile_img && typeof data.profile_img === 'string'
+            ? data.profile_img
+            : '';
+        setFormData(prev => ({
+          ...prev,
+          phoneNumber: data.mobile || '',
+          email: data.email || '',
+          firstName: data.first_name || '',
+          lastName: data.last_name || '',
+          city: cityValue,
+          caste: casteValue,
+          subCaste: subCasteValue,
+          gotra: gotraValue,
+          address: data.address?.address_line1,
+          profile_img: data.profile_img
+            ? {
+                uri: profileImgUri,
+                type: '', // Type is not provided in API response
+                name: '', // Name is not provided in API response
+              }
+            : {uri: '', type: '', name: ''},
+        }));
+        setOriginalProfileImgUri(profileImgUri);
+        setIsImageChanged(false);
+
+        // Fetch subcaste and gotra dropdowns if values exist
+        if (casteValue) {
+          await fetchSubCasteData(casteValue, subCasteValue, gotraValue);
+        }
+        if (subCasteValue) {
+          await fetchGotraData(subCasteValue, gotraValue);
+        }
+        isProfileLoaded.current = true;
+      }
+    } catch (error: any) {
+      showErrorToast(error?.message || 'Failed to load profile data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch subcaste data and optionally set selected subcaste/gotra
+  const fetchSubCasteData = async (
+    casteId: string,
+    selectedSubCaste: string = '',
+    selectedGotra: string = '',
+  ) => {
+    setIsLoading(true);
+    try {
+      const response = (await getSubCaste(casteId)) as DropdownResponse;
+      if (Array.isArray(response?.data)) {
+        const subCastes = response.data.map(item => ({
+          label: 'name' in item ? item.name : item.title,
+          value: item.id?.toString?.() ?? item.id,
+        }));
+        setSubCasteData(subCastes);
+
+        // If a selected subcaste is provided, set it and fetch gotra
+        if (selectedSubCaste) {
+          setFormData(prev => ({
+            ...prev,
+            subCaste: selectedSubCaste,
+          }));
+          if (selectedGotra) {
+            await fetchGotraData(selectedSubCaste, selectedGotra);
+          }
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            subCaste: '',
+            gotra: '',
+          }));
+        }
+      } else {
+        setSubCasteData([]);
+        setFormData(prev => ({
+          ...prev,
+          subCaste: '',
+          gotra: '',
+        }));
+      }
+    } catch (error: any) {
+      showErrorToast(error?.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch gotra data and optionally set selected gotra
+  const fetchGotraData = async (
+    subCasteId: string,
+    selectedGotra: string = '',
+  ) => {
+    setIsLoading(true);
+    try {
+      const response = (await getGotra(subCasteId)) as DropdownResponse;
+      if (Array.isArray(response?.data)) {
+        const gotras = response.data.map(item => ({
+          label: 'name' in item ? item.name : item.title,
+          value: item.id?.toString?.() ?? item.id,
+        }));
+        setGotraData(gotras);
+
+        if (selectedGotra) {
+          setFormData(prev => ({
+            ...prev,
+            gotra: selectedGotra,
+          }));
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            gotra: '',
+          }));
+        }
+      } else {
+        setGotraData([]);
+        setFormData(prev => ({
+          ...prev,
+          gotra: '',
+        }));
+      }
+    } catch (error: any) {
+      showErrorToast(error?.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // When caste changes, fetch subcaste and reset subCaste/gotra
   useEffect(() => {
+    if (!isProfileLoaded.current) return;
     if (formData.caste) {
       fetchSubCasteData(formData.caste);
-      setFormData(prev => ({...prev, subCaste: '', gotra: ''}));
-      setErrors(prev => ({...prev, subCaste: '', gotra: ''}));
     } else {
       setSubCasteData([]);
       setGotraData([]);
@@ -104,97 +297,17 @@ const EditProfileScreen: React.FC = () => {
     }
   }, [formData.caste]);
 
+  // When subCaste changes, fetch gotra and reset gotra
   useEffect(() => {
+    if (!isProfileLoaded.current) return;
     if (formData.subCaste) {
       fetchGotraData(formData.subCaste);
-      setFormData(prev => ({...prev, gotra: ''}));
-      setErrors(prev => ({...prev, gotra: ''}));
     } else {
       setGotraData([]);
       setFormData(prev => ({...prev, gotra: ''}));
       setErrors(prev => ({...prev, gotra: ''}));
     }
   }, [formData.subCaste]);
-
-  const fetchCityData = async () => {
-    setIsLoading(true);
-    try {
-      const response = (await getCity()) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const cities = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setCityData(cities);
-      } else {
-        setCityData([]);
-      }
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchCasteData = async () => {
-    setIsLoading(true);
-    try {
-      const response = (await getCaste()) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const castes = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setCasteData(castes);
-      } else {
-        setCasteData([]);
-      }
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchSubCasteData = async (casteId: string) => {
-    setIsLoading(true);
-    try {
-      const response = (await getSubCaste(casteId)) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const subCastes = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setSubCasteData(subCastes);
-      } else {
-        setSubCasteData([]);
-      }
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchGotraData = async (subCasteId: string) => {
-    setIsLoading(true);
-    try {
-      const response = (await getGotra(subCasteId)) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const gotras = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setGotraData(gotras);
-      } else {
-        setGotraData([]);
-      }
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const validateEmail = (email: string) => {
     // Simple email regex
@@ -234,9 +347,13 @@ const EditProfileScreen: React.FC = () => {
     return '';
   };
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({...prev, [field]: value}));
     setErrors(prev => ({...prev, [field]: validateField(field, value)}));
+    if (field === 'profile_img') {
+      // If user selects a new image, mark as changed
+      setIsImageChanged(true);
+    }
   };
 
   // Fixed photo selection logic: set profile_img, not photoUri
@@ -302,25 +419,21 @@ const EditProfileScreen: React.FC = () => {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const newErrors: Partial<FormData> = {};
     let firstError = '';
 
     for (const field in formData) {
-      // Don't validate photoUri (no longer in formData)
       const error = validateField(
         field as keyof FormData,
         formData[field as keyof FormData] as string,
       );
       if (error) {
-        // Only assign error string to fields that expect a string, not to profile_img (which expects an object)
         if (field !== 'profile_img') {
           newErrors[field as Exclude<keyof FormData, 'profile_img'>] =
             error as string;
           if (!firstError) firstError = error;
-        }
-        // Do not assign error to profile_img, but still capture the first error if not set
-        else if (!firstError) {
+        } else if (!firstError) {
           firstError = error;
         }
       }
@@ -329,7 +442,74 @@ const EditProfileScreen: React.FC = () => {
     if (firstError) {
       return;
     }
-    navigation.goBack();
+
+    setIsLoading(true);
+    try {
+      let payload: any;
+      let isMultipart = false;
+
+      // Convert string IDs to numbers for city, caste, subcaste, gotra
+      const cityNum = formData.city ? Number(formData.city) : '';
+      const casteNum = formData.caste ? Number(formData.caste) : '';
+      const subCasteNum = formData.subCaste ? Number(formData.subCaste) : '';
+      const gotraNum = formData.gotra ? Number(formData.gotra) : '';
+
+      // Only include profile_img if user changed the image
+      if (isImageChanged && formData.profile_img && formData.profile_img.uri) {
+        isMultipart = true;
+        payload = new FormData();
+        payload.append('first_name', formData.firstName);
+        payload.append('last_name', formData.lastName);
+        payload.append('address.city', cityNum);
+        payload.append('caste', casteNum);
+        payload.append('sub_caste', subCasteNum);
+        payload.append('gotra', gotraNum);
+        payload.append('address.address_line1', formData.address);
+        payload.append('profile_img', {
+          uri: formData.profile_img.uri,
+          type: formData.profile_img.type,
+          name: formData.profile_img.name,
+        });
+      } else {
+        // If image not changed, send as JSON (not multipart) and don't include profile_img
+        payload = {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          address: {
+            city: cityNum,
+            address_line1: formData.address,
+          },
+          caste: casteNum,
+          sub_caste: subCasteNum,
+          gotra: gotraNum,
+        };
+      }
+
+      console.log('payload', payload);
+      const response = await putUpdateProfile(payload);
+      console.log('response', response);
+      if (response) {
+        showSuccessToast(
+          t('profile_updated_successfully') || 'Profile updated successfully',
+        );
+        navigation.goBack();
+      } else {
+        showErrorToast(
+          response?.data?.message ||
+            t('failed_to_update_profile') ||
+            'Failed to update profile',
+        );
+      }
+    } catch (error: any) {
+      showErrorToast(
+        error?.response?.data?.message ||
+          error?.message ||
+          t('failed_to_update_profile') ||
+          'Failed to update profile',
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -351,26 +531,30 @@ const EditProfileScreen: React.FC = () => {
                 <View style={styles.photoSection}>
                   <TouchableOpacity
                     style={styles.photoPicker}
-                    onPress={handlePhotoSelect}
                     activeOpacity={0.7}
                     testID="photo-picker">
-                    {formData.profile_img ? (
+                    {formData.profile_img && formData.profile_img.uri ? (
                       <Image
                         source={{uri: formData.profile_img.uri}}
                         style={styles.photo}
                       />
                     ) : (
                       <View style={styles.photoPlaceholder}>
-                        <Text style={styles.photoPlaceholderText}>
+                        {/* <Text style={styles.photoPlaceholderText}>
                           <Feather
                             name="camera"
                             size={32}
                             color={COLORS.gray}
                           />
                           <Text>{t('select_photo')}</Text>
-                        </Text>
+                        </Text> */}
                       </View>
                     )}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handlePhotoSelect}
+                    activeOpacity={0.7}>
+                    <Feather name="edit" size={18} color={COLORS.primary} />
                   </TouchableOpacity>
                   <Text style={styles.photoLabel}>
                     {t('profile_photo') || 'Profile Photo'}
@@ -379,20 +563,24 @@ const EditProfileScreen: React.FC = () => {
                 <CustomTextInput
                   label={t('phone_number')}
                   value={formData.phoneNumber}
-                  onChangeText={value =>
-                    handleInputChange('phoneNumber', value)
-                  }
+                  onChangeText={() => {}}
                   placeholder={t('enter_phone_number')}
                   keyboardType="phone-pad"
                   error={errors.phoneNumber}
+                  editable={false}
+                  style={styles.disabledInput}
+                  textColor={COLORS.gray}
                 />
                 <CustomTextInput
                   label={t('email')}
                   value={formData.email}
-                  onChangeText={value => handleInputChange('email', value)}
+                  onChangeText={() => {}}
                   placeholder={t('enter_email')}
                   keyboardType="email-address"
                   error={errors.email}
+                  editable={false}
+                  style={styles.disabledInput}
+                  textColor={COLORS.gray}
                 />
                 <CustomTextInput
                   label={t('first_name')}
@@ -491,7 +679,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 0, // Remove padding to avoid extra space at bottom
+    paddingBottom: 0,
   },
   formContainer: {
     padding: 24,
@@ -533,6 +721,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border || '#ddd',
+    marginBottom: 5,
   },
   photo: {
     width: 90,
@@ -559,6 +748,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.lighttext,
     fontFamily: Fonts.Sen_Regular,
+  },
+  disabledInput: {
+    backgroundColor: COLORS.lightGray,
   },
 });
 

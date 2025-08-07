@@ -67,6 +67,7 @@ type PujaDetailsType = {
   when_is_pooja?: string;
   tirth_place_name?: string;
   updated_at?: string;
+  booking_user_img: string;
   user_info?: {
     email?: string;
     full_name?: string;
@@ -323,7 +324,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
                   <Image
                     source={{
                       uri:
-                        pujaDetails?.user_info?.profile_img_url ||
+                        pujaDetails?.booking_user_img ||
                         'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=80',
                     }}
                     style={styles.priestImage}

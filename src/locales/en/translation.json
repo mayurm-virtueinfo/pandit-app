@@ -10,7 +10,7 @@
   "completed_puja": "Completed Pooja's",
   "no_upcoming_puja": "No upcoming pooja",
   "no_completed_puja": "No completed pooja",
-  "complete_puja": "COMPLETE Pooja",
+  "complete_puja": "COMPLETE POOJA",
   "code_verification": "Code Verification",
   "Please_enter_the_4-digit": "Please enter the 4-digit user code\nto start the Pooja.",
   "list_of_puja_items": "List of Pooja Items",
@@ -255,5 +255,6 @@
   "no_area_found": "No area found.",
   "no_language_found": "No language found.",
   "no_pooja_found": "No pooja found.",
-  "rate_submit_successfully": "Rating submitted successfully."
+  "rate_submit_successfully": "Rating submitted successfully.",
+  "profile_updated_successfully": "Profile updated successfully"
 }

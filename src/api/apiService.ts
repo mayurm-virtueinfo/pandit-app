@@ -15,6 +15,7 @@ import ApiEndpoints, {
   GET_PANDIT_PROFILE,
   GET_PAST_BOOKINGS,
   GET_POOJA,
+  GET_PUT_UPDATE_PROFILE,
   GET_SUBCASTE,
   GET_TRANSACTIONS,
   GET_UNASSIGN_PUJA,
@@ -293,6 +294,21 @@ export interface postRateUser {
   booking: number,
   rating: number,
   review: string
+}
+
+export interface putUpdateProfile {
+  firstName: string;
+  lastName: string;
+  city: string;
+  caste: string;
+  subCaste: string;
+  gotra: string;
+  address: string;
+  profile_img: {
+    uri: string;
+    type: string;
+    name: string;
+  };
 }
 
 export const apiService = {
@@ -1090,6 +1106,55 @@ export const postRateUser = (data: postRateUser): Promise<any> => {
       })
       .catch(error => {
         console.error('Error post rate user api:', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getProfileData = () => {
+  let apiUrl = GET_PUT_UPDATE_PROFILE;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error in get update profile api', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+
+export const putUpdateProfile = (data: any): Promise<any> => {
+  const apiUrl = GET_PUT_UPDATE_PROFILE;
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+
+  // Set headers for multipart/form-data if FormData is used
+  const config: AxiosRequestConfig = isFormData
+    ? {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+    : {};
+
+  return new Promise((resolve, reject) => {
+    apiDev
+      .put(apiUrl, data, config)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.log("error", error)
+        if (error.response && error.response.data) {
+          console.error('Error put update profile api:', error.response.data);
+        } else if (error.message) {
+          console.error('Error put update profile::::', error.message);
+        } else {
+          console.error('Error put update profile>>>>>>', error);
+        }
         reject(error);
       });
   });

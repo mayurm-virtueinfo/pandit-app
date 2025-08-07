@@ -142,9 +142,7 @@ const RateYourExperienceScreen: React.FC = () => {
 
   // Extract pooja image and name from completePujaData for the card
   const poojaImage =
-    completePujaData?.pooja_image_url ||
-    panditjiData?.profile_img ||
-    selectManualPanitData?.image ||
+    completePujaData?.booking_user_img ||
     'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160';
 
   const poojaName = completePujaData?.pooja_name || 'For family well-being';

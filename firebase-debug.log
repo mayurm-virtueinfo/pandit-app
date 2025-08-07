@@ -3349,3 +3349,928 @@ Issues? Report them at https://github.com/firebase/firebase-tools/issues and att
     at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
     at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
     at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[debug] [2025-08-06T09:28:22.880Z] ----------------------------------------------------------------------
+[debug] [2025-08-06T09:28:22.902Z] Command:       /Users/tarang/.nvm/versions/node/v20.11.1/bin/node /Users/tarang/.nvm/versions/node/v20.11.1/bin/firebase emulators:start --only auth
+[debug] [2025-08-06T09:28:22.903Z] CLI Version:   14.2.1
+[debug] [2025-08-06T09:28:22.903Z] Platform:      darwin
+[debug] [2025-08-06T09:28:22.903Z] Node Version:  v20.11.1
+[debug] [2025-08-06T09:28:22.903Z] Time:          Wed Aug 06 2025 14:58:22 GMT+0530 (India Standard Time)
+[debug] [2025-08-06T09:28:22.903Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-08-06T09:28:23.120Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
+[debug] [2025-08-06T09:28:23.131Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] Failed to authenticate, have you run firebase login?
+[warn] ⚠  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI. 
+[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
+[debug] [2025-08-06T09:28:24.884Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-08-06T09:28:24.884Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-08-06T09:28:24.884Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-08-06T09:28:24.913Z] [hub] writing locator at /var/folders/y2/m246sh752b7gmg0d911c4wmr0000gn/T/hub-panditji-42b4a.json
+[debug] [2025-08-06T09:28:31.814Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI        │
+├────────────────┼────────────────┼────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth │
+└────────────────┴────────────────┴────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2025-08-06T11:51:51.434Z] Received signal SIGHUP 1
+[info]  
+[info] i  emulators: Received SIGHUP for the first time. Starting a clean shutdown. 
+[info] i  emulators: Please wait for a clean shutdown or send the SIGHUP signal again to stop right now. 
+[debug] [2025-08-06T11:51:51.446Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.448Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.448Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.449Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.450Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.450Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.451Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.452Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.453Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.453Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.454Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.454Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.457Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.457Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.458Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.458Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.459Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.459Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.460Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.461Z] Ignoring signal SIGHUP due to short delay of 27ms
+[debug] [2025-08-06T11:51:51.461Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.461Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.462Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.462Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.463Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.463Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.463Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.464Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.464Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.465Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.465Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.466Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.466Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.466Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.467Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.468Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.469Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.469Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.469Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.470Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.470Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.471Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.471Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.471Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.472Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.472Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.472Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.473Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.473Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.473Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.474Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.474Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.475Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.475Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.475Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.476Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.476Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[info] i  emulators: Shutting down emulators. {"metadata":{"emulator":{"name":"hub"},"message":"Shutting down emulators."}}
+[info] i  ui: Stopping Emulator UI {"metadata":{"emulator":{"name":"ui"},"message":"Stopping Emulator UI"}}
+[info] i  auth: Stopping Authentication Emulator {"metadata":{"emulator":{"name":"auth"},"message":"Stopping Authentication Emulator"}}
+[info] i  hub: Stopping emulator hub {"metadata":{"emulator":{"name":"hub"},"message":"Stopping emulator hub"}}
+[debug] [2025-08-06T11:51:51.483Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.484Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.484Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.484Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.485Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.485Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.486Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.486Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.486Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.487Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.487Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-08-06T11:51:51.488Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at Socket._writeGeneric (node:net:952:11)
+    at Socket._write (node:net:964:8)
+    at writeOrBuffer (node:internal/streams/writable:564:12)
+    at _write (node:internal/streams/writable:493:10)
+    at Writable.write (node:internal/streams/writable:502:10)
+    at Console.log (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/Users/tarang/.nvm/versions/node/v20.11.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)

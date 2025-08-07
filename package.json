@@ -10,7 +10,8 @@
     "test": "jest",
     "firebase-emulator": "firebase emulators:start --only auth",
     "dev": "concurrently \"firebase emulators:start --only auth\" \"react-native start\"",
-    "ios:dev": "concurrently \"firebase emulators:start --only auth\" \"npm run ios\""
+    "ios:dev": "concurrently \"firebase emulators:start --only auth\" \"npm run ios\"",
+    "build:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle"
   },
   "dependencies": {
     "@notifee/react-native": "^9.1.8",
