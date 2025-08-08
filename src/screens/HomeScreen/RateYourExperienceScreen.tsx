@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -25,14 +25,17 @@ import PrimaryButton from '../../components/PrimaryButton';
 import Fonts from '../../theme/fonts';
 
 // Import the postRateUser API
-import {postRateUser} from '../../api/apiService';
+import {postRateUser, getCompletedPuja} from '../../api/apiService';
 import {useCommonToast} from '../../common/CommonToast';
+import CustomeLoader from '../../components/CustomLoader';
 
 const RateYourExperienceScreen: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [pujaDetail, setPujaDetail] = useState<any>(null);
+  const [pujaLoading, setPujaLoading] = useState<boolean>(true);
 
   type ScreenNavigationProp = StackNavigationProp<
     HomeStackParamList,
@@ -41,15 +44,40 @@ const RateYourExperienceScreen: React.FC = () => {
   const {t} = useTranslation();
   const {showErrorToast, showSuccessToast} = useCommonToast();
   const inset = useSafeAreaInsets();
-
-  const navigation = useNavigation<ScreenNavigationProp>();
-
   const route = useRoute();
-  const {completePujaData, panditjiData, selectManualPanitData} =
-    route.params as any;
+  const {bookingId} = route.params as any;
+  const navigation = useNavigation<ScreenNavigationProp>();
+  // console.log('bookingId', bookingId);
 
-  // For debugging
-  console.log('completePujaData=====>', completePujaData);
+  useEffect(() => {
+    const fetchPujaDetail = async () => {
+      try {
+        setPujaLoading(true);
+        // Call getCompletedPuja API for puja detail
+        const response = await getCompletedPuja();
+        const data = response?.data;
+        // console.log('data', data);
+
+        // Find the puja detail that matches the bookingId
+        // bookingId may be string or number, so use loose equality
+        const foundPuja = Array.isArray(data)
+          ? data.find((item: any) => item.id == bookingId)
+          : null;
+
+        setPujaDetail(foundPuja || null);
+      } catch (error: any) {
+        showErrorToast(
+          error?.response?.data?.message || t('something_went_wrong'),
+        );
+        setPujaDetail(null);
+      } finally {
+        setPujaLoading(false);
+      }
+    };
+    if (bookingId) {
+      fetchPujaDetail();
+    }
+  }, [bookingId]);
 
   const handleStarPress = (starIndex: number) => {
     setRating(starIndex + 1);
@@ -87,19 +115,21 @@ const RateYourExperienceScreen: React.FC = () => {
 
   // Call postRateUser API for rating
   const handleSubmit = async () => {
+    if (rating === 0) {
+      showErrorToast(t('please_give_rating') || 'Please give a rating');
+      return;
+    }
     try {
       setLoading(true);
-      // Get booking id and pandit id from completePujaData or params
-      const bookingId = completePujaData?.id;
-      const panditId = panditjiData?.id || selectManualPanitData?.id || null;
+      // Get booking id from pujaDetail or params
+      const bookingIdToSend = pujaDetail?.id || bookingId;
       const ratingValue = rating;
       const reviewText = feedback;
       const photoUris = photos.map(p => p.uri);
 
       // Prepare payload for postRateUser
       const payload: any = {
-        booking: bookingId,
-        // pandit: panditId,
+        booking: bookingIdToSend,
         rating: ratingValue,
         review: reviewText,
         // photos: photoUris,
@@ -111,7 +141,7 @@ const RateYourExperienceScreen: React.FC = () => {
       setFeedback('');
       setPhotos([]);
       showSuccessToast(t('rate_submit_successfully'));
-      navigation.goBack();
+      navigation.replace('HomeScreen');
     } catch (error: any) {
       showErrorToast(
         error?.response?.data?.message || t('something_went_wrong'),
@@ -140,132 +170,136 @@ const RateYourExperienceScreen: React.FC = () => {
     );
   };
 
-  // Extract pooja image and name from completePujaData for the card
+  // Extract pooja image and name from pujaDetail for the card
   const poojaImage =
-    completePujaData?.booking_user_img ||
+    pujaDetail?.booking_user_img ||
     'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160';
 
-  const poojaName = completePujaData?.pooja_name || 'For family well-being';
-  const poojaDate = completePujaData?.booking_date
-    ? `Date: ${completePujaData.booking_date}`
+  const poojaName = pujaDetail?.pooja_name || 'For family well-being';
+  const poojaDate = pujaDetail?.booking_date
+    ? `Date: ${pujaDetail.booking_date}`
     : '';
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <CustomHeader title={t('rate_experience')} showBackButton={true} />
 
-      <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
-        <View style={styles.mainContent}>
-          {/* Puja Details Card */}
-          <View style={styles.panditCard}>
-            <View style={styles.panditImageContainer}>
-              <Image
-                source={{
-                  uri: poojaImage,
-                }}
-                style={styles.panditImage}
-                resizeMode="cover"
-              />
-            </View>
-            <View style={styles.panditInfo}>
-              <Text style={styles.panditName}>
-                {completePujaData?.booking_user_name ||
-                  panditjiData?.full_name ||
-                  selectManualPanitData?.name}
-              </Text>
-              <Text style={styles.panditPurpose}>{poojaName}</Text>
-              <Text style={styles.panditPurpose}>{poojaDate}</Text>
-              {/* <PrimaryButton
-                title={t('view_details')}
-                onPress={() =>
-                  navigation.navigate('PujaDetailsScreen', {
-                    id: completePujaData?.id,
-                  })
-                }
-                style={styles.viewDetailsButton}
-                textStyle={styles.viewDetailsText}
-              /> */}
-            </View>
-          </View>
-
-          {/* Rating Section */}
-          <View style={styles.ratingSection}>
-            <Text style={styles.ratingTitle}>
-              {t('how_was_your_experience')}
-            </Text>
-            <View style={styles.ratingCard}>
-              <View style={styles.starsContainer}>
-                {[0, 1, 2, 3, 4].map(renderStar)}
+      {(pujaLoading || loading) && <CustomeLoader loading={loading} />}
+      {!pujaLoading && !loading && (
+        <ScrollView
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
+          <View style={styles.mainContent}>
+            {/* Puja Details Card */}
+            <View style={styles.panditCard}>
+              <View style={styles.panditImageContainer}>
+                <Image
+                  source={{
+                    uri: poojaImage,
+                  }}
+                  style={styles.panditImage}
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={styles.panditInfo}>
+                <Text style={styles.panditName}>
+                  {pujaDetail?.booking_user_name ||
+                    pujaDetail?.pandit_name ||
+                    pujaDetail?.manual_pandit_name ||
+                    ''}
+                </Text>
+                <Text style={styles.panditPurpose}>{poojaName}</Text>
+                <Text style={styles.panditPurpose}>{poojaDate}</Text>
+                {/* <PrimaryButton
+                  title={t('view_details')}
+                  onPress={() =>
+                    navigation.navigate('PujaDetailsScreen', {
+                      id: pujaDetail?.id,
+                    })
+                  }
+                  style={styles.viewDetailsButton}
+                  textStyle={styles.viewDetailsText}
+                /> */}
               </View>
             </View>
-          </View>
 
-          {/* Add multiple photos */}
-          <View style={styles.photoSection}>
-            <Text style={styles.photoSectionTitle}>
-              {t('add_photos_optional') || 'Add Photos (optional)'}
-            </Text>
-            <View style={styles.photoList}>
-              {photos.map((photo, idx) => (
-                <View key={idx} style={styles.photoItem}>
-                  <Image
-                    source={{uri: photo.uri}}
-                    style={styles.photoImage}
-                    resizeMode="cover"
-                  />
-                  <TouchableOpacity
-                    style={styles.removePhotoBtn}
-                    onPress={() => handleRemovePhoto(idx)}>
-                    <AntDesign
-                      name="closecircle"
-                      size={20}
-                      color={COLORS.error}
-                    />
-                  </TouchableOpacity>
+            {/* Rating Section */}
+            <View style={styles.ratingSection}>
+              <Text style={styles.ratingTitle}>
+                {t('how_was_your_experience')}
+              </Text>
+              <View style={styles.ratingCard}>
+                <View style={styles.starsContainer}>
+                  {[0, 1, 2, 3, 4].map(renderStar)}
                 </View>
-              ))}
-              <TouchableOpacity
-                style={styles.addPhotoBtn}
-                onPress={handleAddPhotos}>
-                <AntDesign
-                  name="pluscircleo"
-                  size={32}
-                  color={COLORS.primary}
-                />
-                <Text style={styles.addPhotoText}>
-                  {t('add_photo') || 'Add'}
-                </Text>
-              </TouchableOpacity>
+              </View>
             </View>
-          </View>
 
-          {/* Feedback Section */}
-          <View>
-            <TextInput
-              style={styles.feedbackInput}
-              placeholder={t('tell_us_more_about_your_experience')}
-              placeholderTextColor="rgba(25, 19, 19, 0.3)"
-              multiline
-              numberOfLines={4}
-              value={feedback}
-              onChangeText={setFeedback}
-              textAlignVertical="top"
+            {/* Add multiple photos */}
+            <View style={styles.photoSection}>
+              <Text style={styles.photoSectionTitle}>
+                {t('add_photos_optional') || 'Add Photos (optional)'}
+              </Text>
+              <View style={styles.photoList}>
+                {photos.map((photo, idx) => (
+                  <View key={idx} style={styles.photoItem}>
+                    <Image
+                      source={{uri: photo.uri}}
+                      style={styles.photoImage}
+                      resizeMode="cover"
+                    />
+                    <TouchableOpacity
+                      style={styles.removePhotoBtn}
+                      onPress={() => handleRemovePhoto(idx)}>
+                      <AntDesign
+                        name="closecircle"
+                        size={20}
+                        color={COLORS.error}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <TouchableOpacity
+                  style={styles.addPhotoBtn}
+                  onPress={handleAddPhotos}>
+                  <AntDesign
+                    name="pluscircleo"
+                    size={32}
+                    color={COLORS.primary}
+                  />
+                  <Text style={styles.addPhotoText}>
+                    {t('add_photo') || 'Add'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Feedback Section */}
+            <View>
+              <TextInput
+                style={styles.feedbackInput}
+                placeholder={t('tell_us_more_about_your_experience')}
+                placeholderTextColor="rgba(25, 19, 19, 0.3)"
+                multiline
+                numberOfLines={4}
+                value={feedback}
+                onChangeText={setFeedback}
+                textAlignVertical="top"
+              />
+            </View>
+
+            <PrimaryButton
+              title={t('submtt_rating') || 'Submit Review'}
+              onPress={handleSubmit}
+              style={styles.buttonContainer}
+              textStyle={styles.buttonText}
+              disabled={loading}
             />
           </View>
-
-          <PrimaryButton
-            title={t('submtt_rating') || 'Submit Review'}
-            onPress={handleSubmit}
-            style={styles.buttonContainer}
-            textStyle={styles.buttonText}
-            disabled={loading}
-          />
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </View>
   );
 };

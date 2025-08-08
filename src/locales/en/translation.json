@@ -256,5 +256,6 @@
   "no_language_found": "No language found.",
   "no_pooja_found": "No pooja found.",
   "rate_submit_successfully": "Rating submitted successfully.",
-  "profile_updated_successfully": "Profile updated successfully"
+  "profile_updated_successfully": "Profile updated successfully",
+  "please_give_rating": "Please give a rating"
 }

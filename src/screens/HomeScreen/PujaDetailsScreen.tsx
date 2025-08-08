@@ -109,7 +109,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     }
     return pujaDetails?.id || id;
   };
-
+  console.log('progressPujaDetails', progressPujaDetails);
   // Fetch Pooja details
   const fetchPujaDetails = useCallback(async () => {
     try {
@@ -230,7 +230,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         `${STORAGE_KEY_PREFIX}${bookingId}`,
         'completed',
       );
-      navigation?.navigate('PujaSuccessfull');
+      navigation?.navigate('PujaSuccessfull', {bookingId: id});
     } catch (error: any) {
       let errorMsg = 'Something went wrong';
       if (error?.response?.data?.message) {

@@ -32,7 +32,7 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
-export const BASE_URL = 'https://3e9dc7059688.ngrok-free.app';
+export const BASE_URL = 'https://f605e3f27d5c.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';

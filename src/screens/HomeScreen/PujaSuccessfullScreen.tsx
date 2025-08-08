@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import UserCustomHeader from '../../components/CustomHeader';
@@ -26,7 +26,9 @@ const PujaSuccessfullScreen: React.FC = () => {
     'HomeScreen'
   >;
   const {t, i18n} = useTranslation();
-
+  const route = useRoute();
+  const {bookingId} = route.params as any;
+  console.log('bookingId', bookingId);
   const inset = useSafeAreaInsets();
 
   const navigation = useNavigation<ScreenNavigationProps>();
@@ -51,8 +53,12 @@ const PujaSuccessfullScreen: React.FC = () => {
               {t('puja_completed_successfully')}
             </Text>
             <PrimaryButton
-              title={t('go_to_home')}
-              onPress={() => navigation.navigate('HomeScreen')}
+              title={t('rate_your_experience')}
+              onPress={() =>
+                navigation.navigate('RateYourExperienceScreen', {
+                  bookingId: bookingId,
+                })
+              }
               style={styles.buttonContainer}
               textStyle={styles.buttonText}
             />

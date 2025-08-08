@@ -1,11 +1,9 @@
-import './src/i18n'; // ✅ import BEFORE anything else
+import './src/i18n';
 import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
 import RootNavigator from './src/navigation/RootNavigator';
 import {LogBox} from 'react-native';
-
-// It's good practice to import gesture handler at the top
 import 'react-native-gesture-handler';
 import {AuthProvider} from './src/provider/AuthProvider';
 import {ToastProvider} from 'react-native-toast-notifications';
@@ -15,61 +13,51 @@ import {
   registerNotificationListeners,
   requestUserPermission,
 } from './src/configuration/firebaseMessaging';
-
-// Ignore specific warnings if necessary, for example, from reanimated
-LogBox.ignoreLogs([
-  "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
-  'Non-serializable values were found in the navigation state', // This can happen with some params
-]);
-// import { getApp } from '@react-native-firebase/app';
-// // import { getReactNativePersistence } from 'firebase/auth/react-native';
-// import { initializeAuth } from '@react-native-firebase/auth';
-
-// // Export auth instance
-// const app = getApp();
-
-// export const firebaseAuth = initializeAuth(app);
 import {getAuth} from '@react-native-firebase/auth';
 import {I18nextProvider} from 'react-i18next';
 import i18n from './src/i18n';
-import {navigationRef} from './src/helper/navigationRef';
+import {
+  navigationRef,
+  checkPendingNavigation,
+} from './src/helper/navigationRef';
 
-// Connect to emulator (do this ONCE at app startup)
+LogBox.ignoreLogs([
+  "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
+  'Non-serializable values were found in the navigation state',
+]);
+
 const auth = getAuth();
 if (__DEV__) {
-  auth.useEmulator('http://127.0.0.1:9099'); // or 'http://localhost:9099'
+  auth.useEmulator('http://127.0.0.1:9099');
 }
+
 const App = () => {
   useEffect(() => {
-    // Hide splash screen after a delay
     const timer = setTimeout(() => {
       SplashScreen.hide();
-    }, 2500); // Show splash for 2.5 seconds
+    }, 2500);
 
     requestUserPermission();
     registerNotificationListeners();
 
-    return () => clearTimeout(timer); // Cleanup timer on unmount
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <I18nextProvider i18n={i18n}>
       <ToastProvider
         style={{
-          // borderRadius: 20,
           backgroundColor: COLORS.primary,
-          // borderWidth: 1,
-          // borderColor: Colors.tertiaryGrey,
         }}
         textStyle={{
-          // fontFamily: fonts.nunitoRegular,
           fontSize: moderateScale(16),
           color: COLORS.textPrimary,
-        }}
-        // icon={<SVGIcon iconType={SvgIconTypes.IcTick} />}
-      >
+        }}>
         <AuthProvider>
-          <NavigationContainer ref={navigationRef}>
+          <NavigationContainer
+            ref={navigationRef}
+            onReady={checkPendingNavigation} // ✅ ensures quit-state navigation works
+          >
             <RootNavigator />
           </NavigationContainer>
         </AuthProvider>

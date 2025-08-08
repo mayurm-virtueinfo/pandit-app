@@ -204,11 +204,7 @@ const EditPanditDocumentsScreen: React.FC = () => {
     certifications: 'certifications',
   };
 
-  // This function is rewritten to match the curl request:
-  // - Always send all 4 fields as multipart/form-data
-  // - If a file is selected, send the file
-  // - If not, send the original value from GET if not changed, or "" if removed
-  // - No need to send original URL, only file or value
+  // Only send changed documents in the formData
   const handleSubmit = async () => {
     if (isSubmitting || loadingDocument) return;
 
@@ -232,45 +228,57 @@ const EditPanditDocumentsScreen: React.FC = () => {
         const originalUrl =
           originalDocumentUrls[apiKey as keyof typeof originalDocumentUrls];
 
-        if (__DEV__) {
-          console.log(`Processing ${docType} (apiKey: ${apiKey})`, {
-            info,
-            changed,
-            originalUrl,
-          });
-        }
+        // Only append if changed
+        if (changed) {
+          if (__DEV__) {
+            console.log(`Processing ${docType} (apiKey: ${apiKey})`, {
+              info,
+              changed,
+              originalUrl,
+            });
+          }
 
-        if (info.file && info.file.uri) {
-          const fileObj = {
-            uri:
-              Platform.OS === 'ios' && info.file.uri.startsWith('file://')
-                ? info.file.uri
-                : info.file.uri,
-            type: info.file.type || 'image/jpeg',
-            name: info.file.name || `${apiKey}_${Date.now()}.jpg`,
-          };
-          if (__DEV__) {
-            console.log(`Appending file for ${apiKey}:`, fileObj);
+          if (info.file && info.file.uri) {
+            const fileObj = {
+              uri:
+                Platform.OS === 'ios' && info.file.uri.startsWith('file://')
+                  ? info.file.uri
+                  : info.file.uri,
+              type: info.file.type || 'image/jpeg',
+              name: info.file.name || `${apiKey}_${Date.now()}.jpg`,
+            };
+            if (__DEV__) {
+              console.log(`Appending file for ${apiKey}:`, fileObj);
+            }
+            formData.append(apiKey, fileObj as any);
+          } else {
+            // If removed, send empty string
+            if (__DEV__) {
+              console.log(`Appending empty string for ${apiKey}`);
+            }
+            formData.append(apiKey, '');
           }
-          formData.append(apiKey, fileObj as any);
-        } else if (!changed && originalUrl) {
-          if (__DEV__) {
-            console.log(`Appending original URL for ${apiKey}:`, originalUrl);
-          }
-          formData.append(apiKey, originalUrl);
-        } else {
-          if (__DEV__) {
-            console.log(`Appending empty string for ${apiKey}`);
-          }
-          formData.append(apiKey, '');
         }
       },
     );
 
     try {
-      console.log('formData', JSON.stringify(formData));
+      // For debugging: log which keys are being sent
+      if (__DEV__) {
+        const keys = [];
+        // @ts-ignore
+        if (formData._parts) {
+          // @ts-ignore
+          for (const [k, v] of formData._parts) {
+            keys.push(k);
+          }
+        }
+        console.log('formData keys:', keys);
+      }
       const response = await putPanditDocuments(formData);
-      console.log('API Response:', JSON.stringify(response));
+      if (__DEV__) {
+        console.log('API Response:', JSON.stringify(response));
+      }
       if (response && response.success) {
         showSuccessToast(t('documents_updated_successfully'));
         await fetchDocuments();

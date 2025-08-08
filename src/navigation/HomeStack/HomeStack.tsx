@@ -9,11 +9,12 @@ import NotificationScreen from '../../screens/ProfileScreen/NotificationScreen';
 import PujaCancellationScreen from '../../screens/HomeScreen/PujaCancellationScreen';
 import RateYourExperienceScreen from '../../screens/HomeScreen/RateYourExperienceScreen';
 import WaitingApprovalPujaScreen from '../../screens/HomeScreen/WaitingApprovalPujaScreen';
+import CompletePujaDetailsScreen from '../../screens/HomeScreen/CompletePujaDetailsScreen';
 
 export type HomeStackParamList = {
   replace(arg0: string): unknown;
   navigate(arg0: string): void;
-  HomeScreen: {completePujaData: any};
+  HomeScreen: any;
   PujaDetailsScreen: {id?: any; progress?: boolean};
   PujaSuccessfull: undefined;
   ChatScreen: undefined;
@@ -21,6 +22,7 @@ export type HomeStackParamList = {
   PujaCancellationScreen: {id: number};
   RateYourExperienceScreen: any;
   WaitingApprovalPujaScreen: any;
+  CompletePujaDetailsScreen: any;
 };
 
 const Stack = createStackNavigator<HomeStackParamList>();
@@ -49,6 +51,10 @@ const HomeNavigator = () => {
       <Stack.Screen
         name="PujaCancellationScreen"
         component={PujaCancellationScreen}
+      />
+      <Stack.Screen
+        name="CompletePujaDetailsScreen"
+        component={CompletePujaDetailsScreen}
       />
     </Stack.Navigator>
   );

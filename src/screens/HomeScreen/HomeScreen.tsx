@@ -197,7 +197,7 @@ const HomeScreen: React.FC = () => {
   const renderCompletedPuja = (item: PujaItem, isLast: boolean) => (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate('RateYourExperienceScreen', {
+        navigation.navigate('CompletePujaDetailsScreen', {
           completePujaData: item,
         })
       }>
