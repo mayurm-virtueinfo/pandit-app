@@ -24,8 +24,12 @@ import CustomHeader from '../../components/CustomHeader';
 import PrimaryButton from '../../components/PrimaryButton';
 import Fonts from '../../theme/fonts';
 
-// Import the postRateUser API
-import {postRateUser, getCompletedPuja} from '../../api/apiService';
+// Import the postRateUser API and postReviewImageUpload
+import {
+  postRateUser,
+  getCompletedPuja,
+  postReviewImageUpload,
+} from '../../api/apiService';
 import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 
@@ -47,7 +51,6 @@ const RateYourExperienceScreen: React.FC = () => {
   const route = useRoute();
   const {bookingId} = route.params as any;
   const navigation = useNavigation<ScreenNavigationProp>();
-  // console.log('bookingId', bookingId);
 
   useEffect(() => {
     const fetchPujaDetail = async () => {
@@ -56,7 +59,6 @@ const RateYourExperienceScreen: React.FC = () => {
         // Call getCompletedPuja API for puja detail
         const response = await getCompletedPuja();
         const data = response?.data;
-        // console.log('data', data);
 
         // Find the puja detail that matches the bookingId
         // bookingId may be string or number, so use loose equality
@@ -113,7 +115,7 @@ const RateYourExperienceScreen: React.FC = () => {
     setPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Call postRateUser API for rating
+  // Call postRateUser API for rating, and upload images using postReviewImageUpload
   const handleSubmit = async () => {
     if (rating === 0) {
       showErrorToast(t('please_give_rating') || 'Please give a rating');
@@ -125,7 +127,33 @@ const RateYourExperienceScreen: React.FC = () => {
       const bookingIdToSend = pujaDetail?.id || bookingId;
       const ratingValue = rating;
       const reviewText = feedback;
-      const photoUris = photos.map(p => p.uri);
+
+      let uploadedPhotoUrls: string[] = [];
+
+      if (photos.length > 0) {
+        // Upload each photo using postReviewImageUpload
+        // Assume postReviewImageUpload returns { url: string }
+        const uploadPromises = photos.map(async photo => {
+          // Prepare FormData for each image
+          const formData = new FormData();
+          formData.append('images', {
+            uri: photo.uri,
+            type: photo.mime,
+            name: `review_photo_${Date.now()}.${
+              photo.mime?.split('/')[1] || 'jpg'
+            }`,
+          });
+          // Call the API
+          const res = await postReviewImageUpload(formData, bookingIdToSend);
+          // Support both {url} and {data: {url}}
+          if (res?.url) return res.url;
+          if (res?.data?.url) return res.data.url;
+          return null;
+        });
+
+        const results = await Promise.all(uploadPromises);
+        uploadedPhotoUrls = results.filter(Boolean) as string[];
+      }
 
       // Prepare payload for postRateUser
       const payload: any = {

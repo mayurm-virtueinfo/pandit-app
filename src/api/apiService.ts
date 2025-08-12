@@ -31,6 +31,7 @@ import ApiEndpoints, {
   POST_RATE_USER,
   POST_REFRESH_TOKEN,
   POST_REGISTER_FCM,
+  POST_REVIEW_IMAGE,
   POST_SIGNIN,
   POST_SIGNUP,
   POST_START_PUJA,
@@ -309,6 +310,16 @@ export interface putUpdateProfile {
     type: string;
     name: string;
   };
+}
+
+export interface ReviewImageUpload {
+  images: {
+    profile_img: {
+      uri: string;
+      type: string;
+      name: string;
+    };
+  }
 }
 
 export const apiService = {
@@ -1155,6 +1166,28 @@ export const putUpdateProfile = (data: any): Promise<any> => {
         } else {
           console.error('Error put update profile>>>>>>', error);
         }
+        reject(error);
+      });
+  });
+};
+
+export const postReviewImageUpload = (data: any, id: string): Promise<any> => {
+  // data should be a FormData instance with one or more 'images' fields
+  const apiUrl = POST_REVIEW_IMAGE.replace('{id}', id);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        // If you need to send auth, add Authorization header here
+      })
+      .then(response => {
+        console.log("response", response);
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error uploading review image:', error?.response?.data || error);
         reject(error);
       });
   });

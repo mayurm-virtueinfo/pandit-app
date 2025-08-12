@@ -14,7 +14,7 @@ import {COLORS, THEMESHADOW} from '../../theme/theme';
 import {useTranslation} from 'react-i18next';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-const {width} = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 const CompletePujaDetailsScreen = () => {
   const {t} = useTranslation();
@@ -22,7 +22,7 @@ const CompletePujaDetailsScreen = () => {
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const {completePujaData} = route.params as any;
-  // console.log('completePujaData', completePujaData);
+
   // Destructure the data for easier access
   const {
     pooja_name,
@@ -49,8 +49,8 @@ const CompletePujaDetailsScreen = () => {
     if (isNaN(dateObj.getTime())) return dateString;
     const day = dateObj.getDate();
     const month = dateObj.toLocaleString('default', {month: 'long'});
-    const s = ['th', 'st', 'nd', 'rd'],
-      v = day % 100;
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = day % 100;
     const ordinal = s[(v - 20) % 10] || s[v] || s[0];
     return `${day}${ordinal} ${month}`;
   };
@@ -88,157 +88,133 @@ const CompletePujaDetailsScreen = () => {
   return (
     <View
       style={{
+        flex: 1,
         backgroundColor: COLORS.primaryBackground,
         paddingTop: insets.top,
-        flex: 1,
       }}>
       <CustomHeader title={t('Completed Puja Details')} showBackButton />
       <CustomeLoader loading={loading} />
-      <View
-        style={{
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          backgroundColor: COLORS.backgroundPrimary,
-          flex: 1,
-        }}>
-        <ScrollView
-          contentContainerStyle={styles.container}
-          showsVerticalScrollIndicator={false}>
-          {/* Puja Image and Name OUTSIDE Card */}
-          <View style={styles.pujaImageWrapper}>
-            <Image
-              source={
-                pooja_image_url
-                  ? {uri: pooja_image_url}
-                  : {
-                      uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                    }
-              }
-              style={styles.pujaImage}
-              resizeMode="stretch"
-            />
-            <View style={styles.pujaImageOverlay} />
-          </View>
-          <Text style={styles.pujaName}>{pooja_name}</Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}>
+        {/* Puja Image Section */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={
+              pooja_image_url
+                ? {uri: pooja_image_url}
+                : {
+                    uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
+                  }
+            }
+            style={styles.pujaImage}
+            resizeMode="cover"
+          />
+          <View style={styles.imageOverlay} />
+        </View>
 
-          {/* Puja Card */}
-          <View style={[styles.card, THEMESHADOW.shadow]}>
-            <View style={styles.cardInner}>
-              <View style={styles.infoRow}>
-                <View style={styles.infoItem}>
-                  <Text style={styles.infoLabel}>{t('Date')}</Text>
-                  <Text style={styles.infoValue}>
-                    {formatDateWithOrdinal(booking_date)}
-                  </Text>
-                </View>
-                <View style={styles.infoItem}>
-                  <Text style={styles.infoLabel}>{t('Amount')}</Text>
-                  <Text
-                    style={[
-                      styles.infoValue,
-                      {color: COLORS.success || '#2ecc71', fontWeight: '700'},
-                    ]}>
-                    ₹{amount}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.infoRow}>
-                <View style={styles.infoItem}>
-                  <Text style={styles.infoLabel}>{t('Muhurat')}</Text>
-                  <Text style={styles.infoValue}>
-                    {muhurat_time}{' '}
-                    {muhurat_type ? (
-                      <Text
-                        style={{
-                          color: COLORS.textSecondary,
-                        }}>{`(${muhurat_type})`}</Text>
-                    ) : (
-                      ''
-                    )}
-                  </Text>
-                </View>
-                <View style={styles.infoItem}>
-                  <Text style={styles.infoLabel}>{t('Temple')}</Text>
-                  <Text style={styles.infoValue}>
-                    {tirth_place_name || '-'}
-                  </Text>
-                </View>
-              </View>
-              {/* Divider REMOVED from here */}
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Samagri Required')}</Text>
-                <Text
-                  style={[
-                    styles.detailValue,
-                    {
-                      color: samagri_required
-                        ? COLORS.success || '#2ecc71'
-                        : COLORS.error || '#e74c3c',
-                      fontWeight: '600',
-                    },
-                  ]}>
-                  {samagri_required ? t('Yes') : t('No')}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Payment Status')}</Text>
-                <Text
-                  style={[
-                    styles.detailValue,
-                    {color: getStatusColor(payment_status), fontWeight: '600'},
-                  ]}>
-                  {payment_status}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Booking Status')}</Text>
-                <Text
-                  style={[
-                    styles.detailValue,
-                    {color: getStatusColor(booking_status), fontWeight: '600'},
-                  ]}>
-                  {booking_status}
-                </Text>
-              </View>
-              {notes ? (
-                <View style={styles.notesBox}>
-                  <Text style={styles.notesLabel}>{t('Notes')}</Text>
-                  <Text style={styles.notesValue}>{notes}</Text>
-                </View>
-              ) : null}
-            </View>
-          </View>
-          {/* User Card */}
-          <View style={[styles.userCard, THEMESHADOW.shadow]}>
-            <View style={styles.userImageWrapper}>
-              <Image
-                source={
-                  booking_user_img
-                    ? {uri: booking_user_img}
-                    : {
-                        uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                      }
-                }
-                style={styles.userImage}
-                resizeMode="cover"
-              />
-            </View>
-            <View style={{flex: 1}}>
-              <Text style={styles.userName}>{booking_user_name}</Text>
-              <Text style={styles.userMobile}>{booking_user_mobile}</Text>
-            </View>
-          </View>
-          {/* Address Card */}
-          {address_details ? (
-            <View style={[styles.addressCard, THEMESHADOW.shadow]}>
-              <Text style={styles.addressLabel}>{t('Address Details')}</Text>
-              <Text style={styles.addressValue}>
-                {getAddressString(address_details)}
+        {/* Puja Name */}
+        <Text style={styles.pujaName}>{pooja_name || 'Puja Name'}</Text>
+
+        {/* Details Card */}
+        <View style={[styles.card, THEMESHADOW.shadow]}>
+          <View style={styles.cardInner}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t('Date')}</Text>
+              <Text style={styles.detailValue}>
+                {formatDateWithOrdinal(booking_date) || '-'}
               </Text>
             </View>
-          ) : null}
-        </ScrollView>
-      </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t('Amount')}</Text>
+              <Text style={[styles.detailValue, {color: COLORS.success}]}>
+                ₹{amount || '0'}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t('Muhurat')}</Text>
+              <Text style={styles.detailValue}>
+                {muhurat_time || '-'} {muhurat_type && `(${muhurat_type})`}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t('Temple')}</Text>
+              <Text style={styles.detailValue}>{tirth_place_name || '-'}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t('Samagri Required')}</Text>
+              <Text
+                style={[
+                  styles.detailValue,
+                  {
+                    color: samagri_required ? COLORS.success : COLORS.error,
+                  },
+                ]}>
+                {samagri_required ? t('Yes') : t('No')}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t('Payment Status')}</Text>
+              <Text
+                style={[
+                  styles.detailValue,
+                  {color: getStatusColor(payment_status)},
+                ]}>
+                {payment_status || '-'}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>{t('Booking Status')}</Text>
+              <Text
+                style={[
+                  styles.detailValue,
+                  {color: getStatusColor(booking_status)},
+                ]}>
+                {booking_status || '-'}
+              </Text>
+            </View>
+            {notes && (
+              <View style={styles.notesContainer}>
+                <Text style={styles.notesLabel}>{t('Notes')}</Text>
+                <Text style={styles.notesValue}>{notes}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* User Card */}
+        <View style={[styles.userCard, THEMESHADOW.shadow]}>
+          <Image
+            source={
+              booking_user_img
+                ? {uri: booking_user_img}
+                : {
+                    uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
+                  }
+            }
+            style={styles.userImage}
+            resizeMode="cover"
+          />
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>
+              {booking_user_name || 'User Name'}
+            </Text>
+            <Text style={styles.userMobile}>
+              {booking_user_mobile || 'Mobile Number'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Address Card */}
+        {address_details && (
+          <View style={[styles.addressCard, THEMESHADOW.shadow]}>
+            <Text style={styles.addressLabel}>{t('Address Details')}</Text>
+            <Text style={styles.addressValue}>
+              {getAddressString(address_details) || '-'}
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 };
@@ -247,191 +223,124 @@ export default CompletePujaDetailsScreen;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 18,
-    minHeight: '100%',
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    backgroundColor: COLORS.backgroundPrimary,
   },
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 22,
-    marginBottom: 28,
-    overflow: 'hidden', // Added to prevent content overflow
-  },
-  cardInner: {
-    padding: 18, // Reduced from 24 to 18 for better fit
-  },
-  pujaImageWrapper: {
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
+  imageContainer: {
+    width: '100%',
+    height: width * 0.6,
+    borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 16,
-    alignSelf: 'center',
-    width: '100%',
-    height: width * 0.45,
   },
   pujaImage: {
     width: '100%',
     height: '100%',
   },
-  pujaImageOverlay: {
+  imageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Subtle overlay for contrast
   },
   pujaName: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
     color: COLORS.primary,
-    marginBottom: 24,
     textAlign: 'center',
-    letterSpacing: 0.3,
-    textShadowColor: 'rgba(0,0,0,0.04)',
-    textShadowOffset: {width: 0, height: 1},
-    textShadowRadius: 2,
+    marginBottom: 20,
+    paddingHorizontal: 16,
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    gap: 10,
-    flexWrap: 'wrap', // Added to allow wrapping if content is too wide
+  card: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
   },
-  infoItem: {
-    flex: 1, // Changed from flex: 2 to flex: 1 for better fit
-    flexDirection: 'column', // Changed from 'row' to 'column' for stacking label/value
-    minWidth: 100,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    paddingBottom: 5,
-    marginRight: 10, // Added spacing between items
-    maxWidth: '48%', // Prevents overflow in row
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-    marginBottom: 2,
-    letterSpacing: 0.1,
-  },
-  infoValue: {
-    fontSize: 17,
-    color: COLORS.textPrimary,
-    fontWeight: '700',
-    letterSpacing: 0.1,
-    flexShrink: 1, // Prevents overflow
-    flexWrap: 'wrap', // Allows text to wrap
-  },
-  divider: {
-    height: 1.5,
-    backgroundColor: COLORS.backgroundPrimary,
-    marginVertical: 16,
-    borderRadius: 1,
-    marginBottom: 24,
+  cardInner: {
+    gap: 12,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
     alignItems: 'center',
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
-    paddingBottom: 8,
-    flexWrap: 'wrap', // Added to allow wrapping if content is too wide
   },
   detailLabel: {
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.textSecondary,
     fontWeight: '500',
-    letterSpacing: 0.1,
-    flex: 1,
-    flexWrap: 'wrap',
-    marginRight: 8,
   },
   detailValue: {
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.textPrimary,
-    fontWeight: '500',
-    letterSpacing: 0.1,
-    flex: 1,
-    flexWrap: 'wrap',
+    fontWeight: '600',
     textAlign: 'right',
   },
-  notesBox: {
-    backgroundColor: COLORS.backgroundPrimary,
-    borderRadius: 10,
-    padding: 12,
-    marginTop: 14,
+  notesContainer: {
+    backgroundColor: COLORS.backGroundSecondary,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
   },
   notesLabel: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textSecondary,
     fontWeight: '600',
-    marginBottom: 2,
-    letterSpacing: 0.1,
+    marginBottom: 4,
   },
   notesValue: {
     fontSize: 15,
     color: COLORS.textPrimary,
     fontWeight: '400',
-    letterSpacing: 0.1,
   },
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    padding: 18,
-    marginBottom: 22,
+    padding: 16,
+    marginBottom: 20,
     gap: 12,
   },
-  userImageWrapper: {
-    borderRadius: 40,
-    overflow: 'hidden',
+  userImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 2,
     borderColor: COLORS.primary,
-    marginRight: 18,
-    width: 70,
-    height: 70,
-    backgroundColor: '#f7f7f7',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  userImage: {
-    width: 66,
-    height: 66,
-    borderRadius: 33,
-    backgroundColor: '#eee',
+  userInfo: {
+    flex: 1,
   },
   userName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 2,
-    letterSpacing: 0.1,
+    marginBottom: 4,
   },
   userMobile: {
     fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 2,
-    letterSpacing: 0.1,
   },
   addressCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 18,
-    // marginBottom: 24,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
   },
   addressLabel: {
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.textSecondary,
     fontWeight: '600',
-    marginBottom: 4,
-    letterSpacing: 0.1,
+    marginBottom: 8,
   },
   addressValue: {
     fontSize: 15,
     color: COLORS.textPrimary,
     fontWeight: '400',
-    letterSpacing: 0.1,
   },
 });

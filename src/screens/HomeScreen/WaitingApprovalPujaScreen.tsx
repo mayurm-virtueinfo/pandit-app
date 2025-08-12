@@ -86,6 +86,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
   const [pujaDetails, setPujaDetails] = useState<PujaDetailsType | null>(null);
   const [loading, setLoading] = useState(false);
   const {showSuccessToast, showErrorToast} = useCommonToast();
+  console.log('id', id);
   console.log('pujaDetails', pujaDetails);
   // Modal state for approval/reject
   const [modalVisible, setModalVisible] = useState(false);
@@ -96,12 +97,22 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     setLoading(true);
     try {
       const response = await getPandingPuja();
+      console.log('response', response);
       // Assume response is either an array or an object with data array
-      const data = Array.isArray(response)
-        ? response[0]
-        : response?.data?.[0] || response?.[0];
+      let data: PujaDetailsType | undefined;
+      if (Array.isArray(response)) {
+        data = response.find((item: PujaDetailsType) => item.id === id);
+      } else if (Array.isArray(response?.data)) {
+        data = response.data.find((item: PujaDetailsType) => item.id === id);
+      } else if (Array.isArray(response?.[0])) {
+        data = response[0].find((item: PujaDetailsType) => item.id === id);
+      } else if (response?.id === id) {
+        data = response;
+      }
       if (data) {
         setPujaDetails(data);
+      } else {
+        setPujaDetails(null);
       }
     } catch (error) {
       showErrorToast?.('Error fetching pooja details');
