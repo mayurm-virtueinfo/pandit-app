@@ -23,6 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
 import {getMessaging, getToken} from '@react-native-firebase/messaging';
+import CustomeLoader from '../../components/CustomLoader';
 
 interface DocumentUploadState {
   idProof: boolean;
@@ -113,6 +114,7 @@ const DocumentUploadScreen: React.FC = () => {
   const [loadingDocument, setLoadingDocument] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uid, setUid] = useState<string | null>('');
+  const [showLoader, setShowLoader] = useState(false);
 
   useEffect(() => {
     fetchUID();
@@ -198,6 +200,7 @@ const DocumentUploadScreen: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    setShowLoader(true);
 
     const formData: FormData = new FormData();
 
@@ -336,6 +339,7 @@ const DocumentUploadScreen: React.FC = () => {
       }
     } finally {
       setIsSubmitting(false);
+      setShowLoader(false);
     }
   };
 
@@ -419,6 +423,7 @@ const DocumentUploadScreen: React.FC = () => {
             style={styles.submitButton}
           />
         </View>
+        <CustomeLoader loading={showLoader} />
       </KeyboardAvoidingView>
     </View>
   );

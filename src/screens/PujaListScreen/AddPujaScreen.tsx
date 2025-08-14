@@ -373,6 +373,11 @@ const AddPujaScreen: React.FC = () => {
     </View>
   );
 
+  // Determine if there are any puja items
+  const hasPujaItems = Array.isArray(pujaList) && pujaList.length > 0;
+  // Determine if a puja is selected
+  const hasSelectedPuja = selectedPuja !== null && selectedPuja !== undefined;
+
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
       <UserCustomHeader
@@ -390,61 +395,64 @@ const AddPujaScreen: React.FC = () => {
               <View style={{alignItems: 'center', padding: 20}}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
               </View>
-            ) : !Array.isArray(pujaList) || pujaList.length === 0 ? (
+            ) : !hasPujaItems ? (
               <Text
                 style={{textAlign: 'center', color: COLORS.gray, padding: 16}}>
-                {t('no_items_found')}
+                {t('no_pooja_found')}
               </Text>
             ) : (
               pujaList.map((puja, index) => renderPujaOption(puja, index))
             )}
           </View>
 
-          <View style={[styles.sectionContainer, THEMESHADOW.shadow]}>
-            {priceOptions.map((option, index) =>
-              renderPriceOption(option, index),
-            )}
+          {/* Only show price options if there are puja items */}
+          {hasPujaItems && (
+            <View style={[styles.sectionContainer, THEMESHADOW.shadow]}>
+              {priceOptions.map((option, index) =>
+                renderPriceOption(option, index),
+              )}
 
-            {selectedPriceOption === 'custom' && (
-              <>
-                <View style={styles.inputFieldContainer}>
-                  <View style={styles.inputTitleContainer}>
-                    <Text style={styles.inputLabel}>
-                      Custom Price With Pooja Items
-                    </Text>
+              {selectedPriceOption === 'custom' && (
+                <>
+                  <View style={styles.inputFieldContainer}>
+                    <View style={styles.inputTitleContainer}>
+                      <Text style={styles.inputLabel}>
+                        Custom Price With Pooja Items
+                      </Text>
+                    </View>
+                    <View style={styles.inputAreaContainer}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={customPriceWithItems}
+                        onChangeText={setCustomPriceWithItems}
+                        placeholder="Enter price"
+                        placeholderTextColor={COLORS.gray}
+                        keyboardType="numeric"
+                      />
+                    </View>
                   </View>
-                  <View style={styles.inputAreaContainer}>
-                    <TextInput
-                      style={styles.textInput}
-                      value={customPriceWithItems}
-                      onChangeText={setCustomPriceWithItems}
-                      placeholder="Enter price"
-                      placeholderTextColor={COLORS.gray}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
 
-                <View style={styles.inputFieldContainer}>
-                  <View style={styles.inputTitleContainer}>
-                    <Text style={styles.inputLabel}>
-                      Custom Price Without Pooja Items
-                    </Text>
+                  <View style={styles.inputFieldContainer}>
+                    <View style={styles.inputTitleContainer}>
+                      <Text style={styles.inputLabel}>
+                        Custom Price Without Pooja Items
+                      </Text>
+                    </View>
+                    <View style={styles.inputAreaContainer}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={customPriceWithoutItems}
+                        onChangeText={setCustomPriceWithoutItems}
+                        placeholder="Enter price"
+                        placeholderTextColor={COLORS.gray}
+                        keyboardType="numeric"
+                      />
+                    </View>
                   </View>
-                  <View style={styles.inputAreaContainer}>
-                    <TextInput
-                      style={styles.textInput}
-                      value={customPriceWithoutItems}
-                      onChangeText={setCustomPriceWithoutItems}
-                      placeholder="Enter price"
-                      placeholderTextColor={COLORS.gray}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
-              </>
-            )}
-          </View>
+                </>
+              )}
+            </View>
+          )}
 
           <PrimaryButton
             title={
@@ -453,6 +461,7 @@ const AddPujaScreen: React.FC = () => {
                 : t('add_puja').toUpperCase()
             }
             onPress={handleAddPuja}
+            disabled={!hasPujaItems || !hasSelectedPuja}
           />
         </ScrollView>
       </View>

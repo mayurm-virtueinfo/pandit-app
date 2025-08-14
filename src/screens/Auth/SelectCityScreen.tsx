@@ -149,11 +149,11 @@ const SelectCityScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <CustomeLoader loading={isLoading} />
-      <StatusBar
+      {/* <StatusBar
         translucent
         backgroundColor="transparent"
         barStyle="light-content"
-      />
+      /> */}
       <View style={[styles.container, {paddingTop: insets.top}]}>
         <CustomHeader
           title={t('complete_your_profile')}
