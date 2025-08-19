@@ -3,6 +3,7 @@ import { AxiosRequestConfig } from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   GET_AREA,
+  GET_BOOKING_AUTO_DETAILS,
   GET_CASTE,
   GET_CITY,
   GET_COMPLETED_PUA,
@@ -249,6 +250,7 @@ export interface AddPuja {
 export interface UpdateStatus {
   booking_id: number;
   action: string;
+  offer_id: number
 }
 
 export interface StartCompetePuja {
@@ -1188,6 +1190,21 @@ export const postReviewImageUpload = (data: any, id: string): Promise<any> => {
       })
       .catch(error => {
         console.error('Error uploading review image:', error?.response?.data || error);
+        reject(error);
+      });
+  });
+};
+
+export const getBookingAutoDetails = (bookingID: string) => {
+  let apiUrl = GET_BOOKING_AUTO_DETAILS.replace('{id}', bookingID);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error in get booking auto details api', error.response.data);
         reject(error);
       });
   });

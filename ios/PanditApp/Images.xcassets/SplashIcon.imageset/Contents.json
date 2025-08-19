@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "c5a5ca76-d67d-44b9-8c25-dc8e5c0eb145.png",
+      "filename" : "iTunesArtwork@1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "c5a5ca76-d67d-44b9-8c25-dc8e5c0eb145 1.png",
+      "filename" : "iTunesArtwork@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "c5a5ca76-d67d-44b9-8c25-dc8e5c0eb145 2.png",
+      "filename" : "iTunesArtwork@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

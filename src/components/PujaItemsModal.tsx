@@ -16,104 +16,111 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {apiService} from '../api/apiService';
 import {useTranslation} from 'react-i18next';
 
+interface PujaItem {
+  name: string;
+  quantity: number;
+  units: string;
+}
+
+interface PujaItemsSection {
+  title: string;
+  data: PujaItem[];
+}
+
 interface PujaItemsModalProps extends Partial<ModalProps> {
   visible: boolean;
   onClose: () => void;
-}
-
-interface PujaItemsApiItem {
-  id: number;
-  item: string;
-}
-
-interface PujaItemsApiResponse {
-  userItems: {
-    description?: string;
-    items: PujaItemsApiItem[];
-  };
-  panditjiItems: {
-    description?: string;
-    items: PujaItemsApiItem[];
-  };
+  items?: PujaItemsSection[]; // Now optional and typed as array
 }
 
 const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
   visible,
   onClose,
+  items,
   ...modalProps
 }) => {
-  const [userItems, setUserItems] = useState<PujaItemsApiItem[]>([]);
-  const [panditjiItems, setPanditjiItems] = useState<PujaItemsApiItem[]>([]);
-  const [userItemsDescription, setUserItemsDescription] = useState<string>('');
-  const [panditjiItemsDescription, setPanditjiItemsDescription] =
-    useState<string>('');
+  const {t} = useTranslation();
+
+  // State for API fallback
+  const [apiItems, setApiItems] = useState<PujaItemsSection[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const {t, i18n} = useTranslation();
 
-  // Helper to fetch and set data
+  // Helper to fetch and set data from API if needed
   const fetchPujaItems = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const apiResult = await apiService.getPujaItemsData();
-      let data: PujaItemsApiResponse;
+      // Transform API result to PujaItemsSection[] format
+      let sections: PujaItemsSection[] = [];
       if (Array.isArray(apiResult)) {
-        data = {
-          userItems: {description: '', items: apiResult},
-          panditjiItems: {description: '', items: []},
-        };
+        // Fallback: treat as user items only
+        sections = [
+          {
+            title: 'User Items',
+            data: apiResult.map((item: any) => ({
+              name: item.item || item.name || '',
+              quantity: item.quantity || 1,
+              units: item.units || '',
+            })),
+          },
+        ];
       } else {
-        data = {
-          userItems: {
-            description: (apiResult as any)?.userItems?.description || '',
-            items: Array.isArray((apiResult as any)?.userItems?.items)
-              ? (apiResult as any).userItems.items
-              : [],
-          },
-          panditjiItems: {
-            description: (apiResult as any)?.panditjiItems?.description || '',
-            items: Array.isArray((apiResult as any)?.panditjiItems?.items)
-              ? (apiResult as any).panditjiItems.items
-              : [],
-          },
-        };
+        // Try to extract user and panditji items
+        const userItemsArr =
+          Array.isArray(apiResult?.userItems?.items) &&
+          apiResult.userItems.items.length > 0
+            ? apiResult.userItems.items.map((item: any) => ({
+                name: item.item || item.name || '',
+                quantity: item.quantity || 1,
+                units: item.units || '',
+              }))
+            : [];
+        const panditjiItemsArr =
+          Array.isArray(apiResult?.panditjiItems?.items) &&
+          apiResult.panditjiItems.items.length > 0
+            ? apiResult.panditjiItems.items.map((item: any) => ({
+                name: item.item || item.name || '',
+                quantity: item.quantity || 1,
+                units: item.units || '',
+              }))
+            : [];
+        if (userItemsArr.length > 0) {
+          sections.push({title: 'User Items', data: userItemsArr});
+        }
+        if (panditjiItemsArr.length > 0) {
+          sections.push({title: 'Pandit Items', data: panditjiItemsArr});
+        }
       }
-      setUserItems(data.userItems.items);
-      setUserItemsDescription(data.userItems.description || '');
-      setPanditjiItems(data.panditjiItems.items);
-      setPanditjiItemsDescription(data.panditjiItems.description || '');
-      if (
-        (!data.userItems.items || data.userItems.items.length === 0) &&
-        (!data.panditjiItems.items || data.panditjiItems.items.length === 0)
-      ) {
+      setApiItems(sections);
+      if (sections.length === 0) {
         setError('No pooja items found.');
       }
     } catch (err) {
-      setUserItems([]);
-      setUserItemsDescription('');
-      setPanditjiItems([]);
-      setPanditjiItemsDescription('');
+      setApiItems(null);
       setError('Failed to fetch pooja items. Please try again.');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Fetch puja items from API
+  // Decide if we have items or need to fetch from API
   useEffect(() => {
     if (visible) {
-      fetchPujaItems();
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        fetchPujaItems();
+      } else {
+        setApiItems(null);
+        setError(null);
+        setLoading(false);
+      }
     } else {
-      // Reset data when modal is closed
-      setUserItems([]);
-      setUserItemsDescription('');
-      setPanditjiItems([]);
-      setPanditjiItemsDescription('');
+      setApiItems(null);
       setError(null);
       setLoading(false);
     }
-  }, [visible, fetchPujaItems]);
+  }, [visible, items, fetchPujaItems]);
 
   const CloseIcon = () => (
     <View style={styles.closeIconContainer}>
@@ -125,15 +132,20 @@ const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
     </View>
   );
 
-  const ItemsList = ({items}: {items: PujaItemsApiItem[]}) => (
+  const ItemsList = ({data}: {data: PujaItem[]}) => (
     <View style={styles.itemsList}>
-      {items.map((item, index) => (
-        <Text key={item.id ?? index} style={styles.itemText}>
-          {index + 1}. {item.item}
+      {data.map((item, index) => (
+        <Text key={index} style={styles.itemText}>
+          {index + 1}. {item.name}
+          {item.quantity ? ` - ${item.quantity}` : ''} {item.units}
         </Text>
       ))}
     </View>
   );
+
+  // Which items to show: items prop if present, else apiItems
+  const sectionsToShow: PujaItemsSection[] | null =
+    items && Array.isArray(items) && items.length > 0 ? items : apiItems;
 
   return (
     <Modal
@@ -180,42 +192,34 @@ const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
                   {error}
                 </Text>
               </View>
-            ) : (
+            ) : sectionsToShow && sectionsToShow.length > 0 ? (
               <>
-                {/* Items will be brought by the Panditji */}
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>
-                    {t('items_to_be_arranged_by_you')}
-                  </Text>
-                  <Text style={styles.sectionDescription}>
-                    {panditjiItemsDescription}
-                  </Text>
-                  <View style={styles.itemsContainer}>
-                    {panditjiItems.length > 0 ? (
-                      <ItemsList items={panditjiItems} />
-                    ) : (
-                      <Text style={styles.itemText}>{t('no_items_found')}</Text>
-                    )}
+                {sectionsToShow.map((section, idx) => (
+                  <View style={styles.section} key={section.title + idx}>
+                    <Text style={styles.sectionTitle}>{section.title}</Text>
+                    <View style={styles.itemsContainer}>
+                      {section.data && section.data.length > 0 ? (
+                        <ItemsList data={section.data} />
+                      ) : (
+                        <Text style={styles.itemText}>
+                          {t('no_items_found')}
+                        </Text>
+                      )}
+                    </View>
                   </View>
-                </View>
-
-                {/* Items to be Arranged by You */}
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>
-                    {t('items_will_be_brought_by_the_client')}
-                  </Text>
-                  <Text style={styles.sectionDescription}>
-                    {userItemsDescription}
-                  </Text>
-                  <View style={styles.itemsContainer}>
-                    {userItems.length > 0 ? (
-                      <ItemsList items={userItems} />
-                    ) : (
-                      <Text style={styles.itemText}>{t('no_items_found')}</Text>
-                    )}
-                  </View>
-                </View>
+                ))}
               </>
+            ) : (
+              <View style={{alignItems: 'center', marginTop: 40}}>
+                <Text
+                  style={{
+                    color: COLORS.primary || 'red',
+                    fontFamily: Fonts.Sen_Medium,
+                    fontSize: moderateScale(15),
+                  }}>
+                  {t('no_items_found')}
+                </Text>
+              </View>
             )}
           </ScrollView>
         </View>
@@ -232,7 +236,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: '100%',
-    height: '100%',
+    height: '90%',
     backgroundColor: COLORS.pujaBackground,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),

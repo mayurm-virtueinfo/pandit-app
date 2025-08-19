@@ -9,17 +9,13 @@ import {AuthProvider} from './src/provider/AuthProvider';
 import {ToastProvider} from 'react-native-toast-notifications';
 import {moderateScale} from 'react-native-size-matters';
 import {COLORS} from './src/theme/theme';
-import {
-  registerNotificationListeners,
-  requestUserPermission,
-} from './src/configuration/firebaseMessaging';
+import {handleNotificationNavigation} from './src/configuration/firebaseMessaging';
 import {getAuth} from '@react-native-firebase/auth';
 import {I18nextProvider} from 'react-i18next';
 import i18n from './src/i18n';
-import {
-  navigationRef,
-  checkPendingNavigation,
-} from './src/helper/navigationRef';
+import {navigationRef} from './src/helper/navigationRef';
+import {getMessaging} from '@react-native-firebase/messaging';
+import {requestUserPermission} from './src/configuration/notificationPermission';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -38,10 +34,21 @@ const App = () => {
     }, 2500);
 
     requestUserPermission();
-    registerNotificationListeners();
 
     return () => clearTimeout(timer);
   }, []);
+
+  const handleInitialNotification = async () => {
+    try {
+      const remoteMessage = await getMessaging().getInitialNotification();
+      if (remoteMessage) {
+        console.log('🚀 Opened from quit state:', remoteMessage);
+        handleNotificationNavigation(remoteMessage.data);
+      }
+    } catch (error) {
+      console.error('Error handling initial notification:', error);
+    }
+  };
 
   return (
     <I18nextProvider i18n={i18n}>
@@ -56,7 +63,7 @@ const App = () => {
         <AuthProvider>
           <NavigationContainer
             ref={navigationRef}
-            onReady={checkPendingNavigation} // ✅ ensures quit-state navigation works
+            onReady={handleInitialNotification} // ✅ ensures quit-state navigation works
           >
             <RootNavigator />
           </NavigationContainer>

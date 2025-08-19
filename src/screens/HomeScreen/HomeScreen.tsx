@@ -219,7 +219,7 @@ const HomeScreen: React.FC = () => {
     <TouchableOpacity
       key={item.id}
       onPress={() =>
-        navigation.navigate('WaitingApprovalPujaScreen', {id: item.id})
+        navigation.navigate('WaitingApprovalPujaScreen', {booking_id: item.id})
       }>
       <View style={styles.pujaItem}>
         <View style={styles.pujaContent}>

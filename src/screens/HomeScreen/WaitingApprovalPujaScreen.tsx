@@ -15,7 +15,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Octicons from 'react-native-vector-icons/Octicons';
 import UserCustomHeader from '../../components/CustomHeader';
 import PujaItemsModal from '../../components/PujaItemsModal';
-import CustomModal from '../../components/CustomModal'; // Import the custom modal
+import CustomModal from '../../components/CustomModal';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import {moderateScale, verticalScale} from 'react-native-size-matters';
@@ -24,93 +24,67 @@ import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
 import {useTranslation} from 'react-i18next';
 import {useRoute, useFocusEffect} from '@react-navigation/native';
 import {useCommonToast} from '../../common/CommonToast';
-import {getPandingPuja, postUpdateStatus} from '../../api/apiService';
+import {getBookingAutoDetails, postUpdateStatus} from '../../api/apiService';
 
 const {width: screenWidth} = Dimensions.get('window');
 
+type SamagriItem = {
+  name: string;
+  quantity: number;
+  units: string;
+};
+
+type SamagriDetails = {
+  user_items: SamagriItem[];
+  pandit_items: SamagriItem[];
+};
+
 type PujaDetailsType = {
-  address_details?: {
-    full_address?: string;
-    id?: number;
-  };
-  address?: {
-    address_line1?: string;
-    address_line2?: string | null;
-    city_name?: string;
-    id?: number;
-    name?: string;
-    phone_number?: string;
-    pincode?: string | null;
-    state?: string | null;
-    country?: string | null;
-    latitude?: string | null;
-    longitude?: string | null;
-    address_type?: string | null;
-  };
-  location_display?: string;
-  amount: string;
-  booking_date: string;
-  booking_status: string;
-  booking_user_mobile?: string;
-  booking_user_name?: string;
-  created_at: string;
   id: number;
+  amount: string | null;
+  booking_date: string;
   muhurat_time: string;
   muhurat_type: string;
-  notes?: string;
-  payment_status: string;
-  pooja_id?: number;
-  pooja_image_url: string;
-  pooja_name: string;
   samagri_required: boolean;
-  uuid: string;
-  when_is_pooja?: string;
-  tirth_place_name?: string;
-  updated_at?: string;
-  booking_user_img: string;
-  user_info?: {
-    email?: string;
-    full_name?: string;
-    id?: number;
-    mobile?: string;
-    profile_img_url?: string | null;
+  samagri_details?: SamagriDetails;
+  location: {
+    details?: any;
+    type?: string;
   };
+  pooja: {
+    id: number;
+    name: string;
+    image_url: string | null;
+    description: string;
+  };
+  profile_img: string;
+  user: {
+    id: number;
+    name: string;
+  };
+  offer_id: number;
 };
 
 const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
   const {t} = useTranslation();
   const route = useRoute();
-  const {id} = route.params as any;
+  const {booking_id} = route?.params as any;
   const inset = useSafeAreaInsets();
   const [isPujaItemsModalVisible, setIsPujaItemsModalVisible] = useState(false);
   const [pujaDetails, setPujaDetails] = useState<PujaDetailsType | null>(null);
   const [loading, setLoading] = useState(false);
   const {showSuccessToast, showErrorToast} = useCommonToast();
-  console.log('id', id);
-  console.log('pujaDetails', pujaDetails);
-  // Modal state for approval/reject
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<'approve' | 'reject' | null>(null);
 
-  // Fetch Waiting Approval Pooja details using getPandingPuja
+  // Fetch Waiting Approval Pooja details using new API response structure
   const fetchPujaDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await getPandingPuja();
+      const response = await getBookingAutoDetails(booking_id);
       console.log('response', response);
-      // Assume response is either an array or an object with data array
-      let data: PujaDetailsType | undefined;
-      if (Array.isArray(response)) {
-        data = response.find((item: PujaDetailsType) => item.id === id);
-      } else if (Array.isArray(response?.data)) {
-        data = response.data.find((item: PujaDetailsType) => item.id === id);
-      } else if (Array.isArray(response?.[0])) {
-        data = response[0].find((item: PujaDetailsType) => item.id === id);
-      } else if (response?.id === id) {
-        data = response;
-      }
-      if (data) {
-        setPujaDetails(data);
+      if (response?.data) {
+        setPujaDetails(response.data);
       } else {
         setPujaDetails(null);
       }
@@ -120,7 +94,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     } finally {
       setLoading(false);
     }
-  }, [id, showErrorToast]);
+  }, [showErrorToast, booking_id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -140,22 +114,29 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     setIsPujaItemsModalVisible(false);
   };
 
-  // Helper to get address string for display
+  // Helper to get address string for display, including tirth_place
   const getAddressDisplay = () => {
-    if (pujaDetails) {
-      if (pujaDetails.address_details?.full_address) {
-        return pujaDetails.address_details.full_address;
-      }
-      if (pujaDetails.tirth_place_name) {
-        return pujaDetails.tirth_place_name;
-      }
-      if (pujaDetails.address) {
-        const {address_line1, city_name} = pujaDetails.address;
-        let addressStr = '';
-        if (address_line1) addressStr += address_line1;
-        if (city_name) addressStr += (addressStr ? ', ' : '') + city_name;
-        return addressStr;
-      }
+    if (!pujaDetails?.location?.type || !pujaDetails.location.details)
+      return '';
+    const {type, details} = pujaDetails.location;
+    if (type === 'address') {
+      if (details.full_address) return details.full_address;
+      let addressStr = '';
+      if (details.address_line1) addressStr += details.address_line1;
+      if (details.city) addressStr += (addressStr ? ', ' : '') + details.city;
+      if (details.state) addressStr += (addressStr ? ', ' : '') + details.state;
+      if (details.pincode)
+        addressStr += (addressStr ? ', ' : '') + details.pincode;
+      return addressStr || JSON.stringify(details);
+    }
+    if (type === 'tirth_place') {
+      // Show tirth place name and city, and description if available
+      let tirthStr = '';
+      if (details.name) tirthStr += details.name;
+      if (details.city) tirthStr += (tirthStr ? ', ' : '') + details.city;
+      if (details.description)
+        tirthStr += (tirthStr ? ' - ' : '') + details.description;
+      return tirthStr;
     }
     return '';
   };
@@ -165,11 +146,17 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     if (!pujaDetails?.id) return;
     try {
       setLoading(true);
-      await postUpdateStatus({booking_id: pujaDetails.id, action: 'accept'});
+      await postUpdateStatus({
+        booking_id: pujaDetails.id,
+        action: 'accept',
+        offer_id: pujaDetails.offer_id,
+      });
       showSuccessToast?.('Puja approved successfully');
       navigation.goBack();
     } catch (error: any) {
-      showErrorToast?.(error?.response?.data?.message);
+      showErrorToast?.(
+        error?.response?.data?.message || 'Failed to approve puja',
+      );
       console.error('Approve error:', error);
     } finally {
       setLoading(false);
@@ -182,7 +169,11 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     if (!pujaDetails?.id) return;
     try {
       setLoading(true);
-      await postUpdateStatus({booking_id: pujaDetails.id, action: 'reject'});
+      await postUpdateStatus({
+        booking_id: pujaDetails.id,
+        action: 'reject',
+        offer_id: pujaDetails.offer_id,
+      });
       showSuccessToast?.('Puja rejected successfully');
       navigation.goBack();
     } catch (error) {
@@ -224,6 +215,29 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
 
   const modalContent = getModalContent();
 
+  // Compose items for PujaItemsModal from samagri_details
+  const getPujaItemsForModal = () => {
+    if (!pujaDetails?.samagri_details) return [];
+    return [
+      {
+        title: 'User Items',
+        data: pujaDetails.samagri_details.user_items || [],
+      },
+      {
+        title: 'Pandit Items',
+        data: pujaDetails.samagri_details.pandit_items || [],
+      },
+    ];
+  };
+
+  // Fallback image for priest
+  const fallbackPriestImage =
+    'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=80';
+
+  // Fallback image for pooja
+  const fallbackPoojaImage =
+    'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=400';
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <StatusBar
@@ -233,7 +247,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
       />
 
       <UserCustomHeader
-        title={pujaDetails?.pooja_name || 'Pooja Details'}
+        title={pujaDetails?.pooja?.name || 'Pooja Details'}
         showBackButton
         showBellButton
         onBackPress={handleBackPress}
@@ -249,7 +263,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
           contentContainerStyle={styles.scrollContent}>
           <Image
             source={{
-              uri: pujaDetails?.pooja_image_url,
+              uri: pujaDetails?.pooja?.image_url || fallbackPoojaImage,
             }}
             style={[
               styles.heroImage,
@@ -263,7 +277,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
               paddingHorizontal: moderateScale(24),
               paddingTop: verticalScale(24),
             }}>
-            <Text style={styles.pujaTitle}>{pujaDetails?.pooja_name}</Text>
+            <Text style={styles.pujaTitle}>{pujaDetails?.pooja?.name}</Text>
 
             <View style={[styles.detailsCard, THEMESHADOW.shadow]}>
               <View style={styles.detailItem}>
@@ -288,7 +302,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailText}>
-                    {pujaDetails?.when_is_pooja || pujaDetails?.booking_date}
+                    {pujaDetails?.booking_date}
                   </Text>
                 </View>
               </View>
@@ -334,18 +348,13 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
                 <View style={styles.priestImageContainer}>
                   <Image
                     source={{
-                      uri:
-                        pujaDetails?.booking_user_img ||
-                        'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=80',
+                      uri: pujaDetails?.profile_img || fallbackPriestImage,
                     }}
                     style={styles.priestImage}
                   />
                   <View style={styles.priestImageBorder} />
                 </View>
-                <Text style={styles.priestName}>
-                  {pujaDetails?.booking_user_name ||
-                    pujaDetails?.user_info?.full_name}
-                </Text>
+                <Text style={styles.priestName}>{pujaDetails?.user?.name}</Text>
               </View>
             </View>
 
@@ -384,6 +393,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
       <PujaItemsModal
         visible={isPujaItemsModalVisible}
         onClose={handleClosePujaItemsModal}
+        items={getPujaItemsForModal()}
       />
 
       {/* Custom Modal for Approve/Reject */}

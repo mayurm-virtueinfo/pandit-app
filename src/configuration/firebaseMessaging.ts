@@ -1,148 +1,112 @@
-import { Platform, Alert } from 'react-native';
-import {
-  getMessaging,
-  requestPermission,
-  getToken,
-  getAPNSToken,
-  onMessage,
-  onNotificationOpenedApp,
-  getInitialNotification,
-  AuthorizationStatus,
-} from '@react-native-firebase/messaging';
+import notifee, { EventType, AndroidImportance } from '@notifee/react-native';
+import { getMessaging } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
-import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-import { navigate, storePendingNavigation } from '../helper/navigationRef';
+import { COLORS } from '../theme/theme';
+import { navigate, navigationRef } from '../helper/navigationRef';
 
-// Firebase Messaging instance
 const messaging = getMessaging(getApp());
 
-/**
- * Ask for user permission and fetch FCM token
- */
-export async function requestUserPermission(): Promise<boolean> {
-  const authStatus = await requestPermission(messaging);
-  const enabled =
-    authStatus === AuthorizationStatus.AUTHORIZED ||
-    authStatus === AuthorizationStatus.PROVISIONAL;
+let isSetup = false;
+let foregroundUnsubscribe: (() => void) | null = null;
 
-  if (enabled) {
-    console.log('✅ Notification permission granted');
-
-    try {
-      if (Platform.OS === 'ios') {
-        const apnsToken = await getAPNSToken(messaging);
-        console.log('📲 APNs Token:', apnsToken);
-      }
-
-      const fcmToken = await getFcmToken();
-      console.log('🎯 FCM Token:', fcmToken);
-    } catch (error) {
-      console.error('🚫 Error during notification setup:', error);
-    }
-
-    return true;
-  } else {
-    Alert.alert(
-      'Notifications Disabled',
-      'Please enable push notifications in settings to receive alerts.',
-    );
-    return false;
+export async function setupNotifications() {
+  if (isSetup) {
+    console.log('Notifications already set up, skipping...');
+    return;
   }
-}
 
-/**
- * Fetch FCM token
- */
-export async function getFcmToken(): Promise<string | null> {
-  try {
-    return await getToken(messaging);
-  } catch (error) {
-    console.error('🚫 Failed to get FCM token:', error);
-    return null;
-  }
-}
+  isSetup = true;
 
-/**
- * Navigate to a screen if navigation data is present
- */
-const handleNotificationNavigation = (remoteMessage: any) => {
-  if (remoteMessage?.data?.navigation) {
-    const { booking_id, sender_id, screen } = remoteMessage.data;
-    console.log("➡️ Navigating to", screen);
-
-    storePendingNavigation({
-      name: screen,
-      params: {
-        booking_id,
-        pandit_id: sender_id,
-      },
-    });
-  }
-};
-
-/**
- * Register all notification listeners
- */
-export async function registerNotificationListeners() {
   await notifee.requestPermission();
-
   const channelId = await notifee.createChannel({
     id: 'default',
     name: 'Default Channel',
     importance: AndroidImportance.HIGH,
   });
 
-  // Foreground messages
-  onMessage(messaging, async (remoteMessage: any) => {
+  // Foreground message handler (displays notification)
+  messaging.onMessage(async (remoteMessage: any) => {
     console.log('📩 Foreground FCM message:', remoteMessage);
 
     const { title, body } = remoteMessage.notification || {};
-
     await notifee.displayNotification({
+      id: remoteMessage.messageId,
       title: title || 'New Notification',
       body: body || 'You have a new message!',
+      data: remoteMessage.data,
       android: {
         channelId,
-        smallIcon: 'ic_notifcation',
+        smallIcon: 'ic_notification',
         pressAction: { id: 'default' },
+        color: COLORS.primary,
       },
       ios: {},
-      data: remoteMessage.data || {},
     });
   });
 
-  // Foreground tap events
-  notifee.onForegroundEvent(({ type, detail }) => {
-    if (type === EventType.PRESS && detail?.notification?.data?.navigation) {
-      handleNotificationNavigation({ data: detail.notification.data });
+  // Handle notification press in foreground
+  foregroundUnsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
+    if (type === EventType.PRESS) {
+      console.log('Notification pressed in foreground', detail);
+      const data = detail.notification?.data || {};
+      handleNotificationNavigation(data);
     }
   });
 
-  // Background tap events
-  onNotificationOpenedApp(messaging, (remoteMessage: any) => {
-    console.log('🔁 Opened from background:', remoteMessage);
-    handleNotificationNavigation(remoteMessage);
+  // App opened from background
+  messaging.onNotificationOpenedApp((remoteMessage: any) => {
+    if (remoteMessage) {
+      console.log('🔁 Opened from background:', remoteMessage);
+      handleNotificationNavigation(remoteMessage);
+    }
   });
 
-  // Quit state tap events
-  const initialNotification = await getInitialNotification(messaging);
-  if (initialNotification) {
-    console.log('🚀 Opened from quit state:', initialNotification.notification);
-    handleNotificationNavigation(initialNotification);
-  }
+  // Background handler (must be top-level)
+  messaging.setBackgroundMessageHandler(async (remoteMessage: any) => {
+    console.log('📨 Background FCM message:', remoteMessage);
+    // Optionally display a local notification here if needed
+  });
 }
 
-// Background handler for data-only messages
-messaging.setBackgroundMessageHandler(async remoteMessage => {
-  console.log('📨 Background FCM message:', remoteMessage);
+export function handleNotificationNavigation(data: any) {
+  console.log('data of notification :: ', data);
 
-  await notifee.displayNotification({
-    title: remoteMessage.data?.title || 'Background Notification',
-    body: remoteMessage.data?.body || '',
-    android: {
-      channelId: 'default',
-      pressAction: { id: 'default' },
+  const targetScreen = data?.screen;
+  const booking_id = data?.booking_id;
+  const pandit_id = data?.sender_id;
+
+  const nestedParams = {
+    screen: 'AppBottomTabNavigator',
+    params: {
+      screen: 'HomeNavigator',
+      params: targetScreen
+        ? {
+          screen: targetScreen,
+          params: {
+            booking_id,
+            pandit_id,
+          },
+        }
+        : {
+          booking_id,
+          pandit_id,
+        },
     },
-    data: remoteMessage.data,
-  });
-});
+  };
+
+  setTimeout(() => {
+    if (navigationRef.isReady()) {
+      navigate('Main', nestedParams);
+    } else {
+      console.warn('Navigation not ready yet');
+    }
+  }, 500);
+}
+
+export function cleanupNotifications() {
+  if (foregroundUnsubscribe) {
+    foregroundUnsubscribe();
+    foregroundUnsubscribe = null;
+  }
+  isSetup = false;
+}
