@@ -197,11 +197,11 @@ const AddPujaScreen: React.FC = () => {
         price_with_samagri:
           selectedPriceOption === 'custom'
             ? Number(customPriceWithItems)
-            : 5000,
+            : 2500,
         price_without_samagri:
           selectedPriceOption === 'custom'
             ? Number(customPriceWithoutItems)
-            : 3000,
+            : 1800,
         price_status: selectedPriceOption === 'system' ? 1 : 2,
       };
       const response = await postAddPuja(addRequest);
@@ -259,11 +259,11 @@ const AddPujaScreen: React.FC = () => {
         price_with_samagri:
           selectedPriceOption === 'custom'
             ? Number(customPriceWithItems)
-            : 5000,
+            : 2500,
         price_without_samagri:
           selectedPriceOption === 'custom'
             ? Number(customPriceWithoutItems)
-            : 3000,
+            : 1800,
         price_status: selectedPriceOption === 'system' ? 1 : 2,
       };
       const response = await putPuja(editRequest);
@@ -286,7 +286,7 @@ const AddPujaScreen: React.FC = () => {
       id: 'system',
       title: 'System Price',
       description:
-        'Rs. 5000 - With pooja items\nRs. 3000 - Without pooja items',
+        'Rs. 2500 - With pooja items\nRs. 1800 - Without pooja items',
     },
     {
       id: 'custom',

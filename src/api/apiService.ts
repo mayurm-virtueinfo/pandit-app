@@ -744,7 +744,7 @@ export const postUpdateStatus = (data: UpdateStatus) => {
       .catch(error => {
         console.error(
           'Error Update Puja Status',
-          JSON.stringify(error.response.data.message),
+          (error.response.data.message),
         );
         reject(error);
       });

@@ -57,7 +57,7 @@ export async function setupNotifications() {
   messaging.onNotificationOpenedApp((remoteMessage: any) => {
     if (remoteMessage) {
       console.log('🔁 Opened from background:', remoteMessage);
-      handleNotificationNavigation(remoteMessage);
+      handleNotificationNavigation(remoteMessage.data);
     }
   });
 

@@ -9,7 +9,10 @@ import {AuthProvider} from './src/provider/AuthProvider';
 import {ToastProvider} from 'react-native-toast-notifications';
 import {moderateScale} from 'react-native-size-matters';
 import {COLORS} from './src/theme/theme';
-import {handleNotificationNavigation} from './src/configuration/firebaseMessaging';
+import {
+  handleNotificationNavigation,
+  setupNotifications,
+} from './src/configuration/firebaseMessaging';
 import {getAuth} from '@react-native-firebase/auth';
 import {I18nextProvider} from 'react-i18next';
 import i18n from './src/i18n';
@@ -26,6 +29,7 @@ const auth = getAuth();
 if (__DEV__) {
   auth.useEmulator('http://127.0.0.1:9099');
 }
+setupNotifications();
 
 const App = () => {
   useEffect(() => {
@@ -63,7 +67,9 @@ const App = () => {
         <AuthProvider>
           <NavigationContainer
             ref={navigationRef}
-            onReady={handleInitialNotification} // ✅ ensures quit-state navigation works
+            onReady={() => {
+              handleInitialNotification();
+            }} // ✅ ensures quit-state navigation works
           >
             <RootNavigator />
           </NavigationContainer>
