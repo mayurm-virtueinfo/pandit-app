@@ -25,6 +25,7 @@ import CustomModal from '../../components/CustomModal';
 import {getPanditProfileDetails, postLogout} from '../../api/apiService';
 import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
+import {getFcmToken} from '../../configuration/notificationPermission';
 
 type ProfileFieldProps = {
   label: string;
@@ -78,8 +79,11 @@ const ProfileScreen = () => {
     try {
       const refreshToken =
         (await AsyncStorage.getItem(AppConstant.REFRESH_TOKEN)) || '';
+      const fcmToken = await getFcmToken();
+
       const params = {
         refresh_token: refreshToken,
+        device_token: fcmToken,
       };
       const response: any = await postLogout(params);
       if (response.data.success) {

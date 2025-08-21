@@ -32,8 +32,13 @@ export interface Message {
 
 const ChatScreen: React.FC = () => {
   const route = useRoute() as any;
-  const {booking_id, other_user_name, other_user_image, other_user_phone} =
-    route.params;
+  const {
+    booking_id,
+    other_user_name,
+    other_user_image,
+    other_user_phone,
+    user_id,
+  } = route.params;
 
   console.log('booking_id :: ', booking_id);
   const insets = useSafeAreaInsets();
@@ -58,7 +63,7 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     if (accessToken && booking_id) {
-      const socketURL = `ws://192.168.1.14:8081/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
+      const socketURL = `ws://192.168.1.20:8081/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
       ws.current = new WebSocket(socketURL);
       console.log('ws.current', JSON.stringify(ws.current));
       ws.current.onopen = () => {
@@ -135,9 +140,13 @@ const ChatScreen: React.FC = () => {
 
   const handleSendMessage = (text: string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify({message: text}));
+      const messageData = {
+        message: text,
+        sender_id: panditID,
+        receiver_id: user_id,
+      };
+      ws.current.send(JSON.stringify(messageData));
       isUserAtBottom.current = true;
-      // No notification logic
     } else {
       console.warn('WebSocket not connected');
     }

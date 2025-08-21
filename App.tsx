@@ -69,8 +69,7 @@ const App = () => {
             ref={navigationRef}
             onReady={() => {
               handleInitialNotification();
-            }} // ✅ ensures quit-state navigation works
-          >
+            }}>
             <RootNavigator />
           </NavigationContainer>
         </AuthProvider>

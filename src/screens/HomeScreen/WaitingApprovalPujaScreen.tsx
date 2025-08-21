@@ -68,7 +68,7 @@ type PujaDetailsType = {
 const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
   const {t} = useTranslation();
   const route = useRoute();
-  const {booking_id} = route?.params as any;
+  const {booking_id, offer_id} = route?.params as any;
   const inset = useSafeAreaInsets();
   const [isPujaItemsModalVisible, setIsPujaItemsModalVisible] = useState(false);
   const [pujaDetails, setPujaDetails] = useState<PujaDetailsType | null>(null);
@@ -77,11 +77,14 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<'approve' | 'reject' | null>(null);
 
-  // Fetch Waiting Approval Pooja details using new API response structure
+  console.log('booking_id in WaitingApprovalPujaScreen :: ', booking_id);
+  console.log('offer_id in WaitingApprovalPujaScreen :: ', offer_id);
+  console.log('pujaDetails in WaitingApprovalPujaScreen :: ', pujaDetails);
+
   const fetchPujaDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await getBookingAutoDetails(booking_id);
+      const response: any = await getBookingAutoDetails(booking_id);
       console.log('response', response);
       if (response?.data) {
         setPujaDetails(response.data);
@@ -114,7 +117,6 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     setIsPujaItemsModalVisible(false);
   };
 
-  // Helper to get address string for display, including tirth_place
   const getAddressDisplay = () => {
     if (!pujaDetails?.location?.type || !pujaDetails.location.details)
       return '';
@@ -130,7 +132,6 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
       return addressStr || JSON.stringify(details);
     }
     if (type === 'tirth_place') {
-      // Show tirth place name and city, and description if available
       let tirthStr = '';
       if (details.name) tirthStr += details.name;
       if (details.city) tirthStr += (tirthStr ? ', ' : '') + details.city;
@@ -141,15 +142,14 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     return '';
   };
 
-  // Use postUpdateStatus for both approve and reject
   const handleApprove = async () => {
     if (!pujaDetails?.id) return;
     try {
       setLoading(true);
       await postUpdateStatus({
-        booking_id: pujaDetails.id,
+        booking_id: booking_id,
         action: 'accept',
-        offer_id: pujaDetails.offer_id,
+        offer_id: offer_id || pujaDetails?.offer_id,
       });
       showSuccessToast?.('Puja approved successfully');
       navigation.goBack();
@@ -170,15 +170,14 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     try {
       setLoading(true);
       await postUpdateStatus({
-        booking_id: pujaDetails.id,
+        booking_id: booking_id,
         action: 'reject',
-        offer_id: pujaDetails.offer_id,
+        offer_id: offer_id || pujaDetails?.offer_id,
       });
       showSuccessToast?.('Puja rejected successfully');
       navigation.goBack();
-    } catch (error) {
-      showErrorToast?.('Failed to reject puja');
-      console.error('Reject error:', error);
+    } catch (error: any) {
+      console.error('Reject error:', error?.response?.data?.message);
     } finally {
       setLoading(false);
       setModalVisible(false);
@@ -186,13 +185,11 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     }
   };
 
-  // Open modal for approve/reject
   const openModal = (type: 'approve' | 'reject') => {
     setModalType(type);
     setModalVisible(true);
   };
 
-  // Modal content
   const getModalContent = () => {
     if (modalType === 'approve') {
       return {

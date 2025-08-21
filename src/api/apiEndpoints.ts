@@ -32,7 +32,7 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
-export const BASE_URL = 'https://c1d64678fef4.ngrok-free.app';
+export const BASE_URL = 'https://f4d097afd7b1.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';
@@ -67,9 +67,11 @@ export const PUT_PANDIT_LANGUAGE = '/panditji/edit-pandit-languages/';
 export const PUT_PANDIT_DOCUMENTS = '/panditji/edit-pandit-documents/';
 export const GET_PAST_BOOKINGS = '/panditji/bookings/past/';
 export const POST_CONVERSATION = '/api/chat/conversations/start-by-booking/';
-export const GET_MESSAGE_HISTORY = '/api/chat/conversations/{bookingID}/messages/';
+export const GET_MESSAGE_HISTORY =
+  '/api/chat/conversations/{bookingID}/messages/';
 export const POST_REGISTER_FCM = '/app/register-device-token/';
-export const POST_RATE_USER = "/panditji/rate-user/"
-export const GET_PUT_UPDATE_PROFILE = "/panditji/update-profile/"
-export const POST_REVIEW_IMAGE = "/panditji/reviews/user-rating/{id}/upload-image/"
-export const GET_BOOKING_AUTO_DETAILS = '/panditji/booking-auto/{id}/' 
+export const POST_RATE_USER = '/panditji/rate-user/';
+export const GET_PUT_UPDATE_PROFILE = '/panditji/update-profile/';
+export const POST_REVIEW_IMAGE =
+  '/panditji/reviews/user-rating/{id}/upload-image/';
+export const GET_BOOKING_AUTO_DETAILS = '/panditji/booking-auto/{id}/';
