@@ -257,5 +257,10 @@
   "no_pooja_found": "No puja found.",
   "rate_submit_successfully": "Rating submitted successfully.",
   "profile_updated_successfully": "Profile updated successfully",
-  "please_give_rating": "Please give a rating"
+  "please_give_rating": "Please give a rating",
+  "approve_puja": "Approve Puja",
+  "approve_puja_message": "Are you sure you want to approve this puja?",
+  "reject_puja": "Reject Puja",
+  "puja_reject": "Puja rejected successfully",
+  "puja_approve": "Puja approved successfully"
 }

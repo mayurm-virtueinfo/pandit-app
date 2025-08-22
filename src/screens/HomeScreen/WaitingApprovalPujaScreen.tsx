@@ -151,7 +151,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
         action: 'accept',
         offer_id: offer_id || pujaDetails?.offer_id,
       });
-      showSuccessToast?.('Puja approved successfully');
+      showSuccessToast?.(t('puja_approve'));
       navigation.goBack();
     } catch (error: any) {
       showErrorToast?.(
@@ -174,9 +174,10 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
         action: 'reject',
         offer_id: offer_id || pujaDetails?.offer_id,
       });
-      showSuccessToast?.('Puja rejected successfully');
+      showSuccessToast?.(t('puja_reject'));
       navigation.goBack();
     } catch (error: any) {
+      navigation.goBack();
       console.error('Reject error:', error?.response?.data?.message);
     } finally {
       setLoading(false);
@@ -193,16 +194,16 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
   const getModalContent = () => {
     if (modalType === 'approve') {
       return {
-        title: t('Approve Puja'),
-        message: t('Are you sure you want to approve this puja?'),
+        title: t('approve_puja'),
+        message: t('approve_puja_message'),
         confirmText: t('Approve'),
         onConfirm: handleApprove,
       };
     }
     if (modalType === 'reject') {
       return {
-        title: t('Reject Puja'),
-        message: t('Are you sure you want to reject this puja?'),
+        title: t('reject_puja'),
+        message: t('reject_puja_message'),
         confirmText: t('Reject'),
         onConfirm: handleReject,
       };
