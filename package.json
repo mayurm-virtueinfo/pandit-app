@@ -12,7 +12,9 @@
     "dev": "concurrently \"firebase emulators:start --only auth\" \"react-native start\"",
     "ios:dev": "concurrently \"firebase emulators:start --only auth\" \"npm run ios\"",
     "build:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle",
-    "clean:android": "cd android && ./gradlew clean && cd .."
+    "clean:android": "cd android && ./gradlew clean && cd ..",
+    "release:android": "cd android/ && ./gradlew app:assembleRelease && cd ..",
+    "bundle:android": "cd android/ && ./gradlew app:bundleRelease && cd .."
   },
   "dependencies": {
     "@notifee/react-native": "^9.1.8",
