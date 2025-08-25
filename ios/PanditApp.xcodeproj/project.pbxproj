@@ -8,7 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* PanditAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* PanditAppTests.m */; };
-		04C10EC52E01756C007C3E6D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04C10EC42E01756C007C3E6D /* GoogleService-Info.plist */; };
+		0440FE702E5C78C80077B4FF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0440FE6F2E5C78C80077B4FF /* GoogleService-Info.plist */; };
+		0440FE722E5C80C10077B4FF /* LaunchScreen1.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0440FE712E5C80C10077B4FF /* LaunchScreen1.storyboard */; };
 		0FDA41D631BE665BC6DD5A12 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -37,7 +38,8 @@
 		00E356EE1AD99517003FC87E /* PanditAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PanditAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* PanditAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PanditAppTests.m; sourceTree = "<group>"; };
-		04C10EC42E01756C007C3E6D /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		0440FE6F2E5C78C80077B4FF /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		0440FE712E5C80C10077B4FF /* LaunchScreen1.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen1.storyboard; sourceTree = "<group>"; };
 		04EC08AB2E01725F00067906 /* PanditApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PanditApp.entitlements; path = PanditApp/PanditApp.entitlements; sourceTree = "<group>"; };
 		04F8E9EECC35B92E915E8BFB /* Pods-PanditApp-PanditAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PanditApp-PanditAppTests.release.xcconfig"; path = "Target Support Files/Pods-PanditApp-PanditAppTests/Pods-PanditApp-PanditAppTests.release.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* PanditApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PanditApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,13 +49,13 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = PanditApp/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = PanditApp/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = PanditApp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		19796D79E7FB4D84BB876230 /* Sen-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-Regular.ttf"; path = "../src/assets/fonts/Sen-Regular.ttf"; sourceTree = "<group>"; };
+		19796D79E7FB4D84BB876230 /* Sen-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-Regular.ttf"; path = "../src/assets/fonts/Sen-Regular.ttf"; sourceTree = "<group>"; };
 		1A936495EF919F55EACBB8AC /* Pods_PanditApp_PanditAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PanditApp_PanditAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BE030E531ADFDFED860D343 /* Pods_PanditApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PanditApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4052FFF9B8BA4CD490F64656 /* Sen-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-Medium.ttf"; path = "../src/assets/fonts/Sen-Medium.ttf"; sourceTree = "<group>"; };
-		50ED3CD338894A6097B96ECD /* Sen-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-ExtraBold.ttf"; path = "../src/assets/fonts/Sen-ExtraBold.ttf"; sourceTree = "<group>"; };
-		5536ED5EA8634BA99E4D6416 /* Sen-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-SemiBold.ttf"; path = "../src/assets/fonts/Sen-SemiBold.ttf"; sourceTree = "<group>"; };
-		638AAB10636A4CA9AF81A75C /* Sen-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-Bold.ttf"; path = "../src/assets/fonts/Sen-Bold.ttf"; sourceTree = "<group>"; };
+		4052FFF9B8BA4CD490F64656 /* Sen-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-Medium.ttf"; path = "../src/assets/fonts/Sen-Medium.ttf"; sourceTree = "<group>"; };
+		50ED3CD338894A6097B96ECD /* Sen-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-ExtraBold.ttf"; path = "../src/assets/fonts/Sen-ExtraBold.ttf"; sourceTree = "<group>"; };
+		5536ED5EA8634BA99E4D6416 /* Sen-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-SemiBold.ttf"; path = "../src/assets/fonts/Sen-SemiBold.ttf"; sourceTree = "<group>"; };
+		638AAB10636A4CA9AF81A75C /* Sen-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Sen-Bold.ttf"; path = "../src/assets/fonts/Sen-Bold.ttf"; sourceTree = "<group>"; };
 		6B2348572978B4F898C8F93D /* Pods-PanditApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PanditApp.debug.xcconfig"; path = "Target Support Files/Pods-PanditApp/Pods-PanditApp.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = PanditApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8882F0C28C91001E44A2BC6E /* Pods-PanditApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PanditApp.release.xcconfig"; path = "Target Support Files/Pods-PanditApp/Pods-PanditApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 		13B07FAE1A68108700A75B9A /* PanditApp */ = {
 			isa = PBXGroup;
 			children = (
+				0440FE712E5C80C10077B4FF /* LaunchScreen1.storyboard */,
 				04EC08AB2E01725F00067906 /* PanditApp.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -133,7 +136,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				04C10EC42E01756C007C3E6D /* GoogleService-Info.plist */,
+				0440FE6F2E5C78C80077B4FF /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* PanditApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* PanditAppTests */,
@@ -166,7 +169,6 @@
 				5536ED5EA8634BA99E4D6416 /* Sen-SemiBold.ttf */,
 			);
 			name = Resources;
-			path = "";
 			sourceTree = "<group>";
 		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
@@ -275,10 +277,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				04C10EC52E01756C007C3E6D /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				0440FE702E5C78C80077B4FF /* GoogleService-Info.plist in Resources */,
 				0FDA41D631BE665BC6DD5A12 /* PrivacyInfo.xcprivacy in Resources */,
 				6165E3080EE940D981741AE0 /* Sen-Bold.ttf in Resources */,
+				0440FE722E5C80C10077B4FF /* LaunchScreen1.storyboard in Resources */,
 				C1FFB0C6CD564A869B6C449F /* Sen-ExtraBold.ttf in Resources */,
 				A775CDD54E85488DBF2BA0C7 /* Sen-Medium.ttf in Resources */,
 				F078961FC20D41FD830BC8A1 /* Sen-Regular.ttf in Resources */,
@@ -652,10 +655,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -735,10 +735,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

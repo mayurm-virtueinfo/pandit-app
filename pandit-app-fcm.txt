@@ -1,0 +1,15 @@
+Name
+PanditAppFCM
+
+Key Usage Description
+Pandit App FCM sandbox production
+
+Key ID
+6VW5M69FV3
+
+Created by
+Kalpeshkumar Chhatrola on 2025/08/25 10:08 am
+
+Enabled Services
+Name	    Configuration
+APNsApple   Push Notifications service (APNs)	Team scoped (All topics) [Sandbox & Production]
