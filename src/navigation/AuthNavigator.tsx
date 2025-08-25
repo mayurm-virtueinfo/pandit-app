@@ -19,7 +19,7 @@ import DocumentUploadScreen from '../screens/Auth/DocumentUploadScreen';
 export type AuthStackParamList = {
   replace(arg0: string): void;
   navigate(arg0: string): void;
-  SignIn: undefined;
+  SignIn: any;
   OTPVerification: {
     phoneNumber: string;
     confirmation: FirebaseAuthTypes.ConfirmationResult;

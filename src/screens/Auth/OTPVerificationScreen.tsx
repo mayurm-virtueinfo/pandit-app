@@ -34,7 +34,7 @@ import {getMessaging, getToken} from '@react-native-firebase/messaging';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
-  'OTPVerification' | 'AppBottomTabNavigator'
+  'OTPVerification' | 'AppBottomTabNavigator' | 'SignIn'
 >;
 
 type OTPVerificationScreenRouteProp = RouteProp<
@@ -246,7 +246,11 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
                 </View>
               )}
               <PrimaryButtonOutlined
-                onPress={() => navigation.goBack()}
+                onPress={() =>
+                  navigation.replace('SignIn', {
+                    previousPhoneNumber: phoneNumber,
+                  })
+                }
                 title={t('change_mobile_number')}
               />
             </View>

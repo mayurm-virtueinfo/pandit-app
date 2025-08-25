@@ -27,6 +27,7 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   // Destructure the data for easier access
   const {
     pooja_name,
+
     pooja_image_url,
     booking_date,
     muhurat_time,
@@ -88,12 +89,6 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
-      <StatusBar
-        translucent
-        backgroundColor="transparent"
-        barStyle="light-content"
-      />
-
       <CustomHeader
         title={t('Completed Puja Details')}
         showBackButton
@@ -104,137 +99,133 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         }}
       />
 
-      <View style={styles.contentContainer}>
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}>
-          <Image
-            source={
-              pooja_image_url
-                ? {uri: pooja_image_url}
-                : {
-                    uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                  }
-            }
-            style={[
-              styles.heroImage,
-              {width: screenWidth, height: verticalScale(200)},
-            ]}
-            resizeMode="stretch"
-          />
-          <View
-            style={{
-              flex: 1,
-              paddingHorizontal: moderateScale(24),
-              paddingTop: verticalScale(24),
-            }}>
-            <Text style={styles.pujaTitle}>{pooja_name || t('Puja Name')}</Text>
-
-            <View style={[styles.card, THEMESHADOW.shadow]}>
-              <View style={styles.cardInner}>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('Date')}</Text>
-                  <Text style={styles.detailValue}>
-                    {formatDateWithOrdinal(booking_date) || '-'}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('Amount')}</Text>
-                  <Text style={[styles.detailValue, {color: COLORS.success}]}>
-                    ₹{amount || '0'}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('Muhurat')}</Text>
-                  <Text style={styles.detailValue}>
-                    {muhurat_time || '-'} {muhurat_type && `(${muhurat_type})`}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('Temple')}</Text>
-                  <Text style={styles.detailValue}>
-                    {tirth_place_name || '-'}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>
-                    {t('Samagri Required')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.detailValue,
-                      {
-                        color: samagri_required ? COLORS.success : COLORS.error,
-                      },
-                    ]}>
-                    {samagri_required ? t('Yes') : t('No')}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('Payment Status')}</Text>
-                  <Text
-                    style={[
-                      styles.detailValue,
-                      {color: getStatusColor(payment_status)},
-                    ]}>
-                    {payment_status || '-'}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('Booking Status')}</Text>
-                  <Text
-                    style={[
-                      styles.detailValue,
-                      {color: getStatusColor(booking_status)},
-                    ]}>
-                    {booking_status || '-'}
-                  </Text>
-                </View>
-                {notes && (
-                  <View style={styles.notesContainer}>
-                    <Text style={styles.notesLabel}>{t('Notes')}</Text>
-                    <Text style={styles.notesValue}>{notes}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-
-            {/* User Card */}
-            <View style={[styles.userCard, THEMESHADOW.shadow]}>
-              <Image
-                source={
-                  booking_user_img
-                    ? {uri: booking_user_img}
-                    : {
-                        uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                      }
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}>
+        <Image
+          source={
+            pooja_image_url
+              ? {uri: pooja_image_url}
+              : {
+                  uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
                 }
-                style={styles.userImage}
-                resizeMode="cover"
-              />
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>
-                  {booking_user_name || t('User Name')}
-                </Text>
-                <Text style={styles.userMobile}>
-                  {booking_user_mobile || t('Mobile Number')}
-                </Text>
-              </View>
-            </View>
+          }
+          style={[
+            styles.heroImage,
+            {width: screenWidth, height: verticalScale(200)},
+          ]}
+          resizeMode="stretch"
+        />
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: moderateScale(24),
+            paddingTop: verticalScale(24),
+          }}>
+          <Text style={styles.pujaTitle}>{pooja_name || t('Puja Name')}</Text>
 
-            {/* Address Card */}
-            {address_details && (
-              <View style={[styles.addressCard, THEMESHADOW.shadow]}>
-                <Text style={styles.addressLabel}>{t('Address Details')}</Text>
-                <Text style={styles.addressValue}>
-                  {getAddressString(address_details) || '-'}
+          <View style={[styles.card, THEMESHADOW.shadow]}>
+            <View style={styles.cardInner}>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('Date')}</Text>
+                <Text style={styles.detailValue}>
+                  {formatDateWithOrdinal(booking_date) || '-'}
                 </Text>
               </View>
-            )}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('Amount')}</Text>
+                <Text style={[styles.detailValue, {color: COLORS.success}]}>
+                  ₹{amount || '0'}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('Muhurat')}</Text>
+                <Text style={styles.detailValue}>
+                  {muhurat_time || '-'} {muhurat_type && `(${muhurat_type})`}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('Temple')}</Text>
+                <Text style={styles.detailValue}>
+                  {tirth_place_name || '-'}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('Samagri Required')}</Text>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    {
+                      color: samagri_required ? COLORS.success : COLORS.error,
+                    },
+                  ]}>
+                  {samagri_required ? t('Yes') : t('No')}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('Payment Status')}</Text>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    {color: getStatusColor(payment_status)},
+                  ]}>
+                  {payment_status || '-'}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('Booking Status')}</Text>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    {color: getStatusColor(booking_status)},
+                  ]}>
+                  {booking_status || '-'}
+                </Text>
+              </View>
+              {notes && (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesLabel}>{t('Notes')}</Text>
+                  <Text style={styles.notesValue}>{notes}</Text>
+                </View>
+              )}
+            </View>
           </View>
-        </ScrollView>
-      </View>
+
+          {/* User Card */}
+          <View style={[styles.userCard, THEMESHADOW.shadow]}>
+            <Image
+              source={
+                booking_user_img
+                  ? {uri: booking_user_img}
+                  : {
+                      uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
+                    }
+              }
+              style={styles.userImage}
+              resizeMode="cover"
+            />
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>
+                {booking_user_name || t('User Name')}
+              </Text>
+              <Text style={styles.userMobile}>
+                {booking_user_mobile || t('Mobile Number')}
+              </Text>
+            </View>
+          </View>
+
+          {/* Address Card */}
+          {address_details && (
+            <View style={[styles.addressCard, THEMESHADOW.shadow]}>
+              <Text style={styles.addressLabel}>{t('Address Details')}</Text>
+              <Text style={styles.addressValue}>
+                {getAddressString(address_details) || '-'}
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -248,10 +239,12 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: COLORS.primaryBackground,
   },
   scrollView: {
     flex: 1,
+    backgroundColor: COLORS.pujaBackground,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
   },
   scrollContent: {
     paddingBottom: verticalScale(32),

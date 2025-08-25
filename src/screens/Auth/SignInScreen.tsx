@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
@@ -23,6 +24,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import PrimaryButton from '../../components/PrimaryButton';
 import {Images} from '../../theme/Images';
+import {useFocusEffect} from '@react-navigation/native';
 
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -31,15 +33,29 @@ type SignInScreenNavigationProp = StackNavigationProp<
 
 interface Props {
   navigation: SignInScreenNavigationProp;
+  route: any;
 }
 
-const SignInScreen: React.FC<Props> = ({navigation}) => {
+const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   const {t} = useTranslation();
   const inset = useSafeAreaInsets();
   const {showErrorToast, showSuccessToast} = useCommonToast();
   const [phoneNumber, setPhoneNumber] = useState('1111111111');
   const [isLoading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{phoneNumber?: string}>({});
+  const [previousPhoneNumber, setPreviousPhoneNumber] = useState<string>('');
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('SignIn screen focused - resetting state');
+      setErrors({});
+      setLoading(false);
+
+      if (route.params?.previousPhoneNumber) {
+        setPreviousPhoneNumber(route.params.previousPhoneNumber);
+      }
+    }, [route.params]),
+  );
 
   // Improved validation: Only allow 10 digit numbers, no letters, no special chars, must start with 6-9
   // Also, do not show error if exactly 10 digits and starts with 6-9
@@ -76,6 +92,28 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
 
     setErrors({});
     const formattedPhone = `+91${phoneNumber.trim().replace(/\s+/g, '')}`;
+
+    if (previousPhoneNumber && formattedPhone === previousPhoneNumber) {
+      Alert.alert(
+        'Same Number Detected',
+        'You entered the same phone number. What would you like to do?',
+        [
+          {
+            text: 'Enter Different Number',
+            onPress: () => {
+              setPhoneNumber('');
+              setPreviousPhoneNumber('');
+            },
+            style: 'default',
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ],
+      );
+      return;
+    }
     if (!/^\+91[0-9]\d{9}$/.test(formattedPhone)) {
       const errorText =
         t('Please_enter_valid_number') ||
