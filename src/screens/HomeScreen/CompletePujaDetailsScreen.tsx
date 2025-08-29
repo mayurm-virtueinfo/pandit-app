@@ -142,8 +142,12 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('Muhurat')}</Text>
                 <Text style={styles.detailValue}>
-                  {muhurat_time || '-'} {muhurat_type && `(${muhurat_type})`}
+                  {muhurat_type && `(${muhurat_type})`}
                 </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('muhurat_time')}</Text>
+                <Text style={styles.detailValue}>{muhurat_time || '-'}</Text>
               </View>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('Temple')}</Text>

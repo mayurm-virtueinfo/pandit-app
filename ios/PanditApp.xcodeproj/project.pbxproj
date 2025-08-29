@@ -112,6 +112,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
 			);
 			name = PanditApp;
 			sourceTree = "<group>";
@@ -138,7 +139,6 @@
 			children = (
 				0440FE6F2E5C78C80077B4FF /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* PanditApp */,
-				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* PanditAppTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,

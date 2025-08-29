@@ -1,4 +1,4 @@
-import {Platform, Alert} from 'react-native';
+import { Platform, Alert } from 'react-native';
 import {
   getMessaging,
   requestPermission,
@@ -6,7 +6,7 @@ import {
   getAPNSToken,
   AuthorizationStatus,
 } from '@react-native-firebase/messaging';
-import {getApp} from '@react-native-firebase/app';
+import { getApp } from '@react-native-firebase/app';
 
 const messaging = getMessaging(getApp());
 
