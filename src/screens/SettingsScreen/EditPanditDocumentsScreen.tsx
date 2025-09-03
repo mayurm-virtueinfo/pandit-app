@@ -401,7 +401,7 @@ const EditPanditDocumentsScreen: React.FC = () => {
         <View
           style={[
             styles.bottomButtonContainer,
-            {paddingBottom: insets.bottom || moderateScale(16)},
+            {paddingBottom: moderateScale(16)},
           ]}>
           <PrimaryButton
             title={t('update')}
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: moderateScale(24), // To ensure content is not hidden behind button
+    paddingBottom: moderateScale(24),
   },
   formContainer: {
     paddingHorizontal: scale(20),
@@ -437,13 +437,11 @@ const styles = StyleSheet.create({
   submitButton: {
     minHeight: moderateScale(46),
     marginHorizontal: scale(20),
-    // marginTop: verticalScale(24), // Remove marginTop, handled by bottomButtonContainer
   },
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
     paddingHorizontal: scale(0),
-    paddingTop: moderateScale(12),
-    // paddingBottom handled inline for safe area
+    paddingTop: moderateScale(6),
   },
 });
 

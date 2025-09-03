@@ -167,7 +167,7 @@ const EditCityScreen: React.FC = () => {
             <View
               style={[
                 styles.bottomButtonContainer,
-                {paddingBottom: insets.bottom || moderateScale(16)},
+                {paddingBottom: moderateScale(16)},
               ]}>
               <PrimaryButton
                 title={t('next')}
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
     paddingHorizontal: wp(6.5),
-    paddingTop: moderateScale(12),
+    paddingTop: moderateScale(6),
     // paddingBottom handled inline for safe area
   },
 });

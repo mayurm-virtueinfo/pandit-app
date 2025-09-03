@@ -84,6 +84,13 @@ type PujaDetailsType = {
     mobile?: string;
     profile_img_url?: string | null;
   };
+  // Add these for puja items
+  pandit_arranged_items?: Array<{
+    name: string;
+    quantity: number;
+    units: string;
+  }>;
+  user_arranged_items?: Array<{name: string; quantity: number; units: string}>;
 };
 
 const STORAGE_KEY_PREFIX = 'puja_status_';
@@ -109,7 +116,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     }
     return pujaDetails?.id || id;
   };
-  console.log('progressPujaDetails', progressPujaDetails);
+
   // Fetch Pooja details
   const fetchPujaDetails = useCallback(async () => {
     try {
@@ -119,7 +126,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         const data = Array.isArray(response)
           ? response[0]
           : response?.data?.[0] || response?.[0];
-        console.log('Data', data);
         if (data) {
           setProgressPujaDetails(data);
         }
@@ -294,6 +300,12 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         if (city_name) addressStr += (addressStr ? ', ' : '') + city_name;
         return addressStr;
       }
+      if (progressPujaDetails.address_details) {
+        const {full_address} = progressPujaDetails.address_details;
+        let addressStr = '';
+        if (full_address) addressStr += full_address;
+        return addressStr;
+      }
       // fallback to tirth_place_name
       if (progressPujaDetails.tirth_place_name) {
         return progressPujaDetails.tirth_place_name;
@@ -350,6 +362,35 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     }
   };
 
+  // Get puja items for modal
+  const getPanditArrangedItems = () => {
+    if (
+      progress &&
+      progressPujaDetails &&
+      Array.isArray(progressPujaDetails.pandit_arranged_items)
+    ) {
+      return progressPujaDetails.pandit_arranged_items;
+    }
+    if (pujaDetails && Array.isArray(pujaDetails.pandit_arranged_items)) {
+      return pujaDetails.pandit_arranged_items;
+    }
+    return [];
+  };
+
+  const getUserArrangedItems = () => {
+    if (
+      progress &&
+      progressPujaDetails &&
+      Array.isArray(progressPujaDetails.user_arranged_items)
+    ) {
+      return progressPujaDetails.user_arranged_items;
+    }
+    if (pujaDetails && Array.isArray(pujaDetails.user_arranged_items)) {
+      return pujaDetails.user_arranged_items;
+    }
+    return [];
+  };
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <StatusBar
@@ -365,11 +406,11 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           'Pooja Details'
         }
         showBackButton
-        showBellButton
+        // showBellButton
         onBackPress={handleBackPress}
-        onNotificationPress={() => {
-          navigation.navigate('NotificationScreen');
-        }}
+        // onNotificationPress={() => {
+        //   navigation.navigate('NotificationScreen');
+        // }}
       />
 
       <View style={styles.contentContainer}>
@@ -455,7 +496,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   style={styles.detailIcon}
                 />
                 <View style={styles.detailContent}>
-                  <Text style={styles.detailText}>Pooja items list</Text>
+                  <Text style={styles.detailText}>
+                    {t('list_of_pooja_items')}
+                  </Text>
                 </View>
                 <Feather
                   name="eye"
@@ -481,7 +524,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 </View>
                 <Text style={styles.priestName}>
                   {pujaDetails?.booking_user_name ||
-                    progressPujaDetails?.user_info?.full_name}
+                    progressPujaDetails?.user_info?.full_name ||
+                    progressPujaDetails?.booking_user_name}
                 </Text>
                 <TouchableOpacity
                   onPress={handleOnChatClick}
@@ -508,6 +552,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                       name:
                         pujaDetails?.booking_user_name ||
                         progressPujaDetails?.user_info?.full_name ||
+                        progressPujaDetails?.booking_user_name ||
                         '',
                     },
                   )}
@@ -570,6 +615,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       <PujaItemsModal
         visible={isPujaItemsModalVisible}
         onClose={handleClosePujaItemsModal}
+        panditItems={getPanditArrangedItems()}
+        userItems={getUserArrangedItems()}
       />
     </View>
   );

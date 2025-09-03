@@ -172,7 +172,7 @@ const EditPanditLanguageScreen: React.FC = () => {
             <View
               style={[
                 styles.bottomButtonContainer,
-                {paddingBottom: insets.bottom || moderateScale(16)},
+                {paddingBottom: moderateScale(16)},
               ]}>
               <PrimaryButton
                 title={t('update')}
@@ -207,12 +207,11 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
-    paddingBottom: 0, // Remove bottom padding here, handled by bottomButtonContainer
+    paddingBottom: 0,
   },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    // Remove flex: 1 to allow ScrollView to size naturally
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -233,7 +232,7 @@ const styles = StyleSheet.create({
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
     paddingHorizontal: wp(6.5),
-    paddingTop: moderateScale(8),
+    paddingTop: moderateScale(6),
   },
   noResultText: {
     color: COLORS.lighttext,

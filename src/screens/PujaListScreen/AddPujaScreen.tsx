@@ -285,8 +285,9 @@ const AddPujaScreen: React.FC = () => {
     {
       id: 'system',
       title: 'System Price',
-      description:
-        'Rs. 2500 - With pooja items\nRs. 1800 - Without pooja items',
+      description: `Rs. 2500 - ${t('with_pooja_items')}\nRs. 1800 -${t(
+        'without_pooja_items',
+      )}`,
     },
     {
       id: 'custom',
@@ -453,7 +454,9 @@ const AddPujaScreen: React.FC = () => {
               )}
             </View>
           )}
-
+        </ScrollView>
+        {/* Button fixed at the bottom */}
+        <View style={[styles.bottomButtonContainer, {paddingBottom: 16}]}>
           <PrimaryButton
             title={
               isEditMode
@@ -463,7 +466,7 @@ const AddPujaScreen: React.FC = () => {
             onPress={handleAddPuja}
             disabled={!hasPujaItems || !hasSelectedPuja}
           />
-        </ScrollView>
+        </View>
       </View>
     </View>
   );
@@ -486,7 +489,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   scrollContent: {
-    paddingBottom: Platform.OS === 'ios' ? 20 : 50,
+    paddingBottom: 20, // Remove extra space for button, handled by bottomButtonContainer
   },
   sectionContainer: {
     backgroundColor: COLORS.white,
@@ -599,6 +602,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlignVertical: 'center',
     paddingVertical: 0,
+  },
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 24,
+    paddingTop: 6,
   },
 });
 

@@ -175,6 +175,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
     try {
       setLoading(true);
       const confirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
+      console.log('confirmation', confirmation);
       setOtpConfirmation(confirmation);
       showSuccessToast(t('otp_resent'));
       setShowResend(false);

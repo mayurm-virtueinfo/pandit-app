@@ -26,6 +26,7 @@ import {getPanditProfileDetails, postLogout} from '../../api/apiService';
 import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 import {getFcmToken} from '../../configuration/notificationPermission';
+import LanguageSwitcher from '../../components/LanguageSwitcher';
 
 type ProfileFieldProps = {
   label: string;
@@ -49,7 +50,7 @@ const ProfileScreen = () => {
   const [profileData, setProfileData] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  // console.log('profileData :: ', profileData);
+  console.log('profileData :: ', profileData);
 
   // Use useFocusEffect to reload profile data when coming back from EditProfileScreen
   useFocusEffect(
@@ -189,7 +190,7 @@ const ProfileScreen = () => {
                 color={COLORS.primaryTextDark}
               />
             </TouchableOpacity>
-            <View style={styles.divider} />
+            {/* <View style={styles.divider} />
             <TouchableOpacity
               style={styles.editFieldContainer}
               onPress={handleNotificationNavigation}
@@ -200,10 +201,10 @@ const ProfileScreen = () => {
                 size={20}
                 color={COLORS.primaryTextDark}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
-          {/* <LanguageSwitcher /> */}
+          <LanguageSwitcher />
           <TouchableOpacity
             style={[styles.editSection, THEMESHADOW.shadow]}
             onPress={() => setLogoutModalVisible(true)}>

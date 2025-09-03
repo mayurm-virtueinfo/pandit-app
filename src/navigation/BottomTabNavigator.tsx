@@ -9,6 +9,7 @@ import HomeNavigator from './HomeStack/HomeStack';
 import PujaListNavigator from './PujaListStack/PujaListStack';
 import ProfileNavigator from './ProfileStack/ProfileStack';
 import SettingsNavigator from './SettingsStack/SettingsStack';
+import {useTranslation} from 'react-i18next';
 
 export type AppBottomTabParamList = {
   HomeNavigator: undefined;
@@ -20,6 +21,7 @@ export type AppBottomTabParamList = {
 const Tab = createBottomTabNavigator<AppBottomTabParamList>();
 
 const AppBottomTabNavigator: React.FC = () => {
+  const {t} = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -35,7 +37,7 @@ const AppBottomTabNavigator: React.FC = () => {
         name="HomeNavigator"
         component={HomeNavigator}
         options={({route}) => ({
-          title: 'Home',
+          title: t('home'),
           // headerTitle: getHeaderTitle(route), // dynamic title in screen header
           tabBarIcon: ({color, size}) => (
             <Octicons name="home" size={size} color={color} />
@@ -46,7 +48,7 @@ const AppBottomTabNavigator: React.FC = () => {
         name="PujaListNavigator"
         component={PujaListNavigator}
         options={{
-          title: 'Pooja List',
+          title: t('pooja_list'),
           tabBarIcon: ({color, size}) => (
             <FontAwesome name="institution" size={size} color={color} />
           ),
@@ -56,7 +58,7 @@ const AppBottomTabNavigator: React.FC = () => {
         name="SettingsNavigator"
         component={SettingsNavigator}
         options={{
-          title: 'Settings',
+          title: t('settings'),
           tabBarIcon: ({color, size}) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),
@@ -66,7 +68,7 @@ const AppBottomTabNavigator: React.FC = () => {
         name="ProfileNavigator"
         component={ProfileNavigator}
         options={{
-          title: 'Profile',
+          title: t('profile'),
           tabBarIcon: ({color, size}) => (
             <MaterialIcons name="person-outline" size={size} color={color} />
           ),

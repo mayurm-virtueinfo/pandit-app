@@ -59,26 +59,26 @@ const Calendar: React.FC<CalendarProps> = ({
     todayObj.getMonth() + 1,
   ).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
 
-  // Convert UTC dates to YYYY-MM-DD format
-  const predefinedDates = [
-    Date.UTC(2025, 8, 19),
-    Date.UTC(2025, 8, 20),
-    Date.UTC(2025, 8, 21),
-    Date.UTC(2025, 8, 25),
-    Date.UTC(2025, 8, 26),
-    Date.UTC(2025, 8, 27),
-  ].map(date => {
-    const d = new Date(date);
-    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(
-      2,
-      '0',
-    )}-${String(d.getUTCDate()).padStart(2, '0')}`;
-  });
+  // Remove static predefinedDates
+  // const predefinedDates = [
+  //   Date.UTC(2025, 8, 19),
+  //   Date.UTC(2025, 8, 20),
+  //   Date.UTC(2025, 8, 21),
+  //   Date.UTC(2025, 8, 25),
+  //   Date.UTC(2025, 8, 26),
+  //   Date.UTC(2025, 8, 27),
+  // ].map(date => {
+  //   const d = new Date(date);
+  //   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(
+  //     2,
+  //     '0',
+  //   )}-${String(d.getUTCDate()).padStart(2, '0')}`;
+  // });
 
   const markedDates: {[date: string]: any} = {};
 
-  // Mark predefined and selected dates
-  const allSelectedDates = [...new Set([...selectedDates, ...predefinedDates])]; // Combine and remove duplicates
+  // Only use selectedDates for marking
+  const allSelectedDates = [...new Set([...selectedDates])];
   allSelectedDates.forEach(dateStr => {
     // If today is selected, set background as red
     if (dateStr === todayStr) {

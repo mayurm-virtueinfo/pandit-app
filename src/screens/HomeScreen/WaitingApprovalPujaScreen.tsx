@@ -247,11 +247,11 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
       <UserCustomHeader
         title={pujaDetails?.pooja?.name || 'Pooja Details'}
         showBackButton
-        showBellButton
+        // showBellButton
         onBackPress={handleBackPress}
-        onNotificationPress={() => {
-          navigation.navigate('NotificationScreen');
-        }}
+        // onNotificationPress={() => {
+        //   navigation.navigate('NotificationScreen');
+        // }}
       />
 
       <View style={styles.contentContainer}>

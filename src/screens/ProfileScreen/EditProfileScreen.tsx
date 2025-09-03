@@ -646,7 +646,7 @@ const EditProfileScreen: React.FC = () => {
                 {paddingBottom: inset.bottom || 16},
               ]}>
               <PrimaryButton
-                title={t('next')}
+                title={t('update')}
                 onPress={handleNext}
                 style={styles.buttonContainer}
                 textStyle={styles.buttonText}

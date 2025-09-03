@@ -92,11 +92,11 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       <CustomHeader
         title={t('Completed Puja Details')}
         showBackButton
-        showBellButton={false}
+        // showBellButton={false}
         onBackPress={() => navigation?.goBack && navigation.goBack()}
-        onNotificationPress={() => {
-          navigation?.navigate && navigation.navigate('NotificationScreen');
-        }}
+        // onNotificationPress={() => {
+        //   navigation?.navigate && navigation.navigate('NotificationScreen');
+        // }}
       />
 
       <ScrollView

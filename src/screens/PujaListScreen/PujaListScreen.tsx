@@ -112,7 +112,7 @@ const PujaListScreen: React.FC = () => {
               {puja.pooja_short_description}
             </Text>
             <View style={styles.priceAndEditContainer}>
-              <Text style={styles.pujaPrice}>{formattedPriceWithout}</Text>
+              <Text style={styles.pujaPrice}>{formattedPriceWith}</Text>
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => onEdit(puja)}>
