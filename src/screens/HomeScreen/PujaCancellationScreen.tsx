@@ -30,12 +30,12 @@ interface CancellationReason {
 }
 
 const PANDIT_CANCELLATION_REASONS: CancellationReason[] = [
-  {key: 'pandit_unavailable', label: 'Pandit: Unavailable'},
-  {key: 'pandit_emergency', label: 'Pandit: Emergency'},
-  {key: 'pandit_scheduling_conflict', label: 'Pandit: Scheduling Conflict'},
+  {key: 'pandit_unavailable', label: 'Unavailable'},
+  {key: 'pandit_emergency', label: 'Emergency'},
+  {key: 'pandit_scheduling_conflict', label: 'Scheduling Conflict'},
   {
     key: 'pandit_other',
-    label: 'Pandit: Other (Pandit-provided)',
+    label: 'Other (Pandit-provided)',
     requiresSpecification: true,
   },
 ];
@@ -85,9 +85,9 @@ const PujaCancellationScreen = () => {
     try {
       const payload: any = {
         cancellation_reason_type: selectedReason?.key,
-        reason: selectedReason?.label,
+        // reason: selectedReason?.label,
         ...(selectedReason?.requiresSpecification && {
-          other_reason: customReason,
+          cancellation_reason_other: customReason,
         }),
       };
       console.log('payload', payload);

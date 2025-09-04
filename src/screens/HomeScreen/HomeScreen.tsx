@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import {
   getCompletedPuja,
   getInProgressPuja,
 } from '../../api/apiService';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
 import CustomeLoader from '../../components/CustomLoader';
 
@@ -66,7 +66,7 @@ const HomeScreen: React.FC = () => {
   const [pendingLoading, setPendingLoading] = useState<boolean>(true);
   const [inProgressLoading, setInProgressLoading] = useState<boolean>(true);
 
-  // Refactored: fetchAllPujas as a stable function for reuse
+  // Fetch all API data when the screen is mounted (first time) and every time it comes into focus
   const fetchAllPujas = useCallback(async () => {
     setLoading(true);
     setPendingLoading(true);
@@ -153,11 +153,17 @@ const HomeScreen: React.FC = () => {
     }
   }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchAllPujas();
-    }, [fetchAllPujas]),
-  );
+  // Fetch all API data when the screen is focused (comes into view)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', fetchAllPujas);
+    // Also fetch once on mount
+    fetchAllPujas();
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [fetchAllPujas, navigation]);
 
   const renderPujaItem = (item: PujaItem, isLast: boolean) => (
     <TouchableOpacity

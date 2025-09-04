@@ -22,17 +22,18 @@ class ApiEndpoints {
   static readonly CANCELLATION_POLICY_API = `${ApiEndpoints.API_VERSION}/684695808a456b7966ab29c0`;
   static readonly PAST_BOOKINGS_API = `${ApiEndpoints.API_VERSION}/6846d3ec8561e97a502165ce`;
 
-  static readonly PANDIT_PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/686ce57f8561e97a50338b51`;
-  static readonly PUJA_ITEMS_API = `${ApiEndpoints.API_VERSION}/686d03318960c979a5b92ebd`;
-  static readonly PUJA_DETAILS_API = `${ApiEndpoints.API_VERSION}/686d088a8561e97a50339c4d`;
-  static readonly PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/685e858d8561e97a502cbc73`;
-  static readonly EARNINGS_HISTORY_API = `${ApiEndpoints.API_VERSION}/686e27ce9e410d0f5e41d8ea`;
-  static readonly NOTIFICATION_DATA_API = `${ApiEndpoints.API_VERSION}/6867ade78561e97a50315d3b`;
+  // static readonly PANDIT_PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/686ce57f8561e97a50338b51`;
+  // static readonly PUJA_ITEMS_API = `${ApiEndpoints.API_VERSION}/686d03318960c979a5b92ebd`;
+  // static readonly PUJA_DETAILS_API = `${ApiEndpoints.API_VERSION}/686d088a8561e97a50339c4d`;
+  // static readonly PUJA_LIST_API = `${ApiEndpoints.API_VERSION}/685e858d8561e97a502cbc73`;
+  // static readonly EARNINGS_HISTORY_API = `${ApiEndpoints.API_VERSION}/686e27ce9e410d0f5e41d8ea`;
+  // static readonly NOTIFICATION_DATA_API = `${ApiEndpoints.API_VERSION}/6867ade78561e97a50315d3b`;
 }
 
 export default ApiEndpoints;
 
-export const BASE_URL = 'https://puja-guru.com';
+// export const BASE_URL = 'https://puja-guru.com';
+export const BASE_URL = 'https://4606b23f513e.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';
@@ -52,7 +53,7 @@ export const GET_PANDING_PUJA = '/panditji/booking-requests/';
 export const GET_UPCOMING_PUJA = '/panditji/upcoming-poojas/';
 export const GET_COMPLETED_PUA = '/panditji/completed-poojas/';
 export const POST_UPDATE_STATUS = '/panditji/update-status/';
-export const GET_UPCOMING_PUJA_DETAILS = '/panditji/upcoming-poojas/?id={id}';
+export const GET_UPCOMING_PUJA_DETAILS = '/panditji/upcoming-pooja/?id={id}';
 export const POST_START_PUJA = '/panditji/start-pooja/';
 export const POST_COMPETE_PUJA = '/panditji/complete-pooja/';
 export const GET_PANDIT_PROFILE = '/panditji/my-details/';

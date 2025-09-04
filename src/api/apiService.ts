@@ -324,86 +324,86 @@ export interface ReviewImageUpload {
   }
 }
 
-export const apiService = {
-  // Fetch castes (mock data)
-  getPujaList: async (): Promise<PujaList[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.PANDIT_PUJA_LIST_API);
-      return response?.data?.record || [];
-    } catch (error) {
-      console.error('Error fetching castes:', error);
-      return [];
-    }
-  },
+// export const apiService = {
+//   // Fetch castes (mock data)
+//   getPujaList: async (): Promise<PujaList[]> => {
+//     try {
+//       const response = await apiDev.get(ApiEndpoints.PANDIT_PUJA_LIST_API);
+//       return response?.data?.record || [];
+//     } catch (error) {
+//       console.error('Error fetching castes:', error);
+//       return [];
+//     }
+//   },
 
-  getPujaItemsData: async (): Promise<PujaItemsItem[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.PUJA_ITEMS_API);
-      return response.data?.record || [];
-    } catch (error) {
-      console.error('Error fetching past bookings :', error);
-      return [];
-    }
-  },
-  getPujaDetailsData: async (): Promise<PanditPujaDetails> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.PUJA_DETAILS_API);
-      return response.data?.record || [];
-    } catch (error) {
-      console.error('Error fetching past bookings :', error);
-      // Return a default value that matches the PanditPujaDetails interface
-      return {
-        pujaDetails: {
-          id: 0,
-          name: '',
-          address: '',
-          date: '',
-          time: '',
-          client: '',
-          pricing: '',
-          puja_item_type: '',
-          image: '',
-        },
-      };
-    }
-  },
+//   getPujaItemsData: async (): Promise<PujaItemsItem[]> => {
+//     try {
+//       const response = await apiDev.get(ApiEndpoints.PUJA_ITEMS_API);
+//       return response.data?.record || [];
+//     } catch (error) {
+//       console.error('Error fetching past bookings :', error);
+//       return [];
+//     }
+//   },
+//   getPujaDetailsData: async (): Promise<PanditPujaDetails> => {
+//     try {
+//       const response = await apiDev.get(ApiEndpoints.PUJA_DETAILS_API);
+//       return response.data?.record || [];
+//     } catch (error) {
+//       console.error('Error fetching past bookings :', error);
+//       // Return a default value that matches the PanditPujaDetails interface
+//       return {
+//         pujaDetails: {
+//           id: 0,
+//           name: '',
+//           address: '',
+//           date: '',
+//           time: '',
+//           client: '',
+//           pricing: '',
+//           puja_item_type: '',
+//           image: '',
+//         },
+//       };
+//     }
+//   },
 
-  getPujaListData: async (): Promise<PujaListDataResponse> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
-      return response.data?.record || { recommendedPuja: [], pujaList: [] };
-    } catch (error) {
-      console.error('Error fetching puja list data:', error);
-      return { pujaList: [] };
-    }
-  },
+//   getPujaListData: async (): Promise<PujaListDataResponse> => {
+//     try {
+//       const response = await apiDev.get(ApiEndpoints.PUJA_LIST_API);
+//       return response.data?.record || { recommendedPuja: [], pujaList: [] };
+//     } catch (error) {
+//       console.error('Error fetching puja list data:', error);
+//       return { pujaList: [] };
+//     }
+//   },
 
-  getEaningsHistoryData: async (): Promise<EarningsHistoryResponse> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.EARNINGS_HISTORY_API);
-      return response.data?.record;
-    } catch (error) {
-      console.error('Error fetching earnings history data:', error);
-      // Return a default value that matches the EarningsHistoryResponse interface
-      return {
-        id: 0,
-        poojaName: '',
-        price: 0,
-        date: '',
-      };
-    }
-  },
+//   getEaningsHistoryData: async (): Promise<EarningsHistoryResponse> => {
+//     try {
+//       const response = await apiDev.get(ApiEndpoints.EARNINGS_HISTORY_API);
+//       return response.data?.record;
+//     } catch (error) {
+//       console.error('Error fetching earnings history data:', error);
+//       // Return a default value that matches the EarningsHistoryResponse interface
+//       return {
+//         id: 0,
+//         poojaName: '',
+//         price: 0,
+//         date: '',
+//       };
+//     }
+//   },
 
-  getNotificationData: async (): Promise<NotificationData[]> => {
-    try {
-      const response = await apiDev.get(ApiEndpoints.NOTIFICATION_DATA_API);
-      return response.data?.record || [];
-    } catch (error) {
-      console.error('Error fetching past bookings :', error);
-      return [];
-    }
-  },
-};
+//   getNotificationData: async (): Promise<NotificationData[]> => {
+//     try {
+//       const response = await apiDev.get(ApiEndpoints.NOTIFICATION_DATA_API);
+//       return response.data?.record || [];
+//     } catch (error) {
+//       console.error('Error fetching past bookings :', error);
+//       return [];
+//     }
+//   },
+// };
 
 export const postSignIn = (data: SignInRequest): Promise<SignInResponse> => {
   console.log('params data ::', data);

@@ -12,6 +12,7 @@ import WaitingApprovalPujaScreen from '../../screens/HomeScreen/WaitingApprovalP
 import CompletePujaDetailsScreen from '../../screens/HomeScreen/CompletePujaDetailsScreen';
 
 export type HomeStackParamList = {
+  addListener(arg0: string, arg1: () => void): unknown;
   replace(arg0: string): unknown;
   navigate(arg0: string): void;
   HomeScreen: any;

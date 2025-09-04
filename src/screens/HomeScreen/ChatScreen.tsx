@@ -63,7 +63,7 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     if (accessToken && booking_id) {
-      const socketURL = `ws://192.168.1.20:8081/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
+      const socketURL = `ws://puja-guru.com:9000/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
       ws.current = new WebSocket(socketURL);
       console.log('ws.current', JSON.stringify(ws.current));
       ws.current.onopen = () => {

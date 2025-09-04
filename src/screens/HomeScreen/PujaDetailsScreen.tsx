@@ -110,12 +110,17 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const [enteredPin, setEnteredPin] = useState<string>('');
   const {showSuccessToast, showErrorToast} = useCommonToast();
 
-  const getBookingId = () => {
-    if (progress) {
-      return progressPujaDetails?.id;
-    }
-    return pujaDetails?.id || id;
-  };
+  console.log('pujaStarted', pujaStarted);
+  // const getBookingId = () => {
+  //   if (progress) {
+  //     return progressPujaDetails?.id;
+  //   }
+  //   return id || pujaDetails?.id;
+  // };
+
+  console.log('id', id);
+  console.log('pujaDetails?.id', pujaDetails?.id);
+  console.log('pujaDetails', pujaDetails);
 
   // Fetch Pooja details
   const fetchPujaDetails = useCallback(async () => {
@@ -126,14 +131,17 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         const data = Array.isArray(response)
           ? response[0]
           : response?.data?.[0] || response?.[0];
+        console.log('data ::::: ', data);
         if (data) {
           setProgressPujaDetails(data);
         }
       } else {
         response = await getUpcomingPujaDetails(id);
+        console.log('response', response);
         const data = Array.isArray(response)
           ? response[0]
           : response?.data?.[0] || response?.[0];
+        console.log('data', data);
         if (data) {
           setPujaDetails(data);
         }
@@ -145,15 +153,14 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // Load Pooja started/completed status from AsyncStorage
   const loadPujaStatus = useCallback(
-    async (bookingId: number | string | undefined) => {
-      if (!bookingId) {
+    async (id: number | string | undefined) => {
+      if (!id) {
         setPujaStarted(false);
         return;
       }
       try {
-        const status = await AsyncStorage.getItem(
-          `${STORAGE_KEY_PREFIX}${bookingId}`,
-        );
+        const status = await AsyncStorage.getItem(`${STORAGE_KEY_PREFIX}${id}`);
+        console.log('status', status);
         if (status === 'started') {
           setPujaStarted(true);
         } else {
@@ -182,30 +189,28 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // When pujaDetails or progressPujaDetails changes, load status
   useEffect(() => {
-    const bookingId = getBookingId();
-    if (bookingId) {
-      loadPujaStatus(bookingId);
+    // const bookingId = getBookingId();
+    // console.log('bookingId', bookingId);
+    if (id) {
+      loadPujaStatus(id);
     }
-  }, [pujaDetails, progressPujaDetails, id, progress, loadPujaStatus]);
+  }, [pujaDetails, progressPujaDetails, id, progress]);
 
   // Call Start Pooja API and store status in AsyncStorage
   const handleStartPujaApi = async (pin: string) => {
-    const bookingId = pujaDetails?.id || progressPujaDetails?.id;
-    if (!bookingId) {
+    const bookingId = id;
+    if (!id) {
       console.error('No booking id found for starting pooja');
       return;
     }
     try {
       const data = {
-        booking_id: bookingId,
+        booking_id: id,
         pin: pin,
       };
       await postStartPuja(data);
       setPujaStarted(true);
-      await AsyncStorage.setItem(
-        `${STORAGE_KEY_PREFIX}${bookingId}`,
-        'started',
-      );
+      await AsyncStorage.setItem(`${STORAGE_KEY_PREFIX}${id}`, 'started');
     } catch (error: any) {
       let errorMsg = 'Something went wrong';
       if (error?.response?.data?.message) {
@@ -221,21 +226,18 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   // Call Complete Pooja API and update status in AsyncStorage
   const handleCompletePujaApi = async (pin: string) => {
     const bookingId = progressPujaDetails?.id || pujaDetails?.id;
-    if (!bookingId) {
+    if (!id) {
       console.error('No booking id found for completing pooja');
       return;
     }
     try {
       const data = {
-        booking_id: bookingId,
+        booking_id: id,
         pin: pin,
       };
       await postCompetePuja(data);
       setPujaStarted(false);
-      await AsyncStorage.setItem(
-        `${STORAGE_KEY_PREFIX}${bookingId}`,
-        'completed',
-      );
+      await AsyncStorage.setItem(`${STORAGE_KEY_PREFIX}${id}`, 'completed');
       navigation?.navigate('PujaSuccessfull', {bookingId: id});
     } catch (error: any) {
       let errorMsg = 'Something went wrong';
