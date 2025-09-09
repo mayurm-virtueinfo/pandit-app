@@ -2,6 +2,7 @@
 import { AxiosRequestConfig } from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
+  DELETEACCOUNT,
   GET_AREA,
   GET_BOOKING_AUTO_DETAILS,
   GET_CASTE,
@@ -41,6 +42,9 @@ import ApiEndpoints, {
   PUT_PANDIT_DOCUMENTS,
   PUT_PANDIT_LANGUAGE,
   PUT_SERVICES_AREAS,
+  REFUNDPOLICY,
+  TERMSCONDITIONS,
+  USERAGREEMENT,
 } from './apiEndpoints';
 
 // Types for dropdown data
@@ -1209,3 +1213,82 @@ export const getBookingAutoDetails = (bookingID: string) => {
       });
   });
 };
+
+export const getTermsConditions = (): Promise<any> => {
+  let apiUrl = TERMSCONDITIONS;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl, {
+        headers: {
+          Accept: 'text/html',
+        },
+      })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching Terms & Conditions:', error?.response?.data || error);
+        reject(error);
+      });
+  });
+};
+
+export const getUserAgreement = (): Promise<any> => {
+  let apiUrl = USERAGREEMENT;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl, {
+        headers: {
+          Accept: 'text/html',
+        },
+      })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching User Agreement:', error?.response?.data || error);
+        reject(error);
+      });
+  });
+};
+
+export const getRefundPolicy = (): Promise<any> => {
+  let apiUrl = REFUNDPOLICY;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl, {
+        headers: {
+          Accept: 'text/html',
+        },
+      })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error fetching Refund Policy:', error?.response?.data || error);
+        reject(error);
+      });
+  });
+};
+
+export const deleteAccount = (params: any): Promise<any> => {
+  let apiUrl = DELETEACCOUNT;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .delete(apiUrl, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: params,
+      })
+      .then(response => {
+        console.log("response", response)
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error deleting account:', error?.response?.data || error);
+        reject(error);
+      });
+  });
+};
+

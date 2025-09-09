@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,12 @@ import {
   Image,
   ImageBackground,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
 import ThemedInput from '../../components/ThemedInput';
 import {getAuth, signInWithPhoneNumber} from '@react-native-firebase/auth';
-import {validatePhoneNumber} from '../../helper/Validation';
 import Loader from '../../components/Loader';
 import {moderateScale} from 'react-native-size-matters';
 import {useCommonToast} from '../../common/CommonToast';
@@ -25,6 +25,12 @@ import {useTranslation} from 'react-i18next';
 import PrimaryButton from '../../components/PrimaryButton';
 import {Images} from '../../theme/Images';
 import {useFocusEffect} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {
+  getTermsConditions,
+  getUserAgreement,
+  getRefundPolicy,
+} from '../../api/apiService';
 
 type SignInScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -44,17 +50,51 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   const [isLoading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{phoneNumber?: string}>({});
   const [previousPhoneNumber, setPreviousPhoneNumber] = useState<string>('');
+  const [isAgreed, setIsAgreed] = useState(false);
 
+  // State for policy contents and titles
+  const [termsContent, setTermsContent] = useState<string>('');
+  const [userAgreementContent, setUserAgreementContent] = useState<string>('');
+  const [refundPolicyContent, setRefundPolicyContent] = useState<string>('');
+
+  // Fetch policy contents on mount
   useFocusEffect(
-    React.useCallback(() => {
-      console.log('SignIn screen focused - resetting state');
+    useCallback(() => {
+      // Reset state
       setErrors({});
       setLoading(false);
 
       if (route.params?.previousPhoneNumber) {
         setPreviousPhoneNumber(route.params.previousPhoneNumber);
       }
-    }, [route.params]),
+
+      // Fetch Terms & Conditions
+      getTermsConditions()
+        .then(data => {
+          setTermsContent(data || '');
+        })
+        .catch(() => {
+          setTermsContent('');
+        });
+
+      // Fetch User Agreement
+      getUserAgreement()
+        .then(data => {
+          setUserAgreementContent(data || '');
+        })
+        .catch(() => {
+          setUserAgreementContent('');
+        });
+
+      // Fetch Refund Policy
+      getRefundPolicy()
+        .then(data => {
+          setRefundPolicyContent(data || '');
+        })
+        .catch(() => {
+          setRefundPolicyContent('');
+        });
+    }, []),
   );
 
   // Improved validation: Only allow 10 digit numbers, no letters, no special chars, must start with 6-9
@@ -83,10 +123,17 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
 
   const handleSignIn = async () => {
     const errorMsg = validateInput(phoneNumber);
-    console.log('errorMsg', errorMsg);
     if (errorMsg) {
       setErrors({phoneNumber: errorMsg});
       showErrorToast(errorMsg);
+      return;
+    }
+
+    if (!isAgreed) {
+      showErrorToast(
+        t('please_agree_terms') ||
+          'Please agree to the Terms & Conditions, User Agreement, and Refund Policy.',
+      );
       return;
     }
 
@@ -127,14 +174,13 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     const auth = getAuth();
     try {
       setLoading(true);
-      console.log(auth, formattedPhone);
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone);
-      console.log('confirmation', confirmation);
       setLoading(false);
       showSuccessToast(t('otp_sent') || 'OTP has been sent to your phone.');
       navigation.navigate('OTPVerification', {
         phoneNumber: formattedPhone,
         confirmation,
+        agree: true,
       });
     } catch (error: any) {
       setLoading(false);
@@ -153,6 +199,36 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     if (errors.phoneNumber) {
       setErrors({});
     }
+  };
+
+  // Handler for opening policy in TermsPolicy screen and passing html content
+  const handleOpenPolicy = (type: 'terms' | 'user' | 'refund') => {
+    let title = '';
+    let htmlContent = '';
+    if (type === 'terms') {
+      title = t('terms_and_conditions') || 'Terms & Conditions';
+      htmlContent =
+        termsContent ||
+        t('terms_and_conditions_content') ||
+        'Here are the Terms & Conditions...';
+    } else if (type === 'user') {
+      title = t('user_agreement') || 'User Agreement';
+      htmlContent =
+        userAgreementContent ||
+        t('user_agreement_content') ||
+        'Here is the User Agreement...';
+    } else if (type === 'refund') {
+      title = t('refund_policy') || 'Refund Policy';
+      htmlContent =
+        refundPolicyContent ||
+        t('refund_policy_content') ||
+        'Here is the Refund Policy...';
+    }
+
+    navigation.navigate('TermsPolicyScreen', {
+      title,
+      htmlContent,
+    });
   };
 
   return (
@@ -194,32 +270,57 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                 errorField="phoneNumber"
               />
 
-              <PrimaryButton onPress={handleSignIn} title={t('send_otp')} />
+              {/* Terms and Conditions, User Agreement, Refund Policy with checkbox */}
+              <View style={styles.termsRow}>
+                <TouchableOpacity
+                  style={styles.checkboxContainer}
+                  onPress={() => setIsAgreed(!isAgreed)}
+                  activeOpacity={0.7}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{checked: isAgreed}}
+                  accessibilityLabel="Agree to terms">
+                  <View
+                    style={[
+                      styles.checkbox,
+                      isAgreed && styles.checkboxChecked,
+                    ]}>
+                    {isAgreed && (
+                      <Icon
+                        name="check"
+                        size={moderateScale(16)}
+                        color="#fff"
+                        style={styles.checkboxIcon}
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+                <Text style={styles.termsText}>
+                  {t('i_agree_to') || 'I agree to the '}
+                  <Text
+                    style={styles.termsLink}
+                    onPress={() => handleOpenPolicy('terms')}>
+                    {t('terms_and_conditions') || 'Terms & Conditions'}
+                  </Text>
+                  {', '}
+                  <Text
+                    style={styles.termsLink}
+                    onPress={() => handleOpenPolicy('user')}>
+                    {t('user_agreement') || 'User Agreement'}
+                  </Text>
+                  {' & '}
+                  <Text
+                    style={styles.termsLink}
+                    onPress={() => handleOpenPolicy('refund')}>
+                    {t('refund_policy') || 'Refund Policy'}
+                  </Text>
+                </Text>
+              </View>
 
-              {/* <Text style={styles.termsText}>
-                {t('by_signing_in_you_agree_to_our')}
-                <Text
-                  style={{color: COLORS.primary, fontFamily: Fonts.Sen_Bold}}
-                  onPress={() => {
-                    Alert.alert(
-                      t('terms_of_service'),
-                      t('terms_of_service_content'),
-                    );
-                  }}>
-                  {` ${t('terms_of_service')}`}
-                </Text>
-                {` ${t('and')}`}
-                <Text
-                  style={{color: COLORS.primary, fontFamily: Fonts.Sen_Bold}}
-                  onPress={() => {
-                    Alert.alert(
-                      t('privacy_policy'),
-                      t('privacy_policy_content'),
-                    );
-                  }}>
-                  {` ${t('privacy_policy')}`}
-                </Text>
-              </Text> */}
+              <PrimaryButton
+                onPress={handleSignIn}
+                title={t('send_otp')}
+                disabled={!isAgreed}
+              />
             </View>
           </View>
         </ScrollView>
@@ -272,12 +373,53 @@ const styles = StyleSheet.create({
     padding: moderateScale(24),
     backgroundColor: '#FFFFFF',
   },
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: moderateScale(16),
+    marginBottom: moderateScale(16),
+    flexWrap: 'wrap',
+  },
+  checkboxContainer: {
+    marginRight: moderateScale(8),
+    padding: moderateScale(4),
+  },
+  checkbox: {
+    width: moderateScale(20),
+    height: moderateScale(20),
+    borderWidth: 1,
+    borderColor: COLORS.primaryBackgroundButton,
+    borderRadius: 4,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.primaryBackgroundButton,
+    borderColor: COLORS.primaryBackgroundButton,
+  },
+  // Add icon centering for check icon
+  checkboxIcon: {
+    alignSelf: 'center',
+  },
+  checkboxTick: {
+    width: moderateScale(10),
+    height: moderateScale(10),
+    backgroundColor: '#fff',
+    borderRadius: 2,
+  },
   termsText: {
     fontSize: moderateScale(12),
     color: COLORS.primaryTextDark,
     fontFamily: Fonts.Sen_Regular,
-    marginTop: moderateScale(16),
-    textAlign: 'center',
+    textAlign: 'left',
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  termsLink: {
+    color: COLORS.primaryBackgroundButton,
+    fontFamily: Fonts.Sen_Bold,
+    textDecorationLine: 'underline',
   },
   errorText: {
     color: '#ef4444',

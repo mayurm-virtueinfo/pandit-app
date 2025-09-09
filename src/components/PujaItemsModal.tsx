@@ -14,17 +14,27 @@ import Fonts from '../theme/fonts';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useTranslation} from 'react-i18next';
 
-interface PujaItem {
-  name: string;
-  quantity: number;
-  units: string;
-}
+// Accept both string[] and PujaItem[] for flexibility
+type PujaItem = {name: string; quantity?: number; units?: string} | string;
 
 interface PujaItemsModalProps extends Partial<ModalProps> {
   visible: boolean;
   onClose: () => void;
   userItems?: PujaItem[];
   panditItems?: PujaItem[];
+}
+
+// Helper to normalize array of PujaItem|string to array of {name, quantity, units}
+function normalizeItems(
+  items?: PujaItem[],
+): {name: string; quantity?: number; units?: string}[] {
+  if (!Array.isArray(items)) return [];
+  return items.map(item => {
+    if (typeof item === 'string') {
+      return {name: item};
+    }
+    return item;
+  });
 }
 
 const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
@@ -34,6 +44,8 @@ const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
   panditItems,
   ...modalProps
 }) => {
+  const normalizedUserItems = normalizeItems(userItems);
+  const normalizedPanditItems = normalizeItems(panditItems);
   const {t} = useTranslation();
 
   const CloseIcon = () => (
@@ -46,20 +58,25 @@ const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
     </View>
   );
 
-  const ItemsList = ({data}: {data: PujaItem[]}) => (
+  const ItemsList = ({
+    data,
+  }: {
+    data: {name: string; quantity?: number; units?: string}[];
+  }) => (
     <View style={styles.itemsList}>
       {data.map((item, index) => (
         <Text key={index} style={styles.itemText}>
           {index + 1}. {item.name}
-          {item.quantity ? ` - ${item.quantity}` : ''} {item.units}
+          {item.quantity ? ` - ${item.quantity}` : ''}
+          {item.units ? ` ${item.units}` : ''}
         </Text>
       ))}
     </View>
   );
 
   const hasAnyItems =
-    (userItems && userItems.length > 0) ||
-    (panditItems && panditItems.length > 0);
+    (normalizedUserItems && normalizedUserItems.length > 0) ||
+    (normalizedPanditItems && normalizedPanditItems.length > 0);
 
   return (
     <Modal
@@ -84,19 +101,19 @@ const PujaItemsModal: React.FC<PujaItemsModalProps> = ({
             showsVerticalScrollIndicator={false}>
             {hasAnyItems ? (
               <>
-                {userItems && userItems.length > 0 && (
+                {normalizedUserItems && normalizedUserItems.length > 0 && (
                   <View style={styles.section} key="user-items">
                     <Text style={styles.sectionTitle}>{t('User Items')}</Text>
                     <View style={styles.itemsContainer}>
-                      <ItemsList data={userItems} />
+                      <ItemsList data={normalizedUserItems} />
                     </View>
                   </View>
                 )}
-                {panditItems && panditItems.length > 0 && (
+                {normalizedPanditItems && normalizedPanditItems.length > 0 && (
                   <View style={styles.section} key="pandit-items">
                     <Text style={styles.sectionTitle}>{t('Pandit Items')}</Text>
                     <View style={styles.itemsContainer}>
-                      <ItemsList data={panditItems} />
+                      <ItemsList data={normalizedPanditItems} />
                     </View>
                   </View>
                 )}

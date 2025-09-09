@@ -9,6 +9,7 @@ import CompleteProfileScreen from '../../screens/Auth/CompleteProfileScreen';
 import EditProfileScreen from '../../screens/ProfileScreen/EditProfileScreen';
 
 export type ProfileStackParamList = {
+  replace(arg0: string): unknown;
   navigate(arg0: string): void;
   ProfileScreen: undefined;
   EditProfileScreen: undefined;

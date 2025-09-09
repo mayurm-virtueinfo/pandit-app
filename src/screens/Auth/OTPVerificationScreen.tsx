@@ -57,7 +57,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   const [otpConfirmation, setOtpConfirmation] = useState(
     route.params.confirmation,
   );
-  const {phoneNumber} = route.params;
+  const {phoneNumber, agree} = route.params;
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
   // Timer state for resend OTP
@@ -105,6 +105,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
         mobile: phoneNumber,
         firebase_uid: uid,
         role: 2,
+        agree: agree,
       };
       console.log('params', params);
       const response = await postSignIn(params);

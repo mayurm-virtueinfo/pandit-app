@@ -185,6 +185,7 @@
   "notifications": "Notifications",
   "no_notifications": "No notifications found.",
   "logout": "Logout",
+  "lo": "LOGOUT",
   "email": "Email",
   "phone": "Phone",
   "location": "Location",
@@ -263,5 +264,14 @@
   "reject_puja": "Reject Puja",
   "puja_reject": "Puja rejected successfully",
   "puja_approve": "Puja approved successfully",
-  "muhurat_time": "Muhurat Time"
+  "muhurat_time": "Muhurat Time",
+  "delete_account": "Delete Account",
+  "are_you_sure_delete_account": "Are you sure you want to delete your account? This action cannot be undone.",
+  "delete": "DELETE",
+  "i_agree_to": "I agree to the ",
+  "user_agreement": "User Agreement",
+  "refund_policy": "Refund Policy",
+  "please_agree_terms": "Please agree to the Terms & Conditions, User Agreement, and Refund Policy.",
+  "account_deleted_successfully": "Account deleted successfully",
+  "delete_account_failed": "Failed to delete account"
 }

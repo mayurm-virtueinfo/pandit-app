@@ -212,6 +212,7 @@ const DocumentUploadScreen: React.FC = () => {
     formData.append('role', '2'); // As per curl, hardcoded '2'
     formData.append('address', address); // User's general address
     formData.append('city', selectCityId?.toString?.() ?? ''); // Ensure city ID is a string
+    formData.append('agree', true);
 
     if (
       profile_img &&

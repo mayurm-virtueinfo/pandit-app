@@ -15,6 +15,7 @@ import CompleteProfileScreen from '../screens/Auth/CompleteProfileScreen';
 import AppBottomTabNavigator from './BottomTabNavigator';
 import SelectLanguageScreen from '../screens/Auth/SelectLanguageScreen';
 import DocumentUploadScreen from '../screens/Auth/DocumentUploadScreen';
+import TermsPolicyScreen from '../screens/Auth/TermsPolicy';
 
 export type AuthStackParamList = {
   replace(arg0: string): void;
@@ -23,6 +24,7 @@ export type AuthStackParamList = {
   OTPVerification: {
     phoneNumber: string;
     confirmation: FirebaseAuthTypes.ConfirmationResult;
+    agree: boolean;
   };
   CompleteProfileScreen: {phoneNumber: string};
   SelectCityArea: undefined;
@@ -100,6 +102,7 @@ export type AuthStackParamList = {
   PoojaAndAstrologyPerformed: undefined;
   Languages: undefined;
   AppBottomTabNavigator: undefined;
+  TermsPolicyScreen: any;
 };
 
 const Stack = createStackNavigator<AuthStackParamList>();
@@ -113,6 +116,7 @@ const AuthNavigator = () => {
         cardStyle: {backgroundColor: COLORS.backgroundPrimary},
       }}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
+      <Stack.Screen name="TermsPolicyScreen" component={TermsPolicyScreen} />
       <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
       <Stack.Screen
         name="CompleteProfileScreen"

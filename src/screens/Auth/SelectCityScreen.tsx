@@ -147,60 +147,57 @@ const SelectCityScreen: React.FC = () => {
   const showNoResult = searchText.length > 0 && filteredCities.length === 0;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <CustomeLoader loading={isLoading} />
       {/* <StatusBar
         translucent
         backgroundColor="transparent"
         barStyle="light-content"
       /> */}
-      <View style={[styles.container, {paddingTop: insets.top}]}>
-        <CustomHeader
-          title={t('complete_your_profile')}
-          showBackButton={true}
-        />
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
-          <View style={styles.contentContainer}>
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContentContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled">
-              <View style={styles.mainContent}>
-                <Text style={styles.selectCityTitle}>{t('select_city')}</Text>
-                <Text style={styles.description}>
-                  {t('select_city_description')}
-                </Text>
-                <CustomSelector
-                  data={filteredCities}
-                  selectedDataId={selectedCityId || null}
-                  onDataSelect={handleCitySelect}
-                  searchPlaceholder={t('search_city')}
-                  onSearch={handleSearch}
-                />
-                {showNoResult && (
-                  <Text style={styles.noResultText}>{t('no_city_found')}</Text>
-                )}
-              </View>
-            </ScrollView>
-            <View
-              style={[
-                styles.bottomButtonContainer,
-                {paddingBottom: insets.bottom || moderateScale(16)},
-              ]}>
-              <PrimaryButton
-                title={buttonText}
-                onPress={handleNext}
-                style={styles.nextButton}
-                disabled={!selectedCityId}
+      {/* <View style={[styles.container]}> */}
+      <CustomHeader title={t('complete_your_profile')} showBackButton={true} />
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+        <View style={styles.contentContainer}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContentContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled">
+            <View style={styles.mainContent}>
+              <Text style={styles.selectCityTitle}>{t('select_city')}</Text>
+              <Text style={styles.description}>
+                {t('select_city_description')}
+              </Text>
+              <CustomSelector
+                data={filteredCities}
+                selectedDataId={selectedCityId || null}
+                onDataSelect={handleCitySelect}
+                searchPlaceholder={t('search_city')}
+                onSearch={handleSearch}
               />
+              {showNoResult && (
+                <Text style={styles.noResultText}>{t('no_city_found')}</Text>
+              )}
             </View>
+          </ScrollView>
+          <View
+            style={[
+              styles.bottomButtonContainer,
+              {paddingBottom: insets.bottom || moderateScale(16)},
+            ]}>
+            <PrimaryButton
+              title={buttonText}
+              onPress={handleNext}
+              style={styles.nextButton}
+              disabled={!selectedCityId}
+            />
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
+      {/* </View> */}
     </View>
   );
 };
