@@ -416,11 +416,13 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(24),
   },
   sectionTitle: {
+    flexGrow: 1,
     fontSize: moderateScale(18),
     fontFamily: Fonts.Sen_SemiBold,
     color: COLORS.primaryTextDark,
     marginBottom: verticalScale(12),
-    fontWeight: '600',
+    // fontWeight: '600',
+    lineHeight: 24,
   },
   pujaCard: {
     backgroundColor: COLORS.white,

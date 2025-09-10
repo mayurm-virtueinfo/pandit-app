@@ -165,68 +165,68 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages, scrollToBottom]);
 
-  const requestCallPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const result = await request(PERMISSIONS.ANDROID.CALL_PHONE);
-        return result === 'granted';
-      } catch (err) {
-        console.error('Permission error:', err);
-        return false;
-      }
-    }
-    return true; // iOS doesn't require explicit permission for tel:
-  };
+  // const requestCallPermission = async () => {
+  //   if (Platform.OS === 'android') {
+  //     try {
+  //       const result = await request(PERMISSIONS.ANDROID.CALL_PHONE);
+  //       return result === 'granted';
+  //     } catch (err) {
+  //       console.error('Permission error:', err);
+  //       return false;
+  //     }
+  //   }
+  //   return true; // iOS doesn't require explicit permission for tel:
+  // };
 
-  const handleOnCallPress = async () => {
-    if (
-      !other_user_phone ||
-      typeof other_user_phone !== 'string' ||
-      other_user_phone.trim() === ''
-    ) {
-      Alert.alert(
-        'No Phone Number',
-        'No valid phone number available for this user.',
-      );
-      return;
-    }
+  // const handleOnCallPress = async () => {
+  //   if (
+  //     !other_user_phone ||
+  //     typeof other_user_phone !== 'string' ||
+  //     other_user_phone.trim() === ''
+  //   ) {
+  //     Alert.alert(
+  //       'No Phone Number',
+  //       'No valid phone number available for this user.',
+  //     );
+  //     return;
+  //   }
 
-    let sanitizedPhoneNumber = other_user_phone.replace(/[^0-9+]/g, '');
-    if (
-      !sanitizedPhoneNumber.startsWith('+91') &&
-      sanitizedPhoneNumber.length === 10
-    ) {
-      sanitizedPhoneNumber = `+91${sanitizedPhoneNumber}`;
-    }
+  //   let sanitizedPhoneNumber = other_user_phone.replace(/[^0-9+]/g, '');
+  //   if (
+  //     !sanitizedPhoneNumber.startsWith('+91') &&
+  //     sanitizedPhoneNumber.length === 10
+  //   ) {
+  //     sanitizedPhoneNumber = `+91${sanitizedPhoneNumber}`;
+  //   }
 
-    if (!/^\+91[6-9][0-9]{9}$/.test(sanitizedPhoneNumber)) {
-      Alert.alert(
-        'Invalid Phone Number',
-        'Please provide a valid 10-digit Indian mobile number.',
-      );
-      return;
-    }
+  //   if (!/^\+91[6-9][0-9]{9}$/.test(sanitizedPhoneNumber)) {
+  //     Alert.alert(
+  //       'Invalid Phone Number',
+  //       'Please provide a valid 10-digit Indian mobile number.',
+  //     );
+  //     return;
+  //   }
 
-    const phoneUrl = `tel:${sanitizedPhoneNumber}`;
-    console.log('phoneUrl:', phoneUrl);
+  //   const phoneUrl = `tel:${sanitizedPhoneNumber}`;
+  //   console.log('phoneUrl:', phoneUrl);
 
-    const hasPermission = await requestCallPermission();
-    if (!hasPermission) {
-      Alert.alert(
-        'Permission Denied',
-        'Cannot make a call without permission.',
-      );
-      return;
-    }
+  //   const hasPermission = await requestCallPermission();
+  //   if (!hasPermission) {
+  //     Alert.alert(
+  //       'Permission Denied',
+  //       'Cannot make a call without permission.',
+  //     );
+  //     return;
+  //   }
 
-    Linking.openURL(phoneUrl).catch(err => {
-      console.error('Error opening dialer:', err);
-      Alert.alert(
-        'Error',
-        'Unable to open the dialer. Please check the phone number or try again.',
-      );
-    });
-  };
+  //   Linking.openURL(phoneUrl).catch(err => {
+  //     console.error('Error opening dialer:', err);
+  //     Alert.alert(
+  //       'Error',
+  //       'Unable to open the dialer. Please check the phone number or try again.',
+  //     );
+  //   });
+  // };
 
   return (
     <View
@@ -245,8 +245,8 @@ const ChatScreen: React.FC = () => {
         <UserCustomHeader
           title={other_user_name || 'Chat'}
           showBackButton={true}
-          showCallButton={true}
-          onCallPress={handleOnCallPress}
+          // showCallButton={true}
+          // onCallPress={handleOnCallPress}
         />
         <KeyboardAvoidingView
           style={styles.chatContainer}

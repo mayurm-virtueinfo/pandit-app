@@ -8,6 +8,7 @@ import {
 } from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../utils/AppContent';
+import {clearSavedLanguage} from '../i18n';
 // Authentication Context
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -76,6 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       await AsyncStorage.removeItem(AppConstant.REFRESH_TOKEN);
       await AsyncStorage.removeItem(AppConstant.FIREBASE_UID);
       await AsyncStorage.removeItem(AppConstant.USER_ID);
+      await clearSavedLanguage();
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Sign out error:', error);

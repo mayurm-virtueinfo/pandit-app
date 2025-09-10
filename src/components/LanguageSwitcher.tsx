@@ -8,19 +8,31 @@ import {
   Modal,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
-import i18n, {changeLanguage} from '../i18n';
+import i18n, {setAppLanguage, getCurrentLanguage} from '../i18n';
 import {Picker} from '@react-native-picker/picker';
+
+const LANGUAGES = [
+  {label: 'English', value: 'en'},
+  {label: 'हिन्दी', value: 'hi'},
+  {label: 'ગુજરાતી', value: 'gu'},
+  {label: 'मराठी', value: 'mr'},
+];
 
 export default function LanguageSwitcher() {
   const {t} = useTranslation();
-  const [selectedLang, setSelectedLang] = useState(i18n.language || 'en');
+  const [selectedLang, setSelectedLang] = useState(getCurrentLanguage());
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleLanguageChange = (lang: string) => {
-    changeLanguage(lang);
+  const handleLanguageChange = async (lang: string) => {
+    await setAppLanguage(lang);
     setSelectedLang(lang);
     setModalVisible(false);
-    console.log('lang :: ', lang);
+  };
+
+  // Helper to get the label for the selected language
+  const getSelectedLangLabel = () => {
+    const found = LANGUAGES.find(l => l.value === selectedLang);
+    return found ? found.label : 'English';
   };
 
   if (Platform.OS === 'ios') {
@@ -31,7 +43,7 @@ export default function LanguageSwitcher() {
           style={styles.iosPickerButton}
           onPress={() => setModalVisible(true)}>
           <Text style={styles.iosPickerButtonText}>
-            {selectedLang === 'en' ? 'English' : 'हिन्दी'}
+            {getSelectedLangLabel()}
           </Text>
         </TouchableOpacity>
         <Modal
@@ -48,8 +60,13 @@ export default function LanguageSwitcher() {
                 selectedValue={selectedLang}
                 onValueChange={itemValue => handleLanguageChange(itemValue)}
                 style={styles.iosPicker}>
-                <Picker.Item label="English" value="en" />
-                <Picker.Item label="हिन्दी" value="hi" />
+                {LANGUAGES.map(lang => (
+                  <Picker.Item
+                    key={lang.value}
+                    label={lang.label}
+                    value={lang.value}
+                  />
+                ))}
               </Picker>
               <TouchableOpacity
                 style={styles.iosDoneButton}
@@ -73,8 +90,13 @@ export default function LanguageSwitcher() {
           style={styles.picker}
           onValueChange={itemValue => handleLanguageChange(itemValue)}
           mode="dropdown">
-          <Picker.Item label="English" value="en" />
-          <Picker.Item label="हिन्दी" value="hi" />
+          {LANGUAGES.map(lang => (
+            <Picker.Item
+              key={lang.value}
+              label={lang.label}
+              value={lang.value}
+            />
+          ))}
         </Picker>
       </View>
     </View>

@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ImageBackground,
   Alert,
   TouchableOpacity,
+  Modal,
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
@@ -22,6 +23,12 @@ import {COLORS} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
+import {Picker} from '@react-native-picker/picker';
+import i18n, {
+  getSavedLanguage,
+  setAppLanguage,
+  getCurrentLanguage,
+} from '../../i18n';
 import PrimaryButton from '../../components/PrimaryButton';
 import {Images} from '../../theme/Images';
 import {useFocusEffect} from '@react-navigation/native';
@@ -51,6 +58,23 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   const [errors, setErrors] = useState<{phoneNumber?: string}>({});
   const [previousPhoneNumber, setPreviousPhoneNumber] = useState<string>('');
   const [isAgreed, setIsAgreed] = useState(false);
+
+  // Language selection modal state
+  const [showLangModal, setShowLangModal] = useState(false);
+  const [selectedLang, setSelectedLang] = useState<string>(
+    getCurrentLanguage(),
+  );
+
+  useEffect(() => {
+    // On first app open or when no language saved, prompt selection
+    getSavedLanguage().then(saved => {
+      if (!saved) {
+        setShowLangModal(true);
+      } else {
+        setSelectedLang(saved);
+      }
+    });
+  }, []);
 
   // State for policy contents and titles
   const [termsContent, setTermsContent] = useState<string>('');
@@ -231,6 +255,17 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     });
   };
 
+  // Handler to open language selection modal
+  const handleOpenLanguageModal = () => {
+    setShowLangModal(true);
+  };
+
+  // Handler to change language and close modal
+  const handleChangeLanguage = async () => {
+    await setAppLanguage(selectedLang);
+    setShowLangModal(false);
+  };
+
   return (
     <ImageBackground
       source={Images.ic_splash_background}
@@ -249,6 +284,34 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                 style={{width: '33%', resizeMode: 'contain'}}
               />
               <Text style={styles.title}>{t('hi_welcome')}</Text>
+              {/* Add a language change button in the header */}
+              <TouchableOpacity
+                style={styles.languageButton}
+                onPress={handleOpenLanguageModal}
+                accessibilityLabel="Change language"
+                activeOpacity={0.7}>
+                <Icon
+                  name="language"
+                  size={moderateScale(24)}
+                  color={COLORS.white}
+                />
+                <Text style={styles.languageButtonText}>
+                  {(() => {
+                    switch (selectedLang) {
+                      case 'en':
+                        return 'English';
+                      case 'hi':
+                        return 'हिन्दी';
+                      case 'gu':
+                        return 'ગુજરાતી';
+                      case 'mr':
+                        return 'मराठी';
+                      default:
+                        return 'Language';
+                    }
+                  })()}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View style={[styles.containerBody, {paddingBottom: inset.bottom}]}>
@@ -325,6 +388,38 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Language selection modal (can be opened anytime) */}
+      <Modal
+        visible={showLangModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowLangModal(false)}>
+        <View style={styles.langModalOverlay}>
+          <View style={styles.langModalCard}>
+            <Text style={styles.langModalTitle}>
+              {t('language') || 'Language'}
+            </Text>
+            <View style={styles.langPickerContainer}>
+              <Picker
+                selectedValue={selectedLang}
+                onValueChange={v => setSelectedLang(v)}
+                mode="dropdown"
+                style={styles.langPicker}>
+                <Picker.Item label="English" value="en" />
+                <Picker.Item label="हिन्दी" value="hi" />
+                <Picker.Item label="ગુજરાતી" value="gu" />
+                <Picker.Item label="मराठी" value="mr" />
+              </Picker>
+            </View>
+            <View style={{height: 12}} />
+            <PrimaryButton
+              title={t('continue') || 'Continue'}
+              onPress={handleChangeLanguage}
+            />
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 };
@@ -365,6 +460,8 @@ const styles = StyleSheet.create({
   containerHeader: {
     height: moderateScale(220),
     alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
   containerBody: {
     borderTopLeftRadius: moderateScale(30),
@@ -424,6 +521,52 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#ef4444',
     fontSize: 12,
+  },
+  langModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: moderateScale(24),
+  },
+  langModalCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: moderateScale(16),
+    padding: moderateScale(20),
+  },
+  langModalTitle: {
+    fontSize: moderateScale(18),
+    fontFamily: Fonts.Sen_Bold,
+    color: COLORS.primaryTextDark,
+    marginBottom: moderateScale(12),
+    textAlign: 'center',
+  },
+  langPickerContainer: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  langPicker: {
+    width: '100%',
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'absolute',
+    right: moderateScale(16),
+    top: moderateScale(16),
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderRadius: 20,
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(4),
+  },
+  languageButtonText: {
+    color: COLORS.white,
+    fontFamily: Fonts.Sen_Bold,
+    fontSize: moderateScale(14),
+    marginLeft: moderateScale(6),
   },
 });
 

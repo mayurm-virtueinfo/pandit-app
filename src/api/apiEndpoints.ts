@@ -33,7 +33,7 @@ class ApiEndpoints {
 export default ApiEndpoints;
 
 export const BASE_URL = 'https://puja-guru.com';
-// export const BASE_URL = 'https://f333c59ffe02.ngrok-free.app';
+// export const BASE_URL = 'https://fa9c8056bb88.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';

@@ -263,5 +263,14 @@
   "reject_puja": "पूजा अस्वीकृत करें",
   "puja_reject": "पूजा सफलतापूर्वक अस्वीकृत हुई",
   "puja_approve": "पूजा सफलतापूर्वक स्वीकृत हुई",
-  "muhurat_time": "मुहूर्त समय"
+  "muhurat_time": "मुहूर्त समय",
+  "delete_account": "खाता हटाएँ",
+  "are_you_sure_delete_account": "क्या आप वाकई अपना खाता हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।",
+  "delete": "हटाएँ",
+  "i_agree_to": "मैं सहमत हूँ ",
+  "user_agreement": "उपयोगकर्ता समझौता",
+  "refund_policy": "रिफंड नीति",
+  "please_agree_terms": "कृपया नियम एवं शर्तें, उपयोगकर्ता समझौता और रिफंड नीति से सहमत हों।",
+  "account_deleted_successfully": "खाता सफलतापूर्वक हटाया गया",
+  "delete_account_failed": "खाता हटाने में विफल"
 }
