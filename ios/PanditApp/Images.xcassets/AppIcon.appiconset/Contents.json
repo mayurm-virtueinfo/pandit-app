@@ -55,7 +55,7 @@
       "size" : "60x60"
     },
     {
-      "filename" : "Icon-App-20x20@1x 1.png",
+      "filename" : "Icon-App-20x20@1x.png",
       "idiom" : "ipad",
       "scale" : "1x",
       "size" : "20x20"
@@ -79,7 +79,7 @@
       "size" : "29x29"
     },
     {
-      "filename" : "Icon-App-40x40@1x 1.png",
+      "filename" : "Icon-App-40x40@1x.png",
       "idiom" : "ipad",
       "scale" : "1x",
       "size" : "40x40"
@@ -91,19 +91,19 @@
       "size" : "40x40"
     },
     {
-      "filename" : "Icon-App-76x76@1x 1.png",
+      "filename" : "Icon-App-76x76@1x.png",
       "idiom" : "ipad",
       "scale" : "1x",
       "size" : "76x76"
     },
     {
-      "filename" : "Icon-App-76x76@2x 1.png",
+      "filename" : "Icon-App-76x76@2x.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "76x76"
     },
     {
-      "filename" : "Icon-App-83.5x83.5@2x 2.png",
+      "filename" : "Icon-App-83.5x83.5@2x.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "83.5x83.5"
@@ -121,52 +121,16 @@
       "size" : "60x60"
     },
     {
-      "filename" : "1024.png",
+      "filename" : "iTunesArtwork@2x.png",
       "idiom" : "ios-marketing",
       "scale" : "1x",
       "size" : "1024x1024"
     },
     {
-      "filename" : "ItunesArtwork@2x.png",
+      "filename" : "iTunesArtwork@2x 1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"
-    },
-    {
-      "filename" : "Icon-App-20x20@1x.png",
-      "idiom" : "universal",
-      "scale" : "1x",
-      "size" : "20x20"
-    },
-    {
-      "filename" : "Icon-App-40x40@1x.png",
-      "idiom" : "universal",
-      "scale" : "1x",
-      "size" : "40x40"
-    },
-    {
-      "filename" : "Icon-App-76x76@1x.png",
-      "idiom" : "universal",
-      "scale" : "1x",
-      "size" : "76x76"
-    },
-    {
-      "filename" : "Icon-App-76x76@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x",
-      "size" : "76x76"
-    },
-    {
-      "filename" : "Icon-App-83.5x83.5@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x",
-      "size" : "76x76"
-    },
-    {
-      "filename" : "Icon-App-83.5x83.5@2x 1.png",
-      "idiom" : "universal",
-      "scale" : "2x",
-      "size" : "83.5x83.5"
     }
   ],
   "info" : {

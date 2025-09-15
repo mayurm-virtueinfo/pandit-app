@@ -1275,7 +1275,7 @@ export const deleteAccount = (params: any): Promise<any> => {
   let apiUrl = DELETEACCOUNT;
   return new Promise((resolve, reject) => {
     apiDev
-      .delete(apiUrl, {
+      .post(apiUrl, {
         headers: {
           'Content-Type': 'application/json',
         },

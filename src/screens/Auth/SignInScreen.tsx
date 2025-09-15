@@ -165,24 +165,20 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     const formattedPhone = `+91${phoneNumber.trim().replace(/\s+/g, '')}`;
 
     if (previousPhoneNumber && formattedPhone === previousPhoneNumber) {
-      Alert.alert(
-        'Same Number Detected',
-        'You entered the same phone number. What would you like to do?',
-        [
-          {
-            text: 'Enter Different Number',
-            onPress: () => {
-              setPhoneNumber('');
-              setPreviousPhoneNumber('');
-            },
-            style: 'default',
+      Alert.alert(t('same_number_detected'), t('same_number_message'), [
+        {
+          text: t('enter_different_number'),
+          onPress: () => {
+            setPhoneNumber('');
+            setPreviousPhoneNumber('');
           },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ],
-      );
+          style: 'default',
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]);
       return;
     }
     if (!/^\+91[0-9]\d{9}$/.test(formattedPhone)) {
@@ -281,7 +277,7 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
             <View style={styles.containerHeader}>
               <Image
                 source={Images.ic_app_logo}
-                style={{width: '33%', resizeMode: 'contain'}}
+                style={{resizeMode: 'contain'}}
               />
               <Text style={styles.title}>{t('hi_welcome')}</Text>
               {/* Add a language change button in the header */}

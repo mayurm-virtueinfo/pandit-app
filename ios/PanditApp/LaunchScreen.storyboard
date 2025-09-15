@@ -16,16 +16,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SplashIcon" translatesAutoresizingMaskIntoConstraints="NO" id="K0k-fX-gqM">
-                                <rect key="frame" x="87.5" y="233.5" width="200" height="200"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="K0k-fX-gqM">
+                                <rect key="frame" x="16" y="168" width="350" height="330"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="200" id="N6g-aA-XgW"/>
-                                    <constraint firstAttribute="height" constant="200" id="sQf-tS-7gL"/>
+                                    <constraint firstAttribute="width" constant="300" id="N6g-aA-XgW"/>
+                                    <constraint firstAttribute="height" constant="330" id="sQf-tS-7gL"/>
                                 </constraints>
+                                <variation key="heightClass=regular-widthClass=compact" image="SplashIcon"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <color key="backgroundColor" red="0.87208998199999999" green="0.2364633679" blue="0.2234931886" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                        <color key="backgroundColor" red="0.96214945332987323" green="0.084751911946623681" blue="0.14460977594140079" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="K0k-fX-gqM" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="C9V-sg-pZ5"/>
                             <constraint firstItem="K0k-fX-gqM" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="Wqj-tE-Lg1"/>
@@ -34,10 +35,10 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="52.173913043478265" y="375"/>
+            <point key="canvasLocation" x="52" y="374.66266866566718"/>
         </scene>
     </scenes>
     <resources>
-        <image name="SplashIcon" width="241" height="167.5"/>
+        <image name="SplashIcon" width="512" height="512"/>
     </resources>
 </document>

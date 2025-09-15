@@ -160,7 +160,7 @@ const RateYourExperienceScreen: React.FC = () => {
         booking: bookingIdToSend,
         rating: ratingValue,
         review: reviewText,
-        // photos: photoUris,
+        photos: photos,
       };
 
       await postRateUser(payload);
