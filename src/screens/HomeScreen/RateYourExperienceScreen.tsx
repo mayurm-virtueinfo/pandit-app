@@ -212,7 +212,11 @@ const RateYourExperienceScreen: React.FC = () => {
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <CustomHeader title={t('rate_experience')} showBackButton={true} />
 
-      {(pujaLoading || loading) && <CustomeLoader loading={loading} />}
+      {(pujaLoading || loading) && (
+        <View style={{flex: 1, backgroundColor: COLORS.white}}>
+          <CustomeLoader loading={loading} />
+        </View>
+      )}
       {!pujaLoading && !loading && (
         <ScrollView
           style={styles.scrollContainer}

@@ -2,6 +2,7 @@
 import { AxiosRequestConfig } from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
+  CREATE_MEETING,
   DELETEACCOUNT,
   GET_AREA,
   GET_BOOKING_AUTO_DETAILS,
@@ -1287,6 +1288,20 @@ export const deleteAccount = (params: any): Promise<any> => {
       })
       .catch(error => {
         console.error('Error deleting account:', error?.response?.data || error);
+        reject(error);
+      });
+  });
+};
+export const createMeeting = (booking_id: number): Promise<any> => {
+  let apiUrl = CREATE_MEETING;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, { booking_id })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error('Error creating meeting:', error?.response?.data || error);
         reject(error);
       });
   });

@@ -29,6 +29,7 @@ interface CustomHeaderProps {
   showBellButton?: boolean;
   showCirclePlusButton?: boolean;
   showCallButton?: boolean;
+  showVideoCallButton?: boolean; // Added prop for video call button
   showSliderButton?: boolean;
   showSkipButton?: boolean;
   onBackPress?: () => void;
@@ -36,6 +37,7 @@ interface CustomHeaderProps {
   onCirclePlusPress?: () => void;
   onFilterPress?: () => void;
   onCallPress?: () => void;
+  onVideoCallPress?: () => void; // Added handler for video call button
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -45,6 +47,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   showBellButton = false,
   showCirclePlusButton = false,
   showCallButton = false,
+  showVideoCallButton = false, // Added prop
   showSliderButton = false,
   showSkipButton = false,
   onBackPress,
@@ -52,6 +55,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   onCirclePlusPress,
   onFilterPress,
   onCallPress,
+  onVideoCallPress, // Added handler
 }) => {
   const {t, i18n} = useTranslation();
   const navigation = useNavigation();
@@ -70,6 +74,14 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       onNotificationPress();
     } else {
       console.log('Notification pressed');
+    }
+  };
+
+  const handleVideoCallPress = () => {
+    if (onVideoCallPress) {
+      onVideoCallPress();
+    } else {
+      console.log('Video Call Icon pressed');
     }
   };
 
@@ -142,6 +154,17 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             {showCallButton && (
               <TouchableOpacity onPress={onCallPress} style={styles.iconButton}>
                 <Ionicons name="call-outline" size={24} color={COLORS.white} />
+              </TouchableOpacity>
+            )}
+            {showVideoCallButton && ( // Video call button
+              <TouchableOpacity
+                onPress={handleVideoCallPress}
+                style={styles.iconButton}>
+                <Ionicons
+                  name="videocam-outline"
+                  size={24}
+                  color={COLORS.white}
+                />
               </TouchableOpacity>
             )}
             {showSliderButton && (

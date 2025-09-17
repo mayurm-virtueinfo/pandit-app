@@ -17,7 +17,7 @@ import UserCustomHeader from '../../components/CustomHeader';
 import ChatMessages from '../../components/ChatMessages';
 import ChatInput from '../../components/ChatInput';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {getMessageHistory} from '../../api/apiService';
+import {createMeeting, getMessageHistory} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
@@ -165,6 +165,32 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages, scrollToBottom]);
 
+  const handleVideoCall = () => {
+    // Call the createMeeting API and handle the response
+    if (!booking_id) {
+      Alert.alert('Error', 'No booking ID available for video call.');
+      return;
+    }
+    setLoading(true);
+    createMeeting(booking_id)
+      .then(response => {
+        console.log('Meeting created:', response);
+        if (response?.data?.meeting_url) {
+          Linking.openURL(response.data.meeting_url);
+        }
+      })
+      .catch(error => {
+        console.error('Failed to create meeting:', error);
+        Alert.alert(
+          'Error',
+          'Failed to create video meeting. Please try again.',
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   // const requestCallPermission = async () => {
   //   if (Platform.OS === 'android') {
   //     try {
@@ -245,8 +271,8 @@ const ChatScreen: React.FC = () => {
         <UserCustomHeader
           title={other_user_name || 'Chat'}
           showBackButton={true}
-          // showCallButton={true}
-          // onCallPress={handleOnCallPress}
+          showVideoCallButton={true}
+          onVideoCallPress={handleVideoCall}
         />
         <KeyboardAvoidingView
           style={styles.chatContainer}
