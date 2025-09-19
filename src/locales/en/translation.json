@@ -403,5 +403,9 @@
   "settings_help": "Help & Support",
   "settings_about": "About",
   "settings_logout": "Logout",
-  "settings_version": "App Version"
+  "settings_version": "App Version",
+  "charged_amount": "Charged Amount",
+  "booking_accepted": "Booking accepted",
+  "cancellation_service_fee": "Service fee for cancellation",
+  "booking_cancelled": "Booking cancelled"
 }

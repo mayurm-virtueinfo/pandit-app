@@ -99,6 +99,7 @@ export function handleNotificationNavigation(data: any) {
     const targetScreen = data?.screen;
     const booking_id = data?.booking_id;
     const user_id = data?.sender_id;
+    const videocall = data?.video_call;
 
     const nestedParams = {
       screen: 'AppBottomTabNavigator',
@@ -109,6 +110,7 @@ export function handleNotificationNavigation(data: any) {
           params: {
             booking_id,
             user_id,
+            videocall
           },
         },
       },

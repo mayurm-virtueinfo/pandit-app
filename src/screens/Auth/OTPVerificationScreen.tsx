@@ -194,72 +194,77 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   return (
-    <ImageBackground
-      source={Images.ic_splash_background}
-      style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <View style={[styles.container, {paddingTop: inset.top}]}>
+      <ImageBackground
+        source={Images.ic_splash_background}
         style={styles.container}>
-        <Loader loading={isLoading} />
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled">
-          <View style={[styles.content, {paddingTop: inset.top}]}>
-            <View style={styles.header}>
-              <Image source={Images.ic_app_logo} style={styles.logo} />
-              <Text style={styles.title}>{t('hi_welcome')}</Text>
-            </View>
-            <View style={[styles.body, {paddingBottom: inset.bottom}]}>
-              <Text style={styles.mainTitle}>{t('otp_verification')}</Text>
-              <Text style={styles.subtitle}>
-                {t('enter_6_digit_the_verification_code')}
-              </Text>
-              <Text style={styles.phoneNumber}>{phoneNumber}</Text>
-              <View style={styles.otpContainer}>
-                {otp.map((digit, index) => (
-                  <TextInput
-                    key={index}
-                    ref={ref => (inputRefs.current[index] = ref)}
-                    style={styles.otpInput}
-                    value={digit}
-                    onChangeText={value => handleOtpChange(value, index)}
-                    onKeyPress={e => handleKeyPress(e, index)}
-                    keyboardType="number-pad"
-                    maxLength={1}
-                    selectTextOnFocus
-                    testID={`otp-input-${index}`}
-                  />
-                ))}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}>
+          <Loader loading={isLoading} />
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled">
+            <View style={[styles.content]}>
+              <View style={styles.header}>
+                <Image source={Images.ic_app_logo} style={styles.logo} />
+                <Text style={styles.title}>{t('hi_welcome')}</Text>
               </View>
-              <PrimaryButton onPress={handleVerification} title={t('verify')} />
-              {!showResend ? (
-                <View style={styles.resendContainer}>
-                  <Text style={styles.resendText}>00:{timer}</Text>
+              <View style={[styles.body, {paddingBottom: inset.bottom}]}>
+                <Text style={styles.mainTitle}>{t('otp_verification')}</Text>
+                <Text style={styles.subtitle}>
+                  {t('enter_6_digit_the_verification_code')}
+                </Text>
+                <Text style={styles.phoneNumber}>{phoneNumber}</Text>
+                <View style={styles.otpContainer}>
+                  {otp.map((digit, index) => (
+                    <TextInput
+                      key={index}
+                      ref={ref => (inputRefs.current[index] = ref)}
+                      style={styles.otpInput}
+                      value={digit}
+                      onChangeText={value => handleOtpChange(value, index)}
+                      onKeyPress={e => handleKeyPress(e, index)}
+                      keyboardType="number-pad"
+                      maxLength={1}
+                      selectTextOnFocus
+                      testID={`otp-input-${index}`}
+                    />
+                  ))}
                 </View>
-              ) : (
-                <View style={styles.resendContainer}>
-                  <Text style={styles.resendText}>
-                    {t('didnt_receive_the_code')}
-                  </Text>
-                  <PrimaryButtonLabeled
-                    onPress={handleResendOTP}
-                    title={t('resend_otp')}
-                  />
-                </View>
-              )}
-              <PrimaryButtonOutlined
-                onPress={() =>
-                  navigation.replace('SignIn', {
-                    previousPhoneNumber: phoneNumber,
-                  })
-                }
-                title={t('change_mobile_number')}
-              />
+                <PrimaryButton
+                  onPress={handleVerification}
+                  title={t('verify')}
+                />
+                {!showResend ? (
+                  <View style={styles.resendContainer}>
+                    <Text style={styles.resendText}>00:{timer}</Text>
+                  </View>
+                ) : (
+                  <View style={styles.resendContainer}>
+                    <Text style={styles.resendText}>
+                      {t('didnt_receive_the_code')}
+                    </Text>
+                    <PrimaryButtonLabeled
+                      onPress={handleResendOTP}
+                      title={t('resend_otp')}
+                    />
+                  </View>
+                )}
+                <PrimaryButtonOutlined
+                  onPress={() =>
+                    navigation.replace('SignIn', {
+                      previousPhoneNumber: phoneNumber,
+                    })
+                  }
+                  title={t('change_mobile_number')}
+                />
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </ImageBackground>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </View>
   );
 };
 

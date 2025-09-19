@@ -6,22 +6,26 @@ import {
   Platform,
   ScrollView,
   KeyboardAvoidingView,
-  Linking,
   Alert,
   Text,
+  SafeAreaView,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
 import {COLORS} from '../../theme/theme';
 import UserCustomHeader from '../../components/CustomHeader';
 import ChatMessages from '../../components/ChatMessages';
 import ChatInput from '../../components/ChatInput';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useRoute,
+  useNavigation,
+  useNavigationState,
+} from '@react-navigation/native';
 import {createMeeting, getMessageHistory} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
-import {request, PERMISSIONS} from 'react-native-permissions';
 
 export interface Message {
   id: string;
@@ -32,24 +36,42 @@ export interface Message {
 
 const ChatScreen: React.FC = () => {
   const route = useRoute() as any;
+  const navigation = useNavigation();
   const {
     booking_id,
     other_user_name,
     other_user_image,
     other_user_phone,
     user_id,
+    videocall,
   } = route.params;
 
-  console.log('booking_id :: ', booking_id);
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [panditID, setPanditID] = useState<string | null>(null);
+  const [inCall, setInCall] = useState(false);
+  const [roomName, setRoomName] = useState<string | null>(null);
+  const [meetingToken, setMeetingToken] = useState<string | null>(null);
+  const [serverUrl, setServerUrl] = useState<string>(
+    'https://meet.puja-guru.com/',
+  );
 
   const ws = useRef<WebSocket | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const isUserAtBottom = useRef(true);
+  const jitsiMeeting = useRef<any>(null);
+
+  // Dynamically require JitsiMeeting to avoid import error
+  let JitsiMeeting: any = null;
+  try {
+    // @ts-ignore
+    JitsiMeeting = require('@jitsi/react-native-sdk').JitsiMeeting;
+  } catch (e) {
+    // If not available, JitsiMeeting remains null
+    JitsiMeeting = null;
+  }
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -65,11 +87,7 @@ const ChatScreen: React.FC = () => {
     if (accessToken && booking_id) {
       const socketURL = `ws://puja-guru.com:9000/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
       ws.current = new WebSocket(socketURL);
-      console.log('ws.current', JSON.stringify(ws.current));
-      ws.current.onopen = () => {
-        console.log('✅ Connected to WebSocket');
-      };
-
+      ws.current.onopen = () => console.log('✅ Connected to WebSocket');
       ws.current.onmessage = e => {
         const data = JSON.parse(e.data);
         const newMsg: Message = {
@@ -83,20 +101,10 @@ const ChatScreen: React.FC = () => {
         };
         setMessages(prev => [...prev, newMsg]);
       };
-
-      ws.current.onerror = e => {
-        console.error('WebSocket error:', e.message);
-      };
-
-      ws.current.onclose = e => {
+      ws.current.onerror = e => console.error('WebSocket error:', e.message);
+      ws.current.onclose = e =>
         console.log('WebSocket closed:', e.code, e.reason);
-      };
-
-      return () => {
-        if (ws.current) {
-          ws.current.close();
-        }
-      };
+      return () => ws.current?.close();
     }
   }, [accessToken, panditID]);
 
@@ -132,9 +140,7 @@ const ChatScreen: React.FC = () => {
 
   const scrollToBottom = useCallback((animated = true) => {
     if (scrollViewRef.current) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({animated});
-      }, 100);
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({animated}), 100);
     }
   }, []);
 
@@ -165,8 +171,8 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages, scrollToBottom]);
 
+  // Use room_name and token from API response instead of extracting from URL
   const handleVideoCall = () => {
-    // Call the createMeeting API and handle the response
     if (!booking_id) {
       Alert.alert('Error', 'No booking ID available for video call.');
       return;
@@ -174,9 +180,36 @@ const ChatScreen: React.FC = () => {
     setLoading(true);
     createMeeting(booking_id)
       .then(response => {
-        console.log('Meeting created:', response);
-        if (response?.data?.meeting_url) {
-          Linking.openURL(response.data.meeting_url);
+        console.log('response:::1', response?.data);
+        if (response?.data?.room_name && response?.data?.token) {
+          setRoomName(response.data.room_name);
+          setMeetingToken(response.data.token);
+          setServerUrl(
+            response.data.server_url || 'https://meet.puja-guru.com/',
+          );
+          setInCall(true);
+        } else if (response?.data?.meeting_url) {
+          // fallback: extract room name from URL if needed
+          const meetingUrl = response.data.meeting_url;
+          let url = meetingUrl.endsWith('/')
+            ? meetingUrl.slice(0, -1)
+            : meetingUrl;
+          const lastSlashIdx = url.lastIndexOf('/');
+          let room =
+            lastSlashIdx === -1
+              ? 'defaultRoom'
+              : url.substring(lastSlashIdx + 1);
+          const queryIdx = room.indexOf('?');
+          room =
+            queryIdx !== -1
+              ? room.substring(0, queryIdx)
+              : room || 'defaultRoom';
+          setRoomName(room);
+          setMeetingToken(null);
+          setServerUrl('https://meet.puja-guru.com/');
+          setInCall(true);
+        } else {
+          Alert.alert('Error', 'Meeting information not found.');
         }
       })
       .catch(error => {
@@ -191,69 +224,109 @@ const ChatScreen: React.FC = () => {
       });
   };
 
-  // const requestCallPermission = async () => {
-  //   if (Platform.OS === 'android') {
-  //     try {
-  //       const result = await request(PERMISSIONS.ANDROID.CALL_PHONE);
-  //       return result === 'granted';
-  //     } catch (err) {
-  //       console.error('Permission error:', err);
-  //       return false;
-  //     }
-  //   }
-  //   return true; // iOS doesn't require explicit permission for tel:
-  // };
+  // Call handleVideoCall if videocall is true on mount
+  useEffect(() => {
+    if (videocall) {
+      handleVideoCall();
+    }
+    // We only want to run this on mount or when videocall changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videocall]);
 
-  // const handleOnCallPress = async () => {
-  //   if (
-  //     !other_user_phone ||
-  //     typeof other_user_phone !== 'string' ||
-  //     other_user_phone.trim() === ''
-  //   ) {
-  //     Alert.alert(
-  //       'No Phone Number',
-  //       'No valid phone number available for this user.',
-  //     );
-  //     return;
-  //   }
+  // JitsiMeeting event handlers
+  const onReadyToClose = useCallback(() => {
+    setInCall(false);
+    setRoomName(null);
+    setMeetingToken(null);
+    // @ts-ignore
+    if (
+      jitsiMeeting.current &&
+      typeof jitsiMeeting.current.close === 'function'
+    ) {
+      jitsiMeeting.current.close();
+    }
+    // Restore tab bar visibility when call ends
+    navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
+  }, [navigation]);
 
-  //   let sanitizedPhoneNumber = other_user_phone.replace(/[^0-9+]/g, '');
-  //   if (
-  //     !sanitizedPhoneNumber.startsWith('+91') &&
-  //     sanitizedPhoneNumber.length === 10
-  //   ) {
-  //     sanitizedPhoneNumber = `+91${sanitizedPhoneNumber}`;
-  //   }
+  const onEndpointMessageReceived = useCallback(() => {
+    console.log('You got a message!');
+  }, []);
 
-  //   if (!/^\+91[6-9][0-9]{9}$/.test(sanitizedPhoneNumber)) {
-  //     Alert.alert(
-  //       'Invalid Phone Number',
-  //       'Please provide a valid 10-digit Indian mobile number.',
-  //     );
-  //     return;
-  //   }
+  const eventListeners = {
+    onReadyToClose,
+    onEndpointMessageReceived,
+  };
 
-  //   const phoneUrl = `tel:${sanitizedPhoneNumber}`;
-  //   console.log('phoneUrl:', phoneUrl);
+  // Hide bottom tab bar when in video call
+  useEffect(() => {
+    if (inCall) {
+      // Hide the tab bar
+      navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'none'}});
+    } else {
+      // Show the tab bar
+      navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
+    }
+    // Optionally, restore tab bar on unmount
+    return () => {
+      navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
+    };
+  }, [inCall, navigation]);
 
-  //   const hasPermission = await requestCallPermission();
-  //   if (!hasPermission) {
-  //     Alert.alert(
-  //       'Permission Denied',
-  //       'Cannot make a call without permission.',
-  //     );
-  //     return;
-  //   }
+  // Show full screen when video call starts
+  if (inCall) {
+    // Full screen JitsiMeeting (no header, no chat, no input)
+    return (
+      <View style={styles.jitsiFullScreenView}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="#000"
+          translucent
+        />
+        <CustomeLoader loading={loading} />
+        {JitsiMeeting ? (
+          <JitsiMeeting
+            ref={jitsiMeeting}
+            room={roomName || 'defaultRoom'}
+            serverURL={serverUrl}
+            token={meetingToken || undefined}
+            config={{
+              hideConferenceTimer: true,
+              whiteboard: {
+                enabled: true,
+                collabServerBaseUrl: serverUrl,
+              },
+              analytics: {
+                disabled: true,
+              },
+            }}
+            eventListeners={eventListeners as any}
+            flags={{
+              'audioMute.enabled': true,
+              'ios.screensharing.enabled': true,
+              'fullscreen.enabled': false,
+              'audioOnly.enabled': false,
+              'android.screensharing.enabled': true,
+              'pip.enabled': true,
+              'pip-while-screen-sharing.enabled': true,
+              'conference-timer.enabled': true,
+              'close-captions.enabled': false,
+              'toolbox.enabled': true,
+            }}
+            style={styles.jitsiFullScreenView}
+          />
+        ) : (
+          <View style={styles.jitsiFullScreenView}>
+            <Text style={{color: '#fff', textAlign: 'center', marginTop: 40}}>
+              Video call is not available. Please check your app installation.
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  }
 
-  //   Linking.openURL(phoneUrl).catch(err => {
-  //     console.error('Error opening dialer:', err);
-  //     Alert.alert(
-  //       'Error',
-  //       'Unable to open the dialer. Please check the phone number or try again.',
-  //     );
-  //   });
-  // };
-
+  // Normal chat UI when not in call
   return (
     <View
       style={{
@@ -335,6 +408,20 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     textAlign: 'center',
     marginTop: moderateScale(20),
+  },
+  jitsiView: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  jitsiFullScreenView: {
+    flex: 1,
+    backgroundColor: '#000',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
   },
 });
 

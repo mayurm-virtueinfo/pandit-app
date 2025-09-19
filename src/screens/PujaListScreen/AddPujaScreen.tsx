@@ -285,9 +285,11 @@ const AddPujaScreen: React.FC = () => {
     {
       id: 'system',
       title: 'System Price',
-      description: `Rs. 2500 - ${t('with_pooja_items')}\nRs. 1800 -${t(
-        'without_pooja_items',
-      )}`,
+      description: `Rs. ${
+        pujaData?.price_with_samagri || pujaList[0]?.price_with_samagri
+      }  - ${t('with_pooja_items')}\nRs. ${
+        pujaData?.price_without_samagri || pujaList[0]?.price_without_samagri
+      } -${t('without_pooja_items')}`,
     },
     {
       id: 'custom',

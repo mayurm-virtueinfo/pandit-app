@@ -402,5 +402,9 @@
   "settings_help": "सहायता और समर्थन",
   "settings_about": "परिचय",
   "settings_logout": "लॉगआउट",
-  "settings_version": "ऐप संस्करण"
+  "settings_version": "ऐप संस्करण",
+  "charged_amount": "लागू की गई राशि",
+  "booking_accepted": "बुकिंग स्वीकार की गई",
+  "cancellation_service_fee": "रद्दीकरण सेवा शुल्क",
+  "booking_cancelled": "बुकिंग रद्द की गई"
 }

@@ -403,5 +403,9 @@
   "settings_help": "મદદ અને સપોર્ટ",
   "settings_about": "વિશે",
   "settings_logout": "લૉગઆઉટ",
-  "settings_version": "એપ્લિકેશન વર્ઝન"
+  "settings_version": "એપ્લિકેશન વર્ઝન",
+  "charged_amount": "લાગુ થયેલી રકમ",
+  "booking_accepted": "બુકિંગ સ્વીકારાયું",
+  "cancellation_service_fee": "રદ કરવાની સર્વિસ ફી",
+  "booking_cancelled": "બુકિંગ રદ થયું"
 }

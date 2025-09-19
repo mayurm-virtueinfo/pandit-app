@@ -91,6 +91,8 @@ type PujaDetailsType = {
     units: string;
   }>;
   user_arranged_items?: Array<{name: string; quantity: number; units: string}>;
+  // Add is_cos for cash on site
+  is_cos?: boolean;
 };
 
 const STORAGE_KEY_PREFIX = 'puja_status_';
@@ -110,17 +112,20 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const [enteredPin, setEnteredPin] = useState<string>('');
   const {showSuccessToast, showErrorToast} = useCommonToast();
 
-  console.log('pujaStarted', pujaStarted);
-  // const getBookingId = () => {
-  //   if (progress) {
-  //     return progressPujaDetails?.id;
-  //   }
-  //   return id || pujaDetails?.id;
-  // };
-
-  console.log('id', id);
-  console.log('pujaDetails?.id', pujaDetails?.id);
-  console.log('pujaDetails', pujaDetails);
+  // Helper to get is_cos value from either pujaDetails or progressPujaDetails
+  const getIsCos = () => {
+    if (
+      progress &&
+      progressPujaDetails &&
+      typeof progressPujaDetails.is_cos === 'boolean'
+    ) {
+      return progressPujaDetails.is_cos;
+    }
+    if (pujaDetails && typeof pujaDetails.is_cos === 'boolean') {
+      return pujaDetails.is_cos;
+    }
+    return false;
+  };
 
   // Fetch Pooja details
   const fetchPujaDetails = useCallback(async () => {
@@ -131,17 +136,14 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         const data = Array.isArray(response)
           ? response[0]
           : response?.data?.[0] || response?.[0];
-        console.log('data ::::: ', data);
         if (data) {
           setProgressPujaDetails(data);
         }
       } else {
         response = await getUpcomingPujaDetails(id);
-        console.log('response', response);
         const data = Array.isArray(response)
           ? response[0]
           : response?.data?.[0] || response?.[0];
-        console.log('data', data);
         if (data) {
           setPujaDetails(data);
         }
@@ -160,7 +162,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       }
       try {
         const status = await AsyncStorage.getItem(`${STORAGE_KEY_PREFIX}${id}`);
-        console.log('status', status);
         if (status === 'started') {
           setPujaStarted(true);
         } else {
@@ -189,8 +190,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // When pujaDetails or progressPujaDetails changes, load status
   useEffect(() => {
-    // const bookingId = getBookingId();
-    // console.log('bookingId', bookingId);
     if (id) {
       loadPujaStatus(id);
     }
@@ -198,7 +197,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // Call Start Pooja API and store status in AsyncStorage
   const handleStartPujaApi = async (pin: string) => {
-    const bookingId = id;
     if (!id) {
       console.error('No booking id found for starting pooja');
       return;
@@ -225,7 +223,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // Call Complete Pooja API and update status in AsyncStorage
   const handleCompletePujaApi = async (pin: string) => {
-    const bookingId = progressPujaDetails?.id || pujaDetails?.id;
     if (!id) {
       console.error('No booking id found for completing pooja');
       return;
@@ -290,7 +287,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
   // Helper to get address string for display
   const getAddressDisplay = () => {
-    // For progressPujaDetails, prefer location_display, else build from address
     if (progress && progressPujaDetails) {
       if (progressPujaDetails.location_display) {
         return progressPujaDetails.location_display;
@@ -308,12 +304,10 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         if (full_address) addressStr += full_address;
         return addressStr;
       }
-      // fallback to tirth_place_name
       if (progressPujaDetails.tirth_place_name) {
         return progressPujaDetails.tirth_place_name;
       }
     }
-    // For pujaDetails (upcoming), fallback to old logic
     if (pujaDetails) {
       if (pujaDetails.address_details?.full_address) {
         return pujaDetails.address_details.full_address;
@@ -326,7 +320,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   };
 
   const handleOnChatClick = async () => {
-    // If Pooja has started, do not allow chat and show a toast
     if (pujaStarted) {
       showErrorToast?.(
         'You cannot chat with the pandit after the pooja has started.',
@@ -393,6 +386,30 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     return [];
   };
 
+  // Payment info logic based on is_cos
+  const renderPaymentInfo = () => {
+    const isCos = getIsCos();
+    if (isCos) {
+      return (
+        <View style={styles.paymentInfoContainer}>
+          <Text style={styles.paymentInfoText}>
+            {t(
+              'Payment will be collected in cash from the user at the time of puja.',
+            )}
+          </Text>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.paymentInfoContainer}>
+          <Text style={styles.paymentInfoText}>
+            {t('Pandit will receive payment online after completing the puja.')}
+          </Text>
+        </View>
+      );
+    }
+  };
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <StatusBar
@@ -408,11 +425,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           'Pooja Details'
         }
         showBackButton
-        // showBellButton
         onBackPress={handleBackPress}
-        // onNotificationPress={() => {
-        //   navigation.navigate('NotificationScreen');
-        // }}
       />
 
       <View style={styles.contentContainer}>
@@ -578,6 +591,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   : `₹${progressPujaDetails?.amount}`}
               </Text>
             </View>
+
+            {/* Payment Info Section */}
+            {renderPaymentInfo()}
 
             {!pujaStarted ? (
               <View style={styles.buttonContainer}>
@@ -769,6 +785,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: moderateScale(24),
+  },
+  paymentInfoContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: moderateScale(10),
+    padding: moderateScale(12),
+    marginBottom: verticalScale(16),
+    borderWidth: 1,
+    borderColor: COLORS.separatorColor,
+  },
+  paymentInfoText: {
+    fontSize: moderateScale(13),
+    color: COLORS.primaryTextDark,
+    fontFamily: Fonts.Sen_Medium,
+    fontWeight: '500',
   },
 });
 

@@ -403,5 +403,9 @@
   "settings_help": "मदत व समर्थन",
   "settings_about": "विषयी",
   "settings_logout": "लॉगआउट",
-  "settings_version": "अ‍ॅप आवृत्ती"
+  "settings_version": "अ‍ॅप आवृत्ती",
+  "charged_amount": "आकारलेली रक्कम",
+  "booking_accepted": "बुकिंग स्वीकारले",
+  "cancellation_service_fee": "रद्द करण्यासाठी सेवा शुल्क",
+  "booking_cancelled": "बुकिंग रद्द झाले"
 }
