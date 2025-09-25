@@ -7,6 +7,7 @@ import EarningsHistoryScreen from '../../screens/ProfileScreen/EarningsHistorySc
 import NotificationScreen from '../../screens/ProfileScreen/NotificationScreen';
 import CompleteProfileScreen from '../../screens/Auth/CompleteProfileScreen';
 import EditProfileScreen from '../../screens/ProfileScreen/EditProfileScreen';
+import CompletePujaDetailsScreen from '../../screens/HomeScreen/CompletePujaDetailsScreen';
 
 export type ProfileStackParamList = {
   replace(arg0: string): unknown;
@@ -16,6 +17,7 @@ export type ProfileStackParamList = {
   PastPujaScreen: undefined;
   EarningsHistoryScreen: undefined;
   NotificationScreen: undefined;
+  CompletePujaDetailsScreen: undefined;
 };
 
 const Stack = createStackNavigator<ProfileStackParamList>();
@@ -36,6 +38,10 @@ const ProfileNavigator = () => {
         component={EarningsHistoryScreen}
       />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+      <Stack.Screen
+        name="CompletePujaDetailsScreen"
+        component={CompletePujaDetailsScreen}
+      />
     </Stack.Navigator>
   );
 };

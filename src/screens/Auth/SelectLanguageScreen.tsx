@@ -149,9 +149,9 @@ const SelectLanguageScreen: React.FC = () => {
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <CustomeLoader loading={isLoading} />
-      <View style={[styles.container, {paddingTop: insets.top}]}>
+      <View style={[styles.container]}>
         <CustomHeader
           title={t('complete_your_profile')}
           showBackButton={true}

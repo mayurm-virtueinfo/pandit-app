@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
-import {apiService, getPastBookings} from '../../api/apiService';
+import {getPastBookings} from '../../api/apiService';
 import {useNavigation} from '@react-navigation/native';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
@@ -35,7 +35,7 @@ type PastBookingType = {
 
 const PastPujaScreen: React.FC = () => {
   const {t} = useTranslation();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const [pastBookings, setPastBookings] = useState<PastBookingType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -101,7 +101,14 @@ const PastPujaScreen: React.FC = () => {
   // Render a single booking item
   const renderBookingItem = ({item}: {item: PastBookingType}) => {
     return (
-      <TouchableOpacity style={styles.bookingItem} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.bookingItem}
+        activeOpacity={0.7}
+        onPress={() =>
+          navigation.navigate('CompletePujaDetailsScreen', {
+            completePujaData: item,
+          })
+        }>
         <Image
           source={{uri: item.pooja_image_url}}
           style={styles.bookingImage}

@@ -594,33 +594,32 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
             {/* Payment Info Section */}
             {renderPaymentInfo()}
-
-            {!pujaStarted ? (
-              <View style={styles.buttonContainer}>
-                <PrimaryButtonOutlined
-                  title={t('cancel')}
-                  onPress={() => {
-                    navigation.navigate('PujaCancellationScreen', {id: id});
-                  }}
-                  style={styles.button}
-                />
-                <PrimaryButton
-                  title={t('start')}
-                  onPress={handleStartPuja}
-                  style={styles.button}
-                />
-              </View>
-            ) : (
-              <View style={{marginBottom: verticalScale(24)}}>
-                <PrimaryButton
-                  title={t('complete_puja')}
-                  onPress={handleCompletePuja}
-                  style={styles.button}
-                />
-              </View>
-            )}
           </View>
         </ScrollView>
+        {!pujaStarted ? (
+          <View style={styles.buttonContainer}>
+            <PrimaryButtonOutlined
+              title={t('cancel')}
+              onPress={() => {
+                navigation.navigate('PujaCancellationScreen', {id: id});
+              }}
+              style={styles.button}
+            />
+            <PrimaryButton
+              title={t('start')}
+              onPress={handleStartPuja}
+              style={styles.button}
+            />
+          </View>
+        ) : (
+          <View style={{marginBottom: verticalScale(24)}}>
+            <PrimaryButton
+              title={t('complete_puja')}
+              onPress={handleCompletePuja}
+              style={styles.button}
+            />
+          </View>
+        )}
       </View>
 
       <CodeVerificationModal
@@ -772,19 +771,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   buttonContainer: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: moderateScale(24),
-    marginBottom: verticalScale(24),
+    marginHorizontal: moderateScale(24),
+    marginBottom: moderateScale(16),
+    marginTop: moderateScale(8),
   },
   button: {
     flex: 1,
-    height: moderateScale(46),
     borderRadius: moderateScale(10),
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: moderateScale(24),
   },
   paymentInfoContainer: {
     backgroundColor: COLORS.white,

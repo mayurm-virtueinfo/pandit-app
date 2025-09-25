@@ -9,6 +9,7 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  StatusBar,
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
@@ -195,11 +196,16 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
       <ImageBackground
         source={Images.ic_splash_background}
         style={styles.container}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}>
           <Loader loading={isLoading} />
           <ScrollView
@@ -271,6 +277,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.primary,
   },
   scrollContent: {
     flexGrow: 1,

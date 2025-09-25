@@ -149,14 +149,14 @@ const EditPanditPoojaScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
         backgroundColor="transparent"
         barStyle="light-content"
       />
-      <View style={[styles.container, {paddingTop: insets.top}]}>
+      <View style={[styles.container]}>
         <CustomHeader title={t('edit_puja_list')} showBackButton={true} />
 
         <KeyboardAvoidingView

@@ -11,6 +11,7 @@ import {
   Alert,
   TouchableOpacity,
   Modal,
+  StatusBar,
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
@@ -263,166 +264,176 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   return (
-    <ImageBackground
-      source={Images.ic_splash_background}
-      style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <View style={[styles.container, {paddingTop: inset.top}]}>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
+      <ImageBackground
+        source={Images.ic_splash_background}
         style={styles.container}>
-        <Loader loading={isLoading} />
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled">
-          <View style={[styles.content, {paddingTop: inset.top}]}>
-            <View style={styles.containerHeader}>
-              <Image
-                source={Images.ic_app_logo}
-                style={{resizeMode: 'contain'}}
-              />
-              <Text style={styles.title}>{t('hi_welcome')}</Text>
-              {/* Add a language change button in the header */}
-              <TouchableOpacity
-                style={styles.languageButton}
-                onPress={handleOpenLanguageModal}
-                accessibilityLabel="Change language"
-                activeOpacity={0.7}>
-                <Icon
-                  name="language"
-                  size={moderateScale(24)}
-                  color={COLORS.white}
+        <KeyboardAvoidingView
+          // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}>
+          <Loader loading={isLoading} />
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled">
+            <View style={[styles.content]}>
+              <View style={styles.containerHeader}>
+                <Image
+                  source={Images.ic_app_logo}
+                  style={{resizeMode: 'contain'}}
                 />
-                <Text style={styles.languageButtonText}>
-                  {(() => {
-                    switch (selectedLang) {
-                      case 'en':
-                        return 'English';
-                      case 'hi':
-                        return 'हिन्दी';
-                      case 'gu':
-                        return 'ગુજરાતી';
-                      case 'mr':
-                        return 'मराठी';
-                      default:
-                        return 'Language';
-                    }
-                  })()}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={[styles.containerBody, {paddingBottom: inset.bottom}]}>
-              <Text style={styles.mainTitle}>{t('sign_in')}</Text>
-              <Text style={styles.subtitle}>
-                {t('please_enter_your_credential')}
-              </Text>
-
-              <ThemedInput
-                label={t('')}
-                value={phoneNumber}
-                onChangeText={handlePhoneChange}
-                placeholder={t('enter_mobile_number')}
-                keyboardType="phone-pad"
-                autoComplete="tel"
-                textContentType="telephoneNumber"
-                maxLength={10}
-                errors={errors}
-                errorField="phoneNumber"
-              />
-
-              {/* Terms and Conditions, User Agreement, Refund Policy with checkbox */}
-              <View style={styles.termsRow}>
+                <Text style={styles.title}>{t('hi_welcome')}</Text>
+                {/* Add a language change button in the header */}
                 <TouchableOpacity
-                  style={styles.checkboxContainer}
-                  onPress={() => setIsAgreed(!isAgreed)}
-                  activeOpacity={0.7}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{checked: isAgreed}}
-                  accessibilityLabel="Agree to terms">
-                  <View
-                    style={[
-                      styles.checkbox,
-                      isAgreed && styles.checkboxChecked,
-                    ]}>
-                    {isAgreed && (
-                      <Icon
-                        name="check"
-                        size={moderateScale(16)}
-                        color="#fff"
-                        style={styles.checkboxIcon}
-                      />
-                    )}
-                  </View>
+                  style={styles.languageButton}
+                  onPress={handleOpenLanguageModal}
+                  accessibilityLabel="Change language"
+                  activeOpacity={0.7}>
+                  <Icon
+                    name="language"
+                    size={moderateScale(24)}
+                    color={COLORS.white}
+                  />
+                  <Text style={styles.languageButtonText}>
+                    {(() => {
+                      switch (selectedLang) {
+                        case 'en':
+                          return 'English';
+                        case 'hi':
+                          return 'हिन्दी';
+                        case 'gu':
+                          return 'ગુજરાતી';
+                        case 'mr':
+                          return 'मराठी';
+                        default:
+                          return 'Language';
+                      }
+                    })()}
+                  </Text>
                 </TouchableOpacity>
-                <Text style={styles.termsText}>
-                  {t('i_agree_to') || 'I agree to the '}
-                  <Text
-                    style={styles.termsLink}
-                    onPress={() => handleOpenPolicy('terms')}>
-                    {t('terms_and_conditions') || 'Terms & Conditions'}
-                  </Text>
-                  {', '}
-                  <Text
-                    style={styles.termsLink}
-                    onPress={() => handleOpenPolicy('user')}>
-                    {t('user_agreement') || 'User Agreement'}
-                  </Text>
-                  {' & '}
-                  <Text
-                    style={styles.termsLink}
-                    onPress={() => handleOpenPolicy('refund')}>
-                    {t('refund_policy') || 'Refund Policy'}
-                  </Text>
-                </Text>
               </View>
 
+              <View
+                style={[styles.containerBody, {paddingBottom: inset.bottom}]}>
+                <Text style={styles.mainTitle}>{t('sign_in')}</Text>
+                <Text style={styles.subtitle}>
+                  {t('please_enter_your_credential')}
+                </Text>
+
+                <ThemedInput
+                  label={t('')}
+                  value={phoneNumber}
+                  onChangeText={handlePhoneChange}
+                  placeholder={t('enter_mobile_number')}
+                  keyboardType="phone-pad"
+                  autoComplete="tel"
+                  textContentType="telephoneNumber"
+                  maxLength={10}
+                  errors={errors}
+                  errorField="phoneNumber"
+                />
+
+                {/* Terms and Conditions, User Agreement, Refund Policy with checkbox */}
+                <View style={styles.termsRow}>
+                  <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => setIsAgreed(!isAgreed)}
+                    activeOpacity={0.7}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{checked: isAgreed}}
+                    accessibilityLabel="Agree to terms">
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isAgreed && styles.checkboxChecked,
+                      ]}>
+                      {isAgreed && (
+                        <Icon
+                          name="check"
+                          size={moderateScale(16)}
+                          color="#fff"
+                          style={styles.checkboxIcon}
+                        />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                  <Text style={styles.termsText}>
+                    {t('i_agree_to') || 'I agree to the '}
+                    <Text
+                      style={styles.termsLink}
+                      onPress={() => handleOpenPolicy('terms')}>
+                      {t('terms_and_conditions') || 'Terms & Conditions'}
+                    </Text>
+                    {', '}
+                    <Text
+                      style={styles.termsLink}
+                      onPress={() => handleOpenPolicy('user')}>
+                      {t('user_agreement') || 'User Agreement'}
+                    </Text>
+                    {' & '}
+                    <Text
+                      style={styles.termsLink}
+                      onPress={() => handleOpenPolicy('refund')}>
+                      {t('refund_policy') || 'Refund Policy'}
+                    </Text>
+                  </Text>
+                </View>
+
+                <PrimaryButton
+                  onPress={handleSignIn}
+                  title={t('send_otp')}
+                  disabled={!isAgreed}
+                  style={{marginBottom: 20}}
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        {/* Language selection modal (can be opened anytime) */}
+        <Modal
+          visible={showLangModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowLangModal(false)}>
+          <View style={styles.langModalOverlay}>
+            <View style={styles.langModalCard}>
+              <Text style={styles.langModalTitle}>
+                {t('language') || 'Language'}
+              </Text>
+              <View style={styles.langPickerContainer}>
+                <Picker
+                  selectedValue={selectedLang}
+                  onValueChange={v => setSelectedLang(v)}
+                  mode="dropdown"
+                  style={styles.langPicker}>
+                  <Picker.Item label="English" value="en" />
+                  <Picker.Item label="हिन्दी" value="hi" />
+                  <Picker.Item label="ગુજરાતી" value="gu" />
+                  <Picker.Item label="मराठी" value="mr" />
+                </Picker>
+              </View>
+              <View style={{height: 12}} />
               <PrimaryButton
-                onPress={handleSignIn}
-                title={t('send_otp')}
-                disabled={!isAgreed}
+                title={t('continue') || 'Continue'}
+                onPress={handleChangeLanguage}
               />
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Language selection modal (can be opened anytime) */}
-      <Modal
-        visible={showLangModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowLangModal(false)}>
-        <View style={styles.langModalOverlay}>
-          <View style={styles.langModalCard}>
-            <Text style={styles.langModalTitle}>
-              {t('language') || 'Language'}
-            </Text>
-            <View style={styles.langPickerContainer}>
-              <Picker
-                selectedValue={selectedLang}
-                onValueChange={v => setSelectedLang(v)}
-                mode="dropdown"
-                style={styles.langPicker}>
-                <Picker.Item label="English" value="en" />
-                <Picker.Item label="हिन्दी" value="hi" />
-                <Picker.Item label="ગુજરાતી" value="gu" />
-                <Picker.Item label="मराठी" value="mr" />
-              </Picker>
-            </View>
-            <View style={{height: 12}} />
-            <PrimaryButton
-              title={t('continue') || 'Continue'}
-              onPress={handleChangeLanguage}
-            />
-          </View>
-        </View>
-      </Modal>
-    </ImageBackground>
+        </Modal>
+      </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.primary,
   },
   scrollContent: {
     flexGrow: 1,

@@ -391,7 +391,9 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
       <PujaItemsModal
         visible={isPujaItemsModalVisible}
         onClose={handleClosePujaItemsModal}
-        items={getPujaItemsForModal()}
+        // items={getPujaItemsForModal()}
+        userItems={pujaDetails?.samagri_details?.user_items}
+        panditItems={pujaDetails?.samagri_details?.pandit_items}
       />
 
       {/* Custom Modal for Approve/Reject */}
