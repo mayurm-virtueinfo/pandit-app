@@ -47,6 +47,7 @@
     "react-native-background-timer": "https://github.com/jitsi/react-native-background-timer.git#d180dfaa4486ae3ee17d01242db92cb3195f4718",
     "react-native-calendar-events": "https://github.com/jitsi/react-native-calendar-events.git#47f068dedfed7c0f72042e093f688eb11624eb7b",
     "react-native-calendars": "^1.1313.0",
+    "react-native-callkeep": "^4.3.16",
     "react-native-chart-kit": "^6.12.0",
     "react-native-default-preference": "https://github.com/jitsi/react-native-default-preference.git#c9bf63bdc058e3fa2aa0b87b1ee1af240f44ed02",
     "react-native-device-info": "12.1.0",
@@ -74,10 +75,12 @@
     "react-native-toast-notifications": "^3.4.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-video": "6.13.0",
+    "react-native-voip-push-notification": "^3.3.3",
     "react-native-watch-connectivity": "1.1.0",
     "react-native-webrtc": "124.0.4",
     "react-native-webview": "13.13.5",
     "react-native-worklets-core": "https://github.com/jitsi/react-native-worklets-core.git#8c5dfab2a5907305da8971696a781b60f0f9cb18",
+    "uuid": "^13.0.0",
     "yarn": "^1.22.22"
   },
   "devDependencies": {

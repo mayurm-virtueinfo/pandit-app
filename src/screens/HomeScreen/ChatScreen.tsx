@@ -20,12 +20,12 @@ import {
   useFocusEffect,
   useRoute,
   useNavigation,
-  useNavigationState,
 } from '@react-navigation/native';
 import {createMeeting, getMessageHistory} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
+import RNCallKeep from 'react-native-callkeep';
 
 export interface Message {
   id: string;
@@ -44,6 +44,8 @@ const ChatScreen: React.FC = () => {
     other_user_phone,
     user_id,
     videocall,
+    incomingMeetingUrl,
+    currentCallUUID,
   } = route.params;
 
   const insets = useSafeAreaInsets();
@@ -63,13 +65,10 @@ const ChatScreen: React.FC = () => {
   const isUserAtBottom = useRef(true);
   const jitsiMeeting = useRef<any>(null);
 
-  // Dynamically require JitsiMeeting to avoid import error
   let JitsiMeeting: any = null;
   try {
-    // @ts-ignore
     JitsiMeeting = require('@jitsi/react-native-sdk').JitsiMeeting;
   } catch (e) {
-    // If not available, JitsiMeeting remains null
     JitsiMeeting = null;
   }
 
@@ -171,7 +170,10 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages, scrollToBottom]);
 
-  // Use room_name and token from API response instead of extracting from URL
+  useEffect(() => {
+    handleMeetingURL();
+  }, [incomingMeetingUrl]);
+
   const handleVideoCall = () => {
     if (!booking_id) {
       Alert.alert('Error', 'No booking ID available for video call.');
@@ -189,7 +191,6 @@ const ChatScreen: React.FC = () => {
           );
           setInCall(true);
         } else if (response?.data?.meeting_url) {
-          // fallback: extract room name from URL if needed
           const meetingUrl = response.data.meeting_url;
           let url = meetingUrl.endsWith('/')
             ? meetingUrl.slice(0, -1)
@@ -224,30 +225,47 @@ const ChatScreen: React.FC = () => {
       });
   };
 
-  // Call handleVideoCall if videocall is true on mount
+  const handleMeetingURL = () => {
+    if (incomingMeetingUrl) {
+      let url = incomingMeetingUrl.endsWith('/')
+        ? incomingMeetingUrl.slice(0, -1)
+        : incomingMeetingUrl;
+      const lastSlashIdx = url.lastIndexOf('/');
+      let room =
+        lastSlashIdx === -1 ? 'defaultRoom' : url.substring(lastSlashIdx + 1);
+      const queryIdx = room.indexOf('?');
+      room =
+        queryIdx !== -1 ? room.substring(0, queryIdx) : room || 'defaultRoom';
+      setRoomName(room);
+      setMeetingToken(null);
+      setServerUrl('https://meet.puja-guru.com/');
+      setInCall(true);
+    } else if (videocall) {
+      handleVideoCall(); // Fallback to create a new meeting
+    }
+  };
+
   useEffect(() => {
     if (videocall) {
       handleVideoCall();
     }
-    // We only want to run this on mount or when videocall changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videocall]);
 
-  // JitsiMeeting event handlers
   const onReadyToClose = useCallback(() => {
+    if (currentCallUUID) {
+      RNCallKeep.endCall(currentCallUUID as any);
+    }
     setInCall(false);
     setRoomName(null);
     setMeetingToken(null);
-    // @ts-ignore
     if (
       jitsiMeeting.current &&
       typeof jitsiMeeting.current.close === 'function'
     ) {
       jitsiMeeting.current.close();
     }
-    // Restore tab bar visibility when call ends
     navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
-  }, [navigation]);
+  }, [navigation, currentCallUUID]);
 
   const onEndpointMessageReceived = useCallback(() => {
     console.log('You got a message!');
@@ -258,24 +276,24 @@ const ChatScreen: React.FC = () => {
     onEndpointMessageReceived,
   };
 
-  // Hide bottom tab bar when in video call
+  useEffect(() => {
+    if ((route as any).params?.endCall) {
+      onReadyToClose();
+    }
+  }, [(route as any).params?.endCall]);
+
   useEffect(() => {
     if (inCall) {
-      // Hide the tab bar
       navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'none'}});
     } else {
-      // Show the tab bar
       navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
     }
-    // Optionally, restore tab bar on unmount
     return () => {
       navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
     };
   }, [inCall, navigation]);
 
-  // Show full screen when video call starts
   if (inCall) {
-    // Full screen JitsiMeeting (no header, no chat, no input)
     return (
       <View style={styles.jitsiFullScreenView}>
         <StatusBar
@@ -299,6 +317,13 @@ const ChatScreen: React.FC = () => {
               analytics: {
                 disabled: true,
               },
+              prejoinPageEnabled: false,
+              prejoinConfig: {
+                enabled: false,
+              },
+              requireDisplayName: false,
+              startWithAudioMuted: false,
+              startWithVideoMuted: false,
             }}
             eventListeners={eventListeners as any}
             flags={{
@@ -312,6 +337,8 @@ const ChatScreen: React.FC = () => {
               'conference-timer.enabled': true,
               'close-captions.enabled': false,
               'toolbox.enabled': true,
+              'chat.enabled': false,
+              'prejoin.enabled': false,
             }}
             style={styles.jitsiFullScreenView}
           />
@@ -326,7 +353,6 @@ const ChatScreen: React.FC = () => {
     );
   }
 
-  // Normal chat UI when not in call
   return (
     <View
       style={{

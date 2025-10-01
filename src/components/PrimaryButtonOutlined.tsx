@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_Medium,
+    color: COLORS.primaryTextDark,
   },
   disabled: {
     backgroundColor: '#E5E7EB',

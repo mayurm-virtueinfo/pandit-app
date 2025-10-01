@@ -3,7 +3,12 @@ import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
 import RootNavigator from './src/navigation/RootNavigator';
-import {LogBox} from 'react-native';
+import {
+  LogBox,
+  AppState,
+  NativeEventEmitter,
+  NativeModules,
+} from 'react-native';
 import 'react-native-gesture-handler';
 import {AuthProvider} from './src/provider/AuthProvider';
 import {ToastProvider} from 'react-native-toast-notifications';
@@ -19,6 +24,12 @@ import i18n from './src/i18n';
 import {navigationRef} from './src/helper/navigationRef';
 import {getMessaging} from '@react-native-firebase/messaging';
 import {requestUserPermission} from './src/configuration/notificationPermission';
+import {
+  initCallKeep,
+  setOnAnswerListener,
+  setOnEndListener,
+} from './src/configuration/callValidation';
+import {navigate} from './src/utils/NavigationService';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -27,7 +38,7 @@ LogBox.ignoreLogs([
 
 const auth = getAuth();
 if (__DEV__) {
-  auth.useEmulator('http://127.0.0.1:9099');
+  auth.useEmulator('http://192.168.1.20:9099');
 }
 setupNotifications();
 
@@ -39,7 +50,67 @@ const App = () => {
 
     requestUserPermission();
 
+    initCallKeep();
+
+    setOnAnswerListener(({callUUID, payload}) => {
+      navigate('Main', {
+        screen: 'AppBottomTabNavigator',
+        params: {
+          screen: 'HomeNavigator',
+          params: {
+            screen: 'ChatScreen',
+            params: {
+              booking_id: payload?.booking_id,
+              user_id: payload?.sender_id,
+              other_user_name: payload?.callerName || 'Call',
+              videocall: true,
+              callUUID,
+              incomingMeetingUrl: payload?.meeting_url,
+              ...payload,
+            },
+          },
+        },
+      });
+    });
+
+    setOnEndListener(({callUUID}) => {
+      navigate('Main', {
+        screen: 'AppBottomTabNavigator',
+        params: {
+          screen: 'HomeNavigator',
+          params: {
+            screen: 'ChatScreen',
+            params: {
+              endCall: true,
+              callUUID,
+            },
+          },
+        },
+      });
+    });
+
     return () => clearTimeout(timer);
+  }, []);
+
+  const {CustomAppState} = NativeModules;
+
+  useEffect(() => {
+    const eventEmitter = new NativeEventEmitter(CustomAppState);
+    const subscription = eventEmitter.addListener(
+      'CustomAppStateChange',
+      event => {
+        console.log('Custom App State:', event.state);
+        if (event.state === 'onPause') {
+          console.log('App is inactive (paused)');
+        } else if (event.state === 'onStop') {
+          console.log('App is in background');
+        } else if (event.state === 'onStart') {
+          console.log('App is active');
+        }
+      },
+    );
+
+    return () => subscription.remove();
   }, []);
 
   const handleInitialNotification = async () => {
