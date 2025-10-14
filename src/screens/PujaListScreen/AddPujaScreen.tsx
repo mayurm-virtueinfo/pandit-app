@@ -45,6 +45,10 @@ type PujaDataType = {
   price_with_samagri: string;
   price_without_samagri: string;
   price_status: number;
+  system_price: {
+    price_with_samagri: number;
+    price_without_samagri: number;
+  };
 };
 
 const AddPujaScreen: React.FC = () => {
@@ -59,6 +63,8 @@ const AddPujaScreen: React.FC = () => {
 
   const {pujaId, pujaData} = params || {};
   const isEditMode = !!pujaId;
+
+  console.log('pujaData', pujaData);
 
   const mapApiPujaToListItem = (item: any): EditRequest => ({
     id: item.id,
@@ -87,6 +93,7 @@ const AddPujaScreen: React.FC = () => {
           price_with_samagri: Number(pujaData.price_with_samagri),
           price_without_samagri: Number(pujaData.price_without_samagri),
           price_status: pujaData.price_status,
+          system_price: pujaData.system_price,
         },
       ];
     }
@@ -285,11 +292,11 @@ const AddPujaScreen: React.FC = () => {
     {
       id: 'system',
       title: 'System Price',
-      description: `Rs. ${
-        pujaData?.price_with_samagri || pujaList[0]?.price_with_samagri
-      }  - ${t('with_pooja_items')}\nRs. ${
-        pujaData?.price_without_samagri || pujaList[0]?.price_without_samagri
-      } -${t('without_pooja_items')}`,
+      description: `Rs. ${pujaData?.system_price?.price_with_samagri}  - ${t(
+        'with_pooja_items',
+      )}\nRs. ${pujaData?.system_price?.price_without_samagri} - ${t(
+        'without_pooja_items',
+      )}`,
     },
     {
       id: 'custom',

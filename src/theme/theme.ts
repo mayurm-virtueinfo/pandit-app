@@ -1,5 +1,5 @@
-import {Dimensions, StyleSheet} from 'react-native';
-import {moderateScale} from 'react-native-size-matters';
+import { Dimensions, StyleSheet } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
 
 export const SCREEN_WIDTH = Dimensions.get('window').width;
 export const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -17,8 +17,11 @@ export const hp = (percentage: number) => {
 
 export const THEMESHADOW = {
   shadow: {
+    // borderRadius is for both Android and iOS
     borderRadius: moderateScale(10),
-    elevation: 5,
+    // elevation is Android only
+    elevation: 7,
+    // shadowColor, shadowOffset, shadowOpacity, shadowRadius are iOS only
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

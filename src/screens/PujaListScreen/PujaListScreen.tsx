@@ -34,6 +34,10 @@ interface PujaItemType {
   price_with_samagri: string;
   price_without_samagri: string;
   price_status: number;
+  system_price: {
+    price_with_samagri: number;
+    price_without_samagri: number;
+  };
 }
 
 interface PujaItemProps {
@@ -55,6 +59,7 @@ const PujaListScreen: React.FC = () => {
 
       if (response.data.success) {
         const data = response.data.data;
+        console.log('data', data);
         const mapped = data.map((item: any) => ({
           id: item.id,
           pooja: item.pooja,
@@ -64,6 +69,7 @@ const PujaListScreen: React.FC = () => {
           price_with_samagri: item.price_with_samagri,
           price_without_samagri: item.price_without_samagri,
           price_status: item.price_status,
+          system_price: item.system_price,
         }));
         setPujaList(mapped);
       }

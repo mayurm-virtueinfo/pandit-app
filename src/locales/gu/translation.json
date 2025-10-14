@@ -407,5 +407,13 @@
   "charged_amount": "લાગુ થયેલી રકમ",
   "booking_accepted": "બુકિંગ સ્વીકારાયું",
   "cancellation_service_fee": "રદ કરવાની સર્વિસ ફી",
-  "booking_cancelled": "બુકિંગ રદ થયું"
+  "booking_cancelled": "બુકિંગ રદ થયું",
+  "date": "તારીખ",
+  "amount": "રકમ",
+  "muhurat": "મુહૂર્ત",
+  "temple": "મંદિર",
+  "samagri_required": "સામગ્રી જરૂરી છે",
+  "payment_status": "ચુકવણી સ્થિતિ",
+  "booking_status": "બુકિંગ સ્થિતિ",
+  "notes": "નોંધ"
 }

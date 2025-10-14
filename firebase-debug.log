@@ -1,20 +1,20 @@
-[debug] [2025-09-30T06:24:33.490Z] ----------------------------------------------------------------------
-[debug] [2025-09-30T06:24:33.492Z] Command:       /Users/tarang/.nvm/versions/node/v20.11.1/bin/node /Users/tarang/.nvm/versions/node/v20.11.1/bin/firebase emulators:start --only auth
-[debug] [2025-09-30T06:24:33.493Z] CLI Version:   14.2.1
-[debug] [2025-09-30T06:24:33.493Z] Platform:      darwin
-[debug] [2025-09-30T06:24:33.493Z] Node Version:  v20.11.1
-[debug] [2025-09-30T06:24:33.493Z] Time:          Tue Sep 30 2025 11:54:33 GMT+0530 (India Standard Time)
-[debug] [2025-09-30T06:24:33.493Z] ----------------------------------------------------------------------
+[debug] [2025-10-14T05:48:45.782Z] ----------------------------------------------------------------------
+[debug] [2025-10-14T05:48:45.785Z] Command:       /Users/tarang/.nvm/versions/node/v20.11.1/bin/node /Users/tarang/.nvm/versions/node/v20.11.1/bin/firebase emulators:start --only auth
+[debug] [2025-10-14T05:48:45.785Z] CLI Version:   14.2.1
+[debug] [2025-10-14T05:48:45.785Z] Platform:      darwin
+[debug] [2025-10-14T05:48:45.785Z] Node Version:  v20.11.1
+[debug] [2025-10-14T05:48:45.785Z] Time:          Tue Oct 14 2025 11:18:45 GMT+0530 (India Standard Time)
+[debug] [2025-10-14T05:48:45.786Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2025-09-30T06:24:33.678Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
-[debug] [2025-09-30T06:24:33.684Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-14T05:48:45.973Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
+[debug] [2025-10-14T05:48:45.977Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
 [debug] Failed to authenticate, have you run firebase login?
 [warn] ⚠  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI. 
 [info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
-[debug] [2025-09-30T06:24:34.471Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2025-09-30T06:24:34.471Z] assigned listening specs for emulators {"user":{"auth":[{"address":"0.0.0.0","family":"IPv4","port":9099}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[debug] [2025-09-30T06:24:34.474Z] [hub] writing locator at /var/folders/y2/m246sh752b7gmg0d911c4wmr0000gn/T/hub-panditji-42b4a.json
-[debug] [2025-09-30T06:24:40.833Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[debug] [2025-10-14T05:48:46.809Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-10-14T05:48:46.810Z] assigned listening specs for emulators {"user":{"auth":[{"address":"0.0.0.0","family":"IPv4","port":9099}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-10-14T05:48:46.813Z] [hub] writing locator at /var/folders/y2/m246sh752b7gmg0d911c4wmr0000gn/T/hub-panditji-42b4a.json
+[debug] [2025-10-14T05:48:57.151Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
 [info] 
 ┌─────────────────────────────────────────────────────────────┐
 │ ✔  All emulators ready! It is now safe to connect your app. │
@@ -31,47 +31,4 @@
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
-[info] i  To verify the phone number +911111111111, use the code 653235. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 653235."}}
-[info] i  To verify the phone number +911111111111, use the code 932971. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 932971."}}
-[info] i  To verify the phone number +911111111111, use the code 199785. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 199785."}}
-[info] i  To verify the phone number +911111111111, use the code 597025. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 597025."}}
-[info] i  To verify the phone number +911111111111, use the code 997449. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 997449."}}
-[debug] [2025-09-30T14:37:07.267Z] Received signal SIGHUP 1
-[debug] [2025-10-01T07:04:46.465Z] ----------------------------------------------------------------------
-[debug] [2025-10-01T07:04:46.469Z] Command:       /Users/tarang/.nvm/versions/node/v20.11.1/bin/node /Users/tarang/.nvm/versions/node/v20.11.1/bin/firebase emulators:start --only auth
-[debug] [2025-10-01T07:04:46.469Z] CLI Version:   14.2.1
-[debug] [2025-10-01T07:04:46.470Z] Platform:      darwin
-[debug] [2025-10-01T07:04:46.470Z] Node Version:  v20.11.1
-[debug] [2025-10-01T07:04:46.470Z] Time:          Wed Oct 01 2025 12:34:46 GMT+0530 (India Standard Time)
-[debug] [2025-10-01T07:04:46.470Z] ----------------------------------------------------------------------
-[debug] 
-[debug] [2025-10-01T07:04:46.473Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
-[debug] [2025-10-01T07:04:46.710Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
-[debug] [2025-10-01T07:04:46.716Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] Failed to authenticate, have you run firebase login?
-[warn] ⚠  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI. 
-[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
-[debug] [2025-10-01T07:04:47.544Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2025-10-01T07:04:47.544Z] assigned listening specs for emulators {"user":{"auth":[{"address":"0.0.0.0","family":"IPv4","port":9099}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[debug] [2025-10-01T07:04:47.553Z] [hub] writing locator at /var/folders/y2/m246sh752b7gmg0d911c4wmr0000gn/T/hub-panditji-42b4a.json
-[debug] [2025-10-01T07:04:53.946Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
-[info] 
-┌─────────────────────────────────────────────────────────────┐
-│ ✔  All emulators ready! It is now safe to connect your app. │
-│ i  View Emulator UI at http://127.0.0.1:4000/               │
-└─────────────────────────────────────────────────────────────┘
-
-┌────────────────┬──────────────┬────────────────────────────┐
-│ Emulator       │ Host:Port    │ View in Emulator UI        │
-├────────────────┼──────────────┼────────────────────────────┤
-│ Authentication │ 0.0.0.0:9099 │ http://127.0.0.1:4000/auth │
-└────────────────┴──────────────┴────────────────────────────┘
-  Emulator Hub host: 127.0.0.1 port: 4400
-  Other reserved ports: 4500
-
-Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
- 
-[debug] [2025-10-01T07:04:54.688Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
-[debug] [2025-10-01T07:04:54.688Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
-[info] i  To verify the phone number +911111111111, use the code 943008. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 943008."}}
-[info] i  To verify the phone number +912222222222, use the code 164212. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +912222222222, use the code 164212."}}
+[info] i  To verify the phone number +911111111111, use the code 946701. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +911111111111, use the code 946701."}}

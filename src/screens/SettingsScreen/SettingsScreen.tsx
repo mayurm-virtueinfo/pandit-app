@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.pujaBackground,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingTop: moderateScale(24),
   },
   scrollView: {
     flex: 1,
@@ -132,6 +131,7 @@ const styles = StyleSheet.create({
   settingsCard: {
     backgroundColor: COLORS.white,
     paddingHorizontal: moderateScale(14),
+    marginTop: moderateScale(24),
   },
   settingItem: {
     flexDirection: 'row',

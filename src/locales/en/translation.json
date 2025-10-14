@@ -407,5 +407,13 @@
   "charged_amount": "Charged Amount",
   "booking_accepted": "Booking accepted",
   "cancellation_service_fee": "Service fee for cancellation",
-  "booking_cancelled": "Booking cancelled"
+  "booking_cancelled": "Booking cancelled",
+  "date": "Date",
+  "amount": "Amount",
+  "muhurat": "Muhurat",
+  "temple": "Temple",
+  "samagri_required": "Samagri Required",
+  "payment_status": "Payment Status",
+  "booking_status": "Booking Status",
+  "notes": "Notes"
 }

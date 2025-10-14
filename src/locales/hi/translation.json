@@ -406,5 +406,13 @@
   "charged_amount": "लागू की गई राशि",
   "booking_accepted": "बुकिंग स्वीकार की गई",
   "cancellation_service_fee": "रद्दीकरण सेवा शुल्क",
-  "booking_cancelled": "बुकिंग रद्द की गई"
+  "booking_cancelled": "बुकिंग रद्द की गई",
+  "date": "तिथि",
+  "amount": "राशि",
+  "muhurat": "मुहूर्त",
+  "temple": "मंदिर",
+  "samagri_required": "सामग्री आवश्यक",
+  "payment_status": "भुगतान स्थिति",
+  "booking_status": "बुकिंग स्थिति",
+  "notes": "टिप्पणियाँ"
 }

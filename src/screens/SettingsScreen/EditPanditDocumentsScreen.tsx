@@ -64,6 +64,9 @@ const EditPanditDocumentsScreen: React.FC = () => {
   const [loadingDocument, setLoadingDocument] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // New: Additional loading state for update button press
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
+
   // Track if a document has been changed (uploaded/removed)
   const [changedDocuments, setChangedDocuments] = useState<{
     [key in keyof DocumentUploadState]: boolean;
@@ -206,7 +209,11 @@ const EditPanditDocumentsScreen: React.FC = () => {
 
   // Only send changed documents in the formData
   const handleSubmit = async () => {
-    if (isSubmitting || loadingDocument) return;
+    // Set loading on button click
+    if (isSubmitting || loadingDocument || isButtonLoading) return;
+
+    // show loading feedback on button
+    setIsButtonLoading(true);
 
     const requiredDocuments = ['idProof', 'panCard'];
     const missingRequired = requiredDocuments.filter(
@@ -214,6 +221,7 @@ const EditPanditDocumentsScreen: React.FC = () => {
     );
     if (missingRequired.length > 0) {
       showErrorToast(t('please_upload_all_required_documents'));
+      setIsButtonLoading(false);
       return;
     }
 
@@ -264,17 +272,18 @@ const EditPanditDocumentsScreen: React.FC = () => {
 
     try {
       // For debugging: log which keys are being sent
-      if (__DEV__) {
-        const keys = [];
-        // @ts-ignore
-        if (formData._parts) {
-          // @ts-ignore
-          for (const [k, v] of formData._parts) {
-            keys.push(k);
-          }
-        }
-        console.log('formData keys:', keys);
-      }
+      // if (__DEV__) {
+      //   const keys = [];
+      //   // @ts-ignore
+      //   if (formData._parts) {
+      //     // @ts-ignore
+      //     for (const [k, v] of formData._parts) {
+      //       keys.push(k);
+      //     }
+      //   }
+      //   console.log('formData keys:', keys);
+      // }
+      console.log('formData', formData);
       const response = await putPanditDocuments(formData);
       if (__DEV__) {
         console.log('API Response:', JSON.stringify(response));
@@ -307,6 +316,7 @@ const EditPanditDocumentsScreen: React.FC = () => {
       showErrorToast(errorMessage);
     } finally {
       setIsSubmitting(false);
+      setIsButtonLoading(false);
     }
   };
 
@@ -406,7 +416,8 @@ const EditPanditDocumentsScreen: React.FC = () => {
           <PrimaryButton
             title={t('update')}
             onPress={handleSubmit}
-            disabled={isSubmitting || !!loadingDocument}
+            loading={isButtonLoading}
+            disabled={isSubmitting || !!loadingDocument || isButtonLoading}
             style={styles.submitButton}
           />
         </View>

@@ -128,19 +128,19 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           <View style={[styles.card, THEMESHADOW.shadow]}>
             <View style={styles.cardInner}>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Date')}</Text>
+                <Text style={styles.detailLabel}>{t('date')}</Text>
                 <Text style={styles.detailValue}>
                   {formatDateWithOrdinal(booking_date) || '-'}
                 </Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Amount')}</Text>
+                <Text style={styles.detailLabel}>{t('amount')}</Text>
                 <Text style={[styles.detailValue, {color: COLORS.success}]}>
                   ₹{amount || '0'}
                 </Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Muhurat')}</Text>
+                <Text style={styles.detailLabel}>{t('muhurat')}</Text>
                 <Text style={styles.detailValue}>
                   {muhurat_type && `(${muhurat_type})`}
                 </Text>
@@ -150,13 +150,13 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 <Text style={styles.detailValue}>{muhurat_time || '-'}</Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Temple')}</Text>
+                <Text style={styles.detailLabel}>{t('temple')}</Text>
                 <Text style={styles.detailValue}>
                   {tirth_place_name || '-'}
                 </Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Samagri Required')}</Text>
+                <Text style={styles.detailLabel}>{t('samagri_required')}</Text>
                 <Text
                   style={[
                     styles.detailValue,
@@ -168,28 +168,34 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 </Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Payment Status')}</Text>
+                <Text style={styles.detailLabel}>{t('payment_status')}</Text>
                 <Text
                   style={[
                     styles.detailValue,
                     {color: getStatusColor(payment_status)},
                   ]}>
-                  {payment_status || '-'}
+                  {payment_status
+                    ? payment_status.charAt(0).toUpperCase() +
+                      payment_status.slice(1)
+                    : '-'}
                 </Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('Booking Status')}</Text>
+                <Text style={styles.detailLabel}>{t('booking_status')}</Text>
                 <Text
                   style={[
                     styles.detailValue,
                     {color: getStatusColor(booking_status)},
                   ]}>
-                  {booking_status || '-'}
+                  {booking_status
+                    ? booking_status.charAt(0).toUpperCase() +
+                      booking_status.slice(1)
+                    : '-'}
                 </Text>
               </View>
               {notes && (
                 <View style={styles.notesContainer}>
-                  <Text style={styles.notesLabel}>{t('Notes')}</Text>
+                  <Text style={styles.notesLabel}>{t('notes')}</Text>
                   <Text style={styles.notesValue}>{notes}</Text>
                 </View>
               )}

@@ -25,7 +25,6 @@ import {createMeeting, getMessageHistory} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
-import RNCallKeep from 'react-native-callkeep';
 
 export interface Message {
   id: string;
@@ -84,7 +83,7 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     if (accessToken && booking_id) {
-      const socketURL = `ws://puja-guru.com:9000/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
+      const socketURL = `ws://192.168.1.27:9000/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
       ws.current = new WebSocket(socketURL);
       ws.current.onopen = () => console.log('✅ Connected to WebSocket');
       ws.current.onmessage = e => {
@@ -252,9 +251,6 @@ const ChatScreen: React.FC = () => {
   }, [videocall]);
 
   const onReadyToClose = useCallback(() => {
-    if (currentCallUUID) {
-      RNCallKeep.endCall(currentCallUUID as any);
-    }
     setInCall(false);
     setRoomName(null);
     setMeetingToken(null);
@@ -265,7 +261,7 @@ const ChatScreen: React.FC = () => {
       jitsiMeeting.current.close();
     }
     navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
-  }, [navigation, currentCallUUID]);
+  }, [navigation /*, currentCallUUID */]);
 
   const onEndpointMessageReceived = useCallback(() => {
     console.log('You got a message!');

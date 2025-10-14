@@ -65,6 +65,7 @@ export default function LanguageSwitcher() {
                     key={lang.value}
                     label={lang.label}
                     value={lang.value}
+                    color="black"
                   />
                 ))}
               </Picker>

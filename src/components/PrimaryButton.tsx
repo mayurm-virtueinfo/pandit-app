@@ -7,6 +7,8 @@ import {
   GestureResponderEvent,
   ViewStyle,
   TextStyle,
+  ActivityIndicator,
+  View,
 } from 'react-native';
 import {COLORS} from '../theme/theme';
 import Fonts from '../theme/fonts';
@@ -16,6 +18,7 @@ interface Props {
   title: string;
   onPress: (event: GestureResponderEvent) => void;
   disabled?: boolean;
+  loading?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
 }
@@ -24,16 +27,21 @@ const PrimaryButton: React.FC<Props> = ({
   title,
   onPress,
   disabled = false,
+  loading = false,
   style,
   textStyle,
 }) => {
   return (
     <TouchableOpacity
-      style={[styles.button, style, disabled && styles.disabled]}
+      style={[styles.button, style, (disabled || loading) && styles.disabled]}
       onPress={onPress}
       activeOpacity={0.7}
-      disabled={disabled}>
-      <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+      disabled={disabled || loading}>
+      {loading ? (
+        <ActivityIndicator color={COLORS.primaryTextDark} />
+      ) : (
+        <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+      )}
     </TouchableOpacity>
   );
 };
@@ -41,15 +49,10 @@ const PrimaryButton: React.FC<Props> = ({
 const styles = StyleSheet.create({
   button: {
     height: moderateScale(48),
-    backgroundColor: COLORS.primaryBackgroundButton, // Customize with your primary color
+    backgroundColor: COLORS.primaryBackgroundButton,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    // shadowColor: '#000',
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
-    // shadowOffset: { width: 0, height: 2 },
-    // elevation: 3,
     marginTop: moderateScale(10),
   },
   buttonText: {

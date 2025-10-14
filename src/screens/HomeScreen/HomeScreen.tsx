@@ -106,6 +106,7 @@ const HomeScreen: React.FC = () => {
         'data' in upcomingResponse
       ) {
         const data = (upcomingResponse as {data?: unknown}).data;
+        console.log('data', data);
         upcomingList = Array.isArray(data) ? (data as PujaItem[]) : [];
       } else if (Array.isArray(upcomingResponse)) {
         upcomingList = upcomingResponse;

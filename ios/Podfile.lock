@@ -3737,6 +3737,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNVoipPushNotification (3.3.3):
+    - React-Core
   - RNWatch (1.1.0):
     - React
   - SocketRocket (0.7.1)
@@ -3871,6 +3873,7 @@ DEPENDENCIES:
   - RNSound (from `../node_modules/react-native-sound`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
+  - RNVoipPushNotification (from `../node_modules/react-native-voip-push-notification`)
   - RNWatch (from `../node_modules/react-native-watch-connectivity`)
   - SplashView (from `../node_modules/react-native-splash-view`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -4122,6 +4125,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
+  RNVoipPushNotification:
+    :path: "../node_modules/react-native-voip-push-notification"
   RNWatch:
     :path: "../node_modules/react-native-watch-connectivity"
   SplashView:
@@ -4266,12 +4271,13 @@ SPEC CHECKSUMS:
   RNSound: 314cc5226453ef4a3314a196c65e8a65e5106a7b
   RNSVG: 7504520e0a93b34d49128cac7ec0459bda8bc86b
   RNVectorIcons: 7075443f1ecfe4012b7a2f65f684baf3faa9d8c1
+  RNVoipPushNotification: 4998fe6724d421da616dca765da7dc421ff54c4e
   RNWatch: 28fe1f5e0c6410d45fd20925f4796fce05522e3f
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   SplashView: 8b7d2ea480af8e667c66bdb7af6693629e8075fc
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: 1259c7a8cbaccf7b4c3ddf8ee36ca11be9dee407
 
-PODFILE CHECKSUM: 42b29e130cd1b6ae6a007ab44cadd5c2e4e93425
+PODFILE CHECKSUM: 98b68cddee0841b9afdb949a6e2ddfaa402f33aa
 
 COCOAPODS: 1.16.2

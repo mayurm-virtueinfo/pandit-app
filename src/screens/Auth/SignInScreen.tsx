@@ -411,10 +411,10 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                   onValueChange={v => setSelectedLang(v)}
                   mode="dropdown"
                   style={styles.langPicker}>
-                  <Picker.Item label="English" value="en" />
-                  <Picker.Item label="हिन्दी" value="hi" />
-                  <Picker.Item label="ગુજરાતી" value="gu" />
-                  <Picker.Item label="मराठी" value="mr" />
+                  <Picker.Item label="English" value="en" color="black" />
+                  <Picker.Item label="हिन्दी" value="hi" color="black" />
+                  <Picker.Item label="ગુજરાતી" value="gu" color="black" />
+                  <Picker.Item label="मराठी" value="mr" color="black" />
                 </Picker>
               </View>
               <View style={{height: 12}} />

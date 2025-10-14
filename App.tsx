@@ -8,6 +8,7 @@ import {
   AppState,
   NativeEventEmitter,
   NativeModules,
+  Linking,
 } from 'react-native';
 import 'react-native-gesture-handler';
 import {AuthProvider} from './src/provider/AuthProvider';
@@ -38,7 +39,8 @@ LogBox.ignoreLogs([
 
 const auth = getAuth();
 if (__DEV__) {
-  auth.useEmulator('http://192.168.1.20:9099');
+  // auth.useEmulator('http://127.0.0.1:9099');
+  auth.useEmulator('http://192.168.1.42:9099');
 }
 setupNotifications();
 
@@ -49,68 +51,7 @@ const App = () => {
     }, 2500);
 
     requestUserPermission();
-
-    initCallKeep();
-
-    setOnAnswerListener(({callUUID, payload}) => {
-      navigate('Main', {
-        screen: 'AppBottomTabNavigator',
-        params: {
-          screen: 'HomeNavigator',
-          params: {
-            screen: 'ChatScreen',
-            params: {
-              booking_id: payload?.booking_id,
-              user_id: payload?.sender_id,
-              other_user_name: payload?.callerName || 'Call',
-              videocall: true,
-              callUUID,
-              incomingMeetingUrl: payload?.meeting_url,
-              ...payload,
-            },
-          },
-        },
-      });
-    });
-
-    setOnEndListener(({callUUID}) => {
-      navigate('Main', {
-        screen: 'AppBottomTabNavigator',
-        params: {
-          screen: 'HomeNavigator',
-          params: {
-            screen: 'ChatScreen',
-            params: {
-              endCall: true,
-              callUUID,
-            },
-          },
-        },
-      });
-    });
-
     return () => clearTimeout(timer);
-  }, []);
-
-  const {CustomAppState} = NativeModules;
-
-  useEffect(() => {
-    const eventEmitter = new NativeEventEmitter(CustomAppState);
-    const subscription = eventEmitter.addListener(
-      'CustomAppStateChange',
-      event => {
-        console.log('Custom App State:', event.state);
-        if (event.state === 'onPause') {
-          console.log('App is inactive (paused)');
-        } else if (event.state === 'onStop') {
-          console.log('App is in background');
-        } else if (event.state === 'onStart') {
-          console.log('App is active');
-        }
-      },
-    );
-
-    return () => subscription.remove();
   }, []);
 
   const handleInitialNotification = async () => {
