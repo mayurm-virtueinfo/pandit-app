@@ -32,8 +32,8 @@ class ApiEndpoints {
 
 export default ApiEndpoints;
 
-// export const BASE_URL = 'https://puja-guru.com';
-export const BASE_URL = 'https://7d7aefb35eae.ngrok-free.app';
+export const BASE_URL = 'https://puja-guru.com';
+// export const BASE_URL = 'https://7d7aefb35eae.ngrok-free.app';
 
 export const POST_SIGNIN = '/app/auth/signin/';
 export const GET_CITY = '/app/areas/';

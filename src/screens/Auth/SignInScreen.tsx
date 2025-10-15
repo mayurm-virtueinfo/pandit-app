@@ -54,7 +54,7 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   const {t} = useTranslation();
   const inset = useSafeAreaInsets();
   const {showErrorToast, showSuccessToast} = useCommonToast();
-  const [phoneNumber, setPhoneNumber] = useState('1111111111');
+  const [phoneNumber, setPhoneNumber] = useState(__DEV__ ? '1111111111' : '');
   const [isLoading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{phoneNumber?: string}>({});
   const [previousPhoneNumber, setPreviousPhoneNumber] = useState<string>('');

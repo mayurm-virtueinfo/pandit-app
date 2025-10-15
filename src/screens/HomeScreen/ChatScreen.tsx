@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Alert,
   Text,
-  SafeAreaView,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
@@ -36,16 +35,8 @@ export interface Message {
 const ChatScreen: React.FC = () => {
   const route = useRoute() as any;
   const navigation = useNavigation();
-  const {
-    booking_id,
-    other_user_name,
-    other_user_image,
-    other_user_phone,
-    user_id,
-    videocall,
-    incomingMeetingUrl,
-    currentCallUUID,
-  } = route.params;
+  const {booking_id, other_user_name, user_id, videocall, incomingMeetingUrl} =
+    route?.params || {};
 
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -71,23 +62,98 @@ const ChatScreen: React.FC = () => {
     JitsiMeeting = null;
   }
 
+  // Compose web socket url properly
+  const getSocketURL = (token: string, bookingId: string) => {
+    if (__DEV__) {
+      // Local development: connect directly to your backend
+      return `ws://192.168.1.27:9000/ws/chat/by-booking/${bookingId}/?token=${token}`;
+    }
+
+    // Production: use secure WebSocket (wss) via Apache proxy on port 443
+    return `wss://puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
+  };
+  const socketClosedManually = useRef(false);
+
+  // Get tokens once
   useEffect(() => {
     const fetchToken = async () => {
-      const token = await AsyncStorage.getItem('accessToken');
-      const panditID = await AsyncStorage.getItem(AppConstant.USER_ID);
-      setAccessToken(token);
-      setPanditID(panditID);
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        const pid = await AsyncStorage.getItem(AppConstant.USER_ID);
+        setAccessToken(token);
+        setPanditID(pid);
+      } catch (e) {
+        setAccessToken(null);
+        setPanditID(null);
+      }
     };
     fetchToken();
   }, []);
 
+  // --- Chat History: Fetch on entry (and when user id changes) ---
+  const fetchChatHistory = async () => {
+    setLoading(true);
+    try {
+      const resp: any = await getMessageHistory(booking_id);
+      if (resp && Array.isArray(resp)) {
+        const normalized = resp.map((msg: any) => ({
+          id: msg.uuid,
+          text: msg.content || msg.message,
+          time: new Date(msg.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          isOwn: String(msg.sender) === String(panditID),
+        }));
+        setMessages(normalized);
+        isUserAtBottom.current = true;
+      }
+    } catch (e) {
+      // show error optionally
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchChatHistory();
+    }, [panditID, booking_id]),
+  );
+
+  // --- WebSocket lifecycle and handler ---
   useEffect(() => {
-    if (accessToken && booking_id) {
-      const socketURL = `ws://192.168.1.27:9000/ws/chat/by-booking/${booking_id}/?token=${accessToken}`;
+    // skip if no tokens/id
+    if (!accessToken || !booking_id || !panditID) return;
+
+    if (ws.current) {
+      ws.current.close();
+      ws.current = null;
+    }
+    const socketURL = getSocketURL(accessToken, booking_id);
+    try {
       ws.current = new WebSocket(socketURL);
-      ws.current.onopen = () => console.log('✅ Connected to WebSocket');
-      ws.current.onmessage = e => {
-        const data = JSON.parse(e.data);
+    } catch (e) {
+      Alert.alert('WebSocket Error', 'Could not create socket!');
+      return;
+    }
+
+    ws.current.onopen = () => {
+      socketClosedManually.current = false;
+    };
+
+    ws.current.onmessage = e => {
+      let data;
+      try {
+        data = JSON.parse(e.data);
+      } catch {
+        return;
+      }
+      if (!data?.uuid) return;
+      // Accept only messages from others
+      const isOwn = String(data.sender_id) === String(panditID);
+      // If isOwn, do not set (it is already on chat optimistically)
+      if (!isOwn) {
         const newMsg: Message = {
           id: data.uuid,
           text: data.message,
@@ -95,72 +161,92 @@ const ChatScreen: React.FC = () => {
             hour: '2-digit',
             minute: '2-digit',
           }),
-          isOwn: data.sender_id == panditID,
+          isOwn: false,
         };
         setMessages(prev => [...prev, newMsg]);
-      };
-      ws.current.onerror = e => console.error('WebSocket error:', e.message);
-      ws.current.onclose = e =>
-        console.log('WebSocket closed:', e.code, e.reason);
-      return () => ws.current?.close();
-    }
-  }, [accessToken, panditID]);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchChatHistory();
-    }, [panditID]),
-  );
-
-  const fetchChatHistory = async () => {
-    setLoading(true);
-    try {
-      const response: any = await getMessageHistory(booking_id);
-      if (response) {
-        const normalized = response.map((msg: any) => ({
-          id: msg.uuid,
-          text: msg.content || msg.message,
-          time: new Date(msg.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          isOwn: msg.sender == panditID,
-        }));
-        setMessages(normalized);
-        isUserAtBottom.current = true;
       }
-    } catch (error) {
-      console.error('Error fetching chat history:', error);
-    } finally {
-      setLoading(false);
+    };
+
+    ws.current.onerror = e => {
+      if (!__DEV__) {
+        Alert.alert(
+          'WebSocket error',
+          e.message ? String(e.message) : 'Unknown socket error',
+        );
+      }
+    };
+    ws.current.onclose = e => {
+      if (!socketClosedManually.current && !__DEV__) {
+        Alert.alert('WebSocket Closed', `Code: ${e.code}\nReason: ${e.reason}`);
+      }
+    };
+
+    return () => {
+      socketClosedManually.current = true;
+      if (ws.current) {
+        ws.current.close();
+        ws.current = null;
+      }
+    };
+    // eslint-disable-next-line
+  }, [accessToken, booking_id, panditID]);
+
+  // --- Message Sending: Add to chat on send, but do NOT add a duplicate on websocket receive ---
+  const handleSendMessage = async (text: string) => {
+    if (!panditID) {
+      Alert.alert('You are not logged in.');
+      return;
+    }
+    if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+      Alert.alert(
+        'WebSocket not connected',
+        'Cannot send message: socket not connected',
+      );
+      return;
+    }
+    const messageId = `${Date.now()}-local`; // Temporary id for optimistic rendering
+    const timestamp = new Date();
+    const messageObj = {
+      message: text,
+      sender_id: panditID,
+      receiver_id: user_id,
+    };
+
+    // Optimistically show the message
+    setMessages(prev => [
+      ...prev,
+      {
+        id: messageId,
+        text: text,
+        time: timestamp.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        isOwn: true,
+      },
+    ]);
+
+    isUserAtBottom.current = true;
+    try {
+      ws.current.send(JSON.stringify(messageObj));
+    } catch {
+      Alert.alert('Send Failed', 'Unable to send message.');
+      // Remove optimistic message if send fails
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
     }
   };
 
+  // --- Incoming scroll and view logic ---
   const scrollToBottom = useCallback((animated = true) => {
     if (scrollViewRef.current) {
-      setTimeout(() => scrollViewRef.current?.scrollToEnd({animated}), 100);
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({animated}), 120);
     }
   }, []);
 
-  const handleSendMessage = (text: string) => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      const messageData = {
-        message: text,
-        sender_id: panditID,
-        receiver_id: user_id,
-      };
-      ws.current.send(JSON.stringify(messageData));
-      isUserAtBottom.current = true;
-    } else {
-      console.warn('WebSocket not connected');
-    }
-  };
-
   const handleScroll = (event: any) => {
     const {contentOffset, contentSize, layoutMeasurement} = event.nativeEvent;
-    const isAtBottom =
+    isUserAtBottom.current =
       contentOffset.y >= contentSize.height - layoutMeasurement.height - 10;
-    isUserAtBottom.current = isAtBottom;
   };
 
   useEffect(() => {
@@ -169,9 +255,17 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages, scrollToBottom]);
 
+  // --- Video/Meeting Handling ---
   useEffect(() => {
-    handleMeetingURL();
+    if (incomingMeetingUrl) {
+      handleMeetingURL();
+    }
   }, [incomingMeetingUrl]);
+  useEffect(() => {
+    if (videocall) {
+      handleVideoCall();
+    }
+  }, [videocall]);
 
   const handleVideoCall = () => {
     if (!booking_id) {
@@ -181,7 +275,6 @@ const ChatScreen: React.FC = () => {
     setLoading(true);
     createMeeting(booking_id)
       .then(response => {
-        console.log('response:::1', response?.data);
         if (response?.data?.room_name && response?.data?.token) {
           setRoomName(response.data.room_name);
           setMeetingToken(response.data.token);
@@ -190,6 +283,7 @@ const ChatScreen: React.FC = () => {
           );
           setInCall(true);
         } else if (response?.data?.meeting_url) {
+          // Parse meeting_url
           const meetingUrl = response.data.meeting_url;
           let url = meetingUrl.endsWith('/')
             ? meetingUrl.slice(0, -1)
@@ -212,44 +306,34 @@ const ChatScreen: React.FC = () => {
           Alert.alert('Error', 'Meeting information not found.');
         }
       })
-      .catch(error => {
-        console.error('Failed to create meeting:', error);
+      .catch(() => {
         Alert.alert(
           'Error',
           'Failed to create video meeting. Please try again.',
         );
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   };
 
+  // Parse incomingMeetingUrl
   const handleMeetingURL = () => {
-    if (incomingMeetingUrl) {
-      let url = incomingMeetingUrl.endsWith('/')
-        ? incomingMeetingUrl.slice(0, -1)
-        : incomingMeetingUrl;
-      const lastSlashIdx = url.lastIndexOf('/');
-      let room =
-        lastSlashIdx === -1 ? 'defaultRoom' : url.substring(lastSlashIdx + 1);
-      const queryIdx = room.indexOf('?');
-      room =
-        queryIdx !== -1 ? room.substring(0, queryIdx) : room || 'defaultRoom';
-      setRoomName(room);
-      setMeetingToken(null);
-      setServerUrl('https://meet.puja-guru.com/');
-      setInCall(true);
-    } else if (videocall) {
-      handleVideoCall(); // Fallback to create a new meeting
-    }
+    if (!incomingMeetingUrl) return;
+    let url = incomingMeetingUrl.endsWith('/')
+      ? incomingMeetingUrl.slice(0, -1)
+      : incomingMeetingUrl;
+    const lastSlashIdx = url.lastIndexOf('/');
+    let room =
+      lastSlashIdx === -1 ? 'defaultRoom' : url.substring(lastSlashIdx + 1);
+    const queryIdx = room.indexOf('?');
+    room =
+      queryIdx !== -1 ? room.substring(0, queryIdx) : room || 'defaultRoom';
+    setRoomName(room);
+    setMeetingToken(null);
+    setServerUrl('https://meet.puja-guru.com/');
+    setInCall(true);
   };
 
-  useEffect(() => {
-    if (videocall) {
-      handleVideoCall();
-    }
-  }, [videocall]);
-
+  // Jitsi events
   const onReadyToClose = useCallback(() => {
     setInCall(false);
     setRoomName(null);
@@ -261,23 +345,18 @@ const ChatScreen: React.FC = () => {
       jitsiMeeting.current.close();
     }
     navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
-  }, [navigation /*, currentCallUUID */]);
+  }, [navigation]);
 
-  const onEndpointMessageReceived = useCallback(() => {
-    console.log('You got a message!');
-  }, []);
+  const eventListeners = {onReadyToClose};
 
-  const eventListeners = {
-    onReadyToClose,
-    onEndpointMessageReceived,
-  };
-
+  // Support end call from navigation params
   useEffect(() => {
-    if ((route as any).params?.endCall) {
+    if ((route as any)?.params?.endCall) {
       onReadyToClose();
     }
-  }, [(route as any).params?.endCall]);
+  }, [(route as any)?.params?.endCall]);
 
+  // Hide tabBar during call
   useEffect(() => {
     if (inCall) {
       navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'none'}});
@@ -310,13 +389,9 @@ const ChatScreen: React.FC = () => {
                 enabled: true,
                 collabServerBaseUrl: serverUrl,
               },
-              analytics: {
-                disabled: true,
-              },
+              analytics: {disabled: true},
               prejoinPageEnabled: false,
-              prejoinConfig: {
-                enabled: false,
-              },
+              prejoinConfig: {enabled: false},
               requireDisplayName: false,
               startWithAudioMuted: false,
               startWithVideoMuted: false,
@@ -365,8 +440,8 @@ const ChatScreen: React.FC = () => {
       <View style={styles.safeArea}>
         <UserCustomHeader
           title={other_user_name || 'Chat'}
-          showBackButton={true}
-          showVideoCallButton={true}
+          showBackButton
+          showVideoCallButton
           onVideoCallPress={handleVideoCall}
         />
         <KeyboardAvoidingView
