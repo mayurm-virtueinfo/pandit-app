@@ -3317,8 +3317,6 @@ PODS:
   - RecaptchaInterop (101.0.0)
   - RNCalendarEvents (2.2.0):
     - React-Core
-  - RNCallKeep (4.3.16):
-    - React
   - RNCAsyncStorage (1.23.1):
     - DoubleConversion
     - glog
@@ -3852,7 +3850,6 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RNCalendarEvents (from `../node_modules/react-native-calendar-events`)
-  - RNCallKeep (from `../node_modules/react-native-callkeep`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
@@ -4083,8 +4080,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCalendarEvents:
     :path: "../node_modules/react-native-calendar-events"
-  RNCallKeep:
-    :path: "../node_modules/react-native-callkeep"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
@@ -4250,7 +4245,6 @@ SPEC CHECKSUMS:
   ReactCommon: b2eb96a61b826ff327a773a74357b302cf6da678
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   RNCalendarEvents: 62e1ac89d3afbfa77cf2dafa8727af93fa70825f
-  RNCallKeep: 1930a01d8caf48f018be4f2db0c9f03405c2f977
   RNCAsyncStorage: 9ff617df4a485f2efba57bdf4face05a41767390
   RNCClipboard: 81e19a7539c9b7eac2902663ef6a0f8c944e90f9
   RNCPicker: 2763f58fe45655fa79712f9d90be833c9e5216fa
@@ -4278,6 +4272,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: 1259c7a8cbaccf7b4c3ddf8ee36ca11be9dee407
 
-PODFILE CHECKSUM: 98b68cddee0841b9afdb949a6e2ddfaa402f33aa
+PODFILE CHECKSUM: 873088d10179db0eaed03b83e7b2e12cab97ef0d
 
 COCOAPODS: 1.16.2

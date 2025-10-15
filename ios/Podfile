@@ -25,7 +25,6 @@ target 'PanditApp' do
 
   # Add RNFBDatabase pod
   pod 'RNFBDatabase', :path => '../node_modules/@react-native-firebase/database'
-  pod 'RNCallKeep', :path => '../node_modules/react-native-callkeep'
 
   target 'PanditAppTests' do
     inherit! :complete
