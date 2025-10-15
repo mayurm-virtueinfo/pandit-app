@@ -32,6 +32,7 @@ interface TransactionItem {
   booking?: number;
   notes?: string | null;
   reason?: string;
+  paymentModeLabel?: string; // Added field for Cash on/Online
 }
 
 const EarningsHistoryScreen: React.FC = () => {
@@ -51,6 +52,7 @@ const EarningsHistoryScreen: React.FC = () => {
       try {
         // Fetch wallet
         const walletRes: any = await getWallet();
+        console.log('walletRes', walletRes);
         let walletValue = 0;
         if (
           walletRes &&
@@ -104,6 +106,12 @@ const EarningsHistoryScreen: React.FC = () => {
             displayReason = t('booking_cancelled') || 'Booking cancelled';
           }
 
+          // Determine payment mode label
+          let paymentModeLabel: string | undefined = undefined;
+          if (typeof item.is_cos === 'boolean') {
+            paymentModeLabel = item.is_cos ? 'Cash on' : 'Online';
+          }
+
           return {
             id: item.id ?? idx,
             title: item.puja_name || t('transaction'),
@@ -127,6 +135,7 @@ const EarningsHistoryScreen: React.FC = () => {
             booking: item.booking,
             notes: item.notes,
             reason: displayReason,
+            paymentModeLabel, // Add to transaction
           };
         });
         setTransactions(mapped);
@@ -207,6 +216,12 @@ const EarningsHistoryScreen: React.FC = () => {
                 maximumFractionDigits: 2,
               })}
             </Text>
+          )}
+          {item.paymentModeLabel && (
+            <View style={styles.payment_method}>
+              <Text>{'Payment method : '}</Text>
+              <Text style={styles.cash}>{item.paymentModeLabel}</Text>
+            </View>
           )}
           {item.notes && <Text style={styles.earningsNotes}>{item.notes}</Text>}
         </View>
@@ -409,6 +424,15 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     color: COLORS.gray,
     marginBottom: verticalScale(2),
+  },
+  payment_method: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cash: {
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_SemiBold,
+    color: COLORS.primaryTextDark,
   },
   earningsBooking: {
     fontSize: moderateScale(12),
