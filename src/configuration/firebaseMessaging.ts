@@ -3,31 +3,31 @@ import { getMessaging } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { COLORS } from '../theme/theme';
 import { navigate, navigationRef } from '../helper/navigationRef';
-
+ 
 const messaging = getMessaging(getApp());
-
+ 
 let isSetup = false;
 let foregroundUnsubscribe: (() => void) | null = null;
-
+ 
 export async function setupNotifications() {
   if (isSetup) {
     console.log('Notifications already set up, skipping...');
     return;
   }
-
+ 
   isSetup = true;
-
+ 
   await notifee.requestPermission();
   const channelId = await notifee.createChannel({
     id: 'default',
     name: 'Default Channel',
     importance: AndroidImportance.HIGH,
   });
-
+ 
   // Foreground message handler (displays notification)
   messaging.onMessage(async (remoteMessage: any) => {
     console.log('📩 Foreground FCM message:', remoteMessage);
-
+ 
     const { title, body } = remoteMessage.notification || {};
     await notifee.displayNotification({
       id: remoteMessage.messageId,
@@ -43,7 +43,7 @@ export async function setupNotifications() {
       ios: {},
     });
   });
-
+ 
   // Handle notification press in foreground
   foregroundUnsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
     if (type === EventType.PRESS) {
@@ -52,7 +52,7 @@ export async function setupNotifications() {
       handleNotificationNavigation(data);
     }
   });
-
+ 
   // App opened from background
   messaging.onNotificationOpenedApp((remoteMessage: any) => {
     if (remoteMessage) {
@@ -60,13 +60,13 @@ export async function setupNotifications() {
       handleNotificationNavigation(remoteMessage.data);
     }
   });
-
+ 
   // Background handler (must be top-level)
   messaging.setBackgroundMessageHandler(async (remoteMessage: any) => {
     console.log('📨 Background FCM message:', JSON.stringify(remoteMessage));
   });
 }
-
+ 
 export function handleNotificationNavigation(data: any) {
   if (data?.type === 'video_call_invite') {
     const nestedParams = {
@@ -97,7 +97,7 @@ export function handleNotificationNavigation(data: any) {
     const targetScreen = data?.screen;
     const booking_id = data?.booking_id;
     const offer_id = data?.offer_id;
-
+ 
     const nestedParams = {
       screen: 'AppBottomTabNavigator',
       params: {
@@ -111,7 +111,7 @@ export function handleNotificationNavigation(data: any) {
         },
       },
     };
-
+ 
     setTimeout(() => {
       if (navigationRef.isReady()) {
         navigate('Main', nestedParams);
@@ -124,7 +124,7 @@ export function handleNotificationNavigation(data: any) {
     const booking_id = data?.booking_id;
     const user_id = data?.sender_id;
     const videocall = data?.video_call;
-
+ 
     const nestedParams = {
       screen: 'AppBottomTabNavigator',
       params: {
@@ -139,7 +139,7 @@ export function handleNotificationNavigation(data: any) {
         },
       },
     };
-
+ 
     setTimeout(() => {
       if (navigationRef.isReady()) {
         navigate('Main', nestedParams);
@@ -147,9 +147,20 @@ export function handleNotificationNavigation(data: any) {
         console.warn('Navigation not ready yet');
       }
     }, 500);
+  } else if (data?.screen === 'PujaDetailsScreen') {
+    // Directly navigate to PujaDetailsScreen and pass booking_id
+    setTimeout(() => {
+      if (navigationRef.isReady()) {
+        navigate('PujaDetailsScreen', {
+          booking_id: data?.booking_id,
+        });
+      } else {
+        console.warn('Navigation not ready yet');
+      }
+    }, 500);
   }
 }
-
+ 
 export function cleanupNotifications() {
   if (foregroundUnsubscribe) {
     foregroundUnsubscribe();
@@ -157,3 +168,4 @@ export function cleanupNotifications() {
   }
   isSetup = false;
 }
+ 

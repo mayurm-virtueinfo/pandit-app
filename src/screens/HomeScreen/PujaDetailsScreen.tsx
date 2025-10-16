@@ -133,17 +133,17 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       let response;
       if (progress) {
         response = await getInProgressPuja();
-        const data = Array.isArray(response)
-          ? response[0]
-          : response?.data?.[0] || response?.[0];
+        const data = Array.isArray((response as any) || [])
+          ? (response as any)[0]
+          : (response as any)?.data?.[0] || (response as any)?.[0];
         if (data) {
           setProgressPujaDetails(data);
         }
       } else {
         response = await getUpcomingPujaDetails(id);
-        const data = Array.isArray(response)
-          ? response[0]
-          : response?.data?.[0] || response?.[0];
+        const data = Array.isArray((response as any) || [])
+          ? (response as any)[0]
+          : (response as any)?.data?.[0] || (response as any)?.[0];
         if (data) {
           setPujaDetails(data);
         }

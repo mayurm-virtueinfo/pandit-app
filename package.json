@@ -14,7 +14,8 @@
     "build:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle",
     "clean:android": "cd android && ./gradlew clean && cd ..",
     "release:android": "cd android/ && ./gradlew app:assembleRelease && cd ..",
-    "bundle:android": "cd android/ && ./gradlew app:bundleRelease && cd .."
+    "bundle:android": "cd android/ && ./gradlew app:bundleRelease && cd ..",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.4.13",
@@ -63,7 +64,7 @@
     "react-native-performance": "5.1.2",
     "react-native-permissions": "^5.4.2",
     "react-native-ratings": "^8.1.0",
-    "react-native-reanimated": "^3.18.0",
+    "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "5.5.2",
     "react-native-screens": "4.11.1",
     "react-native-size-matters": "^0.4.2",
