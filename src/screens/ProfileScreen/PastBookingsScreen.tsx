@@ -40,7 +40,7 @@ const PastPujaScreen: React.FC = () => {
   const [pastBookings, setPastBookings] = useState<PastBookingType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-
+  console.log("pastBookings",pastBookings)
   // Fetch bookings from API
   const fetchPastBookings = useCallback(async () => {
     setLoading(true);
@@ -106,7 +106,7 @@ const PastPujaScreen: React.FC = () => {
         activeOpacity={0.7}
         onPress={() =>
           navigation.navigate('CompletePujaDetailsScreen', {
-            completePujaData: item,
+            booking_id: item.id,
           })
         }>
         <Image

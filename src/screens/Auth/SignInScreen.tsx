@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   Modal,
   StatusBar,
+  useColorScheme,
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
@@ -65,6 +66,11 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   const [selectedLang, setSelectedLang] = useState<string>(
     getCurrentLanguage(),
   );
+
+  // For dark mode
+  const colorScheme = useColorScheme();
+  const pickerTextColor = colorScheme === 'dark' ? COLORS.white : COLORS.primaryTextDark;
+  const pickerItemBackground = colorScheme === 'dark' ? COLORS.backgroundDark : undefined;
 
   useEffect(() => {
     // On first app open or when no language saved, prompt selection
@@ -263,6 +269,14 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     setShowLangModal(false);
   };
 
+  // Helper to get picker style for iOS for item text color (and background for dark mode)
+  const getIosPickerItemStyle = () => ({
+    color: pickerTextColor,
+    fontSize: moderateScale(16),
+    fontFamily: Fonts.Sen_Regular,
+    backgroundColor: colorScheme === 'dark' ? COLORS.backgroundDark : undefined,
+  });
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <StatusBar
@@ -274,7 +288,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
         source={Images.ic_splash_background}
         style={styles.container}>
         <KeyboardAvoidingView
-          // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}>
           <Loader loading={isLoading} />
           <ScrollView
@@ -410,11 +423,54 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                   selectedValue={selectedLang}
                   onValueChange={v => setSelectedLang(v)}
                   mode="dropdown"
-                  style={styles.langPicker}>
-                  <Picker.Item label="English" value="en" color="black" />
-                  <Picker.Item label="हिन्दी" value="hi" color="black" />
-                  <Picker.Item label="ગુજરાતી" value="gu" color="black" />
-                  <Picker.Item label="मराठी" value="mr" color="black" />
+                  style={[
+                    styles.langPicker,
+                    Platform.OS === 'ios' && {color: pickerTextColor},
+                  ]}
+                  itemStyle={
+                    Platform.OS === 'ios' ? getIosPickerItemStyle() : undefined
+                  }
+                >
+                  <Picker.Item
+                    label="English"
+                    value="en"
+                    color={Platform.OS === 'ios' ? undefined : pickerTextColor}
+                    style={
+                      colorScheme === 'dark'
+                        ? {backgroundColor: COLORS.backgroundDark}
+                        : undefined
+                    }
+                  />
+                  <Picker.Item
+                    label="हिन्दी"
+                    value="hi"
+                    color={Platform.OS === 'ios' ? undefined : pickerTextColor}
+                    style={
+                      colorScheme === 'dark'
+                        ? {backgroundColor: COLORS.backgroundDark}
+                        : undefined
+                    }
+                  />
+                  <Picker.Item
+                    label="ગુજરાતી"
+                    value="gu"
+                    color={Platform.OS === 'ios' ? undefined : pickerTextColor}
+                    style={
+                      colorScheme === 'dark'
+                        ? {backgroundColor: COLORS.backgroundDark}
+                        : undefined
+                    }
+                  />
+                  <Picker.Item
+                    label="मराठी"
+                    value="mr"
+                    color={Platform.OS === 'ios' ? undefined : pickerTextColor}
+                    style={
+                      colorScheme === 'dark'
+                        ? {backgroundColor: COLORS.backgroundDark}
+                        : undefined
+                    }
+                  />
                 </Picker>
               </View>
               <View style={{height: 12}} />

@@ -147,12 +147,46 @@ export function handleNotificationNavigation(data: any) {
         console.warn('Navigation not ready yet');
       }
     }, 500);
-  } else if (data?.screen === 'PujaDetailsScreen') {
+  }else if (data?.pandit_screen === 'CompletePujaDetailsScreen') {
+    const targetScreen = data?.pandit_screen;
+    const booking_id = data?.booking_id;
+ 
+    const nestedParams = {
+      screen: 'AppBottomTabNavigator',
+      params: {
+        screen: 'ProfileNavigator',
+        params: {
+          screen: targetScreen,
+          params: {
+            booking_id,
+          },
+        },
+      },
+    };
+ 
+    setTimeout(() => {
+      if (navigationRef.isReady()) {
+        navigate('Main', nestedParams);
+      } else {
+        console.warn('Navigation not ready yet');
+      }
+    }, 500);
+  }
+   else if (data?.panditji_screen === 'PujaDetailsScreen') {
     // Directly navigate to PujaDetailsScreen and pass booking_id
     setTimeout(() => {
       if (navigationRef.isReady()) {
-        navigate('PujaDetailsScreen', {
-          booking_id: data?.booking_id,
+        navigate('Main', {
+          screen: 'AppBottomTabNavigator',
+          params: {
+            screen: 'HomeNavigator',
+            params: {
+              screen: 'PujaDetailsScreen',
+              params: {
+                booking_id: data?.booking_id,
+              },
+            },
+          },
         });
       } else {
         console.warn('Navigation not ready yet');

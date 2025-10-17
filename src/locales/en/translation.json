@@ -415,5 +415,9 @@
   "samagri_required": "Samagri Required",
   "payment_status": "Payment Status",
   "booking_status": "Booking Status",
-  "notes": "Notes"
+  "notes": "Notes",
+  "completed_puja_details":"Completed puja details",
+  "past_booking": "Past booking",
+  "no_data":"No data found",
+  "payment_method":"Payment method :"
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {View, StatusBar, ScrollView, StyleSheet, Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
@@ -64,7 +64,7 @@ const EditPanditDocumentsScreen: React.FC = () => {
   const [loadingDocument, setLoadingDocument] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // New: Additional loading state for update button press
+  // Additional loading state for update button press
   const [isButtonLoading, setIsButtonLoading] = useState(false);
 
   // Track if a document has been changed (uploaded/removed)
@@ -76,6 +76,16 @@ const EditPanditDocumentsScreen: React.FC = () => {
     electricityBill: false,
     certifications: false,
   });
+
+  // Loader state for document upload specifically (true/false)
+  const [isDocumentUploading, setIsDocumentUploading] = useState(false);
+
+  // --- FIX: Track changedDocuments latest using ref to avoid stale closure on submit
+  const changedDocumentsRef = useRef(changedDocuments);
+  useEffect(() => {
+    changedDocumentsRef.current = changedDocuments;
+  }, [changedDocuments]);
+  // ---
 
   useEffect(() => {
     fetchDocuments();
@@ -142,11 +152,13 @@ const EditPanditDocumentsScreen: React.FC = () => {
     }
   };
 
+  // Rewritten handleDocumentUpload to show CustomLoader during document picking and delay
   const handleDocumentUpload = async (
     documentType: keyof DocumentUploadState,
   ) => {
-    if (loadingDocument) return;
+    if (loadingDocument || isDocumentUploading) return;
     try {
+      setIsDocumentUploading(true); // Show loader globally
       const result = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles],
       });
@@ -155,28 +167,36 @@ const EditPanditDocumentsScreen: React.FC = () => {
         setLoadingDocument(documentType);
         if (!document.uri || !document.type || !document.name)
           throw new Error(t('invalid_document'));
-        setUploadedDocuments(prev => ({
-          ...prev,
-          [documentType]: true,
-        }));
-        setDocumentInfo(prev => ({
-          ...prev,
-          [documentType]: {
-            name: document.name || 'Selected Document',
-            file: document,
-            url: null,
-          },
-        }));
-        setChangedDocuments(prev => ({
-          ...prev,
-          [documentType]: true,
-        }));
-        setLoadingDocument(null);
+        // Wait for 2-3 seconds
+        const delay = Math.floor(Math.random() * 1000) + 2000; // 2000ms to 3000ms
+        setTimeout(() => {
+          setUploadedDocuments(prev => ({
+            ...prev,
+            [documentType]: true,
+          }));
+          setDocumentInfo(prev => ({
+            ...prev,
+            [documentType]: {
+              name: document.name || 'Selected Document',
+              file: document,
+              url: null,
+            },
+          }));
+          setChangedDocuments(prev => ({
+            ...prev,
+            [documentType]: true,
+          }));
+          setLoadingDocument(null);
+          setIsDocumentUploading(false); // Hide loader when done
+        }, delay);
+      } else {
+        setIsDocumentUploading(false); // Hide loader if no file picked
       }
     } catch (err) {
+      setIsDocumentUploading(false); // Hide loader on error/cancel
+      setLoadingDocument(null);
       if (DocumentPicker.isCancel(err)) return;
       showErrorToast(t('failed_to_pick_document'));
-      setLoadingDocument(null);
     }
   };
 
@@ -210,9 +230,8 @@ const EditPanditDocumentsScreen: React.FC = () => {
   // Only send changed documents in the formData
   const handleSubmit = async () => {
     // Set loading on button click
-    if (isSubmitting || loadingDocument || isButtonLoading) return;
+    if (isSubmitting || loadingDocument || isButtonLoading || isDocumentUploading) return;
 
-    // show loading feedback on button
     setIsButtonLoading(true);
 
     const requiredDocuments = ['idProof', 'panCard'];
@@ -228,15 +247,19 @@ const EditPanditDocumentsScreen: React.FC = () => {
     setIsSubmitting(true);
     const formData = new FormData();
 
+    // --- FIX: always use latest changedDocuments (from useRef), not the closure
+    const currentChangedDocs = changedDocumentsRef.current;
+    // ---
+
     (Object.keys(documentInfo) as (keyof DocumentUploadState)[]).forEach(
       docType => {
         const apiKey = docTypeToApiKey[docType];
         const info = documentInfo[docType];
-        const changed = changedDocuments[docType];
+        // const changed = changedDocuments[docType];   // old, can be stale!
+        const changed = currentChangedDocs[docType];     // always up-to-date
         const originalUrl =
           originalDocumentUrls[apiKey as keyof typeof originalDocumentUrls];
 
-        // Only append if changed
         if (changed) {
           if (__DEV__) {
             console.log(`Processing ${docType} (apiKey: ${apiKey})`, {
@@ -245,7 +268,6 @@ const EditPanditDocumentsScreen: React.FC = () => {
               originalUrl,
             });
           }
-
           if (info.file && info.file.uri) {
             const fileObj = {
               uri:
@@ -260,29 +282,16 @@ const EditPanditDocumentsScreen: React.FC = () => {
             }
             formData.append(apiKey, fileObj as any);
           } else {
-            // If removed, send empty string
             if (__DEV__) {
               console.log(`Appending empty string for ${apiKey}`);
             }
             formData.append(apiKey, '');
           }
         }
-      },
+      }
     );
 
     try {
-      // For debugging: log which keys are being sent
-      // if (__DEV__) {
-      //   const keys = [];
-      //   // @ts-ignore
-      //   if (formData._parts) {
-      //     // @ts-ignore
-      //     for (const [k, v] of formData._parts) {
-      //       keys.push(k);
-      //     }
-      //   }
-      //   console.log('formData keys:', keys);
-      // }
       console.log('formData', formData);
       const response = await putPanditDocuments(formData);
       if (__DEV__) {
@@ -417,7 +426,7 @@ const EditPanditDocumentsScreen: React.FC = () => {
             title={t('update')}
             onPress={handleSubmit}
             loading={isButtonLoading}
-            disabled={isSubmitting || !!loadingDocument || isButtonLoading}
+            disabled={isSubmitting || !!loadingDocument || isButtonLoading || isDocumentUploading}
             style={styles.submitButton}
           />
         </View>

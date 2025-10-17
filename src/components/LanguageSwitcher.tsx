@@ -6,10 +6,12 @@ import {
   Platform,
   TouchableOpacity,
   Modal,
+  useColorScheme,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import i18n, {setAppLanguage, getCurrentLanguage} from '../i18n';
 import {Picker} from '@react-native-picker/picker';
+import { COLORS } from '../theme/theme';
 
 const LANGUAGES = [
   {label: 'English', value: 'en'},
@@ -22,6 +24,9 @@ export default function LanguageSwitcher() {
   const {t} = useTranslation();
   const [selectedLang, setSelectedLang] = useState(getCurrentLanguage());
   const [modalVisible, setModalVisible] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const textColor = isDark ? COLORS.white : COLORS.lighttext;
 
   const handleLanguageChange = async (lang: string) => {
     await setAppLanguage(lang);
@@ -38,11 +43,11 @@ export default function LanguageSwitcher() {
   if (Platform.OS === 'ios') {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>{t('language')}</Text>
+        <Text style={[styles.title, {color: textColor}]}>{t('language')}</Text>
         <TouchableOpacity
           style={styles.iosPickerButton}
           onPress={() => setModalVisible(true)}>
-          <Text style={styles.iosPickerButtonText}>
+          <Text style={[styles.iosPickerButtonText, {color: textColor}]}>
             {getSelectedLangLabel()}
           </Text>
         </TouchableOpacity>
@@ -59,20 +64,22 @@ export default function LanguageSwitcher() {
               <Picker
                 selectedValue={selectedLang}
                 onValueChange={itemValue => handleLanguageChange(itemValue)}
-                style={styles.iosPicker}>
+                style={styles.iosPicker}
+                itemStyle={{color: textColor}}
+              >
                 {LANGUAGES.map(lang => (
                   <Picker.Item
                     key={lang.value}
                     label={lang.label}
                     value={lang.value}
-                    color="black"
+                    color={textColor}
                   />
                 ))}
               </Picker>
               <TouchableOpacity
                 style={styles.iosDoneButton}
                 onPress={() => setModalVisible(false)}>
-                <Text style={styles.iosDoneButtonText}>Done</Text>
+                <Text style={[styles.iosDoneButtonText, {color: textColor}]}>Done</Text>
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -84,11 +91,11 @@ export default function LanguageSwitcher() {
   // Android
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('language')}</Text>
+      <Text style={[styles.title, {color: textColor}]}>{t('language')}</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedLang}
-          style={styles.picker}
+          style={[styles.picker, {color: textColor}]}
           onValueChange={itemValue => handleLanguageChange(itemValue)}
           mode="dropdown">
           {LANGUAGES.map(lang => (
@@ -96,6 +103,7 @@ export default function LanguageSwitcher() {
               key={lang.value}
               label={lang.label}
               value={lang.value}
+              color={textColor}
             />
           ))}
         </Picker>
@@ -112,34 +120,34 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     marginBottom: 12,
-    color: '#333',
+    // color set dynamically
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: COLORS.lighttext,
     borderRadius: 8,
     overflow: 'hidden',
     width: 180,
     height: 44,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     justifyContent: 'center',
   },
   picker: {
     width: '100%',
-    color: '#333',
+    // color set dynamically
   },
   iosPickerButton: {
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: COLORS.lighttext,
     borderRadius: 8,
     width: 180,
     height: 44,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
   },
   iosPickerButtonText: {
-    color: '#333',
+    // color set dynamically
     fontSize: 16,
   },
   modalOverlay: {
@@ -148,7 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   iosModalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingBottom: 24,
@@ -161,13 +169,13 @@ const styles = StyleSheet.create({
   },
   iosDoneButton: {
     marginTop: 10,
-    backgroundColor: '#333',
+    backgroundColor: COLORS.lighttext,
     borderRadius: 8,
     paddingHorizontal: 24,
     paddingVertical: 8,
   },
   iosDoneButtonText: {
-    color: '#fff',
+    // color set dynamically
     fontSize: 16,
   },
 });

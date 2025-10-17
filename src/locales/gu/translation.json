@@ -415,5 +415,8 @@
   "samagri_required": "સામગ્રી જરૂરી છે",
   "payment_status": "ચુકવણી સ્થિતિ",
   "booking_status": "બુકિંગ સ્થિતિ",
-  "notes": "નોંધ"
+  "notes": "નોંધ",
+  "completed_puja_details": "પૂર્ણ થયેલી પૂજાની માહિતી",
+  "past_booking": "પાછલી બુકિંગ",
+  "no_data": "કોઈ માહિતી મળી નથી"
 }

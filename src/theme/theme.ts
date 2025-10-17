@@ -53,6 +53,7 @@ export const COLORS = {
   textDark: '#1A1A1A',
   textGray: '#7D7D7D',
   background: '#F7F9FC',
+  backgroundDark: '#22252A', // <-- Added for dark background
   border: '#DDDDDD',
   darkText: '#1F2937',
   inputBg: '#ECEEF2',

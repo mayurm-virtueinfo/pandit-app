@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,7 @@ import {
   ScrollView,
   Image,
   Dimensions,
-  StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useRoute} from '@react-navigation/native';
@@ -16,18 +16,83 @@ import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import {moderateScale, verticalScale} from 'react-native-size-matters';
 
+import {getCompletedPuja, getPastBookings} from '../../api/apiService';
+
 const {width: screenWidth} = Dimensions.get('window');
 
 const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const {t} = useTranslation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
-  const {completePujaData} = route.params as any;
+
+  // Extract route params
+  // passed: completed (boolean), booking_id (string|number), [completePujaData (optional preloaded)]
+  const {completed, booking_id, completePujaData} = (route.params || {}) as any;
+
+  // State to store selected booking
+  const [pujaData, setPujaData] = useState<any>(completePujaData);
+  const [loading, setLoading] = useState<boolean>(!completePujaData);
+
+  useEffect(() => {
+    let isMounted = true;
+    // Only fetch if data not already preloaded
+    if (pujaData) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    const fetchData = async () => {
+      try {
+        let response: any;
+
+        if (completed) {
+          response = await getCompletedPuja();
+        } else {
+          response = await getPastBookings();
+        }
+        // Normalize to array
+        let dataList: any[] = [];
+        if (response && typeof response === 'object' && 'data' in response) {
+          dataList = Array.isArray(response.data) ? response.data : [];
+        } else if (Array.isArray(response)) {
+          dataList = response;
+        }
+
+        // Find booking by booking_id if provided, otherwise fallback to first
+        let selected = undefined;
+        if (dataList && booking_id != null) {
+          // Accept loose equality to match string/number
+          selected = dataList.find(
+            (item: any) =>
+              item?.booking_id == booking_id ||
+              item?.id == booking_id // in case key is "id"
+          );
+        }
+        if (!selected && dataList && dataList.length > 0) {
+          selected = dataList[0];
+        }
+        if (isMounted) {
+          setPujaData(selected);
+        }
+      } catch (e) {
+        if (isMounted) setPujaData(undefined);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completed, booking_id]);
 
   // Destructure the data for easier access
   const {
     pooja_name,
-
     pooja_image_url,
     booking_date,
     muhurat_time,
@@ -42,7 +107,7 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     samagri_required,
     address_details,
     booking_status,
-  } = completePujaData || {};
+  } = pujaData || {};
 
   // Helper to format date (e.g., 19th September)
   const formatDateWithOrdinal = (dateString: string) => {
@@ -90,152 +155,158 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
       <CustomHeader
-        title={t('Completed Puja Details')}
+        title={completed ? t('completed_puja_details'): t("past_booking")}
         showBackButton
-        // showBellButton={false}
         onBackPress={() => navigation?.goBack && navigation.goBack()}
-        // onNotificationPress={() => {
-        //   navigation?.navigate && navigation.navigate('NotificationScreen');
-        // }}
       />
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}>
-        <Image
-          source={
-            pooja_image_url
-              ? {uri: pooja_image_url}
-              : {
-                  uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                }
-          }
-          style={[
-            styles.heroImage,
-            {width: screenWidth, height: verticalScale(200)},
-          ]}
-          resizeMode="stretch"
-        />
-        <View
-          style={{
-            flex: 1,
-            paddingHorizontal: moderateScale(24),
-            paddingTop: verticalScale(24),
-          }}>
-          <Text style={styles.pujaTitle}>{pooja_name || t('Puja Name')}</Text>
-
-          <View style={[styles.card, THEMESHADOW.shadow]}>
-            <View style={styles.cardInner}>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('date')}</Text>
-                <Text style={styles.detailValue}>
-                  {formatDateWithOrdinal(booking_date) || '-'}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('amount')}</Text>
-                <Text style={[styles.detailValue, {color: COLORS.success}]}>
-                  ₹{amount || '0'}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('muhurat')}</Text>
-                <Text style={styles.detailValue}>
-                  {muhurat_type && `(${muhurat_type})`}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('muhurat_time')}</Text>
-                <Text style={styles.detailValue}>{muhurat_time || '-'}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('temple')}</Text>
-                <Text style={styles.detailValue}>
-                  {tirth_place_name || '-'}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('samagri_required')}</Text>
-                <Text
-                  style={[
-                    styles.detailValue,
-                    {
-                      color: samagri_required ? COLORS.success : COLORS.error,
-                    },
-                  ]}>
-                  {samagri_required ? t('Yes') : t('No')}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('payment_status')}</Text>
-                <Text
-                  style={[
-                    styles.detailValue,
-                    {color: getStatusColor(payment_status)},
-                  ]}>
-                  {payment_status
-                    ? payment_status.charAt(0).toUpperCase() +
-                      payment_status.slice(1)
-                    : '-'}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('booking_status')}</Text>
-                <Text
-                  style={[
-                    styles.detailValue,
-                    {color: getStatusColor(booking_status)},
-                  ]}>
-                  {booking_status
-                    ? booking_status.charAt(0).toUpperCase() +
-                      booking_status.slice(1)
-                    : '-'}
-                </Text>
-              </View>
-              {notes && (
-                <View style={styles.notesContainer}>
-                  <Text style={styles.notesLabel}>{t('notes')}</Text>
-                  <Text style={styles.notesValue}>{notes}</Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* User Card */}
-          <View style={[styles.userCard, THEMESHADOW.shadow]}>
-            <Image
-              source={
-                booking_user_img
-                  ? {uri: booking_user_img}
-                  : {
-                      uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                    }
-              }
-              style={styles.userImage}
-              resizeMode="cover"
-            />
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>
-                {booking_user_name || t('User Name')}
-              </Text>
-              <Text style={styles.userMobile}>
-                {booking_user_mobile || t('Mobile Number')}
-              </Text>
-            </View>
-          </View>
-
-          {/* Address Card */}
-          {address_details && (
-            <View style={[styles.addressCard, THEMESHADOW.shadow]}>
-              <Text style={styles.addressLabel}>{t('Address Details')}</Text>
-              <Text style={styles.addressValue}>
-                {getAddressString(address_details) || '-'}
-              </Text>
-            </View>
-          )}
+      {loading ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor:COLORS.white}}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
-      </ScrollView>
+      ) : pujaData ? (
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}>
+          <Image
+            source={
+              pooja_image_url
+                ? {uri: pooja_image_url}
+                : {
+                    uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
+                  }
+            }
+            style={[
+              styles.heroImage,
+              {width: screenWidth, height: verticalScale(200)},
+            ]}
+            resizeMode="stretch"
+          />
+          <View
+            style={{
+              flex: 1,
+              paddingHorizontal: moderateScale(24),
+              paddingTop: verticalScale(24),
+            }}>
+            <Text style={styles.pujaTitle}>{pooja_name || t('Puja Name')}</Text>
+
+            <View style={[styles.card, THEMESHADOW.shadow]}>
+              <View style={styles.cardInner}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('date')}</Text>
+                  <Text style={styles.detailValue}>
+                    {formatDateWithOrdinal(booking_date) || '-'}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('amount')}</Text>
+                  <Text style={[styles.detailValue, {color: COLORS.success}]}>
+                    ₹{amount || '0'}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('muhurat')}</Text>
+                  <Text style={styles.detailValue}>
+                    {muhurat_type && `(${muhurat_type})`}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('muhurat_time')}</Text>
+                  <Text style={styles.detailValue}>{muhurat_time || '-'}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('temple')}</Text>
+                  <Text style={styles.detailValue}>
+                    {tirth_place_name || '-'}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('samagri_required')}</Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      {
+                        color: samagri_required ? COLORS.success : COLORS.error,
+                      },
+                    ]}>
+                    {samagri_required ? t('Yes') : t('No')}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('payment_status')}</Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      {color: getStatusColor(payment_status)},
+                    ]}>
+                    {payment_status
+                      ? payment_status.charAt(0).toUpperCase() +
+                        payment_status.slice(1)
+                      : '-'}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('booking_status')}</Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      {color: getStatusColor(booking_status)},
+                    ]}>
+                    {booking_status
+                      ? booking_status.charAt(0).toUpperCase() +
+                        booking_status.slice(1)
+                      : '-'}
+                  </Text>
+                </View>
+                {notes && (
+                  <View style={styles.notesContainer}>
+                    <Text style={styles.notesLabel}>{t('notes')}</Text>
+                    <Text style={styles.notesValue}>{notes}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* User Card */}
+            <View style={[styles.userCard, THEMESHADOW.shadow]}>
+              <Image
+                source={
+                  booking_user_img
+                    ? {uri: booking_user_img}
+                    : {
+                        uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
+                      }
+                }
+                style={styles.userImage}
+                resizeMode="cover"
+              />
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>
+                  {booking_user_name || t('User Name')}
+                </Text>
+                <Text style={styles.userMobile}>
+                  {booking_user_mobile || t('Mobile Number')}
+                </Text>
+              </View>
+            </View>
+
+            {/* Address Card */}
+            {address_details && (
+              <View style={[styles.addressCard, THEMESHADOW.shadow]}>
+                <Text style={styles.addressLabel}>{t('Address Details')}</Text>
+                <Text style={styles.addressValue}>
+                  {getAddressString(address_details) || '-'}
+                </Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      ) : (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={{color: COLORS.error}}>{t('no_data')}</Text>
+        </View>
+      )}
     </View>
   );
 };

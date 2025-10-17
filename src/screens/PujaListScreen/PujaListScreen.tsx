@@ -132,6 +132,7 @@ const PujaListScreen: React.FC = () => {
   };
 
   const handleEditPuja = (puja: PujaItemType) => {
+    // console.log("puja",puja)
     navigation.navigate('EditPujaScreen', {pujaId: puja.id, pujaData: puja});
   };
 
