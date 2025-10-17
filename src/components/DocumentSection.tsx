@@ -151,9 +151,11 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   loadingContainer: {
-    position: 'absolute',
-    right: scale(10),
-    top: '50%',
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    paddingTop:50
   },
 });
 

@@ -39,8 +39,8 @@ LogBox.ignoreLogs([
 
 const auth = getAuth();
 if (__DEV__) {
-  // auth.useEmulator('http://127.0.0.1:9099');
-  auth.useEmulator('http://192.168.1.9:9099');
+  auth.useEmulator('http://127.0.0.1:9099');
+  // auth.useEmulator('http://192.168.1.9:9099');
 }
 setupNotifications();
 

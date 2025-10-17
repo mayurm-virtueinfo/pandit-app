@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   StatusBar,
   ActivityIndicator,
+  useColorScheme,
 } from 'react-native';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
@@ -38,6 +39,8 @@ interface TransactionItem {
 const EarningsHistoryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -219,7 +222,17 @@ const EarningsHistoryScreen: React.FC = () => {
           )}
           {item.paymentModeLabel && (
             <View style={styles.payment_method}>
-              <Text>{'Payment method : '}</Text>
+              <Text
+                style={[
+                  styles.paymentMethodText,
+                  {
+                    color: isDarkMode
+                      ? COLORS?.white || '#fff'
+                      : COLORS?.primaryTextDark || '#000',
+                  },
+                ]}>
+                {t('payment_method')}
+              </Text>
               <Text style={styles.cash}>{item.paymentModeLabel}</Text>
             </View>
           )}
@@ -428,6 +441,11 @@ const styles = StyleSheet.create({
   payment_method: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  paymentMethodText: {
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_SemiBold,
+    marginRight: 4,
   },
   cash: {
     fontSize: moderateScale(14),

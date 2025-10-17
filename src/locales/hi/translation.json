@@ -414,5 +414,8 @@
   "samagri_required": "सामग्री आवश्यक",
   "payment_status": "भुगतान स्थिति",
   "booking_status": "बुकिंग स्थिति",
-  "notes": "टिप्पणियाँ"
+  "notes": "टिप्पणियाँ",
+  "completed_puja_details": "पूर्ण हुई पूजा का विवरण",
+  "past_booking": "पिछली बुकिंग",
+  "no_data": "कोई डेटा नहीं मिला"
 }

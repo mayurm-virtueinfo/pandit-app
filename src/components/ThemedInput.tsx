@@ -1,5 +1,13 @@
 import React from 'react';
-import { TextInput, View, Text, StyleSheet, KeyboardTypeOptions, TextInputProps } from 'react-native';
+import {
+  TextInput,
+  View,
+  Text,
+  StyleSheet,
+  KeyboardTypeOptions,
+  TextInputProps,
+  useColorScheme,
+} from 'react-native';
 import { COLORS, COMPONENT_STYLES } from '../theme/theme';
 import { moderateScale } from 'react-native-size-matters';
 
@@ -8,13 +16,13 @@ interface ThemedInputProps {
   onChangeText: (text: string) => void;
   placeholder: string;
   label?: string;
-  autoComplete?: TextInputProps['autoComplete']; // Change this line
-  textContentType?: TextInputProps['textContentType']; // Change this line
+  autoComplete?: TextInputProps['autoComplete'];
+  textContentType?: TextInputProps['textContentType'];
   secureTextEntry?: boolean;
-  keyboardType?: KeyboardTypeOptions; // Change this line
-  maxLength?: number; // Optional prop for maximum length
-  errors?: any
-  errorField?: string
+  keyboardType?: KeyboardTypeOptions;
+  maxLength?: number;
+  errors?: any;
+  errorField?: string;
 }
 
 const ThemedInput: React.FC<ThemedInputProps> = ({
@@ -24,28 +32,37 @@ const ThemedInput: React.FC<ThemedInputProps> = ({
   label,
   secureTextEntry = false,
   keyboardType = 'default',
-  autoComplete = 'off', // Default to 'off' for autoComplete
-  textContentType = 'none', // Default to 'none' for textContentType
+  autoComplete = 'off',
+  textContentType = 'none',
   maxLength,
   errors,
-  errorField
+  errorField,
 }) => {
+  const colorScheme = useColorScheme();
+  // Set input text color and placeholder text color for light/dark
+  const inputTextColor = colorScheme === 'dark' ? COLORS.white : COLORS.textPrimary;
+  const placeholderColor = colorScheme === 'dark' ? COLORS.gray : COLORS.gray;
+
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
-        style={[COMPONENT_STYLES.input, errorField && errors[`${errorField}`] && styles.errorField]}
+        style={[
+          COMPONENT_STYLES.input,
+          { color: inputTextColor },
+          errorField && errors?.[`${errorField}`] && styles.errorField,
+        ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.gray}
+        placeholderTextColor={placeholderColor}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoComplete={autoComplete}
         textContentType={textContentType}
         maxLength={maxLength}
       />
-      {errorField && errors[`${errorField}`] && (
+      {errorField && errors?.[`${errorField}`] && (
         <Text style={styles.errorText}>{errors.phoneNumber}</Text>
       )}
     </View>
@@ -61,7 +78,6 @@ const styles = StyleSheet.create({
     color: '#ef4444',
     fontSize: 14,
     marginTop: moderateScale(5),
-
   },
   container: {
     marginBottom: 0,

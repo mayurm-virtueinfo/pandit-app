@@ -64,8 +64,7 @@ const AddPujaScreen: React.FC = () => {
   const {pujaId, pujaData} = params || {};
   const isEditMode = !!pujaId;
 
-  console.log('pujaData', pujaData);
-
+  // --- MAP API DATA ---
   const mapApiPujaToListItem = (item: any): EditRequest => ({
     id: item.id,
     image: item.image_url || '',
@@ -99,18 +98,16 @@ const AddPujaScreen: React.FC = () => {
     }
     return [];
   });
-  console.log('pujaList', pujaList);
+
+  const [loading, setLoading] = useState<boolean>(false);
+
   useEffect(() => {
     if (!isEditMode) {
       setLoading(true);
       getUnassignPuja()
         .then((response: any) => {
-          console.log('response', response);
-
-          // Defensive extraction: handle both Axios and fetch/other response shapes
           let data: any[] = [];
           if (response && typeof response === 'object') {
-            // Axios: response.data may be the payload object or the array
             if (Array.isArray(response.data)) {
               data = response.data;
             } else if (
@@ -118,22 +115,18 @@ const AddPujaScreen: React.FC = () => {
               typeof response.data === 'object' &&
               Array.isArray(response.data.data)
             ) {
-              // Axios: response.data.data is the array (as in your sample)
               data = response.data.data;
             } else if (Array.isArray(response)) {
-              // fallback, not expected
               data = response;
             }
           }
-          console.log('Extracted puja data:', data);
-
           if (Array.isArray(data)) {
             setPujaList(data.map(mapApiPujaToListItem));
           } else {
             setPujaList([]);
           }
         })
-        .catch(err => {
+        .catch(() => {
           setPujaList([]);
         })
         .finally(() => {
@@ -142,9 +135,31 @@ const AddPujaScreen: React.FC = () => {
     }
   }, [isEditMode]);
 
+  // State - which puja is selected
   const [selectedPuja, setSelectedPuja] = useState<number | null>(
     pujaData && typeof pujaData === 'object' ? pujaData.id : null,
   );
+
+  // System priceSelector for add puja -- updated extraction logic for system price per selected puja
+  const getSystemPricesForSelected = () => {
+    if (isEditMode && pujaData && typeof pujaData === 'object') {
+      return {
+        price_with_samagri: Number(
+          pujaData.system_price?.price_with_samagri ?? pujaData.price_with_samagri,
+        ),
+        price_without_samagri: Number(
+          pujaData.system_price?.price_without_samagri ?? pujaData.price_without_samagri,
+        ),
+      };
+    } else if (Array.isArray(pujaList) && selectedPuja) {
+      const entry = pujaList.find(p => p.id === selectedPuja);
+      return {
+        price_with_samagri: Number(entry?.price_with_samagri) || 0,
+        price_without_samagri: Number(entry?.price_without_samagri) || 0,
+      };
+    }
+    return {price_with_samagri: 0, price_without_samagri: 0};
+  };
 
   const getInitialPriceOption = () => {
     if (pujaData && typeof pujaData === 'object') {
@@ -164,8 +179,7 @@ const AddPujaScreen: React.FC = () => {
     pujaData && pujaData.price_without_samagri,
   );
 
-  const [loading, setLoading] = useState<boolean>(false);
-
+  // -------- Add Puja -----------
   const addPuja = async () => {
     if (
       selectedPriceOption === 'custom' &&
@@ -198,21 +212,31 @@ const AddPujaScreen: React.FC = () => {
       if (selectedPujaObj && typeof selectedPujaObj.pooja === 'number') {
         poojaValue = selectedPujaObj.pooja;
       }
+
+      // ✔️ Use system price from selected puja for ADD only
+      let price_with_samagri = 0;
+      let price_without_samagri = 0;
+
+      if (selectedPriceOption === 'system') {
+        // For add, always get system price from selected puja
+        if (selectedPujaObj) {
+          price_with_samagri = Number(selectedPujaObj.price_with_samagri);
+          price_without_samagri = Number(selectedPujaObj.price_without_samagri);
+        }
+      } else {
+        // Use custom values!
+        price_with_samagri = Number(customPriceWithItems);
+        price_without_samagri = Number(customPriceWithoutItems);
+      }
+
       const addRequest: AddPuja = {
         user: userId,
         pooja: poojaValue,
-        price_with_samagri:
-          selectedPriceOption === 'custom'
-            ? Number(customPriceWithItems)
-            : 2500,
-        price_without_samagri:
-          selectedPriceOption === 'custom'
-            ? Number(customPriceWithoutItems)
-            : 1800,
+        price_with_samagri: price_with_samagri,
+        price_without_samagri: price_without_samagri,
         price_status: selectedPriceOption === 'system' ? 1 : 2,
       };
       const response = await postAddPuja(addRequest);
-      console.log('add response =====>', response);
       if (response && (response as any).data.success === true) {
         showSuccessToast(response.data.message);
         navigation.goBack();
@@ -224,6 +248,7 @@ const AddPujaScreen: React.FC = () => {
     }
   };
 
+  // -------- Edit Puja (leave as before) -----------
   const editPuja = async () => {
     if (
       selectedPriceOption === 'custom' &&
@@ -274,7 +299,6 @@ const AddPujaScreen: React.FC = () => {
         price_status: selectedPriceOption === 'system' ? 1 : 2,
       };
       const response = await putPuja(editRequest);
-      console.log('edit response ===>', response.data.success);
       if (response && (response as any).data.success === true) {
         showSuccessToast(response.data.message);
         navigation.goBack();
@@ -288,15 +312,18 @@ const AddPujaScreen: React.FC = () => {
     }
   };
 
+  // Price options
   const priceOptions: PriceOption[] = [
     {
       id: 'system',
       title: 'System Price',
-      description: `Rs. ${pujaData?.system_price?.price_with_samagri}  - ${t(
-        'with_pooja_items',
-      )}\nRs. ${pujaData?.system_price?.price_without_samagri} - ${t(
-        'without_pooja_items',
-      )}`,
+      description: (() => {
+        // For ADD: Show price from selected puja if available
+        let p = getSystemPricesForSelected();
+        return `Rs. ${p.price_with_samagri} - ${t('with_pooja_items')}\nRs. ${p.price_without_samagri} - ${t(
+          'without_pooja_items'
+        )}`;
+      })(),
     },
     {
       id: 'custom',
@@ -304,8 +331,12 @@ const AddPujaScreen: React.FC = () => {
     },
   ];
 
+  // Handlers
   const handlePujaSelection = (pujaId: number) => {
     setSelectedPuja(pujaId);
+    // When puja selection changes, reset custom price fields and system price display
+    setCustomPriceWithItems('');
+    setCustomPriceWithoutItems('');
   };
 
   const handlePriceOptionSelection = (option: 'system' | 'custom') => {

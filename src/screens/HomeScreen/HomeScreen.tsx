@@ -205,7 +205,8 @@ const HomeScreen: React.FC = () => {
     <TouchableOpacity
       onPress={() =>
         navigation.navigate('CompletePujaDetailsScreen', {
-          completePujaData: item,
+          booking_id: item.id,
+          completed: true
         })
       }>
       <View style={styles.pujaItem}>
@@ -213,7 +214,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.pujaContent}>
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
           <Text style={styles.pujaDate}>
-            {`Scheduled on ${formatDateWithOrdinal(item.booking_date)}`}
+            {t("scheduled_on")}{" "}{`${formatDateWithOrdinal(item.booking_date)}`}
           </Text>
         </View>
       </View>
@@ -240,7 +241,7 @@ const HomeScreen: React.FC = () => {
               <Text
                 style={
                   styles.pujaDate
-                }>{`Scheduled on ${item.when_is_pooja}`}</Text>
+                }>{t('scheduled_on')}{`${item.when_is_pooja}`}</Text>
             </View>
           </View>
         </View>
@@ -265,9 +266,9 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
           <Text style={styles.pujaDate}>
             {item.when_is_pooja
-              ? `Scheduled on ${item.when_is_pooja}`
+              ? `${t("scheduled_on")}${item.when_is_pooja}`
               : item.booking_date
-              ? `Scheduled on ${formatDateWithOrdinal(item.booking_date)}`
+              ? `${t("scheduled_on")}${formatDateWithOrdinal(item.booking_date)}`
               : ''}
           </Text>
         </View>
