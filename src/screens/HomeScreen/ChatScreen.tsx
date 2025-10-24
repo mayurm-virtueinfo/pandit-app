@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Alert,
   Text,
+  Keyboard,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
@@ -105,6 +106,7 @@ const ChatScreen: React.FC = () => {
     setLoading(true);
     try {
       const resp: any = await getMessageHistory(booking_id);
+      console.log("resp",resp)
       if (resp && Array.isArray(resp)) {
         const normalized = resp.map((msg: any) => ({
           id: msg.uuid,
@@ -435,6 +437,20 @@ const ChatScreen: React.FC = () => {
     };
   }, [inCall, navigation]);
 
+  // ----- Android 15+ Keyboard Fix -----
+  // See: https://stackoverflow.com/questions/78452064/keyboardavoidingview-not-working-properly-on-android-14-react-native
+  // Solution: Use "height: 100%" and avoid "flex: 1" directly on KeyboardAvoidingView, and/or new Android windowSoftInputMode defaults.
+  // Also, new react-native 0.73+ and Android 14+ require behavior="height" for KeyboardAvoidingView.
+
+  // You can also try dynamically measuring keyboard height to ensure input is always visible.
+  // But first, properly set the KeyboardAvoidingView props based on platform.
+
+  const keyboardVerticalOffset = Platform.select({
+    ios: moderateScale(90),
+    android: insets.top, // or 0, as needed (try insets.bottom if nav bar at bottom)
+    default: 0,
+  });
+
   if (inCall) {
     return (
       <View style={styles.jitsiFullScreenView}>
@@ -511,12 +527,15 @@ const ChatScreen: React.FC = () => {
           showVideoCallButton
           onVideoCallPress={handleVideoCall}
         />
+        {/* Android 14/15+ fix: 
+            1. Use "behavior='height'" (NOT 'padding') for KeyboardAvoidingView.
+            2. Assign style={{flex: 1, minHeight: 0}} to ensure the chat is not forced out.
+            3. Try to set keyboardVerticalOffset: 0 or insets.bottom if nav-bar present, but test visually.*/}
         <KeyboardAvoidingView
-          style={styles.chatContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={
-            Platform.OS === 'ios' ? moderateScale(90) : 0
-          }>
+          style={styles.chatContainerFixed}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={keyboardVerticalOffset}
+        >
           <ScrollView
             style={styles.messagesContainer}
             contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
@@ -551,12 +570,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.primaryBackground,
   },
+  // Keep original for fallback, but use chatContainerFixed for the KeyboardAvoidingView.
   chatContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
     paddingTop: moderateScale(24),
+  },
+  // ADDED: For Android 14+/15+ keyboard fix. Remove "flex: 1" and use minHeight: 0 for better flexibility.
+  chatContainerFixed: {
+    flexGrow: 1,
+    minHeight: 0,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: moderateScale(30),
+    borderTopRightRadius: moderateScale(30),
+    paddingTop: moderateScale(24),
+    flexDirection: 'column',
   },
   messagesContainer: {
     flex: 1,
