@@ -5,10 +5,9 @@ import {
   StatusBar,
   Platform,
   ScrollView,
-  KeyboardAvoidingView,
   Alert,
   Text,
-  Keyboard,
+  SafeAreaView,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
@@ -25,6 +24,11 @@ import {createMeeting, getMessageHistory} from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
+import {
+  KeyboardAwareScrollView,
+  KeyboardProvider,
+  KeyboardStickyView,
+} from 'react-native-keyboard-controller';
 
 export interface Message {
   id: string;
@@ -51,18 +55,13 @@ const ChatScreen: React.FC = () => {
     'https://meet.puja-guru.com/',
   );
 
-  // For forcing WebSocket effect when remount
-  const [wsKey, setWsKey] = useState(0);
-
-  // For websocket connect loader
   const [wsConnecting, setWsConnecting] = useState(false);
 
-  // WebSocket Ref
   const ws = useRef<WebSocket | null>(null);
-  // Track if ws was manually closed to avoid duplicate alert
   const socketClosedManually = useRef(false);
+  const isFocused = useRef(true);
+  const hasInitialized = useRef(false);
 
-  // Scroll & UI Refs
   const scrollViewRef = useRef<ScrollView | null>(null);
   const isUserAtBottom = useRef(true);
 
@@ -75,17 +74,14 @@ const ChatScreen: React.FC = () => {
     JitsiMeeting = null;
   }
 
-  // Compose web socket url properly
   const getSocketURL = (token: string, bookingId: string) => {
     if (__DEV__) {
-      // Local development: connect directly to your backend
-      return `wss://puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
+      return `ws://192.168.1.27:9000/ws/chat/by-booking/${bookingId}/?token=${token}`;
     }
-    // Production: use secure WebSocket (wss) via Apache proxy on port 443
     return `wss://puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
   };
 
-  // Only fetch tokens once on mount
+  // Fetch tokens once on mount
   useEffect(() => {
     const fetchToken = async () => {
       try {
@@ -101,12 +97,14 @@ const ChatScreen: React.FC = () => {
     fetchToken();
   }, []);
 
-  // --- Chat History: Fetch on entry (and when user id changes) ---
-  const fetchChatHistory = async () => {
+  // Fetch chat history only once on mount
+  const fetchChatHistory = useCallback(async () => {
+    if (!booking_id || !panditID) return;
+
     setLoading(true);
     try {
       const resp: any = await getMessageHistory(booking_id);
-      console.log("resp",resp)
+      console.log('resp', resp);
       if (resp && Array.isArray(resp)) {
         const normalized = resp.map((msg: any) => ({
           id: msg.uuid,
@@ -121,28 +119,47 @@ const ChatScreen: React.FC = () => {
         isUserAtBottom.current = true;
       }
     } catch (e) {
-      // show error optionally
+      console.error('Fetch chat history error:', e);
     } finally {
       setLoading(false);
     }
-  };
+  }, [booking_id, panditID]);
 
-  // Fix for navigation: when you come back to this screen, force ws re-connection and fetch chat
+  // Initial load - fetch history only once
+  useEffect(() => {
+    if (!hasInitialized.current && panditID && booking_id) {
+      fetchChatHistory();
+      hasInitialized.current = true;
+    }
+  }, [panditID, booking_id, fetchChatHistory]);
+
+  // Track focus state - reconnect WebSocket only when coming back
   useFocusEffect(
     useCallback(() => {
-      fetchChatHistory();
-      // This forces the useEffect([wsKey]) to run again and clean/setup new ws connection
-      setWsKey(prev => prev + 1);
-      // Optional: reset scroll
-    }, [panditID, booking_id])
+      isFocused.current = true;
+
+      // Only reconnect if WebSocket is not already connected
+      if (
+        ws.current?.readyState !== WebSocket.OPEN &&
+        accessToken &&
+        booking_id &&
+        panditID
+      ) {
+        console.log('🔄 Reconnecting WebSocket on focus...');
+        connectWebSocket();
+      }
+
+      return () => {
+        isFocused.current = false;
+      };
+    }, [accessToken, booking_id, panditID]),
   );
 
-  // WebSocket connection management (runs fresh on wsKey change)
-  useEffect(() => {
-    // Wait until have token/id/info to connect
+  // WebSocket connection setup
+  const connectWebSocket = useCallback(() => {
     if (!accessToken || !booking_id || !panditID) return;
 
-    // Always cleanup before new socket (very important for navigation back/forth)
+    // Clean up existing connection
     if (ws.current) {
       try {
         ws.current.onopen = null;
@@ -150,37 +167,36 @@ const ChatScreen: React.FC = () => {
         ws.current.onerror = null;
         ws.current.onclose = null;
         ws.current.close();
-      } catch (err) {}
+      } catch (err) {
+        console.error('Error closing existing WebSocket:', err);
+      }
       ws.current = null;
     }
 
-    // Start loader before websocket connect
     setWsConnecting(true);
 
-    // Automatically hide loader after 2.3 seconds if not connected (safety timeout)
-    let autoLoaderTimeout: NodeJS.Timeout | null = setTimeout(() => {
+    const autoLoaderTimeout = setTimeout(() => {
       setWsConnecting(false);
     }, 2300);
 
     const socketURL = getSocketURL(accessToken, booking_id);
     let newWs: WebSocket | null = null;
+
     try {
       newWs = new WebSocket(socketURL);
       ws.current = newWs;
     } catch (e) {
       setWsConnecting(false);
-      if (autoLoaderTimeout) clearTimeout(autoLoaderTimeout);
+      clearTimeout(autoLoaderTimeout);
       Alert.alert('WebSocket Error', 'Could not create socket!');
       return;
     }
 
     newWs.onopen = () => {
+      console.log('✅ Connected to WebSocket');
       socketClosedManually.current = false;
       setWsConnecting(false);
-      if (autoLoaderTimeout) {
-        clearTimeout(autoLoaderTimeout);
-        autoLoaderTimeout = null;
-      }
+      clearTimeout(autoLoaderTimeout);
     };
 
     newWs.onmessage = e => {
@@ -190,10 +206,12 @@ const ChatScreen: React.FC = () => {
       } catch {
         return;
       }
+
       if (!data?.uuid) return;
-      // Accept only messages from others
+
       const isOwn = String(data.sender_id) === String(panditID);
-      // If isOwn, do not set (it is already on chat optimistically)
+
+      // Only add messages from others (own messages already added optimistically)
       if (!isOwn) {
         const newMsg: Message = {
           id: data.uuid,
@@ -204,108 +222,118 @@ const ChatScreen: React.FC = () => {
           }),
           isOwn: false,
         };
-        setMessages(prev => [...prev, newMsg]);
+
+        // Add message in real-time
+        setMessages(prev => {
+          // Check if message already exists to avoid duplicates
+          const exists = prev.some(msg => msg.id === data.uuid);
+          if (exists) return prev;
+          return [...prev, newMsg];
+        });
       }
     };
 
     newWs.onerror = (e: any) => {
+      console.error('❌ WebSocket error:', e);
       setWsConnecting(false);
-      if (autoLoaderTimeout) {
-        clearTimeout(autoLoaderTimeout);
-        autoLoaderTimeout = null;
-      }
+      clearTimeout(autoLoaderTimeout);
+
       if (!__DEV__) {
         Alert.alert(
           'WebSocket error',
-          e.message ? String(e.message) : 'Unknown socket error',
+          e?.message ? String(e.message) : 'Unknown socket error',
         );
       }
     };
+
     newWs.onclose = (e: any) => {
+      console.log('🔌 WebSocket closed:', e.code, e.reason);
       setWsConnecting(false);
-      if (autoLoaderTimeout) {
-        clearTimeout(autoLoaderTimeout);
-        autoLoaderTimeout = null;
-      }
+      clearTimeout(autoLoaderTimeout);
+
       if (!socketClosedManually.current && !__DEV__) {
         Alert.alert('WebSocket Closed', `Code: ${e.code}\nReason: ${e.reason}`);
       }
-    };
 
-    // Cleanup on unmount or wsKey change
+      // Auto-reconnect if screen is still focused and not manually closed
+      if (isFocused.current && !socketClosedManually.current) {
+        setTimeout(() => {
+          console.log('🔄 Auto-reconnecting WebSocket...');
+          connectWebSocket();
+        }, 3000);
+      }
+    };
+  }, [accessToken, booking_id, panditID]);
+
+  // Initial WebSocket connection
+  useEffect(() => {
+    if (accessToken && booking_id && panditID) {
+      connectWebSocket();
+    }
+
     return () => {
-      setWsConnecting(false);
-      if (autoLoaderTimeout) {
-        clearTimeout(autoLoaderTimeout);
-        autoLoaderTimeout = null;
-      }
       socketClosedManually.current = true;
-      if (newWs) {
+      if (ws.current) {
         try {
-          newWs.onopen = null;
-          newWs.onmessage = null;
-          newWs.onerror = null;
-          newWs.onclose = null;
-          newWs.close();
-        } catch (err) {}
-        if (ws.current === newWs) {
-          ws.current = null;
+          ws.current.onopen = null;
+          ws.current.onmessage = null;
+          ws.current.onerror = null;
+          ws.current.onclose = null;
+          ws.current.close();
+        } catch (err) {
+          console.error('Error closing WebSocket on cleanup:', err);
         }
+        ws.current = null;
       }
     };
-    // NOTE: wsKey is used so this effect reruns every time you come back to the screen
-  }, [accessToken, booking_id, panditID, wsKey]);
+  }, [accessToken, booking_id, panditID, connectWebSocket]);
 
-  // --- Message Sending: Add to chat on send, but do NOT add a duplicate on websocket receive ---
   const handleSendMessage = async (text: string) => {
     if (!panditID) {
       Alert.alert('You are not logged in.');
       return;
     }
 
-    // -- Fix: ws.current may be non-null but closed, so check readyState
-    if (!ws.current && ws?.current?.OPEN !== WebSocket.OPEN) {
+    if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
       Alert.alert(
         'WebSocket not connected',
-        'Reconnecting or starting up. Please try again in a moment.'
+        'Reconnecting or starting up. Please try again in a moment.',
       );
-      // Optionally, you could call setWsKey(prev=>prev+1); to force reconnect quicker if desired.
       return;
     }
-    const messageId = `${Date.now()}-local`; // Temporary id for optimistic rendering
+
+    const messageId = `${Date.now()}-local`;
     const timestamp = new Date();
 
     const messageObj = {
       message: text,
       sender_id: panditID,
-      // receiver_id: user_id,
     };
 
-    // Optimistically show the message
-    setMessages(prev => [
-      ...prev,
-      {
-        id: messageId,
-        text: text,
-        time: timestamp.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        isOwn: true,
-      },
-    ]);
+    // Optimistically add message to UI
+    const newMessage: Message = {
+      id: messageId,
+      text: text,
+      time: timestamp.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      isOwn: true,
+    };
 
+    setMessages(prev => [...prev, newMessage]);
     isUserAtBottom.current = true;
+
     try {
       ws.current.send(JSON.stringify(messageObj));
-    } catch {
+    } catch (error) {
+      console.error('Send message error:', error);
       Alert.alert('Send Failed', 'Unable to send message.');
-      // Remove optimistic message if send fails
+      // Remove optimistic message on failure
       setMessages(prev => prev.filter(msg => msg.id !== messageId));
     }
   };
 
-  // --- Incoming scroll and view logic ---
   const scrollToBottom = useCallback((animated = true) => {
     if (scrollViewRef.current) {
       setTimeout(() => scrollViewRef.current?.scrollToEnd({animated}), 120);
@@ -324,12 +352,13 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages, scrollToBottom]);
 
-  // --- Video/Meeting Handling ---
+  // Video/Meeting Handling
   useEffect(() => {
     if (incomingMeetingUrl) {
       handleMeetingURL();
     }
   }, [incomingMeetingUrl]);
+
   useEffect(() => {
     if (videocall) {
       handleVideoCall();
@@ -352,7 +381,6 @@ const ChatScreen: React.FC = () => {
           );
           setInCall(true);
         } else if (response?.data?.meeting_url) {
-          // Parse meeting_url
           const meetingUrl = response.data.meeting_url;
           let url = meetingUrl.endsWith('/')
             ? meetingUrl.slice(0, -1)
@@ -384,7 +412,6 @@ const ChatScreen: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
-  // Parse incomingMeetingUrl
   const handleMeetingURL = () => {
     if (!incomingMeetingUrl) return;
     let url = incomingMeetingUrl.endsWith('/')
@@ -402,7 +429,6 @@ const ChatScreen: React.FC = () => {
     setInCall(true);
   };
 
-  // Jitsi events
   const onReadyToClose = useCallback(() => {
     setInCall(false);
     setRoomName(null);
@@ -418,14 +444,12 @@ const ChatScreen: React.FC = () => {
 
   const eventListeners = {onReadyToClose};
 
-  // Support end call from navigation params
   useEffect(() => {
     if ((route as any)?.params?.endCall) {
       onReadyToClose();
     }
   }, [(route as any)?.params?.endCall]);
 
-  // Hide tabBar during call
   useEffect(() => {
     if (inCall) {
       navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'none'}});
@@ -436,20 +460,6 @@ const ChatScreen: React.FC = () => {
       navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
     };
   }, [inCall, navigation]);
-
-  // ----- Android 15+ Keyboard Fix -----
-  // See: https://stackoverflow.com/questions/78452064/keyboardavoidingview-not-working-properly-on-android-14-react-native
-  // Solution: Use "height: 100%" and avoid "flex: 1" directly on KeyboardAvoidingView, and/or new Android windowSoftInputMode defaults.
-  // Also, new react-native 0.73+ and Android 14+ require behavior="height" for KeyboardAvoidingView.
-
-  // You can also try dynamically measuring keyboard height to ensure input is always visible.
-  // But first, properly set the KeyboardAvoidingView props based on platform.
-
-  const keyboardVerticalOffset = Platform.select({
-    ios: moderateScale(90),
-    android: insets.top, // or 0, as needed (try insets.bottom if nav bar at bottom)
-    default: 0,
-  });
 
   if (inCall) {
     return (
@@ -508,35 +518,31 @@ const ChatScreen: React.FC = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: COLORS.primaryBackground,
-        paddingTop: insets.top,
-      }}>
-      <CustomeLoader loading={loading || wsConnecting} />
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.primaryBackground}
-        translucent
-      />
-      <View style={styles.safeArea}>
-        <UserCustomHeader
-          title={other_user_name || 'Chat'}
-          showBackButton
-          showVideoCallButton
-          onVideoCallPress={handleVideoCall}
+    <KeyboardProvider>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: COLORS.primaryBackground,
+          paddingTop: insets.top,
+        }}>
+        <CustomeLoader loading={loading || wsConnecting} />
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={COLORS.primaryBackground}
+          translucent
         />
-        {/* Android 14/15+ fix: 
-            1. Use "behavior='height'" (NOT 'padding') for KeyboardAvoidingView.
-            2. Assign style={{flex: 1, minHeight: 0}} to ensure the chat is not forced out.
-            3. Try to set keyboardVerticalOffset: 0 or insets.bottom if nav-bar present, but test visually.*/}
-        <KeyboardAvoidingView
-          style={styles.chatContainerFixed}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={keyboardVerticalOffset}
-        >
-          <ScrollView
+        <View style={styles.safeArea}>
+          <UserCustomHeader
+            title={other_user_name || 'Chat'}
+            showBackButton
+            showVideoCallButton
+            onVideoCallPress={handleVideoCall}
+          />
+        </View>
+
+        <View style={styles.chatContainer}>
+          <KeyboardAwareScrollView
+            extraKeyboardSpace={Platform.OS === 'android' ? -50 : -70}
             style={styles.messagesContainer}
             contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
             ref={scrollViewRef}
@@ -557,36 +563,32 @@ const ChatScreen: React.FC = () => {
             ) : (
               <ChatMessages messages={messages} />
             )}
-          </ScrollView>
-          <ChatInput onSendMessage={handleSendMessage} />
-        </KeyboardAvoidingView>
-      </View>
-    </View>
+          </KeyboardAwareScrollView>
+
+          <KeyboardStickyView
+            offset={{
+              closed: 0,
+              opened: Platform.OS === 'android' ? 50 : 85,
+            }}
+            enabled={true}>
+            <ChatInput onSendMessage={handleSendMessage} />
+          </KeyboardStickyView>
+        </View>
+      </SafeAreaView>
+    </KeyboardProvider>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
     backgroundColor: COLORS.primaryBackground,
   },
-  // Keep original for fallback, but use chatContainerFixed for the KeyboardAvoidingView.
   chatContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
     paddingTop: moderateScale(24),
-  },
-  // ADDED: For Android 14+/15+ keyboard fix. Remove "flex: 1" and use minHeight: 0 for better flexibility.
-  chatContainerFixed: {
-    flexGrow: 1,
-    minHeight: 0,
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: moderateScale(30),
-    borderTopRightRadius: moderateScale(30),
-    paddingTop: moderateScale(24),
-    flexDirection: 'column',
   },
   messagesContainer: {
     flex: 1,
@@ -602,10 +604,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     textAlign: 'center',
     marginTop: moderateScale(20),
-  },
-  jitsiView: {
-    flex: 1,
-    backgroundColor: '#000',
   },
   jitsiFullScreenView: {
     flex: 1,
