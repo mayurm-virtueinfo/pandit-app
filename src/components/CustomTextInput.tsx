@@ -36,7 +36,7 @@ const CustomTextInput: React.FC<InputFieldProps> = ({
 }) => {
   return (
     <View style={styles.inputField}>
-      <Text style={styles.inputTitle}>{label}</Text>
+      {label && <Text style={styles.inputTitle}>{label}</Text>}
       <View
         style={[styles.inputArea, error ? styles.inputAreaError : null, style]}>
         <TextInput

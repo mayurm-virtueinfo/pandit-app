@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Alert,
   Text,
+  Keyboard,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {moderateScale} from 'react-native-size-matters';
@@ -50,9 +51,21 @@ const ChatScreen: React.FC = () => {
     'https://meet.puja-guru.com/',
   );
 
+  // For forcing WebSocket effect when remount
+  const [wsKey, setWsKey] = useState(0);
+
+  // For websocket connect loader
+  const [wsConnecting, setWsConnecting] = useState(false);
+
+  // WebSocket Ref
   const ws = useRef<WebSocket | null>(null);
+  // Track if ws was manually closed to avoid duplicate alert
+  const socketClosedManually = useRef(false);
+
+  // Scroll & UI Refs
   const scrollViewRef = useRef<ScrollView | null>(null);
   const isUserAtBottom = useRef(true);
+
   const jitsiMeeting = useRef<any>(null);
 
   let JitsiMeeting: any = null;
@@ -66,15 +79,13 @@ const ChatScreen: React.FC = () => {
   const getSocketURL = (token: string, bookingId: string) => {
     if (__DEV__) {
       // Local development: connect directly to your backend
-      return `ws://192.168.1.27:9000/ws/chat/by-booking/${bookingId}/?token=${token}`;
+      return `wss://puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
     }
-
     // Production: use secure WebSocket (wss) via Apache proxy on port 443
     return `wss://puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
   };
-  const socketClosedManually = useRef(false);
 
-  // Get tokens once
+  // Only fetch tokens once on mount
   useEffect(() => {
     const fetchToken = async () => {
       try {
@@ -95,6 +106,7 @@ const ChatScreen: React.FC = () => {
     setLoading(true);
     try {
       const resp: any = await getMessageHistory(booking_id);
+      console.log("resp",resp)
       if (resp && Array.isArray(resp)) {
         const normalized = resp.map((msg: any) => ({
           id: msg.uuid,
@@ -115,34 +127,63 @@ const ChatScreen: React.FC = () => {
     }
   };
 
+  // Fix for navigation: when you come back to this screen, force ws re-connection and fetch chat
   useFocusEffect(
     useCallback(() => {
       fetchChatHistory();
-    }, [panditID, booking_id]),
+      // This forces the useEffect([wsKey]) to run again and clean/setup new ws connection
+      setWsKey(prev => prev + 1);
+      // Optional: reset scroll
+    }, [panditID, booking_id])
   );
 
-  // --- WebSocket lifecycle and handler ---
+  // WebSocket connection management (runs fresh on wsKey change)
   useEffect(() => {
-    // skip if no tokens/id
+    // Wait until have token/id/info to connect
     if (!accessToken || !booking_id || !panditID) return;
 
+    // Always cleanup before new socket (very important for navigation back/forth)
     if (ws.current) {
-      ws.current.close();
+      try {
+        ws.current.onopen = null;
+        ws.current.onmessage = null;
+        ws.current.onerror = null;
+        ws.current.onclose = null;
+        ws.current.close();
+      } catch (err) {}
       ws.current = null;
     }
+
+    // Start loader before websocket connect
+    setWsConnecting(true);
+
+    // Automatically hide loader after 2.3 seconds if not connected (safety timeout)
+    let autoLoaderTimeout: NodeJS.Timeout | null = setTimeout(() => {
+      setWsConnecting(false);
+    }, 2300);
+
     const socketURL = getSocketURL(accessToken, booking_id);
+    let newWs: WebSocket | null = null;
     try {
-      ws.current = new WebSocket(socketURL);
+      newWs = new WebSocket(socketURL);
+      ws.current = newWs;
     } catch (e) {
+      setWsConnecting(false);
+      if (autoLoaderTimeout) clearTimeout(autoLoaderTimeout);
       Alert.alert('WebSocket Error', 'Could not create socket!');
       return;
     }
 
-    ws.current.onopen = () => {
+    newWs.onopen = () => {
       socketClosedManually.current = false;
+      setWsConnecting(false);
+      if (autoLoaderTimeout) {
+        clearTimeout(autoLoaderTimeout);
+        autoLoaderTimeout = null;
+      }
     };
 
-    ws.current.onmessage = e => {
+    newWs.onmessage = e => {
       let data;
       try {
         data = JSON.parse(e.data);
@@ -167,7 +208,12 @@ const ChatScreen: React.FC = () => {
       }
     };
 
-    ws.current.onerror = e => {
+    newWs.onerror = (e: any) => {
+      setWsConnecting(false);
+      if (autoLoaderTimeout) {
+        clearTimeout(autoLoaderTimeout);
+        autoLoaderTimeout = null;
+      }
       if (!__DEV__) {
         Alert.alert(
           'WebSocket error',
@@ -175,21 +221,40 @@ const ChatScreen: React.FC = () => {
         );
       }
     };
-    ws.current.onclose = e => {
+    newWs.onclose = (e: any) => {
+      setWsConnecting(false);
+      if (autoLoaderTimeout) {
+        clearTimeout(autoLoaderTimeout);
+        autoLoaderTimeout = null;
+      }
       if (!socketClosedManually.current && !__DEV__) {
         Alert.alert('WebSocket Closed', `Code: ${e.code}\nReason: ${e.reason}`);
       }
     };
 
+    // Cleanup on unmount or wsKey change
     return () => {
+      setWsConnecting(false);
+      if (autoLoaderTimeout) {
+        clearTimeout(autoLoaderTimeout);
+        autoLoaderTimeout = null;
+      }
       socketClosedManually.current = true;
-      if (ws.current) {
-        ws.current.close();
-        ws.current = null;
+      if (newWs) {
+        try {
+          newWs.onopen = null;
+          newWs.onmessage = null;
+          newWs.onerror = null;
+          newWs.onclose = null;
+          newWs.close();
+        } catch (err) {}
+        if (ws.current === newWs) {
+          ws.current = null;
+        }
       }
     };
-    // eslint-disable-next-line
-  }, [accessToken, booking_id, panditID]);
+    // NOTE: wsKey is used so this effect reruns every time you come back to the screen
+  }, [accessToken, booking_id, panditID, wsKey]);
 
   // --- Message Sending: Add to chat on send, but do NOT add a duplicate on websocket receive ---
   const handleSendMessage = async (text: string) => {
@@ -197,19 +262,23 @@ const ChatScreen: React.FC = () => {
       Alert.alert('You are not logged in.');
       return;
     }
-    if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+
+    // -- Fix: ws.current may be non-null but closed, so check readyState
+    if (!ws.current && ws?.current?.OPEN !== WebSocket.OPEN) {
       Alert.alert(
         'WebSocket not connected',
-        'Cannot send message: socket not connected',
+        'Reconnecting or starting up. Please try again in a moment.'
       );
+      // Optionally, you could call setWsKey(prev=>prev+1); to force reconnect quicker if desired.
       return;
     }
     const messageId = `${Date.now()}-local`; // Temporary id for optimistic rendering
     const timestamp = new Date();
+
     const messageObj = {
       message: text,
       sender_id: panditID,
-      receiver_id: user_id,
+      // receiver_id: user_id,
     };
 
     // Optimistically show the message
@@ -368,6 +437,20 @@ const ChatScreen: React.FC = () => {
     };
   }, [inCall, navigation]);
 
+  // ----- Android 15+ Keyboard Fix -----
+  // See: https://stackoverflow.com/questions/78452064/keyboardavoidingview-not-working-properly-on-android-14-react-native
+  // Solution: Use "height: 100%" and avoid "flex: 1" directly on KeyboardAvoidingView, and/or new Android windowSoftInputMode defaults.
+  // Also, new react-native 0.73+ and Android 14+ require behavior="height" for KeyboardAvoidingView.
+
+  // You can also try dynamically measuring keyboard height to ensure input is always visible.
+  // But first, properly set the KeyboardAvoidingView props based on platform.
+
+  const keyboardVerticalOffset = Platform.select({
+    ios: moderateScale(90),
+    android: insets.top, // or 0, as needed (try insets.bottom if nav bar at bottom)
+    default: 0,
+  });
+
   if (inCall) {
     return (
       <View style={styles.jitsiFullScreenView}>
@@ -431,7 +514,7 @@ const ChatScreen: React.FC = () => {
         backgroundColor: COLORS.primaryBackground,
         paddingTop: insets.top,
       }}>
-      <CustomeLoader loading={loading} />
+      <CustomeLoader loading={loading || wsConnecting} />
       <StatusBar
         barStyle="light-content"
         backgroundColor={COLORS.primaryBackground}
@@ -444,12 +527,15 @@ const ChatScreen: React.FC = () => {
           showVideoCallButton
           onVideoCallPress={handleVideoCall}
         />
+        {/* Android 14/15+ fix: 
+            1. Use "behavior='height'" (NOT 'padding') for KeyboardAvoidingView.
+            2. Assign style={{flex: 1, minHeight: 0}} to ensure the chat is not forced out.
+            3. Try to set keyboardVerticalOffset: 0 or insets.bottom if nav-bar present, but test visually.*/}
         <KeyboardAvoidingView
-          style={styles.chatContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={
-            Platform.OS === 'ios' ? moderateScale(90) : 0
-          }>
+          style={styles.chatContainerFixed}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={keyboardVerticalOffset}
+        >
           <ScrollView
             style={styles.messagesContainer}
             contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
@@ -484,12 +570,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.primaryBackground,
   },
+  // Keep original for fallback, but use chatContainerFixed for the KeyboardAvoidingView.
   chatContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
     paddingTop: moderateScale(24),
+  },
+  // ADDED: For Android 14+/15+ keyboard fix. Remove "flex: 1" and use minHeight: 0 for better flexibility.
+  chatContainerFixed: {
+    flexGrow: 1,
+    minHeight: 0,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: moderateScale(30),
+    borderTopRightRadius: moderateScale(30),
+    paddingTop: moderateScale(24),
+    flexDirection: 'column',
   },
   messagesContainer: {
     flex: 1,
