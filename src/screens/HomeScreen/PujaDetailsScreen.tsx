@@ -28,7 +28,6 @@ import {
   postStartPuja,
   getInProgressPuja,
   postConversations,
-  getMessageHistory,
 } from '../../api/apiService';
 import {useRoute, useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -84,18 +83,14 @@ type PujaDetailsType = {
     mobile?: string;
     profile_img_url?: string | null;
   };
-  // Add these for puja items
   pandit_arranged_items?: Array<{
     name: string;
     quantity: number;
     units: string;
   }>;
   user_arranged_items?: Array<{name: string; quantity: number; units: string}>;
-  // Add is_cos for cash on site
   is_cos?: boolean;
 };
-
-const STORAGE_KEY_PREFIX = 'puja_status_';
 
 const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const {t} = useTranslation();
@@ -103,7 +98,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const {id, progress} = route.params as any;
   const inset = useSafeAreaInsets();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [pujaStarted, setPujaStarted] = useState(false);
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [isPujaItemsModalVisible, setIsPujaItemsModalVisible] = useState(false);
   const [pujaDetails, setPujaDetails] = useState<PujaDetailsType | null>(null);
@@ -111,6 +105,14 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     useState<PujaDetailsType | null>(null);
   const [enteredPin, setEnteredPin] = useState<string>('');
   const {showSuccessToast, showErrorToast} = useCommonToast();
+
+  console.log('pujaDetails :: ', pujaDetails);
+  console.log('progressPujaDetails :: ', progressPujaDetails);
+
+  const bookingStatus =
+    progressPujaDetails?.booking_status || pujaDetails?.booking_status;
+
+  console.log('bookingStatus :: ', bookingStatus);
 
   // Helper to get is_cos value from either pujaDetails or progressPujaDetails
   const getIsCos = () => {
@@ -153,27 +155,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     }
   }, [id, progress]);
 
-  // Load Pooja started/completed status from AsyncStorage
-  const loadPujaStatus = useCallback(
-    async (id: number | string | undefined) => {
-      if (!id) {
-        setPujaStarted(false);
-        return;
-      }
-      try {
-        const status = await AsyncStorage.getItem(`${STORAGE_KEY_PREFIX}${id}`);
-        if (status === 'started') {
-          setPujaStarted(true);
-        } else {
-          setPujaStarted(false);
-        }
-      } catch (error) {
-        console.error('Error loading Pooja status from storage:', error);
-      }
-    },
-    [],
-  );
-
   // Fetch details and status on focus (when coming to this screen)
   useFocusEffect(
     useCallback(() => {
@@ -188,13 +169,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     }, [fetchPujaDetails]),
   );
 
-  // When pujaDetails or progressPujaDetails changes, load status
-  useEffect(() => {
-    if (id) {
-      loadPujaStatus(id);
-    }
-  }, [pujaDetails, progressPujaDetails, id, progress]);
-
   // Call Start Pooja API and store status in AsyncStorage
   const handleStartPujaApi = async (pin: string) => {
     if (!id) {
@@ -206,9 +180,16 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         booking_id: id,
         pin: pin,
       };
-      await postStartPuja(data);
-      setPujaStarted(true);
-      await AsyncStorage.setItem(`${STORAGE_KEY_PREFIX}${id}`, 'started');
+      const response: any = await postStartPuja(data);
+      if (response) {
+        console.log('Response from starting pooja :: ', response);
+
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'HomeScreen'}],
+        });
+        return response;
+      }
     } catch (error: any) {
       let errorMsg = 'Something went wrong';
       if (error?.response?.data?.message) {
@@ -233,8 +214,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         pin: pin,
       };
       await postCompetePuja(data);
-      setPujaStarted(false);
-      await AsyncStorage.setItem(`${STORAGE_KEY_PREFIX}${id}`, 'completed');
       navigation?.navigate('PujaSuccessfull', {bookingId: id});
     } catch (error: any) {
       let errorMsg = 'Something went wrong';
@@ -285,7 +264,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     setIsPujaItemsModalVisible(false);
   };
 
-  // Helper to get address string for display
   const getAddressDisplay = () => {
     if (progress && progressPujaDetails) {
       if (progressPujaDetails.location_display) {
@@ -320,7 +298,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   };
 
   const handleOnChatClick = async () => {
-    if (pujaStarted) {
+    if (progressPujaDetails?.booking_status === 'in_progress') {
       showErrorToast?.(
         'You cannot chat with the pandit after the pooja has started.',
       );
@@ -357,7 +335,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     }
   };
 
-  // Get puja items for modal
   const getPanditArrangedItems = () => {
     if (
       progress &&
@@ -386,7 +363,6 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     return [];
   };
 
-  // Payment info logic based on is_cos
   const renderPaymentInfo = () => {
     const isCos = getIsCos();
     if (isCos) {
@@ -544,17 +520,16 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 </Text>
                 <TouchableOpacity
                   onPress={handleOnChatClick}
-                  style={styles.chatButton}
-                  disabled={pujaStarted}>
+                  style={styles.chatButton}>
                   <Image
                     source={{
                       uri: 'https://api.builder.io/api/v1/image/assets/TEMP/4c01dc3358caeee996c8d4195776dbf1f8045f61?width=40',
                     }}
-                    style={[styles.chatIcon, pujaStarted && {opacity: 0.5}]}
+                    style={[styles.chatIcon && {opacity: 0.5}]}
                   />
                 </TouchableOpacity>
               </View>
-              {pujaStarted && (
+              {bookingStatus == 'in_progress' && (
                 <Text
                   style={{
                     color: COLORS.error,
@@ -596,13 +571,14 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
             {renderPaymentInfo()}
           </View>
         </ScrollView>
-        {!pujaStarted ? (
+
+        {bookingStatus == 'accepted' && (
           <View style={styles.buttonContainer}>
             <PrimaryButtonOutlined
               title={t('cancel')}
-              onPress={() => {
-                navigation.navigate('PujaCancellationScreen', {id: id});
-              }}
+              onPress={() =>
+                navigation.navigate('PujaCancellationScreen', {id})
+              }
               style={styles.button}
             />
             <PrimaryButton
@@ -611,8 +587,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               style={styles.button}
             />
           </View>
-        ) : (
-          <View style={{marginBottom: verticalScale(24)}}>
+        )}
+        {bookingStatus == 'in_progress' && (
+          <View style={styles.buttonContainer}>
             <PrimaryButton
               title={t('complete_puja')}
               onPress={handleCompletePuja}

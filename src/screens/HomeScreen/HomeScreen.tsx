@@ -25,8 +25,6 @@ import {useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
 import CustomeLoader from '../../components/CustomLoader';
 
-const {width: screenWidth} = Dimensions.get('window');
-
 interface PujaItem {
   id: string | number;
   pooja_name: string;
@@ -40,7 +38,6 @@ interface PendingPujaItem {
   pooja_name: string;
   when_is_pooja?: string;
   pooja_image_url?: string;
-  // Add other fields as needed from the API response
 }
 
 interface InProgressPujaItem {
@@ -49,7 +46,6 @@ interface InProgressPujaItem {
   when_is_pooja?: string;
   pooja_image_url?: string;
   booking_date: string;
-  // Add other fields as needed from the API response
 }
 
 const HomeScreen: React.FC = () => {
@@ -66,7 +62,6 @@ const HomeScreen: React.FC = () => {
   const [pendingLoading, setPendingLoading] = useState<boolean>(true);
   const [inProgressLoading, setInProgressLoading] = useState<boolean>(true);
 
-  // Fetch all API data when the screen is mounted (first time) and every time it comes into focus
   const fetchAllPujas = useCallback(async () => {
     setLoading(true);
     setPendingLoading(true);
@@ -183,30 +178,27 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  // Helper to get ordinal suffix for a day
   const getOrdinal = (n: number) => {
     const s = ['th', 'st', 'nd', 'rd'],
       v = n % 100;
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   };
 
-  // Format date as "19th September"
   const formatDateWithOrdinal = (dateString: string) => {
     if (!dateString) return '';
     const dateObj = new Date(dateString);
-    if (isNaN(dateObj.getTime())) return dateString; // fallback if invalid
+    if (isNaN(dateObj.getTime())) return dateString;
     const day = dateObj.getDate();
     const month = dateObj.toLocaleString('default', {month: 'long'});
     return `${getOrdinal(day)} ${month}`;
   };
 
-  // Modified to pass puja_name, pooja_image_url, and booking_date to RateYourExperienceScreen
   const renderCompletedPuja = (item: PujaItem, isLast: boolean) => (
     <TouchableOpacity
       onPress={() =>
         navigation.navigate('CompletePujaDetailsScreen', {
           booking_id: item.id,
-          completed: true
+          completed: true,
         })
       }>
       <View style={styles.pujaItem}>
@@ -214,7 +206,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.pujaContent}>
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
           <Text style={styles.pujaDate}>
-            {t("scheduled_on")}{" "}{`${formatDateWithOrdinal(item.booking_date)}`}
+            {t('scheduled_on')} {`${formatDateWithOrdinal(item.booking_date)}`}
           </Text>
         </View>
       </View>
@@ -238,10 +230,10 @@ const HomeScreen: React.FC = () => {
             />
             <View>
               <Text style={styles.pujaName}>{item.pooja_name}</Text>
-              <Text
-                style={
-                  styles.pujaDate
-                }>{t('scheduled_on')}{`${item.when_is_pooja}`}</Text>
+              <Text style={styles.pujaDate}>
+                {t('scheduled_on')}
+                {`${item.when_is_pooja}`}
+              </Text>
             </View>
           </View>
         </View>
@@ -258,7 +250,7 @@ const HomeScreen: React.FC = () => {
     <TouchableOpacity
       key={item.id}
       onPress={() =>
-        navigation.navigate('PujaDetailsScreen', {progress: true})
+        navigation.navigate('PujaDetailsScreen', {progress: true, id: item.id})
       }>
       <View style={styles.pujaItem}>
         <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
@@ -266,9 +258,11 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
           <Text style={styles.pujaDate}>
             {item.when_is_pooja
-              ? `${t("scheduled_on")}${item.when_is_pooja}`
+              ? `${t('scheduled_on')}${item.when_is_pooja}`
               : item.booking_date
-              ? `${t("scheduled_on")}${formatDateWithOrdinal(item.booking_date)}`
+              ? `${t('scheduled_on')}${formatDateWithOrdinal(
+                  item.booking_date,
+                )}`
               : ''}
           </Text>
         </View>
@@ -285,12 +279,7 @@ const HomeScreen: React.FC = () => {
         barStyle="light-content"
       />
 
-      {/* Custom Header */}
-      <UserCustomHeader
-        title={t('home')}
-        // showBellButton={true}
-        // onNotificationPress={() => navigation.navigate('NotificationScreen')}
-      />
+      <UserCustomHeader title={t('home')} />
 
       {/* Main Content */}
       <View style={styles.contentContainer}>
@@ -303,7 +292,7 @@ const HomeScreen: React.FC = () => {
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}>
-            {/* In-Progress Puja's Section (at the top) */}
+            {/* In-Progress Puja's Section */}
             {inProgressPujas && inProgressPujas.length > 0 && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>
@@ -320,7 +309,7 @@ const HomeScreen: React.FC = () => {
               </View>
             )}
 
-            {/* Pending Puja's Section */}
+            {/* Waiting for approval Section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('pending_puja')}</Text>
               <View style={[styles.pujaCard, THEMESHADOW.shadow]}>
