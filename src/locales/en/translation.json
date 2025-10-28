@@ -416,11 +416,14 @@
   "payment_status": "Payment Status",
   "booking_status": "Booking Status",
   "notes": "Notes",
-  "completed_puja_details":"Completed puja details",
+  "completed_puja_details": "Completed puja details",
   "past_booking": "Past booking",
-  "no_data":"No data found",
-  "payment_method":"Payment method :",
+  "no_data": "No data found",
+  "payment_method": "Payment method :",
   "update_modal_title": "New Version Available!",
   "update_modal_message": "A new version of the app is available. Please update to continue using the app.",
-  "update_now": "Update Now"
+  "update_now": "Update Now",
+  "session_expire": "Session Expired",
+  "session_expire_message": "Your session has expired. Please login again.",
+  "login_again": "Login Again"
 }

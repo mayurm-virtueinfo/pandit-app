@@ -1,9 +1,10 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import {Calendar as RNCalendar} from 'react-native-calendars';
 import {COLORS, wp, hp, THEMESHADOW} from '../theme/theme';
 import Fonts from '../theme/fonts';
 import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
+import {useCommonToast} from '../common/CommonToast';
 
 interface CalendarProps {
   onDateSelect?: (dates: string[]) => void; // Updated to return array of dates
@@ -40,6 +41,8 @@ const Calendar: React.FC<CalendarProps> = ({
 }) => {
   const [selectedDates, setSelectedDates] = useState<string[]>(initialSelected);
 
+  const {showSuccessToast, showErrorToast} = useCommonToast();
+
   useEffect(() => {
     setSelectedDates(initialSelected);
   }, [initialSelected]);
@@ -58,6 +61,9 @@ const Calendar: React.FC<CalendarProps> = ({
   const todayStr = `${todayObj.getFullYear()}-${String(
     todayObj.getMonth() + 1,
   ).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+  // Normalize today's date to midnight for reliable comparisons
+  const todayStart = new Date(todayObj);
+  todayStart.setHours(0, 0, 0, 0);
 
   // Remove static predefinedDates
   // const predefinedDates = [
@@ -162,6 +168,13 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const handleDayPress = (day: any) => {
     const dateStr = day.dateString;
+    // Create a Date at midnight for the pressed date (safe across timezones)
+    const pressedDate = new Date(`${dateStr}T00:00:00`);
+    if (pressedDate.getTime() < todayStart.getTime()) {
+      // Show a user-friendly error and do not toggle selection
+      showErrorToast('You cannot select a past date');
+      return;
+    }
     setSelectedDates(prev => {
       let newSelectedDates: string[];
       if (prev.includes(dateStr)) {

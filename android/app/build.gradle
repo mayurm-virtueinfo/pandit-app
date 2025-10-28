@@ -119,6 +119,7 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation 'com.google.firebase:firebase-messaging:23.0.0'
+    implementation project(':react-native-config')
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
@@ -126,3 +127,4 @@ dependencies {
     }
 }
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"

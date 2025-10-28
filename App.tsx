@@ -37,6 +37,7 @@ import {
 import {navigate} from './src/utils/NavigationService';
 import DeviceInfo from 'react-native-device-info';
 import checkVersion from 'react-native-store-version';
+import {SessionProvider} from './src/provider/SessionProvider';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -174,13 +175,15 @@ const App = () => {
           color: COLORS.textPrimary,
         }}>
         <AuthProvider>
-          <NavigationContainer
-            ref={navigationRef}
-            onReady={() => {
-              handleInitialNotification();
-            }}>
-            <RootNavigator />
-          </NavigationContainer>
+          <SessionProvider>
+            <NavigationContainer
+              ref={navigationRef}
+              onReady={() => {
+                handleInitialNotification();
+              }}>
+              <RootNavigator />
+            </NavigationContainer>
+          </SessionProvider>
         </AuthProvider>
       </ToastProvider>
     </I18nextProvider>

@@ -104,13 +104,14 @@ const ProfileScreen = () => {
       const params = {
         refresh_token: refreshToken,
         device_token: fcmToken,
+        user_id: userId,
       };
       const response: any = await postLogout(params);
       if (response.data.success) {
         signOutApp();
       }
     } catch (error: any) {
-      console.error('Logout error:', error);
+      console.error('Logout error:', error?.response);
     }
     setLogoutLoading(false);
   };

@@ -2,6 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiEndpoints, {BASE_URL} from './apiEndpoints';
 import AppConstant from '../utils/AppContent';
+import {clearSavedLanguage} from '../i18n';
 
 const apiDev = axios.create({
   baseURL: BASE_URL,
@@ -37,6 +38,12 @@ apiDev.interceptors.request.use(
 let isRefreshing = false;
 let refreshSubscribers: any = [];
 
+let sessionHandler: any = null;
+
+export const registerApiSessionHandler = (handler: any) => {
+  sessionHandler = handler;
+};
+
 const subscribeTokenRefresh = (cb: any) => {
   refreshSubscribers.push(cb);
 };
@@ -58,8 +65,11 @@ const refreshAccessToken = async (refreshToken: string) => {
       },
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error refreshing token (custom logic)', error);
+    if (sessionHandler) {
+      sessionHandler();
+    }
     throw error;
   }
 };
@@ -85,21 +95,17 @@ apiDev.interceptors.response.use(
             isRefreshing = false;
             return Promise.reject(error);
           }
+
           console.log('---Accesstoken---refreshing---apiDev (custom logic)');
           const data = await refreshAccessToken(refresh_token);
           const newAccessToken = data?.access_token;
-          // Optionally, handle new refresh token if returned
-          // const newRefreshToken = data?.refresh_token;
 
           if (newAccessToken) {
             await AsyncStorage.setItem(
               AppConstant.ACCESS_TOKEN,
               newAccessToken,
             );
-            // Optionally, update refresh token
-            // if (newRefreshToken) {
-            //   await AsyncStorage.setItem(AppConstant.REFRESH_TOKEN, newRefreshToken);
-            // }
+
             isRefreshing = false;
             onRefreshed(newAccessToken);
 
@@ -117,6 +123,10 @@ apiDev.interceptors.response.use(
             '---Accesstoken---refreshing---apiDev--failure (custom logic): ',
             refreshError,
           );
+
+          // ✅ Call session handler here as a fallback too
+          if (sessionHandler) sessionHandler();
+
           return Promise.reject(refreshError);
         }
       }

@@ -1,13 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import dayjs from 'dayjs';
 import {useTranslation} from 'react-i18next';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS} from '../../theme/theme';
 import Calendar from '../../components/Calendar';
 import PrimaryButton from '../../components/PrimaryButton';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Fonts from '../../theme/fonts';
 import {moderateScale} from 'react-native-size-matters';
 import {
@@ -19,8 +18,8 @@ import {useNavigation} from '@react-navigation/native';
 
 const AvailabilityScreen: React.FC = () => {
   const [monthOffset, setMonthOffset] = useState(0);
-  const [selectedDates, setSelectedDates] = useState<string[]>([]); // Track selected dates
-  const [allFetchedDates, setAllFetchedDates] = useState<string[]>([]); // Track all dates fetched from API
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [allFetchedDates, setAllFetchedDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const insets = useSafeAreaInsets();
@@ -29,7 +28,6 @@ const AvailabilityScreen: React.FC = () => {
   const navigation = useNavigation();
   console.log(selectedDates);
 
-  // Helper to ensure date is always in 'YYYY-MM-DD' format
   const formatDate = (date: string | Date | dayjs.Dayjs) => {
     return dayjs(date).format('YYYY-MM-DD');
   };
@@ -40,7 +38,6 @@ const AvailabilityScreen: React.FC = () => {
       setFetching(true);
       try {
         const response: any = await getPanditAvailability();
-        console.log('response================>', response.data);
         // The response is an array of objects: [{date: "YYYY-MM-DD", is_available: true}, ...]
         if (Array.isArray(response?.data)) {
           // Only select dates where is_available is true
@@ -149,20 +146,15 @@ const AvailabilityScreen: React.FC = () => {
         showMenuButton={false}
         title={t('availability')}
       />
-
       <View style={styles.contentContainer}>
         <ScrollView style={styles.scrollContent}>
           <Text style={styles.description}>{t('availability_desc')}</Text>
-
-          {/* Calendar Component */}
           <Calendar
             month={monthName}
             onMonthChange={handleMonthChange}
             onDateSelect={handleDateSelect}
             selected={selectedDates}
           />
-
-          {/* Update Availability Button */}
           <PrimaryButton
             title={t('update')}
             style={styles.updateButton}
