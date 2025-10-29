@@ -44,6 +44,8 @@ import {
 } from '../../api/apiService';
 import CountrySelect, {ICountry} from 'react-native-country-select';
 import CustomTextInput from '../../components/CustomTextInput';
+// Import Firebase error handler
+import {getFirebaseAuthErrorMessage} from '../../helper/firebaseErrorHandler';
 
 // Fallback mapping for country calling codes (complete list)
 const COUNTRY_CALLING_CODES: {[key: string]: string} = {
@@ -319,7 +321,6 @@ type SignInScreenNavigationProp = StackNavigationProp<
 
 interface Props {
   navigation: SignInScreenNavigationProp;
-
   route: any;
 }
 
@@ -329,7 +330,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   const {t} = useTranslation();
   const inset = useSafeAreaInsets();
   const {showErrorToast, showSuccessToast} = useCommonToast();
-
   const [phoneNumber, setPhoneNumber] = useState(__DEV__ ? '1111111111' : '');
   const [isLoading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{phoneNumber?: string}>({});
@@ -347,7 +347,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     getCurrentLanguage(),
   );
   const colorScheme = useColorScheme();
-
   const pickerTextColor =
     colorScheme === 'dark' ? COLORS.white : COLORS.primaryTextDark;
 
@@ -369,19 +368,15 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     useCallback(() => {
       setErrors({});
       setLoading(false);
-
       if (route.params?.previousPhoneNumber) {
         setPreviousPhoneNumber(route.params.previousPhoneNumber);
       }
-
       getTermsConditions()
         .then(data => setTermsContent(data || ''))
         .catch(() => setTermsContent(''));
-
       getUserAgreement()
         .then(data => setUserAgreementContent(data || ''))
         .catch(() => setUserAgreementContent(''));
-
       getRefundPolicy()
         .then(data => setRefundPolicyContent(data || ''))
         .catch(() => setRefundPolicyContent(''));
@@ -390,33 +385,26 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
 
   const validateInput = (input: string) => {
     const trimmed = input.trim().replace(/\s+/g, '');
-
     if (!trimmed) {
       return t('enter_mobile_number');
     }
-
     // Allow variable length based on country
-
     const minLength = selectedCountry?.cca2 === 'US' ? 10 : 10; // Customize per country
-
     if (trimmed.length < minLength) {
       return (
         t('Please_enter_valid_number') || 'Please enter a valid mobile number'
       );
     }
-
     if (!/^[0-9]+$/.test(trimmed)) {
       return (
         t('Please_enter_valid_number') || 'Please enter a valid mobile number'
       );
     }
-
     return '';
   };
 
   const handleSignIn = async () => {
     const errorMsg = validateInput(phoneNumber);
-
     if (errorMsg) {
       setErrors({phoneNumber: errorMsg});
       showErrorToast(errorMsg);
@@ -432,9 +420,7 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
     }
 
     setErrors({});
-
     const dialCode = selectedCountry?.callingCode || '+91';
-
     const formattedPhone = `${dialCode}${phoneNumber
       .trim()
       .replace(/\s+/g, '')}`;
@@ -456,11 +442,9 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
       ]);
       return;
     }
-
     const phoneRegex = new RegExp(
       `^\\${dialCode}[0-9]\\d{${dialCode === '+1' ? 9 : 9}}$`,
     );
-
     if (!phoneRegex.test(formattedPhone)) {
       const errorText =
         t('Please_enter_valid_number') || 'Please enter a valid mobile number';
@@ -470,17 +454,12 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
       showErrorToast(errorText);
       return;
     }
-
     const auth = getAuth();
-
     try {
       setLoading(true);
-
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone);
-
       setLoading(false);
       showSuccessToast(t('otp_sent') || 'OTP has been sent to your phone.');
-
       navigation.navigate('OTPVerification', {
         phoneNumber: formattedPhone,
         confirmation,
@@ -488,10 +467,12 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
       });
     } catch (error: any) {
       setLoading(false);
-
-      showErrorToast(
-        t('otp_send_failed') || 'Failed to send OTP. Please try again.',
-      );
+      // Use Firebase error handler for proper error message
+      const errorMessage =
+        getFirebaseAuthErrorMessage(error) ||
+        t('otp_send_failed') ||
+        'Failed to send OTP. Please try again.';
+      showErrorToast(errorMessage);
     }
   };
 
@@ -507,24 +488,20 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
   const handleOpenPolicy = (type: 'terms' | 'user' | 'refund') => {
     let title = '';
     let htmlContent = '';
-
     if (type === 'terms') {
       title = t('terms_and_conditions') || 'Terms & Conditions';
-
       htmlContent =
         termsContent ||
         t('terms_and_conditions_content') ||
         'Here are the Terms & Conditions...';
     } else if (type === 'user') {
       title = t('user_agreement') || 'User Agreement';
-
       htmlContent =
         userAgreementContent ||
         t('user_agreement_content') ||
         'Here is the User Agreement...';
     } else if (type === 'refund') {
       title = t('refund_policy') || 'Refund Policy';
-
       htmlContent =
         refundPolicyContent ||
         t('refund_policy_content') ||
@@ -560,13 +537,11 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
         backgroundColor="transparent"
         barStyle="light-content"
       />
-
       <ImageBackground
         source={Images.ic_splash_background}
         style={styles.container}>
         <KeyboardAvoidingView style={styles.container}>
           <Loader loading={isLoading} />
-
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled">
@@ -576,9 +551,7 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                   source={Images.ic_app_logo}
                   style={{resizeMode: 'contain'}}
                 />
-
                 <Text style={styles.title}>{t('hi_welcome')}</Text>
-
                 <TouchableOpacity
                   style={styles.languageButton}
                   onPress={handleOpenLanguageModal}
@@ -589,7 +562,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                     size={moderateScale(24)}
                     color={COLORS.white}
                   />
-
                   <Text style={styles.languageButtonText}>
                     {(() => {
                       switch (selectedLang) {
@@ -612,7 +584,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
               <View
                 style={[styles.containerBody, {paddingBottom: inset.bottom}]}>
                 <Text style={styles.mainTitle}>{t('sign_in')}</Text>
-
                 <Text style={styles.subtitle}>
                   {t('please_enter_your_credential')}
                 </Text>
@@ -627,18 +598,15 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                     <Text style={styles.flagText}>
                       {selectedCountry?.flag || '🇮🇳'}
                     </Text>
-
                     <Text style={styles.dialCodeText}>
                       {selectedCountry?.callingCode || '+91'}
                     </Text>
-
                     <Icon
                       name="arrow-drop-down"
                       color={COLORS.primaryTextDark}
                       size={18}
                     />
                   </TouchableOpacity>
-
                   <CustomTextInput
                     label=""
                     value={phoneNumber}
@@ -682,7 +650,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                     <View
                       style={[
                         styles.checkbox,
-
                         isAgreed && styles.checkboxChecked,
                       ]}>
                       {isAgreed && (
@@ -695,7 +662,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                       )}
                     </View>
                   </TouchableOpacity>
-
                   <Text style={styles.termsText}>
                     {t('i_agree_to') || 'I agree to the '}
                     <Text
@@ -746,7 +712,6 @@ const SignInScreen: React.FC<Props> = ({navigation, route}) => {
                   mode="dropdown"
                   style={[
                     styles.langPicker,
-
                     Platform.OS === 'ios' && {color: pickerTextColor},
                   ]}
                   itemStyle={
