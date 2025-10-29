@@ -32,6 +32,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {postRegisterFCMToken, postSignIn} from '../../api/apiService';
 import AppConstant from '../../utils/AppContent';
 import {getMessaging, getToken} from '@react-native-firebase/messaging';
+import {getFirebaseAuthErrorMessage} from '../../helper/firebaseErrorHandler'; // Added import
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -153,12 +154,9 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
         );
       }
     } catch (error: any) {
-      console.log('error', error.code);
-      if (error.code === 'auth/invalid-verification-id') {
-        showErrorToast(t('invalid_otp'));
-      } else {
-        showErrorToast(error?.message);
-      }
+      // Use firebaseErrorHandler
+      const errorMsg = getFirebaseAuthErrorMessage(error);
+      showErrorToast(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -188,7 +186,9 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
         inputRefs.current[0]?.focus();
       }, 100);
     } catch (error: any) {
-      showErrorToast(t('resend_otp_failed'));
+      // Use firebaseErrorHandler
+      const errorMsg = getFirebaseAuthErrorMessage(error);
+      showErrorToast(errorMsg);
     } finally {
       setLoading(false);
     }

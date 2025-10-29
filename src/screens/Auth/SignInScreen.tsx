@@ -44,6 +44,8 @@ import {
 } from '../../api/apiService';
 import CountrySelect, { ICountry } from 'react-native-country-select';
 import CustomTextInput from '../../components/CustomTextInput';
+// Import Firebase error handler
+import { getFirebaseAuthErrorMessage } from '../../helper/firebaseErrorHandler';
 
 // Fallback mapping for country calling codes (complete list)
 const COUNTRY_CALLING_CODES: { [key: string]: string } = {
@@ -112,1283 +114,643 @@ const COUNTRY_CALLING_CODES: { [key: string]: string } = {
 
 
 type SignInScreenNavigationProp = StackNavigationProp<
-
   AuthStackParamList,
-
   'SignIn'
-
 >;
 
-
-
 interface Props {
-
   navigation: SignInScreenNavigationProp;
-
   route: any;
-
 }
-
-
 
 const DEFAULT_COUNTRY_ISO = 'IN';
 
-
-
 const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
-
   const { t } = useTranslation();
-
   const inset = useSafeAreaInsets();
-
   const { showErrorToast, showSuccessToast } = useCommonToast();
-
   const [phoneNumber, setPhoneNumber] = useState(__DEV__ ? '1111111111' : '');
-
   const [isLoading, setLoading] = useState(false);
-
   const [errors, setErrors] = useState<{ phoneNumber?: string }>({});
-
   const [previousPhoneNumber, setPreviousPhoneNumber] = useState<string>('');
-
   const [isAgreed, setIsAgreed] = useState(false);
-
   const [countryModalVisible, setCountryModalVisible] = useState(false);
-
   const [selectedCountry, setSelectedCountry] = useState<any>({
-
     name: { common: 'India' },
-
     flag: '🇮🇳',
-
     callingCode: '+91',
-
     cca2: 'IN',
-
   });
-
   const [showLangModal, setShowLangModal] = useState(false);
-
   const [selectedLang, setSelectedLang] = useState<string>(
-
     getCurrentLanguage(),
-
   );
-
   const colorScheme = useColorScheme();
-
   const pickerTextColor = colorScheme === 'dark' ? COLORS.white : COLORS.primaryTextDark;
 
-
-
   useEffect(() => {
-
     getSavedLanguage().then(saved => {
-
       if (!saved) {
-
         setShowLangModal(true);
-
       } else {
-
         setSelectedLang(saved);
-
       }
-
     });
-
   }, []);
 
-
-
   const [termsContent, setTermsContent] = useState<string>('');
-
   const [userAgreementContent, setUserAgreementContent] = useState<string>('');
-
   const [refundPolicyContent, setRefundPolicyContent] = useState<string>('');
 
-
-
   useFocusEffect(
-
     useCallback(() => {
-
       setErrors({});
-
       setLoading(false);
-
       if (route.params?.previousPhoneNumber) {
-
         setPreviousPhoneNumber(route.params.previousPhoneNumber);
-
       }
-
       getTermsConditions()
-
         .then(data => setTermsContent(data || ''))
-
         .catch(() => setTermsContent(''));
-
       getUserAgreement()
-
         .then(data => setUserAgreementContent(data || ''))
-
         .catch(() => setUserAgreementContent(''));
-
       getRefundPolicy()
-
         .then(data => setRefundPolicyContent(data || ''))
-
         .catch(() => setRefundPolicyContent(''));
-
     }, [route.params?.previousPhoneNumber]),
-
   );
-
-
 
   const validateInput = (input: string) => {
-
     const trimmed = input.trim().replace(/\s+/g, '');
-
     if (!trimmed) {
-
       return t('enter_mobile_number');
-
     }
-
     // Allow variable length based on country
-
     const minLength = selectedCountry?.cca2 === 'US' ? 10 : 10; // Customize per country
-
     if (trimmed.length < minLength) {
-
       return (
-
         t('Please_enter_valid_number') ||
-
         'Please enter a valid mobile number'
-
       );
-
     }
-
     if (!/^[0-9]+$/.test(trimmed)) {
-
       return (
-
         t('Please_enter_valid_number') ||
-
         'Please enter a valid mobile number'
-
       );
-
     }
-
     return '';
-
   };
-
-
 
   const handleSignIn = async () => {
-
     const errorMsg = validateInput(phoneNumber);
-
     if (errorMsg) {
-
       setErrors({ phoneNumber: errorMsg });
-
       showErrorToast(errorMsg);
-
       return;
-
     }
-
-
 
     if (!isAgreed) {
-
       showErrorToast(
-
         t('please_agree_terms') ||
-
         'Please agree to the Terms & Conditions, User Agreement, and Refund Policy.',
-
       );
-
       return;
-
     }
-
-
 
     setErrors({});
-
     const dialCode = selectedCountry?.callingCode || '+91';
-
     const formattedPhone = `${dialCode}${phoneNumber.trim().replace(/\s+/g, '')}`;
 
-
-
     if (previousPhoneNumber && formattedPhone === previousPhoneNumber) {
-
       Alert.alert(t('same_number_detected'), t('same_number_message'), [
-
         {
-
           text: t('enter_different_number'),
-
           onPress: () => {
-
             setPhoneNumber('');
-
             setPreviousPhoneNumber('');
-
           },
-
           style: 'default',
-
         },
-
         {
-
           text: 'Cancel',
-
           style: 'cancel',
-
         },
-
       ]);
-
       return;
-
     }
-
     const phoneRegex = new RegExp(`^\\${dialCode}[0-9]\\d{${dialCode === '+1' ? 9 : 9}}$`);
-
     if (!phoneRegex.test(formattedPhone)) {
-
       const errorText =
-
         t('Please_enter_valid_number') ||
-
         'Please enter a valid mobile number';
-
       setErrors({
-
         phoneNumber: errorText,
-
       });
-
       showErrorToast(errorText);
-
       return;
-
     }
-
     const auth = getAuth();
-
     try {
-
       setLoading(true);
-
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone);
-
       setLoading(false);
-
       showSuccessToast(t('otp_sent') || 'OTP has been sent to your phone.');
-
       navigation.navigate('OTPVerification', {
-
         phoneNumber: formattedPhone,
-
         confirmation,
-
         agree: true,
-
       });
-
     } catch (error: any) {
-
       setLoading(false);
-
-      showErrorToast(
-
-        t('otp_send_failed') || 'Failed to send OTP. Please try again.',
-
-      );
-
+      // Use Firebase error handler for proper error message
+      const errorMessage = getFirebaseAuthErrorMessage(error) || t('otp_send_failed') || 'Failed to send OTP. Please try again.';
+      showErrorToast(errorMessage);
     }
-
   };
-
-
 
   const handlePhoneChange = (text: string) => {
-
     let cleaned = text.replace(/[^0-9]/g, '');
-
     if (cleaned.length > 10) cleaned = cleaned.slice(0, 10);
-
     setPhoneNumber(cleaned);
-
     if (errors.phoneNumber) {
-
       setErrors({});
-
     }
-
   };
-
-
 
   const handleOpenPolicy = (type: 'terms' | 'user' | 'refund') => {
-
     let title = '';
-
     let htmlContent = '';
-
     if (type === 'terms') {
-
       title = t('terms_and_conditions') || 'Terms & Conditions';
-
       htmlContent =
-
         termsContent ||
-
         t('terms_and_conditions_content') ||
-
         'Here are the Terms & Conditions...';
-
     } else if (type === 'user') {
-
       title = t('user_agreement') || 'User Agreement';
-
       htmlContent =
-
         userAgreementContent ||
-
         t('user_agreement_content') ||
-
         'Here is the User Agreement...';
-
     } else if (type === 'refund') {
-
       title = t('refund_policy') || 'Refund Policy';
-
       htmlContent =
-
         refundPolicyContent ||
-
         t('refund_policy_content') ||
-
         'Here is the Refund Policy...';
-
     }
 
-
-
     navigation.navigate('TermsPolicyScreen', {
-
       title,
-
       htmlContent,
-
     });
-
   };
-
-
 
   const handleOpenLanguageModal = () => {
-
     setShowLangModal(true);
-
   };
-
-
 
   const handleChangeLanguage = async () => {
-
     await setAppLanguage(selectedLang);
-
     setShowLangModal(false);
-
   };
 
-
-
   const getIosPickerItemStyle = () => ({
-
     color: pickerTextColor,
-
     fontSize: moderateScale(16),
-
     fontFamily: Fonts.Sen_Regular,
-
     backgroundColor: colorScheme === 'dark' ? COLORS.backgroundDark : undefined,
-
   });
 
-
-
   return (
-
     <View style={[styles.container, { paddingTop: inset.top }]}>
-
       <StatusBar
-
         translucent
-
         backgroundColor="transparent"
-
         barStyle="light-content"
-
       />
-
       <ImageBackground
-
         source={Images.ic_splash_background}
-
         style={styles.container}>
-
         <KeyboardAvoidingView style={styles.container}>
-
           <Loader loading={isLoading} />
-
           <ScrollView
-
             contentContainerStyle={styles.scrollContent}
-
             keyboardShouldPersistTaps="handled">
-
             <View style={[styles.content]}>
-
               <View style={styles.containerHeader}>
-
                 <Image
-
                   source={Images.ic_app_logo}
-
                   style={{ resizeMode: 'contain' }}
-
                 />
-
                 <Text style={styles.title}>{t('hi_welcome')}</Text>
-
                 <TouchableOpacity
-
                   style={styles.languageButton}
-
                   onPress={handleOpenLanguageModal}
-
                   accessibilityLabel="Change language"
-
                   activeOpacity={0.7}>
-
                   <Icon
-
                     name="language"
-
                     size={moderateScale(24)}
-
                     color={COLORS.white}
-
                   />
-
                   <Text style={styles.languageButtonText}>
-
                     {(() => {
-
                       switch (selectedLang) {
-
                         case 'en':
-
                           return 'English';
-
                         case 'hi':
-
                           return 'हिन्दी';
-
                         case 'gu':
-
                           return 'ગુજરાતી';
-
                         case 'mr':
-
                           return 'मराठी';
-
                         default:
-
                           return 'Language';
-
                       }
-
                     })()}
-
                   </Text>
-
                 </TouchableOpacity>
-
               </View>
-
-
 
               <View
-
                 style={[styles.containerBody, { paddingBottom: inset.bottom }]}>
-
                 <Text style={styles.mainTitle}>{t('sign_in')}</Text>
-
                 <Text style={styles.subtitle}>
-
                   {t('please_enter_your_credential')}
-
                 </Text>
 
-
-
                 <View style={styles.phoneInputGroup}>
-
                   <TouchableOpacity
-
                     style={styles.countryCodeButton}
-
                     onPress={() => setCountryModalVisible(true)}
-
                     activeOpacity={0.7}
-
                     accessibilityRole="button"
-
                     accessibilityLabel="Select country code">
-
                     <Text style={styles.flagText}>
-
                       {selectedCountry?.flag || '🇮🇳'}
-
                     </Text>
-
                     <Text style={styles.dialCodeText}>
-
                       {selectedCountry?.callingCode || '+91'}
-
                     </Text>
-
                     <Icon
-
                       name="arrow-drop-down"
-
                       color={COLORS.primaryTextDark}
-
                       size={18}
-
                     />
-
                   </TouchableOpacity>
-
                   <CustomTextInput
-
                     label=""
-
                     value={phoneNumber}
-
                     onChangeText={handlePhoneChange}
-
                     placeholder={t('enter_mobile_number')}
-
                     keyboardType="phone-pad"
-
                     error={errors?.phoneNumber}
-
                     style={{ width: "65%" }}
-
                   />
-
                 </View>
-
-
 
                 <CountrySelect
-
                   visible={countryModalVisible}
-
                   onClose={() => setCountryModalVisible(false)}
-
                   onSelect={country => {
-
                     console.log('Selected country:', country);
-
                     const correctCallingCode = COUNTRY_CALLING_CODES[country.cca2] || (Array.isArray(country.callingCode) ? country.callingCode[0] : country.callingCode || country.dialCode || '+91');
-
                     setSelectedCountry({
-
                       name: country.name || { common: country.name || 'Unknown' },
-
                       flag: country.flag,
-
                       callingCode: correctCallingCode,
-
                       cca2: country.cca2 || 'IN',
-
                     });
-
                     setCountryModalVisible(false);
-
                   }}
-
                   initialCountry={selectedCountry?.cca2 || DEFAULT_COUNTRY_ISO}
-
                 />
-
-
 
                 <View style={styles.termsRow}>
-
                   <TouchableOpacity
-
                     style={styles.checkboxContainer}
-
                     onPress={() => setIsAgreed(!isAgreed)}
-
                     activeOpacity={0.7}
-
                     accessibilityRole="checkbox"
-
                     accessibilityState={{ checked: isAgreed }}
-
                     accessibilityLabel="Agree to terms">
-
                     <View
-
                       style={[
-
                         styles.checkbox,
-
                         isAgreed && styles.checkboxChecked,
-
                       ]}>
-
                       {isAgreed && (
-
                         <Icon
-
                           name="check"
-
                           size={moderateScale(16)}
-
                           color="#fff"
-
                           style={styles.checkboxIcon}
-
                         />
-
                       )}
-
                     </View>
-
                   </TouchableOpacity>
-
                   <Text style={styles.termsText}>
-
                     {t('i_agree_to') || 'I agree to the '}
-
                     <Text
-
                       style={styles.termsLink}
-
                       onPress={() => handleOpenPolicy('terms')}>
-
                       {t('terms_and_conditions') || 'Terms & Conditions'}
-
                     </Text>
-
                     {', '}
-
                     <Text
-
                       style={styles.termsLink}
-
                       onPress={() => handleOpenPolicy('user')}>
-
                       {t('user_agreement') || 'User Agreement'}
-
                     </Text>
-
                     {' & '}
-
                     <Text
-
                       style={styles.termsLink}
-
                       onPress={() => handleOpenPolicy('refund')}>
-
                       {t('refund_policy') || 'Refund Policy'}
-
                     </Text>
-
                   </Text>
-
                 </View>
 
-
-
                 <PrimaryButton
-
                   onPress={handleSignIn}
-
                   title={t('send_otp')}
-
                   disabled={!isAgreed}
-
                   style={{ marginBottom: 20 }}
-
                 />
-
               </View>
-
             </View>
-
           </ScrollView>
-
         </KeyboardAvoidingView>
 
-
-
         <Modal
-
           visible={showLangModal}
-
           transparent
-
           animationType="slide"
-
           onRequestClose={() => setShowLangModal(false)}>
-
           <View style={styles.langModalOverlay}>
-
             <View style={styles.langModalCard}>
-
               <Text style={styles.langModalTitle}>
-
                 {t('language') || 'Language'}
-
               </Text>
-
               <View style={styles.langPickerContainer}>
-
                 <Picker
-
                   selectedValue={selectedLang}
-
                   onValueChange={v => setSelectedLang(v)}
-
                   mode="dropdown"
-
                   style={[
-
                     styles.langPicker,
-
                     Platform.OS === 'ios' && { color: pickerTextColor },
-
                   ]}
-
                   itemStyle={
-
                     Platform.OS === 'ios' ? getIosPickerItemStyle() : undefined
-
                   }>
-
                   <Picker.Item
-
                     label="English"
-
                     value="en"
-
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
-
                     style={
-
                       colorScheme === 'dark'
-
                         ? { backgroundColor: COLORS.backgroundDark }
-
                         : undefined
-
                     }
-
                   />
-
                   <Picker.Item
-
                     label="हिन्दी"
-
                     value="hi"
-
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
-
                     style={
-
                       colorScheme === 'dark'
-
                         ? { backgroundColor: COLORS.backgroundDark }
-
                         : undefined
-
                     }
-
                   />
-
                   <Picker.Item
-
                     label="ગુજરાતી"
-
                     value="gu"
-
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
-
                     style={
-
                       colorScheme === 'dark'
-
                         ? { backgroundColor: COLORS.backgroundDark }
-
                         : undefined
-
                     }
-
                   />
-
                   <Picker.Item
-
                     label="मराठी"
-
                     value="mr"
-
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
-
                     style={
-
                       colorScheme === 'dark'
-
                         ? { backgroundColor: COLORS.backgroundDark }
-
                         : undefined
-
                     }
-
                   />
-
                 </Picker>
-
               </View>
-
               <View style={{ height: 12 }} />
-
               <PrimaryButton
-
                 title={t('continue') || 'Continue'}
-
                 onPress={handleChangeLanguage}
-
               />
-
             </View>
-
           </View>
-
         </Modal>
-
       </ImageBackground>
-
     </View>
-
   );
-
 };
 
-
-
 const styles = StyleSheet.create({
-
   container: {
-
     flex: 1,
-
     backgroundColor: COLORS.primary,
-
   },
-
   scrollContent: {
-
     flexGrow: 1,
-
   },
-
   content: {
-
     flex: 1,
-
     justifyContent: 'center',
-
   },
-
   title: {
-
     fontSize: moderateScale(32),
-
     fontFamily: Fonts.Sen_Bold,
-
     color: COLORS.white,
-
   },
-
   mainTitle: {
-
     fontSize: moderateScale(24),
-
     fontFamily: Fonts.Sen_Bold,
-
     color: COLORS.primaryTextDark,
-
     marginBottom: moderateScale(24),
-
     textAlign: 'center',
-
   },
-
   subtitle: {
-
     fontSize: moderateScale(14),
-
     fontFamily: Fonts.Sen_Regular,
-
     color: COLORS.primaryTextDark,
-
     marginBottom: moderateScale(24),
-
     textAlign: 'center',
-
   },
-
   inputContainer: {
-
     marginBottom: 24,
-
   },
-
   phoneInputGroup: {
-
     flexDirection: 'row',
-
     alignItems: 'center',
-
     // marginBottom: moderateScale(18),
-
     // marginTop: moderateScale(24),
-
   },
-
   countryCodeButton: {
-
     flexDirection: 'row',
-
     alignItems: 'center',
-
     borderWidth: 1,
-
     borderColor: '#E0E0E0',
-
     borderRadius: 8,
-
     paddingHorizontal: moderateScale(8),
-
     paddingVertical: moderateScale(8),
-
     marginRight: moderateScale(10),
-
     backgroundColor: '#f7f7f7',
-
     minWidth: 70,
-
   },
-
   flagText: {
-
     fontSize: moderateScale(20),
-
     marginRight: moderateScale(4),
-
   },
-
   dialCodeText: {
-
     fontSize: moderateScale(16),
-
     color: COLORS.primaryTextDark,
-
     fontFamily: Fonts.Sen_Bold,
-
     marginRight: 2,
-
   },
-
   phoneInputField: {
-
     flex: 1,
-
   },
-
   countryModalOverlay: {
-
     flex: 1,
-
     backgroundColor: 'rgba(0,0,0,0.4)',
-
     justifyContent: 'center',
-
     alignItems: 'center',
-
     padding: moderateScale(24),
-
   },
-
   countryModalCard: {
-
     width: '100%',
-
     maxHeight: '80%',
-
     backgroundColor: '#FFFFFF',
-
     borderRadius: moderateScale(16),
-
     padding: moderateScale(8),
-
   },
-
   containerHeader: {
-
     height: moderateScale(220),
-
     alignItems: 'center',
-
     justifyContent: 'center',
-
     position: 'relative',
-
   },
-
   containerBody: {
-
     borderTopLeftRadius: moderateScale(30),
-
     borderTopRightRadius: moderateScale(30),
-
     flex: 1,
-
     padding: moderateScale(24),
-
     backgroundColor: '#FFFFFF',
-
   },
-
   termsRow: {
-
     flexDirection: 'row',
-
     alignItems: 'center',
-
     marginTop: moderateScale(16),
-
     marginBottom: moderateScale(16),
-
     flexWrap: 'wrap',
-
   },
-
   checkboxContainer: {
-
     marginRight: moderateScale(8),
-
     padding: moderateScale(4),
-
   },
-
   checkbox: {
-
     width: moderateScale(20),
-
     height: moderateScale(20),
-
     borderWidth: 1,
-
     borderColor: COLORS.primaryBackgroundButton,
-
     borderRadius: 4,
-
     backgroundColor: '#fff',
-
     alignItems: 'center',
-
     justifyContent: 'center',
-
   },
-
   checkboxChecked: {
-
     backgroundColor: COLORS.primaryBackgroundButton,
-
     borderColor: COLORS.primaryBackgroundButton,
-
   },
-
   checkboxIcon: {
-
     alignSelf: 'center',
-
   },
-
   checkboxTick: {
-
     width: moderateScale(10),
-
     height: moderateScale(10),
-
     backgroundColor: '#fff',
-
     borderRadius: 2,
-
   },
-
   termsText: {
-
     fontSize: moderateScale(12),
-
     color: COLORS.primaryTextDark,
-
     fontFamily: Fonts.Sen_Regular,
-
     textAlign: 'left',
-
     flex: 1,
-
     flexWrap: 'wrap',
-
   },
-
   termsLink: {
-
     color: COLORS.primaryBackgroundButton,
-
     fontFamily: Fonts.Sen_Bold,
-
     textDecorationLine: 'underline',
-
   },
-
   errorText: {
-
     color: '#ef4444',
-
     fontSize: 12,
-
   },
-
   langModalOverlay: {
-
     flex: 1,
-
     backgroundColor: 'rgba(0,0,0,0.4)',
-
     justifyContent: 'center',
-
     alignItems: 'center',
-
     padding: moderateScale(24),
-
   },
-
   langModalCard: {
-
     width: '100%',
-
     backgroundColor: '#FFFFFF',
-
     borderRadius: moderateScale(16),
-
     padding: moderateScale(20),
-
   },
-
   langModalTitle: {
-
     fontSize: moderateScale(18),
-
     fontFamily: Fonts.Sen_Bold,
-
     color: COLORS.primaryTextDark,
-
     marginBottom: moderateScale(12),
-
     textAlign: 'center',
-
   },
-
   langPickerContainer: {
-
     borderWidth: 1,
-
     borderColor: '#DDD',
-
     borderRadius: 8,
-
     overflow: 'hidden',
-
   },
-
   langPicker: {
-
     width: '100%',
-
   },
-
   languageButton: {
-
     flexDirection: 'row',
-
     alignItems: 'center',
-
     position: 'absolute',
-
     right: moderateScale(16),
-
     top: moderateScale(16),
-
     backgroundColor: 'rgba(0,0,0,0.2)',
-
     borderRadius: 20,
-
     paddingHorizontal: moderateScale(10),
-
     paddingVertical: moderateScale(4),
-
   },
-
   languageButtonText: {
-
     color: COLORS.white,
-
     fontFamily: Fonts.Sen_Bold,
-
     fontSize: moderateScale(14),
-
     marginLeft: moderateScale(6),
-
   },
-
 });
-
-
 
 export default SignInScreen;
