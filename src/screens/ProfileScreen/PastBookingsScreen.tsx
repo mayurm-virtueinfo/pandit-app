@@ -147,7 +147,7 @@ const PastPujaScreen: React.FC = () => {
       <UserCustomHeader title={t('past_bookings')} showBackButton={true} />
 
       <View style={styles.contentContainer}>
-        <ScrollView>
+        {/* <ScrollView> */}
           <View style={[styles.listContainer, THEMESHADOW.shadow]}>
             {loading ? (
               <View
@@ -189,7 +189,7 @@ const PastPujaScreen: React.FC = () => {
               />
             )}
           </View>
-        </ScrollView>
+        {/* </ScrollView> */}
       </View>
     </View>
   );
@@ -205,12 +205,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+    padding: 24,
   },
   listContainer: {
     backgroundColor: COLORS.white,
     borderRadius: 10,
     padding: 14,
-    margin: 24,
   },
   flatListContent: {
     // flexGrow: 1,

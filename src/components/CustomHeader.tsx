@@ -92,13 +92,13 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         backgroundColor="transparent"
         barStyle="light-content"
       />
-      <LinearGradient
+      {/* <LinearGradient
         colors={[COLORS.gradientStart, COLORS.gradientEnd]}
         style={[
           styles.gradientContainer,
           // {paddingTop: Platform.OS === 'android' ? inset.top : 0},
           // {height: Platform.OS === 'ios' ? 50 : 100},
-        ]}>
+        ]}> */}
         {/* Header Content */}
         <View style={styles.headerContainer}>
           <View style={styles.leftContainer}>
@@ -188,7 +188,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             )}
           </View>
         </View>
-      </LinearGradient>
+      {/* </LinearGradient> */}
     </>
   );
 };

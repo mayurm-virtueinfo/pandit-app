@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* PanditAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* PanditAppTests.m */; };
+		042A592E2EB385AA0058924E /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 042A592D2EB385AA0058924E /* Config.xcconfig */; };
 		0440FE702E5C78C80077B4FF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0440FE6F2E5C78C80077B4FF /* GoogleService-Info.plist */; };
 		0440FE722E5C80C10077B4FF /* LaunchScreen1.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0440FE712E5C80C10077B4FF /* LaunchScreen1.storyboard */; };
 		0FDA41D631BE665BC6DD5A12 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
@@ -38,6 +39,7 @@
 		00E356EE1AD99517003FC87E /* PanditAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PanditAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* PanditAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PanditAppTests.m; sourceTree = "<group>"; };
+		042A592D2EB385AA0058924E /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		0440FE6F2E5C78C80077B4FF /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0440FE712E5C80C10077B4FF /* LaunchScreen1.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen1.storyboard; sourceTree = "<group>"; };
 		04EC08AB2E01725F00067906 /* PanditApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PanditApp.entitlements; path = PanditApp/PanditApp.entitlements; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
 				B222F91A033B4CF182E54412 /* Resources */,
+				042A592D2EB385AA0058924E /* Config.xcconfig */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -280,6 +283,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				0440FE702E5C78C80077B4FF /* GoogleService-Info.plist in Resources */,
+				042A592E2EB385AA0058924E /* Config.xcconfig in Resources */,
 				0FDA41D631BE665BC6DD5A12 /* PrivacyInfo.xcprivacy in Resources */,
 				6165E3080EE940D981741AE0 /* Sen-Bold.ttf in Resources */,
 				0440FE722E5C80C10077B4FF /* LaunchScreen1.storyboard in Resources */,
@@ -613,6 +617,7 @@
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 042A592D2EB385AA0058924E /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -701,6 +706,7 @@
 		};
 		83CBBA211A601CBA00E9B192 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 042A592D2EB385AA0058924E /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

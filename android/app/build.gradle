@@ -1,7 +1,13 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply plugin: 'com.google.gms.google-services' 
+apply plugin: 'com.google.gms.google-services'
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
+project.ext.envConfigFiles = [
+    debug: ".env.development",
+    release: ".env.production"
+]
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -84,6 +90,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 5
         versionName "1.0"
+        resValue "string", "app_name", (project.hasProperty("env") && project.env.get("APP_NAME") ? project.env.get("APP_NAME") : "Pujaguru")
     }
     signingConfigs {
         debug {
@@ -127,4 +134,3 @@ dependencies {
     }
 }
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
-apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"

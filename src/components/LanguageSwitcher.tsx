@@ -25,8 +25,16 @@ export default function LanguageSwitcher() {
   const [selectedLang, setSelectedLang] = useState(getCurrentLanguage());
   const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const textColor = isDark ? COLORS.white : COLORS.lighttext;
+
+  // Always use light mode for picker border/text but handle Done button for dark mode
+  const textColor = COLORS.lighttext;
+  const pickerIconColor = COLORS.lighttext;
+
+  // For Done button: use light background in light mode, dark in dark mode; text should contrast
+  const doneButtonBg =
+    colorScheme === 'dark' ? '#222' : COLORS.lighttext;
+  const doneButtonText =
+    colorScheme === 'dark' ? COLORS.white : COLORS.white;
 
   const handleLanguageChange = async (lang: string) => {
     await setAppLanguage(lang);
@@ -66,6 +74,7 @@ export default function LanguageSwitcher() {
                 onValueChange={itemValue => handleLanguageChange(itemValue)}
                 style={styles.iosPicker}
                 itemStyle={{color: textColor}}
+                dropdownIconColor={pickerIconColor}
               >
                 {LANGUAGES.map(lang => (
                   <Picker.Item
@@ -77,9 +86,17 @@ export default function LanguageSwitcher() {
                 ))}
               </Picker>
               <TouchableOpacity
-                style={styles.iosDoneButton}
+                style={[
+                  styles.iosDoneButton,
+                  {backgroundColor: doneButtonBg},
+                ]}
                 onPress={() => setModalVisible(false)}>
-                <Text style={[styles.iosDoneButtonText, {color: textColor}]}>Done</Text>
+                <Text style={[
+                  styles.iosDoneButtonText,
+                  {color: doneButtonText}
+                ]}>
+                  Done
+                </Text>
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -97,7 +114,9 @@ export default function LanguageSwitcher() {
           selectedValue={selectedLang}
           style={[styles.picker, {color: textColor}]}
           onValueChange={itemValue => handleLanguageChange(itemValue)}
-          mode="dropdown">
+          mode="dropdown"
+          dropdownIconColor={pickerIconColor}
+        >
           {LANGUAGES.map(lang => (
             <Picker.Item
               key={lang.value}
@@ -169,13 +188,11 @@ const styles = StyleSheet.create({
   },
   iosDoneButton: {
     marginTop: 10,
-    backgroundColor: COLORS.lighttext,
     borderRadius: 8,
     paddingHorizontal: 24,
     paddingVertical: 8,
   },
   iosDoneButtonText: {
-    // color set dynamically
     fontSize: 16,
   },
 });
