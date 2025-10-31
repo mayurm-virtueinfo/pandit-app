@@ -16,7 +16,6 @@
     "firebase-emulator": "firebase emulators:start --only auth",
     "dev": "concurrently \"firebase emulators:start --only auth\" \"ENVFILE=.env.development react-native start\"",
     "ios:dev": "concurrently \"firebase emulators:start --only auth\" \"npm run ios\"",
-    "postinstall": "patch-package",
     "lint": "eslint .",
     "test": "jest"
   },
