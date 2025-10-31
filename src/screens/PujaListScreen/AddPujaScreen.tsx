@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,8 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
@@ -29,6 +28,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useCommonToast} from '../../common/CommonToast';
 import AppConstant from '../../utils/AppContent';
+import {translateData} from '../../utils/TranslateData';
 
 interface PriceOption {
   id: 'system' | 'custom';
@@ -52,7 +52,8 @@ type PujaDataType = {
 };
 
 const AddPujaScreen: React.FC = () => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
+  const currentLanguage = i18n.language;
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
@@ -63,6 +64,68 @@ const AddPujaScreen: React.FC = () => {
 
   const {pujaId, pujaData} = params || {};
   const isEditMode = !!pujaId;
+
+  const [translatedPujaData, setTranslatedPujaData] = useState<any>(pujaData);
+
+  console.log('translatedPujaData :: ', translatedPujaData);
+
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
+
+  console.log('pujaData :: ', pujaData);
+
+  const [pujaList, setPujaList] = useState<EditRequest[]>([]);
+  const [loading, setLoading] = useState<boolean>(!isEditMode);
+
+  const translatePujaData = useCallback(async () => {
+    if (pujaData) {
+      const cacheKey = `${currentLanguage}_${pujaData.id ?? 'new'}`;
+      const cachedData = translationCacheRef.current.get(cacheKey);
+      if (cachedData) {
+        setTranslatedPujaData(cachedData);
+        return;
+      }
+      const translatedData = await translateData(pujaData, currentLanguage, [
+        'pooja_title',
+        'pooja_short_description',
+      ]);
+      translationCacheRef.current.set(cacheKey, translatedData);
+      setTranslatedPujaData(translatedData);
+    }
+  }, [currentLanguage, pujaData]);
+
+  useEffect(() => {
+    translatePujaData();
+  }, [translatePujaData]);
+
+  // Rebuild single-item list for edit mode from translated data
+  useEffect(() => {
+    if (
+      isEditMode &&
+      translatedPujaData &&
+      typeof translatedPujaData === 'object'
+    ) {
+      setPujaList([
+        {
+          id: translatedPujaData.id,
+          user: 0,
+          pooja: translatedPujaData.pooja,
+          custom_samagri_list: '',
+          image: translatedPujaData.pooja_image_url,
+          name: translatedPujaData.pooja_title,
+          pujaPurpose: translatedPujaData.pooja_short_description,
+          price_with_samagri: Number(
+            pujaData?.price_with_samagri ??
+              translatedPujaData.price_with_samagri,
+          ),
+          price_without_samagri: Number(
+            pujaData?.price_without_samagri ??
+              translatedPujaData.price_without_samagri,
+          ),
+          price_status: translatedPujaData.price_status,
+        },
+      ]);
+    }
+  }, [isEditMode, translatedPujaData, pujaData]);
 
   // --- MAP API DATA ---
   const mapApiPujaToListItem = (item: any): EditRequest => ({
@@ -78,34 +141,13 @@ const AddPujaScreen: React.FC = () => {
     price_status: 0,
   });
 
-  const [pujaList, setPujaList] = useState<EditRequest[]>(() => {
-    if (isEditMode && pujaData && typeof pujaData === 'object') {
-      return [
-        {
-          id: pujaData.id,
-          user: 0,
-          pooja: pujaData.pooja,
-          custom_samagri_list: '',
-          image: pujaData.pooja_image_url,
-          name: pujaData.pooja_title,
-          pujaPurpose: pujaData.pooja_short_description,
-          price_with_samagri: Number(pujaData.price_with_samagri),
-          price_without_samagri: Number(pujaData.price_without_samagri),
-          price_status: pujaData.price_status,
-          system_price: pujaData.system_price,
-        },
-      ];
-    }
-    return [];
-  });
-
-  const [loading, setLoading] = useState<boolean>(false);
-
   useEffect(() => {
-    if (!isEditMode) {
-      setLoading(true);
-      getUnassignPuja()
-        .then((response: any) => {
+    let isActive = true;
+    const run = async () => {
+      if (!isEditMode) {
+        try {
+          setLoading(true);
+          const response: any = await getUnassignPuja();
           let data: any[] = [];
           if (response && typeof response === 'object') {
             if (Array.isArray(response.data)) {
@@ -121,19 +163,30 @@ const AddPujaScreen: React.FC = () => {
             }
           }
           if (Array.isArray(data)) {
-            setPujaList(data.map(mapApiPujaToListItem));
+            const mapped = data.map(mapApiPujaToListItem);
+            let translated = mapped;
+            try {
+              translated = (await translateData(mapped, currentLanguage, [
+                'name',
+                'pujaPurpose',
+              ])) as EditRequest[];
+            } catch {}
+            if (isActive) setPujaList(translated);
           } else {
-            setPujaList([]);
+            if (isActive) setPujaList([]);
           }
-        })
-        .catch(() => {
-          setPujaList([]);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [isEditMode]);
+        } catch {
+          if (isActive) setPujaList([]);
+        } finally {
+          if (isActive) setLoading(false);
+        }
+      }
+    };
+    run();
+    return () => {
+      isActive = false;
+    };
+  }, [isEditMode, currentLanguage]);
 
   // State - which puja is selected
   const [selectedPuja, setSelectedPuja] = useState<number | null>(
@@ -145,10 +198,12 @@ const AddPujaScreen: React.FC = () => {
     if (isEditMode && pujaData && typeof pujaData === 'object') {
       return {
         price_with_samagri: Number(
-          pujaData.system_price?.price_with_samagri ?? pujaData.price_with_samagri,
+          pujaData.system_price?.price_with_samagri ??
+            pujaData.price_with_samagri,
         ),
         price_without_samagri: Number(
-          pujaData.system_price?.price_without_samagri ?? pujaData.price_without_samagri,
+          pujaData.system_price?.price_without_samagri ??
+            pujaData.price_without_samagri,
         ),
       };
     } else if (Array.isArray(pujaList) && selectedPuja) {
@@ -238,8 +293,9 @@ const AddPujaScreen: React.FC = () => {
       };
       const response = await postAddPuja(addRequest);
       if (response && (response as any).data.success === true) {
-        showSuccessToast(response.data.message);
-        navigation.goBack();
+        showSuccessToast((response as any).data.message);
+        // Navigate with refresh flag so list screen can force refresh (simpler than storage)
+        (navigation as any).navigate('PujaListScreen', {refresh: Date.now()});
       }
     } catch (error) {
       showErrorToast(error as string);
@@ -298,10 +354,10 @@ const AddPujaScreen: React.FC = () => {
             : 1800,
         price_status: selectedPriceOption === 'system' ? 1 : 2,
       };
-      const response = await putPuja(editRequest);
+      const response = await putPuja(editRequest as any);
       if (response && (response as any).data.success === true) {
-        showSuccessToast(response.data.message);
-        navigation.goBack();
+        showSuccessToast((response as any).data.message);
+        (navigation as any).navigate('PujaListScreen', {refresh: Date.now()});
       } else {
         setPujaList([]);
       }
@@ -318,11 +374,10 @@ const AddPujaScreen: React.FC = () => {
       id: 'system',
       title: 'System Price',
       description: (() => {
-        // For ADD: Show price from selected puja if available
         let p = getSystemPricesForSelected();
-        return `Rs. ${p.price_with_samagri} - ${t('with_pooja_items')}\nRs. ${p.price_without_samagri} - ${t(
-          'without_pooja_items'
-        )}`;
+        return `Rs. ${p.price_with_samagri} - ${t('with_pooja_items')}\nRs. ${
+          p.price_without_samagri
+        } - ${t('without_pooja_items')}`;
       })(),
     },
     {
@@ -334,7 +389,6 @@ const AddPujaScreen: React.FC = () => {
   // Handlers
   const handlePujaSelection = (pujaId: number) => {
     setSelectedPuja(pujaId);
-    // When puja selection changes, reset custom price fields and system price display
     setCustomPriceWithItems('');
     setCustomPriceWithoutItems('');
   };

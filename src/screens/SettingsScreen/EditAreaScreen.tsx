@@ -56,7 +56,8 @@ type ScreenNavigationProp = StackNavigationProp<
 const EditAreaScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
+  const currentLanguage = i18n.language;
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
 
   const {showErrorToast, showSuccessToast} = useCommonToast();
@@ -69,29 +70,25 @@ const EditAreaScreen: React.FC = () => {
   >([]);
 
   const {selectCityId, area} = route.params || {};
-  // area is expected to be AreaItem[] or undefined
 
-  // Set selectedAreaIds from area prop after areas are loaded
+  console.log('area :: ', area);
+  console.log('selectCityId :: ', selectCityId);
+
   useEffect(() => {
     if (area && Array.isArray(area) && areas.length > 0) {
-      // area is an array of { area: number, ... }
       const areaIds = area.map((a: AreaItem) => a.area);
-      // Only set those areaIds that exist in the loaded areas
       const validAreaIds = areas
         .map(a => a.id)
         .filter(id => areaIds.includes(id));
       setSelectedAreaIds(validAreaIds);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [area, areas]);
 
   useEffect(() => {
     fetchAreaData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectCityId]);
 
   useEffect(() => {
-    // Filter areas based on searchText
     if (searchText.trim() === '') {
       setFilteredAreas(areas);
     } else {
@@ -112,8 +109,12 @@ const EditAreaScreen: React.FC = () => {
         id: item.id,
         name: item.name,
       }));
+      console.log('mappedData :: ', mappedData);
+
       setAreas(mappedData);
     } catch (error: any) {
+      console.log('error :: ', error?.response?.data);
+      setAreas([]);
       showErrorToast(error?.message);
     } finally {
       setIsLoading(false);
@@ -139,15 +140,12 @@ const EditAreaScreen: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Prepare data for putServiceArea as { service_areas: [{city, area}, ...] }
-      // selectCityId is always a number here
       const service_areas = selectedAreaIds.map(areaId => ({
         city: Number(selectCityId),
         area: areaId,
       }));
       const payload = {service_areas};
       await putServiceArea(payload);
-      // Optionally, show a success toast or navigate back
       showSuccessToast(t('area_updated_successfully'));
       navigation.replace('SettingsScreen');
     } catch (error: any) {
@@ -202,7 +200,6 @@ const EditAreaScreen: React.FC = () => {
                 )}
               </View>
             </ScrollView>
-            {/* Button fixed at bottom */}
             <View
               style={[
                 styles.bottomButtonContainer,

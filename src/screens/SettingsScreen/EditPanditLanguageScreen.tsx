@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ import CustomeLoader from '../../components/CustomLoader';
 import {useCommonToast} from '../../common/CommonToast';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import {translateData} from '../../utils/TranslateData';
 
 type ScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -36,59 +37,96 @@ type ScreenNavigationProp = StackNavigationProp<
 const EditPanditLanguageScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {showErrorToast, showSuccessToast} = useCommonToast();
 
   const [languages, setLanguages] = useState<CustomeSelectorDataOption[]>([]);
-  const [selectedLanguageId, setSelectedLanguageId] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchText, setSearchText] = useState<string>('');
+  const [originalLanguages, setOriginalLanguages] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
   const [filteredLanguages, setFilteredLanguages] = useState<
     CustomeSelectorDataOption[]
   >([]);
+  const [selectedLanguageId, setSelectedLanguageId] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState<string>('');
 
-  // Fetch all languages and user's selected languages
-  useEffect(() => {
-    fetchAllLanguages();
-    fetchSelectedLanguages();
-  }, []);
+  const currentLanguage = i18n.language;
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
-  // Fetch all available languages
-  const fetchAllLanguages = async () => {
+  /** Fetch all languages (with translation & caching) + selected ones */
+  const fetchAllLanguages = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response: any = await getLanguage();
-      const data = response && response.data ? response.data : [];
-      const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-      }));
-      setLanguages(mappedData);
-      setFilteredLanguages(mappedData);
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+
+      if (cachedData) {
+        setLanguages(cachedData);
+        setFilteredLanguages(cachedData);
+      } else {
+        const response: any = await getLanguage();
+        const data = response?.data ?? [];
+
+        const mappedData: CustomeSelectorDataOption[] = data.map(
+          (item: any) => ({
+            id: item.id,
+            name: item.name,
+          }),
+        );
+
+        setOriginalLanguages(mappedData);
+
+        const translatedData: any = await translateData(
+          mappedData,
+          currentLanguage,
+          ['name'],
+        );
+
+        translationCacheRef.current.set(currentLanguage, translatedData);
+        setLanguages(translatedData);
+        setFilteredLanguages(translatedData);
+      }
+
+      // Fetch selected language IDs
+      const selectedResponse: any = await getPanditLanguage();
+      const selectedData = selectedResponse?.data?.languages ?? [];
+
+      const selectedIds = Array.isArray(selectedData)
+        ? selectedData.map((item: any) => item.language_id)
+        : [];
+
+      setSelectedLanguageId(selectedIds);
     } catch (error: any) {
       showErrorToast(error?.message || 'Failed to fetch languages');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage, translationCacheRef]);
 
-  // Fetch user's selected languages
-  const fetchSelectedLanguages = async () => {
-    setIsLoading(true);
-    try {
-      const response: any = await getPanditLanguage();
-      const data =
-        response && response?.data?.languages ? response?.data?.languages : [];
-      const selectedIds = Array.isArray(data)
-        ? data.map((item: any) => item.language_id)
-        : [];
-      setSelectedLanguageId(selectedIds);
-    } catch (error: any) {
-      showErrorToast(error?.message || 'Failed to fetch selected languages');
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    fetchAllLanguages();
+  }, [fetchAllLanguages]);
+
+  /** Dual-language search */
+  useEffect(() => {
+    if (!searchText.trim()) {
+      setFilteredLanguages(languages);
+    } else {
+      const lowerText = searchText.toLowerCase();
+
+      setFilteredLanguages(
+        languages.filter(item => {
+          const translatedMatch = item.name?.toLowerCase()?.includes(lowerText);
+          const originalMatch = originalLanguages
+            .find(orig => orig.id === item.id)
+            ?.name?.toLowerCase()
+            ?.includes(lowerText);
+
+          return translatedMatch || originalMatch;
+        }),
+      );
     }
-  };
+  }, [searchText, languages, originalLanguages]);
 
   const handleLanguageSelect = (languageId: number) => {
     setSelectedLanguageId(prev =>
@@ -116,14 +154,6 @@ const EditPanditLanguageScreen: React.FC = () => {
 
   const handleSearch = (text: string) => {
     setSearchText(text);
-    if (!text.trim()) {
-      setFilteredLanguages(languages);
-    } else {
-      const lowerText = text.toLowerCase();
-      setFilteredLanguages(
-        languages.filter(lang => lang.name.toLowerCase().includes(lowerText)),
-      );
-    }
   };
 
   return (
@@ -134,7 +164,7 @@ const EditPanditLanguageScreen: React.FC = () => {
         backgroundColor="transparent"
         barStyle="light-content"
       />
-      <View style={[styles.container]}>
+      <View style={styles.container}>
         <CustomHeader title={t('edit_language')} showBackButton={true} />
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
@@ -168,6 +198,7 @@ const EditPanditLanguageScreen: React.FC = () => {
                 )}
               </View>
             </ScrollView>
+
             {/* Button fixed at bottom */}
             <View
               style={[
@@ -189,26 +220,16 @@ const EditPanditLanguageScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.primaryBackground,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
+  container: {flex: 1, backgroundColor: COLORS.primaryBackground},
+  keyboardAvoidingView: {flex: 1},
   contentContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContentContainer: {
-    flexGrow: 1,
-    paddingBottom: 0,
-  },
+  scrollView: {flex: 1},
+  scrollContentContainer: {flexGrow: 1, paddingBottom: 0},
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
@@ -225,10 +246,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     marginBottom: moderateScale(18),
   },
-  nextButton: {
-    height: moderateScale(46),
-    marginTop: moderateScale(0),
-  },
+  nextButton: {height: moderateScale(46)},
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
     paddingHorizontal: wp(6.5),

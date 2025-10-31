@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ import {useCommonToast} from '../../common/CommonToast';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {SettingsStackParamList} from '../../navigation/SettingsStack/SettingsStack';
 import CustomeLoader from '../../components/CustomLoader';
+import {translateData} from '../../utils/TranslateData';
 
 type ScreenNavigationProp = StackNavigationProp<
   SettingsStackParamList,
@@ -32,10 +33,14 @@ type ScreenNavigationProp = StackNavigationProp<
 const EditCityScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
+  const currentLanguage = i18n.language;
   const {showErrorToast} = useCommonToast();
 
   const [cities, setCities] = useState<CustomeSelectorDataOption[]>([]);
+  const [originalCities, setOriginalCities] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
   const [data, setData] = useState([]);
   const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -44,12 +49,9 @@ const EditCityScreen: React.FC = () => {
     CustomeSelectorDataOption[]
   >([]);
 
-  useEffect(() => {
-    fetchCityAndServiceArea();
-  }, []);
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
   useEffect(() => {
-    // Filter cities based on searchText
     if (searchText.trim() === '') {
       setFilteredCities(cities);
     } else {
@@ -60,12 +62,18 @@ const EditCityScreen: React.FC = () => {
     }
   }, [searchText, cities]);
 
-  const fetchCityAndServiceArea = async () => {
+  const fetchCityAndServiceArea = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch all cities
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+      if (cachedData) {
+        setCities(cachedData);
+        setFilteredCities(cachedData);
+        setIsLoading(false);
+        return;
+      }
+
       const cityResponse = await getCity();
-      // Defensive: cityResponse may be array or object with .data, or fallback to []
       const cityData = Array.isArray(cityResponse)
         ? cityResponse
         : cityResponse && Array.isArray((cityResponse as any).data)
@@ -77,11 +85,22 @@ const EditCityScreen: React.FC = () => {
           name: item.name,
         }),
       );
-      setCities(mappedData);
-      setFilteredCities(mappedData);
+      setOriginalCities(mappedData);
+      const translatedData: any = await translateData(
+        mappedData,
+        currentLanguage,
+        ['name'],
+      );
+      translationCacheRef.current.set(currentLanguage, translatedData);
+      setCities(translatedData);
+      setFilteredCities(translatedData);
 
       // Fetch current service area to get city_id
-      const serviceAreaResponse = await getServiceArea();
+      const serviceAreaResponse: any = await getServiceArea();
+      console.log(
+        'serviceAreaResponse :: ',
+        serviceAreaResponse?.data?.service_areas,
+      );
       const serviceAreaData =
         serviceAreaResponse?.data?.service_areas || serviceAreaResponse || [];
       setData(serviceAreaData);
@@ -94,10 +113,15 @@ const EditCityScreen: React.FC = () => {
       }
     } catch (error: any) {
       showErrorToast(error?.message || 'Failed to load city data');
+      setCities([]);
+      setOriginalCities([]);
+      setFilteredCities([]);
+      setData([]);
+      setSelectedCityId(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage, translationCacheRef]);
 
   const handleCitySelect = (cityId: number) => {
     if (selectedCityId === cityId) {
@@ -106,6 +130,10 @@ const EditCityScreen: React.FC = () => {
       setSelectedCityId(cityId);
     }
   };
+
+  useEffect(() => {
+    fetchCityAndServiceArea();
+  }, [fetchCityAndServiceArea]);
 
   const handleNext = () => {
     const selectedCity = cities.find(city => city.id === selectedCityId);
@@ -119,7 +147,6 @@ const EditCityScreen: React.FC = () => {
     }
   };
 
-  // Custom search handler for CustomSelector
   const handleSearch = (text: string) => {
     setSearchText(text);
   };

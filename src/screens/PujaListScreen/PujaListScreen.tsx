@@ -1,15 +1,15 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useState, useCallback, useRef} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   Image,
   Platform,
+  RefreshControl,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
 import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
@@ -19,6 +19,7 @@ import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {PujaListStackParamList} from '../../navigation/PujaListStack/PujaListStack';
 import CustomeLoader from '../../components/CustomLoader';
+import {translateData} from '../../utils/TranslateData';
 
 type PujaListScreenNavigationProp = StackNavigationProp<
   PujaListStackParamList,
@@ -46,58 +47,81 @@ interface PujaItemProps {
 }
 
 const PujaListScreen: React.FC = () => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<PujaListScreenNavigationProp>();
+  const [originalPujaList, setOriginalPujaList] = useState<PujaItemType[]>([]);
   const [pujaList, setPujaList] = useState<PujaItemType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  const fetchPujaList = async () => {
-    setLoading(true);
-    try {
-      const response: any = await getPuja();
+  const currentLanguage = i18n.language;
 
-      if (response.data.success) {
-        const data = response.data.data;
-        console.log('data', data);
-        const mapped = data.map((item: any) => ({
-          id: item.id,
-          pooja: item.pooja,
-          pooja_image_url: item.pooja_image_url,
-          pooja_title: item.pooja_title,
-          pooja_short_description: item.pooja_short_description,
-          price_with_samagri: item.price_with_samagri,
-          price_without_samagri: item.price_without_samagri,
-          price_status: item.price_status,
-          system_price: item.system_price,
-        }));
-        setPujaList(mapped);
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
+
+  const fetchPujaList = useCallback(
+    async (forceRefresh: boolean = false) => {
+      if (forceRefresh) setRefreshing(true);
+      else setLoading(true);
+      try {
+        const cachedData = translationCacheRef.current.get(currentLanguage);
+
+        if (!forceRefresh && cachedData) {
+          setPujaList(cachedData);
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
+
+        const response: any = await getPuja();
+
+        if (response.data.success) {
+          const data = response.data.data;
+          console.log('data', data);
+          const mapped = data.map((item: any) => ({
+            id: item.id,
+            pooja: item.pooja,
+            pooja_image_url: item.pooja_image_url,
+            pooja_title: item.pooja_title,
+            pooja_short_description: item.pooja_short_description,
+            price_with_samagri: item.price_with_samagri,
+            price_without_samagri: item.price_without_samagri,
+            price_status: item.price_status,
+            system_price: item.system_price,
+          }));
+          setOriginalPujaList(mapped);
+          const translatedData: any = await translateData(
+            mapped,
+            currentLanguage,
+            ['pooja_title', 'pooja_short_description'],
+          );
+          translationCacheRef.current.set(currentLanguage, translatedData);
+          setPujaList(translatedData);
+        } else {
+          setPujaList([]);
+          setOriginalPujaList([]);
+        }
+      } catch (error) {
+        setPujaList([]);
+        setOriginalPujaList([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-    } catch (error) {
-      setPujaList([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPujaList();
-  }, []);
+    },
+    [currentLanguage, translationCacheRef],
+  );
 
   useFocusEffect(
     useCallback(() => {
-      fetchPujaList();
-    }, []),
+      fetchPujaList(false);
+    }, [fetchPujaList]),
   );
 
   const PujaItem: React.FC<PujaItemProps> = ({puja, onEdit}) => {
     const formattedPriceWith =
       puja.price_with_samagri && puja.price_with_samagri !== '0.00'
         ? `₹ ${Number(puja.price_with_samagri).toLocaleString('en-IN')}`
-        : '₹ 0';
-    const formattedPriceWithout =
-      puja.price_without_samagri && puja.price_without_samagri !== '0.00'
-        ? `₹ ${Number(puja.price_without_samagri).toLocaleString('en-IN')}`
         : '₹ 0';
 
     return (
@@ -132,8 +156,11 @@ const PujaListScreen: React.FC = () => {
   };
 
   const handleEditPuja = (puja: PujaItemType) => {
-    // console.log("puja",puja)
-    navigation.navigate('EditPujaScreen', {pujaId: puja.id, pujaData: puja});
+    const original = originalPujaList.find(item => item.id === puja.id) || puja;
+    navigation.navigate('EditPujaScreen', {
+      pujaId: original.id,
+      pujaData: original,
+    });
   };
 
   const handleAddPuja = () => {
@@ -159,7 +186,15 @@ const PujaListScreen: React.FC = () => {
               paddingBottom: Platform.OS === 'ios' ? 20 : 50,
             },
           ]}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => fetchPujaList(true)}
+              tintColor={COLORS.primary}
+              colors={[COLORS.primary]}
+            />
+          }>
           <View style={[styles.listContainer, THEMESHADOW.shadow]}>
             {loading ? null : pujaList.length === 0 ? (
               <Text

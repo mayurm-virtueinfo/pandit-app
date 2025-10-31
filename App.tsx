@@ -29,12 +29,6 @@ import i18n from './src/i18n';
 import {navigationRef} from './src/helper/navigationRef';
 import {getMessaging} from '@react-native-firebase/messaging';
 import {requestUserPermission} from './src/configuration/notificationPermission';
-import {
-  initCallKeep,
-  setOnAnswerListener,
-  setOnEndListener,
-} from './src/configuration/callValidation';
-import {navigate} from './src/utils/NavigationService';
 import DeviceInfo from 'react-native-device-info';
 import checkVersion from 'react-native-store-version';
 import {SessionProvider} from './src/provider/SessionProvider';
@@ -47,7 +41,7 @@ LogBox.ignoreLogs([
 const auth = getAuth();
 if (__DEV__) {
   // auth.useEmulator('http://127.0.0.1:9099');
-  auth.useEmulator('http://192.168.1.9:9099');
+  auth.useEmulator('http://192.168.1.13:9099');
 }
 setupNotifications();
 

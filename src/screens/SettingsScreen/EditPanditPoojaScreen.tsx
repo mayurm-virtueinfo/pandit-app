@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -18,17 +18,12 @@ import CustomHeader from '../../components/CustomHeader';
 import {useTranslation} from 'react-i18next';
 import {poojaDataOption} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
-import {
-  getPandingPuja,
-  getPanditPooja,
-  getPooja,
-  putPanditPooja,
-} from '../../api/apiService';
+import {getPanditPooja, getPooja, putPanditPooja} from '../../api/apiService';
 import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
-import {SelectorDataOption} from '../Auth/type';
+import {translateData} from '../../utils/TranslateData';
 
 type ScreenNavigation = StackNavigationProp<
   AuthStackParamList,
@@ -38,56 +33,93 @@ type ScreenNavigation = StackNavigationProp<
 const EditPanditPoojaScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigation>();
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {showErrorToast, showSuccessToast} = useCommonToast();
 
+  const [originalPoojaData, setOriginalPoojaData] = useState<poojaDataOption[]>(
+    [],
+  );
   const [poojaData, setPoojaData] = useState<poojaDataOption[]>([]);
-  const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchText, setSearchText] = useState<string>('');
   const [filteredPoojaData, setFilteredPoojaData] = useState<poojaDataOption[]>(
     [],
   );
+  const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState<string>('');
+
+  const currentLanguage = i18n.language;
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
   // Fetch all puja list and selected puja list on mount
   useEffect(() => {
     fetchAllPujaAndSelected();
-  }, []);
+  }, [currentLanguage]);
 
   useEffect(() => {
-    // Filter poojaData based on searchText
     if (searchText.trim() === '') {
       setFilteredPoojaData(poojaData);
     } else {
+      const lower = searchText.toLowerCase();
+
       setFilteredPoojaData(
-        poojaData.filter(item =>
-          item.title.toLowerCase().includes(searchText.toLowerCase()),
-        ),
+        poojaData.filter((item: any) => {
+          const titleMatch = item.title?.toLowerCase().includes(lower);
+          const originalMatch = item.originalTitle
+            ?.toLowerCase()
+            .includes(lower);
+          return titleMatch || originalMatch;
+        }),
       );
     }
   }, [searchText, poojaData]);
 
-  const fetchAllPujaAndSelected = async () => {
+  const fetchAllPujaAndSelected = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch all puja list
-      const allPujaResponse = await getPooja();
-      const allPujaData = Array.isArray(allPujaResponse)
-        ? allPujaResponse
-        : Array.isArray((allPujaResponse as any)?.data)
-        ? (allPujaResponse as any).data
-        : [];
-      const mappedAllPuja: poojaDataOption[] = allPujaData.map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        short_description: item.short_description,
-      }));
-      setPoojaData(mappedAllPuja);
-      setFilteredPoojaData(mappedAllPuja);
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+      if (cachedData) {
+        setPoojaData(cachedData);
+        setFilteredPoojaData(cachedData);
+      } else {
+        // 🔹 Fetch all puja list
+        const allPujaResponse = await getPooja();
+        const allPujaData = Array.isArray(allPujaResponse)
+          ? allPujaResponse
+          : Array.isArray((allPujaResponse as any)?.data)
+          ? (allPujaResponse as any).data
+          : [];
 
-      // Fetch selected puja ids
+        const mappedAllPuja: poojaDataOption[] = allPujaData.map(
+          (item: any) => ({
+            id: item.id,
+            title: item.title,
+            short_description: item.short_description,
+          }),
+        );
+
+        // 🧠 Store original un-translated data for English search
+        setOriginalPoojaData(mappedAllPuja);
+
+        // 🌍 Translate puja data fields
+        const translatedData: any = await translateData(
+          mappedAllPuja,
+          currentLanguage,
+          ['title', 'short_description'],
+        );
+
+        // 🪄 Add English fallback (dual titles) for search
+        const finalData = translatedData.map((item: any, index: number) => ({
+          ...item,
+          originalTitle: mappedAllPuja[index].title, // for English search
+        }));
+
+        translationCacheRef.current.set(currentLanguage, finalData);
+        setPoojaData(finalData);
+        setFilteredPoojaData(finalData);
+      }
+
+      // 🔹 Fetch selected puja ids
       const selectedPujaResponse = await getPanditPooja();
-      // Try to get the array of selected pujas from either .data.poojas or .poojas, fallback to []
       const selectedPujaData = Array.isArray(
         (selectedPujaResponse as any)?.data?.poojas,
       )
@@ -95,7 +127,7 @@ const EditPanditPoojaScreen: React.FC = () => {
         : Array.isArray((selectedPujaResponse as any)?.poojas)
         ? (selectedPujaResponse as any).poojas
         : [];
-      // Extract the "pooja" field from each object in the array
+
       const selectedIds: number[] = Array.isArray(selectedPujaData)
         ? selectedPujaData
             .filter(
@@ -104,13 +136,14 @@ const EditPanditPoojaScreen: React.FC = () => {
             )
             .map((item: any) => item.pooja)
         : [];
+
       setSelectedPoojaId(selectedIds);
     } catch (error: any) {
       showErrorToast(error?.message || 'Failed to fetch pooja list');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage, translationCacheRef]);
 
   const handlePoojaSelect = (poojaId: number) => {
     setSelectedPoojaId(prev =>
@@ -125,9 +158,10 @@ const EditPanditPoojaScreen: React.FC = () => {
   };
 
   const handleNext = async () => {
-    const selectedPooja = poojaData.filter(area =>
+    const selectedPooja = originalPoojaData.filter(area =>
       selectedPoojaId.includes(area.id),
     );
+
     if (selectedPooja.length === 0) {
       showErrorToast(t('please_select_pooja') || 'Please select pooja');
       return;
@@ -187,7 +221,6 @@ const EditPanditPoojaScreen: React.FC = () => {
                 )}
               </View>
             </ScrollView>
-            {/* Button fixed at bottom */}
             <View
               style={[
                 styles.bottomButtonContainer,

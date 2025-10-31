@@ -18,6 +18,7 @@ import {getWallet, getTransactions} from '../../api/apiService';
 import {useTranslation} from 'react-i18next';
 import Options from '../../components/Options';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {translateText} from '../../utils/TranslateData';
 
 interface TransactionItem {
   id: number;
@@ -33,12 +34,12 @@ interface TransactionItem {
   booking?: number;
   notes?: string | null;
   reason?: string;
-  paymentModeLabel?: string; // Added field for Cash on/Online
+  paymentModeLabel?: string;
 }
 
 const EarningsHistoryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
@@ -50,81 +51,76 @@ const EarningsHistoryScreen: React.FC = () => {
   const [walletAmount, setWalletAmount] = useState<number>(0);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch wallet
-        const walletRes: any = await getWallet();
-        console.log('walletRes', walletRes);
-        let walletValue = 0;
-        if (
-          walletRes &&
-          typeof walletRes === 'object' &&
-          walletRes.data &&
-          walletRes.data.data &&
-          walletRes.data.data.balance !== undefined
-        ) {
-          walletValue = Number(walletRes.data.data.balance) || 0;
-        }
-        setWalletAmount(walletValue);
+    fetchData();
+  }, [i18n.language]); // ✅ re-fetch or re-translate when language changes
 
-        // Fetch transactions
-        const txRes: any = await getTransactions();
-        console.log('txRes', txRes.data.data);
-        let txItems: any[] = [];
-        if (Array.isArray(txRes)) {
-          txItems = txRes;
-        } else if (
-          txRes &&
-          typeof txRes === 'object' &&
-          txRes.data &&
-          Array.isArray(txRes.data.data)
-        ) {
-          txItems = txRes.data.data;
-        }
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const walletRes: any = await getWallet();
+      let walletValue = 0;
+      if (
+        walletRes &&
+        typeof walletRes === 'object' &&
+        walletRes.data &&
+        walletRes.data.data &&
+        walletRes.data.data.balance !== undefined
+      ) {
+        walletValue = Number(walletRes.data.data.balance) || 0;
+      }
+      setWalletAmount(walletValue);
 
-        // Map API data to local display format
-        const mapped: TransactionItem[] = txItems.map((item, idx) => {
+      // Fetch transactions
+      const txRes: any = await getTransactions();
+      let txItems: any[] = [];
+      if (Array.isArray(txRes)) {
+        txItems = txRes;
+      } else if (
+        txRes &&
+        typeof txRes === 'object' &&
+        txRes.data &&
+        Array.isArray(txRes.data.data)
+      ) {
+        txItems = txRes.data.data;
+      }
+
+      // ✅ Map & translate
+      const mapped: TransactionItem[] = await Promise.all(
+        txItems.map(async (item, idx) => {
           let rawAmount = 0;
-          if (
-            item.transaction_type === 'credit' &&
-            item.amount_to_credit !== undefined &&
-            item.amount_to_credit !== null
-          ) {
-            rawAmount = Number(item.amount_to_credit);
-          } else if (
-            item.transaction_type === 'debit' &&
-            item.amount_to_debit !== undefined &&
-            item.amount_to_debit !== null
-          ) {
-            rawAmount = Number(item.amount_to_debit);
-          } else if (item.amount !== undefined && item.amount !== null) {
-            rawAmount = Number(item.amount);
-          }
+          if (item.transaction_type === 'credit')
+            rawAmount = Number(item.amount_to_credit || 0);
+          else if (item.transaction_type === 'debit')
+            rawAmount = Number(item.amount_to_debit || 0);
+          else rawAmount = Number(item.amount || 0);
 
-          let displayReason = item.reason;
-          if (item.reason === 'booking_accepted') {
-            displayReason = t('booking_accepted') || 'Booking Accepted';
-          } else if (item.reason === 'booking_cancelled') {
-            displayReason = t('booking_cancelled') || 'Booking cancelled';
-          }
+          // Translate pooja_name + reason + notes if available
+          const translatedTitle = await translateText(
+            item.puja_name || t('transaction'),
+            i18n.language,
+          );
+          const translatedReason = item.reason
+            ? await translateText(item.reason, i18n.language)
+            : '';
+          const translatedNotes = item.notes
+            ? await translateText(item.notes, i18n.language)
+            : '';
 
-          // Determine payment mode label
-          let paymentModeLabel: string | undefined = undefined;
+          let paymentModeLabel: string | undefined;
           if (typeof item.is_cos === 'boolean') {
-            paymentModeLabel = item.is_cos ? 'Cash on' : 'Online';
+            paymentModeLabel = item.is_cos ? t('cash_on') : t('online');
           }
 
           return {
             id: item.id ?? idx,
-            title: item.puja_name || t('transaction'),
+            title: translatedTitle,
             date: item.timestamp,
             amount: `₹ ${rawAmount.toLocaleString('en-IN', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}`,
             rawDate: item.timestamp,
-            rawAmount: rawAmount,
+            rawAmount,
             transactionType: item.transaction_type,
             chargedAmount: item.charged_amount
               ? Number(item.charged_amount)
@@ -136,21 +132,21 @@ const EarningsHistoryScreen: React.FC = () => {
               ? Number(item.amount_to_debit)
               : undefined,
             booking: item.booking,
-            notes: item.notes,
-            reason: displayReason,
-            paymentModeLabel, // Add to transaction
+            notes: translatedNotes,
+            reason: translatedReason,
+            paymentModeLabel,
           };
-        });
-        setTransactions(mapped);
-      } catch (error) {
-        setWalletAmount(0);
-        setTransactions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+        }),
+      );
+
+      setTransactions(mapped);
+    } catch (error) {
+      setWalletAmount(0);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   function formatDate(dateString: string) {
     if (!dateString) return '';
@@ -226,9 +222,7 @@ const EarningsHistoryScreen: React.FC = () => {
                 style={[
                   styles.paymentMethodText,
                   {
-                    color: isDarkMode
-                      ? COLORS?.white || '#fff'
-                      : COLORS?.primaryTextDark || '#000',
+                    color: isDarkMode ? COLORS.white : COLORS.primaryTextDark,
                   },
                 ]}>
                 {t('payment_method')}
@@ -290,20 +284,7 @@ const EarningsHistoryScreen: React.FC = () => {
         </View>
 
         <View style={styles.historySection}>
-          {selectedMonth || selectedYear ? (
-            <Text style={styles.historyTitle}>
-              {selectedMonth && selectedYear
-                ? `${selectedMonth} ${selectedYear}`
-                : selectedMonth
-                ? selectedMonth
-                : selectedYear
-                ? selectedYear
-                : ''}
-            </Text>
-          ) : (
-            <Text style={styles.historyTitle}>{t('history')}</Text>
-          )}
-
+          <Text style={styles.historyTitle}>{t('history')}</Text>
           <View style={[styles.historyCard, THEMESHADOW.shadow]}>
             {loading ? (
               <View style={{alignItems: 'center', padding: 20}}>
@@ -341,10 +322,7 @@ const EarningsHistoryScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.primaryBackground,
-  },
+  container: {flex: 1, backgroundColor: COLORS.primaryBackground},
   scrollContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -378,9 +356,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Bold,
     color: COLORS.success,
   },
-  historySection: {
-    flex: 1,
-  },
+  historySection: {flex: 1},
   historyTitle: {
     fontSize: moderateScale(18),
     fontFamily: Fonts.Sen_SemiBold,
@@ -399,10 +375,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: verticalScale(8),
   },
-  earningsItemLeft: {
-    flex: 1,
-    marginRight: scale(16),
-  },
+  earningsItemLeft: {flex: 1, marginRight: scale(16)},
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -438,10 +411,7 @@ const styles = StyleSheet.create({
     color: COLORS.gray,
     marginBottom: verticalScale(2),
   },
-  payment_method: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  payment_method: {flexDirection: 'row', alignItems: 'center'},
   paymentMethodText: {
     fontSize: moderateScale(14),
     fontFamily: Fonts.Sen_SemiBold,
@@ -451,11 +421,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: Fonts.Sen_SemiBold,
     color: COLORS.primaryTextDark,
-  },
-  earningsBooking: {
-    fontSize: moderateScale(12),
-    fontFamily: Fonts.Sen_Regular,
-    color: COLORS.gray,
   },
   earningsAmount: {
     fontSize: moderateScale(16),
