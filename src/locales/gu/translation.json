@@ -421,5 +421,12 @@
   "no_data": "કોઈ માહિતી મળી નથી",
   "session_expire": "સેશન સમાપ્ત થયું",
   "session_expire_message": "તમારું સેશન સમાપ્ત થઈ ગયું છે. કૃપા કરીને ફરી લૉગિન કરો.",
-  "login_again": "ફરી લૉગિન કરો"
+  "login_again": "ફરી લૉગિન કરો",
+  "payment_cos_desc": "પૂજા સમયે વપરાશકર્તા પાસેથી રોકડમાં ચુકવણી લેવામાં આવશે.",
+  "payment_no_cos_desc": "પૂજા પૂર્ણ થયા પછી પંડિતને ઓનલાઇન ચુકવણી મળશે.",
+  "pooja_pricing": "પૂજા ભાવ",
+  "with_puja_items": "પૂજા સામગ્રી સાથે",
+  "without_puja_items": "પૂજા સામગ્રી વગર",
+  "chat_with_pandit_after_puja_started": "પૂજા શરૂ થયા પછી તમે {{name}} સાથે ચેટ કરી શકતા નથી.",
+  "address_details": "સરનામાની વિગતો"
 }

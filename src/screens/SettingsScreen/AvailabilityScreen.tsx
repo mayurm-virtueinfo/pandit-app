@@ -39,27 +39,29 @@ const AvailabilityScreen: React.FC = () => {
       try {
         const response: any = await getPanditAvailability();
         // The response is an array of objects: [{date: "YYYY-MM-DD", is_available: true}, ...]
-        if (Array.isArray(response?.data)) {
+        if (Array.isArray(response?.data?.data)) {
           // Only select dates where is_available is true
-          const formattedAvailable = response.data
+          const formattedAvailable = response.data?.data
             .filter((d: any) => d.is_available)
             .map((d: any) => formatDate(d.date));
           setSelectedDates(formattedAvailable);
 
           // Collect all dates present in the response
-          const allDates = response.data.map((d: any) => formatDate(d.date));
+          const allDates = response.data?.data?.map((d: any) =>
+            formatDate(d.date),
+          );
           setAllFetchedDates(allDates);
         } else if (response?.data?.data?.available_dates) {
           // fallback for old structure
-          const formattedAvailable = response.data.data.available_dates.map(
+          const formattedAvailable = response.data?.data?.available_dates.map(
             (d: any) => formatDate(d),
           );
           setSelectedDates(formattedAvailable);
 
           // Try to get all possible dates (if available)
-          if (Array.isArray(response.data.data.all_dates)) {
+          if (Array.isArray(response.data?.data?.all_dates)) {
             setAllFetchedDates(
-              response.data.data.all_dates.map((d: any) => formatDate(d)),
+              response.data?.data?.all_dates.map((d: any) => formatDate(d)),
             );
           } else {
             // If not provided, fallback to available_dates only
@@ -91,16 +93,6 @@ const AvailabilityScreen: React.FC = () => {
     // Map all dates to 'YYYY-MM-DD' format
     const formattedDates = dates.map(date => formatDate(date));
     setSelectedDates(formattedDates);
-  };
-
-  const toggleDate = (day: number | null) => {
-    if (!day) return;
-    const dateStr = currentMonth.date(day).format('YYYY-MM-DD');
-    setSelectedDates(prev =>
-      prev.includes(dateStr)
-        ? prev.filter(d => d !== dateStr)
-        : [...prev, dateStr],
-    );
   };
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
@@ -185,7 +177,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     color: COLORS.darkText,
     marginBottom: 16,
-    lineHeight: 22,
     fontFamily: Fonts.Sen_Regular,
   },
   scrollContent: {flex: 1, paddingHorizontal: 24},

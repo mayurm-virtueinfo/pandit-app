@@ -228,7 +228,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: moderateScale(20),
-    lineHeight: moderateScale(22),
   },
   updateButton: {
     backgroundColor: COLORS.primaryBackgroundButton,
@@ -241,7 +240,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontWeight: 'bold',
     fontSize: moderateScale(16),
-    letterSpacing: 0.5,
   },
 });
 

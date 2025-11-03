@@ -488,7 +488,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 32,
     fontSize: 14,
-    lineHeight: 20,
     color: '#6b7280',
   },
   formContainer: {
@@ -536,7 +535,6 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 12,
-    lineHeight: 16,
     color: '#6b7280',
     marginTop: 8,
   },

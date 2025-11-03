@@ -48,9 +48,7 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
     return isCustomeSelectorDataOption(item) ? item.name : item.title;
   };
 
-  const filteredData = data.filter(item =>
-    getDisplayName(item).toLowerCase().includes(searchText.toLowerCase()),
-  );
+  const filteredData = data;
 
   const handleSearchTextChange = (text: string) => {
     setSearchText(text);

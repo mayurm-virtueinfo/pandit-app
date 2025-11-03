@@ -72,7 +72,6 @@ const styles = StyleSheet.create({
   messageText: {
     fontSize: moderateScale(14),
     fontFamily: Fonts.Sen_Regular,
-    lineHeight: moderateScale(17),
   },
   ownText: {
     color: COLORS.primaryTextDark,
@@ -87,7 +86,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     color: COLORS.pujaCardSubtext,
     marginTop: moderateScale(5),
-    lineHeight: moderateScale(15),
   },
   ownTime: {
     textAlign: 'right',

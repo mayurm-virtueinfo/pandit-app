@@ -420,5 +420,12 @@
   "no_data": "कोई डेटा नहीं मिला",
   "session_expire": "सत्र समाप्त",
   "session_expire_message": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
-  "login_again": "दोबारा लॉगिन करें"
+  "login_again": "दोबारा लॉगिन करें",
+  "payment_cos_desc": "पूजा के समय उपयोगकर्ता से नकद में भुगतान लिया जाएगा।",
+  "payment_no_cos_desc": "पूजा पूरी होने के बाद पंडित को ऑनलाइन भुगतान मिलेगा।",
+  "pooja_pricing": "पूजा मूल्य",
+  "with_puja_items": "पूजा सामग्री के साथ",
+  "without_puja_items": "पूजा सामग्री के बिना",
+  "chat_with_pandit_after_puja_started": "पूजा शुरू होने के बाद आप {{name}} से चैट नहीं कर सकते।",
+  "address_details": "पते का विवरण"
 }

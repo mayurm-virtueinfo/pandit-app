@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
+  DeviceEventEmitter,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -152,6 +153,10 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
         offer_id: offer_id || pujaDetails?.offer_id,
       });
       showSuccessToast?.(t('puja_approve'));
+
+      // 🔥 Emit event to update HomeScreen instantly
+      DeviceEventEmitter.emit('PUJA_DATA_UPDATED');
+
       navigation.goBack();
     } catch (error: any) {
       showErrorToast?.(
@@ -175,6 +180,10 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
         offer_id: offer_id || pujaDetails?.offer_id,
       });
       showSuccessToast?.(t('puja_reject'));
+
+      // 🔥 Emit event to update HomeScreen instantly
+      DeviceEventEmitter.emit('PUJA_DATA_UPDATED');
+
       navigation.goBack();
     } catch (error: any) {
       navigation.goBack();
@@ -462,7 +471,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     fontWeight: '500',
-    lineHeight: moderateScale(22),
   },
   separator: {
     height: 1,
@@ -503,7 +511,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     fontWeight: '500',
-    letterSpacing: -0.33,
   },
   pricingCard: {
     backgroundColor: COLORS.white,
@@ -522,14 +529,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     fontWeight: '500',
-    letterSpacing: -0.33,
   },
   pricingAmount: {
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_SemiBold,
     color: COLORS.primaryTextDark,
     fontWeight: '600',
-    letterSpacing: -0.33,
   },
   pricingSubtext: {
     fontSize: moderateScale(13),

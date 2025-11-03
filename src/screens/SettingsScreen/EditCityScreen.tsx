@@ -51,16 +51,38 @@ const EditCityScreen: React.FC = () => {
 
   const translationCacheRef = useRef<Map<string, any>>(new Map());
 
+  console.log('filteredCities :: ', filteredCities);
+
+  // useEffect(() => {
+  //   if (searchText.trim() === '') {
+  //     setFilteredCities(cities);
+  //   } else {
+  //     const lowerSearch = searchText.toLowerCase();
+  //     setFilteredCities(
+  //       cities.filter(city => city.name.toLowerCase().includes(lowerSearch)),
+  //     );
+  //   }
+  // }, [searchText, cities]);
+
   useEffect(() => {
-    if (searchText.trim() === '') {
+    if (!searchText.trim()) {
       setFilteredCities(cities);
     } else {
-      const lowerSearch = searchText.toLowerCase();
+      const lower = searchText.toLowerCase();
+
       setFilteredCities(
-        cities.filter(city => city.name.toLowerCase().includes(lowerSearch)),
+        cities.filter(city => {
+          const translatedMatch = city.name?.toLowerCase()?.includes(lower);
+          const originalMatch = originalCities
+            .find(orig => orig.id === city.id)
+            ?.name?.toLowerCase()
+            ?.includes(lower);
+
+          return translatedMatch || originalMatch;
+        }),
       );
     }
-  }, [searchText, cities]);
+  }, [searchText, cities, originalCities]);
 
   const fetchCityAndServiceArea = useCallback(async () => {
     setIsLoading(true);

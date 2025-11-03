@@ -83,6 +83,8 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const markedDates: {[date: string]: any} = {};
 
+  console.log('Marked Dates:', Object.keys(markedDates));
+
   // Only use selectedDates for marking
   const allSelectedDates = [...new Set([...selectedDates])];
   allSelectedDates.forEach(dateStr => {

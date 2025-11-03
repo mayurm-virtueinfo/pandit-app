@@ -92,7 +92,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: Fonts.Sen_Regular,
     color: COLORS.primaryTextDark,
-    lineHeight: moderateScale(20),
     marginBottom: verticalScale(10),
   },
   closeButton: {

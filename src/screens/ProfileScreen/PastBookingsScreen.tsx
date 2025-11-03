@@ -246,7 +246,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: COLORS.pujaCardSubtext,
     fontFamily: Fonts.Sen_Medium,
-    lineHeight: 16,
   },
   separator: {
     height: 1,

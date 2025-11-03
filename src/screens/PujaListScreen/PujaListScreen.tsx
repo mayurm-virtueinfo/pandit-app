@@ -332,8 +332,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     textTransform: 'uppercase',
-    letterSpacing: -0.15,
-    lineHeight: 21,
   },
   separator: {
     height: 1,

@@ -619,7 +619,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: Fonts.Sen_SemiBold,
     fontWeight: '600',
-    letterSpacing: -0.33,
     marginBottom: 7,
   },
   pujaDescription: {
@@ -648,7 +647,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: Fonts.Sen_Medium,
     fontWeight: '500',
-    letterSpacing: -0.33,
     marginBottom: 4,
   },
   priceDescription: {
@@ -656,7 +654,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.Sen_Medium,
     fontWeight: '500',
-    lineHeight: 20,
   },
   inputFieldContainer: {
     marginTop: 12,
@@ -672,8 +669,6 @@ const styles = StyleSheet.create({
     color: COLORS.inputLabelText,
     fontSize: 14,
     fontFamily: Fonts.Sen_Medium,
-    letterSpacing: -0.28,
-    lineHeight: 21,
   },
   inputAreaContainer: {
     alignItems: 'center',
@@ -692,8 +687,6 @@ const styles = StyleSheet.create({
     color: COLORS.primaryTextDark,
     fontSize: 14,
     fontFamily: Fonts.Sen_Regular,
-    letterSpacing: -0.14,
-    lineHeight: 20,
     textAlignVertical: 'center',
     paddingVertical: 0,
   },

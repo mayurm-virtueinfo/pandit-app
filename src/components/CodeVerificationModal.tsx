@@ -190,8 +190,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: COLORS.primaryTextDark,
     textAlign: 'center',
-    lineHeight: moderateScale(20),
-    letterSpacing: -0.14,
     marginTop: verticalScale(17),
   },
   codeInputContainer: {
@@ -248,7 +246,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: COLORS.primaryTextDark,
     textTransform: 'uppercase',
-    letterSpacing: -0.15,
   },
   cancelButton: {
     borderRadius: moderateScale(10),
@@ -265,7 +262,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: COLORS.primaryTextDark,
     textTransform: 'uppercase',
-    letterSpacing: -0.15,
   },
 });
 
