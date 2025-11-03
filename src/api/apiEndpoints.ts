@@ -42,7 +42,7 @@ export const GET_CASTE = '/panditji/castes/';
 export const GET_SUBCASTE = '/panditji/castes/{casteId}/subcastes/';
 export const GET_GOTRA = '/panditji/subcastes/{subCasteId}/gotras/';
 export const GET_AREA = '/app/api/areas/?city_id={id}';
-export const GET_POOJA = '/panditji/poojas/';
+export const GET_POOJA = '/panditji/poojas/?page={page}';
 export const GET_LANGUAGES = '/panditji/languages/';
 export const POST_SIGNUP = '/app/auth/register/';
 export const POST_LOGOUT = '/app/auth/logout/';

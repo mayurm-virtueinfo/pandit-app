@@ -7,6 +7,7 @@ import {
   TextInput,
   FlatList,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -17,19 +18,20 @@ import Fonts from '../theme/fonts';
 
 const isCustomeSelectorDataOption = (
   item: CustomeSelectorDataOption | poojaDataOption,
-): item is CustomeSelectorDataOption => {
-  return 'name' in item;
-};
+): item is CustomeSelectorDataOption => 'name' in item;
 
 interface CustomeMultiSelectorProps {
-  data: CustomeSelectorDataOption[] | poojaDataOption[];
+  data: (CustomeSelectorDataOption | poojaDataOption)[];
   selectedDataIds: number[];
   onDataSelect: (dataId: number) => void;
   searchPlaceholder?: string;
   showSearch?: boolean;
   containerStyle?: any;
   isMultiSelect?: boolean;
-  onSearch?: (text: string) => void; // Added for search
+  onSearch?: (text: string) => void;
+  onEndReached?: () => void;
+  onEndReachedThreshold?: number;
+  loadingMore?: boolean;
 }
 
 const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
@@ -40,51 +42,38 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
   showSearch = true,
   containerStyle,
   isMultiSelect = false,
-  onSearch, // Added for search
+  onSearch,
+  onEndReached,
+  onEndReachedThreshold = 0.3,
+  loadingMore = false,
 }) => {
-  const [searchText, setSearchText] = useState('');
-
+  const [localSearch, setLocalSearch] = useState('');
+  // console.log('loadingMore', loadingMore);
   const getDisplayName = (
     item: CustomeSelectorDataOption | poojaDataOption,
-  ): string => {
-    return isCustomeSelectorDataOption(item) ? item.name : item.title;
+  ): string => (isCustomeSelectorDataOption(item) ? item.name : item.title);
+
+  const handleSearchChange = (text: string) => {
+    setLocalSearch(text);
+    onSearch?.(text);
   };
 
-  // Remove local filtering if onSearch is provided, else filter locally
-  const filteredData =
-    typeof onSearch === 'function'
-      ? data
-      : data.filter(item =>
-          getDisplayName(item).toLowerCase().includes(searchText.toLowerCase()),
-        );
-
-  const handleItemPress = (dataId: number) => {
-    if (isMultiSelect) {
-      onDataSelect(dataId);
-    } else {
-      onDataSelect(dataId);
-    }
+  const handleItemPress = (id: number) => {
+    if (isMultiSelect) onDataSelect(id);
+    else onDataSelect(id);
   };
 
-  const handleSearchTextChange = (text: string) => {
-    setSearchText(text);
-    if (onSearch) {
-      onSearch(text);
-    }
-  };
-
-  const renderCityItem = ({
+  const renderItem = ({
     item,
-    index,
   }: {
     item: CustomeSelectorDataOption | poojaDataOption;
-    index: number;
   }) => (
     <View>
       <TouchableOpacity
         style={styles.cityItem}
         onPress={() => handleItemPress(item.id)}>
         <Text style={styles.cityName}>{getDisplayName(item)}</Text>
+
         <TouchableOpacity
           style={styles.checkboxContainer}
           onPress={() => handleItemPress(item.id)}>
@@ -103,12 +92,25 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
           )}
         </TouchableOpacity>
       </TouchableOpacity>
-      {index < filteredData.length - 1 && <View style={styles.citySeparator} />}
+
+      {/* Separator (except after last item) */}
+      <View style={styles.citySeparator} />
     </View>
   );
 
+  // The loader should be at the FlatList bottom as footer component.
+  const renderFooter = () =>
+    loadingMore ? (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    ) : (
+      <View style={{height: moderateScale(10)}} />
+    );
+
   return (
     <View style={[styles.container, containerStyle, THEMESHADOW.shadow]}>
+      {/* SEARCH BAR */}
       {showSearch && (
         <>
           <View
@@ -129,26 +131,34 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
               style={styles.searchInput}
               placeholder={searchPlaceholder}
               placeholderTextColor={COLORS.searchbartext}
-              value={searchText}
-              onChangeText={handleSearchTextChange}
+              value={localSearch}
+              onChangeText={handleSearchChange}
+              autoCapitalize="none"
             />
           </View>
           <View style={styles.separator} />
         </>
       )}
+
+      {/* LIST */}
       <FlatList
-        data={filteredData}
-        renderItem={renderCityItem}
-        keyExtractor={item => item.id.toString()}
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={i => i.id.toString()}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        onEndReached={onEndReached}
+        onEndReachedThreshold={onEndReachedThreshold}
+        ListFooterComponent={renderFooter}
       />
+      {/* No overlay loader for paging; loader is at list bottom */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     borderRadius: moderateScale(10),
     backgroundColor: COLORS.white,
   },
@@ -157,9 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: moderateScale(14),
   },
-  searchIcon: {
-    marginRight: moderateScale(5),
-  },
+  searchIcon: {marginRight: moderateScale(5)},
   searchInput: {
     flex: 1,
     fontSize: moderateScale(14),
@@ -176,6 +184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: moderateScale(14),
+    // paddingVertical: moderateScale(12),
   },
   cityName: {
     flex: 1,
@@ -195,6 +204,20 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: COLORS.separatorColor,
     marginLeft: moderateScale(14),
+  },
+  // Loader at FlatList footer for pagination
+  footerLoader: {
+    paddingVertical: moderateScale(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Retain overlay style in case needed elsewhere, but not used here
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#FFFFFFAA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
 });
 

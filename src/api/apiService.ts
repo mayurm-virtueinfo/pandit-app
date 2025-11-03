@@ -498,8 +498,8 @@ export const getAreas = (id: any) => {
   });
 };
 
-export const getPooja = () => {
-  let apiUrl = GET_POOJA;
+export const getPooja = (params: any): Promise<any> => {
+  let apiUrl = GET_POOJA.replace('{page}', params.page);
   return new Promise((resolve, reject) => {
     apiDev
       .get(apiUrl)
