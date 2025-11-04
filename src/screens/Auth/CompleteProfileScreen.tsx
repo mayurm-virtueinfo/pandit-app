@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
 import ImagePicker from 'react-native-image-crop-picker';
 import Feather from 'react-native-vector-icons/Feather';
+import {translateData} from '../../utils/TranslateData';
 
 interface FormData {
   phoneNumber: string;
@@ -60,8 +61,11 @@ const CompleteProfileScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const inset = useSafeAreaInsets();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {showErrorToast} = useCommonToast();
+
+  const currentLanguage = i18n.language;
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
   const {phoneNumber} = route.params;
 
@@ -118,88 +122,133 @@ const CompleteProfileScreen: React.FC = () => {
     }
   }, [formData.subCaste]);
 
-  const fetchCityData = async () => {
+  const fetchCityData = useCallback(async () => {
     setIsLoading(true);
     try {
+      const cacheKey = `city_${currentLanguage}`;
+      if (translationCacheRef.current.has(cacheKey)) {
+        setCityData(translationCacheRef.current.get(cacheKey));
+        setIsLoading(false);
+        return;
+      }
+
       const response = (await getCity()) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const cities = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setCityData(cities);
-      } else {
-        setCityData([]);
-      }
+      const cityList = Array.isArray(response?.data) ? response.data : [];
+
+      const mapped: any = cityList.map((item: any) => ({
+        label: item.name || item.title,
+        value: item.id,
+      }));
+
+      const translated: any = await translateData(mapped, currentLanguage, [
+        'label',
+      ]);
+      setCityData(translated);
+      translationCacheRef.current.set(cacheKey, translated);
     } catch (error: any) {
       showErrorToast(error?.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage, showErrorToast]);
 
-  const fetchCasteData = async () => {
+  const fetchCasteData = useCallback(async () => {
     setIsLoading(true);
     try {
+      const cacheKey = `caste_${currentLanguage}`;
+      if (translationCacheRef.current.has(cacheKey)) {
+        setCasteData(translationCacheRef.current.get(cacheKey));
+        setIsLoading(false);
+        return;
+      }
+
       const response = (await getCaste()) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const castes = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setCasteData(castes);
-      } else {
-        setCasteData([]);
-      }
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const casteList = Array.isArray(response?.data) ? response.data : [];
 
-  const fetchSubCasteData = async (casteId: string) => {
-    setIsLoading(true);
-    try {
-      const response = (await getSubCaste(casteId)) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const subCastes = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setSubCasteData(subCastes);
-      } else {
-        setSubCasteData([]);
-      }
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const mapped = casteList.map((item: any) => ({
+        label: item.name || item.title,
+        value: item.id,
+      }));
 
-  const fetchGotraData = async (subCasteId: string) => {
-    setIsLoading(true);
-    try {
-      const response = (await getGotra(subCasteId)) as DropdownResponse;
-      if (Array.isArray(response?.data)) {
-        const gotras = response.data.map(item => ({
-          label: 'name' in item ? item.name : item.title,
-          value: item.id,
-        }));
-        setGotraData(gotras);
-      } else {
-        setGotraData([]);
-      }
+      const translated: any = await translateData(mapped, currentLanguage, [
+        'label',
+      ]);
+      setCasteData(translated);
+      translationCacheRef.current.set(cacheKey, translated);
     } catch (error: any) {
       showErrorToast(error?.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage, showErrorToast]);
+
+  const fetchSubCasteData = useCallback(
+    async (casteId: string) => {
+      setIsLoading(true);
+      try {
+        const cacheKey = `subcaste_${casteId}_${currentLanguage}`;
+        if (translationCacheRef.current.has(cacheKey)) {
+          setSubCasteData(translationCacheRef.current.get(cacheKey));
+          setIsLoading(false);
+          return;
+        }
+
+        const response = (await getSubCaste(casteId)) as DropdownResponse;
+        const list = Array.isArray(response?.data) ? response.data : [];
+
+        const mapped = list.map((item: any) => ({
+          label: item.name || item.title,
+          value: item.id,
+        }));
+
+        const translated: any = await translateData(mapped, currentLanguage, [
+          'label',
+        ]);
+        setSubCasteData(translated);
+        translationCacheRef.current.set(cacheKey, translated);
+      } catch (error: any) {
+        showErrorToast(error?.message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentLanguage, showErrorToast],
+  );
+
+  const fetchGotraData = useCallback(
+    async (subCasteId: string) => {
+      setIsLoading(true);
+      try {
+        const cacheKey = `gotra_${subCasteId}_${currentLanguage}`;
+        if (translationCacheRef.current.has(cacheKey)) {
+          setGotraData(translationCacheRef.current.get(cacheKey));
+          setIsLoading(false);
+          return;
+        }
+
+        const response = (await getGotra(subCasteId)) as DropdownResponse;
+        const list = Array.isArray(response?.data) ? response.data : [];
+
+        const mapped = list.map((item: any) => ({
+          label: item.name || item.title,
+          value: item.id,
+        }));
+
+        const translated: any = await translateData(mapped, currentLanguage, [
+          'label',
+        ]);
+        setGotraData(translated);
+        translationCacheRef.current.set(cacheKey, translated);
+      } catch (error: any) {
+        showErrorToast(error?.message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentLanguage, showErrorToast],
+  );
 
   const validateEmail = (email: string) => {
-    // Simple email regex
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
   };
@@ -241,7 +290,6 @@ const CompleteProfileScreen: React.FC = () => {
     setErrors(prev => ({...prev, [field]: validateField(field, value)}));
   };
 
-  // Fixed photo selection logic: set profile_img, not photoUri
   const handlePhotoSelect = () => {
     Keyboard.dismiss();
     Alert.alert(t('select_profile_picture'), t('choose_an_option'), [
@@ -289,7 +337,7 @@ const CompleteProfileScreen: React.FC = () => {
 
   const processImage = async (image: any) => {
     try {
-      const imageData = {
+      const imageData: any = {
         uri:
           Platform.OS === 'ios'
             ? image.path.replace('file://', '')
@@ -309,20 +357,16 @@ const CompleteProfileScreen: React.FC = () => {
     let firstError = '';
 
     for (const field in formData) {
-      // Don't validate photoUri (no longer in formData)
       const error = validateField(
         field as keyof FormData,
         formData[field as keyof FormData] as string,
       );
       if (error) {
-        // Only assign error string to fields that expect a string, not to profile_img (which expects an object)
         if (field !== 'profile_img') {
           newErrors[field as Exclude<keyof FormData, 'profile_img'>] =
             error as string;
           if (!firstError) firstError = error;
-        }
-        // Do not assign error to profile_img, but still capture the first error if not set
-        else if (!firstError) {
+        } else if (!firstError) {
           firstError = error;
         }
       }
@@ -344,6 +388,21 @@ const CompleteProfileScreen: React.FC = () => {
       profile_img: formData.profile_img,
     });
   };
+
+  useEffect(() => {
+    fetchCityData();
+    fetchCasteData();
+    if (formData.caste) fetchSubCasteData(formData.caste);
+    if (formData.subCaste) fetchGotraData(formData.subCaste);
+  }, [
+    currentLanguage,
+    fetchCityData,
+    fetchCasteData,
+    fetchSubCasteData,
+    fetchGotraData,
+    formData.caste,
+    formData.subCaste,
+  ]);
 
   return (
     <View style={[styles.mainContainer, {paddingTop: inset.top}]}>

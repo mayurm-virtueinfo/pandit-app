@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
   },
   phoneInputGroup: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     // marginBottom: moderateScale(18),
     // marginTop: moderateScale(24),
   },

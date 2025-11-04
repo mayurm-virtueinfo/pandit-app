@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {COLORS, wp} from '../../theme/theme';
@@ -19,11 +19,11 @@ import {useTranslation} from 'react-i18next';
 import {CustomeSelectorDataOption} from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
 import {getLanguage} from '../../api/apiService';
-import {SelectorDataOption} from './type';
 import CustomeLoader from '../../components/CustomLoader';
 import {useCommonToast} from '../../common/CommonToast';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import {translateData} from '../../utils/TranslateData';
 
 type RouteParams = {
   action?: string;
@@ -51,17 +51,22 @@ const SelectLanguageScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {showErrorToast} = useCommonToast();
 
   const [languages, setLanguages] = useState<CustomeSelectorDataOption[]>([]);
+  const [originalLanguages, setOriginalLanguages] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
   const [filteredLanguages, setFilteredLanguages] = useState<
     CustomeSelectorDataOption[]
   >([]);
-  const [searchText, setSearchText] = useState('');
   const [selectedLanguageId, setSelectedLanguageId] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState<string>('');
 
+  const currentLanguage = i18n.language;
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
   const action = route.params?.action;
 
   const {
@@ -80,27 +85,67 @@ const SelectLanguageScreen: React.FC = () => {
     selectedPoojaId,
   } = route.params || {};
 
-  useEffect(() => {
-    fetchPoojaData();
-  }, []);
-
-  const fetchPoojaData = async () => {
+  /** ✅ Fetch all languages with translation and caching */
+  const fetchLanguageData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = (await getLanguage()) as SelectorDataOption;
-      const data = response?.data || [];
-      const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-      }));
-      setLanguages(mappedData);
-      setFilteredLanguages(mappedData);
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+
+      if (cachedData) {
+        setLanguages(cachedData);
+        setFilteredLanguages(cachedData);
+      } else {
+        const response: any = await getLanguage();
+        const data = response?.data ?? [];
+
+        const mappedData: CustomeSelectorDataOption[] = data.map(
+          (item: any) => ({
+            id: item.id,
+            name: item.name,
+          }),
+        );
+
+        setOriginalLanguages(mappedData);
+
+        const translatedData: any = await translateData(
+          mappedData,
+          currentLanguage,
+          ['name'],
+        );
+
+        translationCacheRef.current.set(currentLanguage, translatedData);
+        setLanguages(translatedData);
+        setFilteredLanguages(translatedData);
+      }
     } catch (error: any) {
-      showErrorToast(error?.message);
+      showErrorToast(error?.message || 'Failed to fetch languages');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    fetchLanguageData();
+  }, [fetchLanguageData]);
+
+  /** ✅ Dual-language search (original + translated) */
+  useEffect(() => {
+    if (!searchText.trim()) {
+      setFilteredLanguages(languages);
+    } else {
+      const lowerText = searchText.toLowerCase();
+      setFilteredLanguages(
+        languages.filter(lang => {
+          const translatedMatch = lang.name?.toLowerCase()?.includes(lowerText);
+          const originalMatch = originalLanguages
+            .find(orig => orig.id === lang.id)
+            ?.name?.toLowerCase()
+            ?.includes(lowerText);
+          return translatedMatch || originalMatch;
+        }),
+      );
+    }
+  }, [searchText, languages, originalLanguages]);
 
   const handleLanguageSelect = (languageId: number) => {
     setSelectedLanguageId(prev =>
@@ -110,118 +155,109 @@ const SelectLanguageScreen: React.FC = () => {
     );
   };
 
-  const handleSearch = (text: string) => {
-    setSearchText(text);
-    if (text.trim() === '') {
-      setFilteredLanguages(languages);
-    } else {
-      const filtered = languages.filter(lang =>
-        lang.name.toLowerCase().includes(text.toLowerCase()),
-      );
-      setFilteredLanguages(filtered);
+  const handleNext = () => {
+    if (!selectedLanguageId.length) {
+      showErrorToast(t('please_select_language') || 'Please select a language');
+      return;
     }
+
+    navigation.navigate('DocumentUploadScreen', {
+      phoneNumber: phoneNumber ?? '',
+      email: email ?? '',
+      firstName: firstName ?? '',
+      lastName: lastName ?? '',
+      city: city ?? '',
+      caste: caste ?? '',
+      subCaste: subCaste ?? '',
+      gotra: gotra ?? '',
+      address: address ?? '',
+      profile_img: profile_img ?? '',
+      selectCityId: selectCityId ?? '',
+      selectedAreasId: selectedAreasId ?? [],
+      selectedPoojaId: selectedPoojaId ?? [],
+      selectedLanguageId: selectedLanguageId ?? [],
+    });
   };
 
-  const handleNext = () => {
-    const selectedLanguage = languages.filter(language =>
-      selectedLanguageId.includes(language.id),
-    );
-    if (selectedLanguage.length > 0) {
-      navigation.navigate('DocumentUploadScreen', {
-        phoneNumber: phoneNumber ?? '',
-        email: email ?? '',
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
-        city: city ?? '',
-        caste: caste ?? '',
-        subCaste: subCaste ?? '',
-        gotra: gotra ?? '',
-        address: address ?? '',
-        profile_img: profile_img ?? '',
-        selectCityId: selectCityId ?? '',
-        selectedAreasId: selectedAreasId ?? [],
-        selectedPoojaId: selectedPoojaId ?? [],
-        selectedLanguageId: selectedLanguageId ?? [],
-      });
-    }
+  const handleSearch = (text: string) => {
+    setSearchText(text);
   };
 
   const buttonText = action === 'Update' ? t('update') : t('next');
+  const showNoResult =
+    searchText.trim().length > 0 && filteredLanguages.length === 0;
 
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
       <CustomeLoader loading={isLoading} />
-      <View style={[styles.container]}>
-        <CustomHeader
-          title={t('complete_your_profile')}
-          showBackButton={true}
-        />
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
-          <View style={styles.contentContainer}>
-            <ScrollView
-              contentContainerStyle={{flexGrow: 1}}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}>
-              <View style={styles.mainContent}>
-                <Text style={styles.selectCityTitle}>
-                  {t('select_language')}
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
+      <CustomHeader title={t('complete_your_profile')} showBackButton={true} />
+
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+        <View style={styles.contentContainer}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContentContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled">
+            <View style={styles.mainContent}>
+              <Text style={styles.selectCityTitle}>{t('select_language')}</Text>
+              <Text style={styles.description}>
+                {t('select_language_desc')}
+              </Text>
+
+              <CustomeMultiSelector
+                data={filteredLanguages}
+                selectedDataIds={selectedLanguageId}
+                onDataSelect={handleLanguageSelect}
+                searchPlaceholder={t('search_language')}
+                isMultiSelect={true}
+                onSearch={handleSearch}
+              />
+
+              {showNoResult && (
+                <Text style={styles.noResultText}>
+                  {t('no_language_found') || 'No language found'}
                 </Text>
-                <Text style={styles.description}>
-                  {t('select_language_desc')}
-                </Text>
-                <CustomeMultiSelector
-                  data={filteredLanguages}
-                  selectedDataIds={selectedLanguageId}
-                  onDataSelect={handleLanguageSelect}
-                  searchPlaceholder={t('select_language')}
-                  isMultiSelect={true}
-                  onSearch={handleSearch}
-                  // onSearch={searchText}
-                />
-                {filteredLanguages.length === 0 && searchText.trim() !== '' && (
-                  <Text style={styles.noDataText}>
-                    {t('no_data_found') || 'No data found'}
-                  </Text>
-                )}
-              </View>
-            </ScrollView>
-          </View>
-          {/* Button fixed at the bottom */}
+              )}
+            </View>
+          </ScrollView>
+
           <View style={styles.bottomButtonContainer}>
             <PrimaryButton
               title={buttonText}
               onPress={handleNext}
               style={styles.nextButton}
-              disabled={selectedLanguageId.length === 0}
+              disabled={!selectedLanguageId.length}
             />
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.primaryBackground,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
+  container: {flex: 1, backgroundColor: COLORS.primaryBackground},
+  keyboardAvoidingView: {flex: 1},
   contentContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
+  scrollView: {flex: 1},
+  scrollContentContainer: {flexGrow: 1, paddingBottom: 0},
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    flex: 1,
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -235,21 +271,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     marginBottom: moderateScale(18),
   },
-  noDataText: {
+  nextButton: {height: moderateScale(46)},
+  bottomButtonContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: wp(6.5),
+    paddingTop: moderateScale(8),
+    paddingBottom: moderateScale(16),
+  },
+  noResultText: {
     color: COLORS.lighttext,
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(16),
     textAlign: 'center',
-    marginTop: moderateScale(20),
-  },
-  nextButton: {
-    height: moderateScale(46),
-    marginTop: moderateScale(0),
-  },
-  bottomButtonContainer: {
-    paddingHorizontal: wp(6.5),
-    paddingBottom: moderateScale(24),
-    backgroundColor: COLORS.white,
   },
 });
 

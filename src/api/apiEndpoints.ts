@@ -82,3 +82,6 @@ export const USERAGREEMENT = '/panditji/policies/user-agreement/';
 export const REFUNDPOLICY = '/panditji/policies/refund-policy/';
 export const DELETEACCOUNT = '/app/delete-user/';
 export const CREATE_MEETING = '/api/chat/create_meeting/';
+export const GET_COMPLETED_PUJA = '/panditji/completed-poojas-list/';
+export const GET_COMPLETED_PUJA_DETAILS =
+  '/panditji/completed-pooja-detail/?booking_id={id}';

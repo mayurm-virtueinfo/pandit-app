@@ -21,11 +21,14 @@ import {
   getUpcomingPuja,
   getCompletedPuja,
   getInProgressPuja,
+  getCompletePujaList,
 } from '../../api/apiService';
 import {useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
 import CustomeLoader from '../../components/CustomLoader';
 import {translateData} from '../../utils/TranslateData';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppConstant from '../../utils/AppContent';
 
 interface PujaItem {
   id: string | number;
@@ -66,7 +69,6 @@ const HomeScreen: React.FC = () => {
   const [inProgressLoading, setInProgressLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // 🔥 Cache translations per language
   const translationCacheRef = useRef<Map<string, any>>(new Map());
   const currentLanguage = i18n.language;
 
@@ -80,10 +82,10 @@ const HomeScreen: React.FC = () => {
         upcomingResponse,
         completedResponse,
         inProgressResponse,
-      ] = await Promise.all([
+      ]: any = await Promise.all([
         getPandingPuja(),
         getUpcomingPuja(),
-        getCompletedPuja(),
+        getCompletePujaList(),
         getInProgressPuja(),
       ]);
 
@@ -97,7 +99,7 @@ const HomeScreen: React.FC = () => {
 
       let pendingList = getArray(pendingResponse);
       let upcomingList = getArray(upcomingResponse);
-      let completedList = getArray(completedResponse);
+      let completedList = completedResponse?.data?.results;
       let inProgressList = getArray(inProgressResponse);
 
       // ✅ Apply Translation Logic
@@ -152,34 +154,90 @@ const HomeScreen: React.FC = () => {
     }
   }, [currentLanguage]);
 
-  // 🔁 Refetch when language changes
   useEffect(() => {
     fetchAllPujas();
-  }, [fetchAllPujas, currentLanguage]);
+  }, [fetchAllPujas]);
 
-  // 🔁 Also fetch when screen comes into focus
-  // useEffect(() => {
-  //   const unsubscribe = navigation.addListener('focus', fetchAllPujas);
-  //   fetchAllPujas();
-  //   return () => {
-  //     if (typeof unsubscribe === 'function') unsubscribe();
-  //   };
-  // }, [fetchAllPujas, navigation]);
+  useEffect(() => {
+    let socket: WebSocket | null = null;
+
+    const connectWebSocket = async () => {
+      try {
+        const token = await AsyncStorage.getItem(AppConstant.ACCESS_TOKEN);
+        const userId = await AsyncStorage.getItem(AppConstant.USER_ID);
+
+        if (!token || !userId) return;
+
+        const wsUrl = getSocketURL(token, userId);
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+          console.log('✅ WebSocket connected');
+        };
+
+        socket.onmessage = event => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('📩 WebSocket message received:', data);
+
+            if (
+              data.type === 'booking_request' &&
+              data.action === 'created' &&
+              data.booking_id
+            ) {
+              console.log('🔔 New Puja Booking Created:', data.booking_id);
+
+              // 🔄 Refresh all sections
+              translationCacheRef.current.clear();
+              fetchAllPujas();
+            }
+          } catch (err) {
+            console.error('❌ Error parsing WebSocket message:', err);
+          }
+        };
+
+        socket.onerror = error => {
+          console.error('⚠️ WebSocket error:', error);
+        };
+
+        socket.onclose = e => {
+          console.log('🔌 WebSocket closed:', e.reason);
+          // 🔁 Auto reconnect after 5s
+          setTimeout(connectWebSocket, 5000);
+        };
+      } catch (error) {
+        console.error('⚠️ Failed to connect WebSocket:', error);
+      }
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (socket) {
+        console.log('❎ Closing WebSocket connection');
+        socket.close();
+      }
+    };
+  }, [fetchAllPujas]);
 
   useEffect(() => {
     const subscription = DeviceEventEmitter.addListener(
       'PUJA_DATA_UPDATED',
       async () => {
-        // Clear cache if you’re using translation caching
         translationCacheRef?.current?.clear?.();
-
-        // Fetch latest puja data and update UI
         await fetchAllPujas();
       },
     );
 
     return () => subscription.remove();
   }, [fetchAllPujas]);
+
+  const getSocketURL = (token: string, userId: string) => {
+    if (__DEV__) {
+      return `ws://dev.puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
+    }
+    return `wss://puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -224,18 +282,18 @@ const HomeScreen: React.FC = () => {
     return `${getOrdinal(day)} ${month}`;
   };
 
-  const renderCompletedPuja = (item: PujaItem, isLast: boolean) => (
+  const renderCompletedPuja = (item: any, isLast: boolean) => (
     <TouchableOpacity
       onPress={() =>
         navigation.navigate('CompletePujaDetailsScreen', {
-          booking_id: item.id,
+          booking_id: item.booking_id,
           completed: true,
         })
       }>
       <View style={styles.pujaItem}>
-        <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
+        <Image source={{uri: item.image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
-          <Text style={styles.pujaName}>{item.pooja_name}</Text>
+          <Text style={styles.pujaName}>{item.title}</Text>
           <Text style={styles.pujaDate}>
             {t('scheduled_on')} {formatDateWithOrdinal(item.booking_date)}
           </Text>

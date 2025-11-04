@@ -37,6 +37,7 @@ import {
   translateOne,
   translateText,
 } from '../../utils/TranslateData';
+import {Images} from '../../theme/Images';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -599,10 +600,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   onPress={handleOnChatClick}
                   style={styles.chatButton}>
                   <Image
-                    source={{
-                      uri: 'https://api.builder.io/api/v1/image/assets/TEMP/4c01dc3358caeee996c8d4195776dbf1f8045f61?width=40',
-                    }}
+                    source={Images.ic_message}
                     style={[styles.chatIcon && {opacity: 0.5}]}
+                    tintColor={COLORS.primaryBackgroundButton}
                   />
                 </TouchableOpacity>
               </View>

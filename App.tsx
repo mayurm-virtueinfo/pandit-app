@@ -32,6 +32,7 @@ import {requestUserPermission} from './src/configuration/notificationPermission'
 import DeviceInfo from 'react-native-device-info';
 import checkVersion from 'react-native-store-version';
 import {SessionProvider} from './src/provider/SessionProvider';
+import {NetworkProvider} from './src/provider/NetworkProvider';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -160,26 +161,28 @@ const App = () => {
         </View>
       </Modal>
       {/* App content */}
-      <ToastProvider
-        style={{
-          backgroundColor: COLORS.primary,
-        }}
-        textStyle={{
-          fontSize: moderateScale(16),
-          color: COLORS.textPrimary,
-        }}>
-        <AuthProvider>
-          <SessionProvider>
-            <NavigationContainer
-              ref={navigationRef}
-              onReady={() => {
-                handleInitialNotification();
-              }}>
-              <RootNavigator />
-            </NavigationContainer>
-          </SessionProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <NetworkProvider>
+        <ToastProvider
+          style={{
+            backgroundColor: COLORS.primary,
+          }}
+          textStyle={{
+            fontSize: moderateScale(16),
+            color: COLORS.textPrimary,
+          }}>
+          <AuthProvider>
+            <SessionProvider>
+              <NavigationContainer
+                ref={navigationRef}
+                onReady={() => {
+                  handleInitialNotification();
+                }}>
+                <RootNavigator />
+              </NavigationContainer>
+            </SessionProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </NetworkProvider>
     </I18nextProvider>
   );
 };

@@ -15,7 +15,11 @@ import {COLORS, THEMESHADOW} from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import {moderateScale, verticalScale} from 'react-native-size-matters';
 
-import {getCompletedPuja, getPastBookings} from '../../api/apiService';
+import {
+  getCompletedPuja,
+  getCompletedPujaDetails,
+  getPastBookings,
+} from '../../api/apiService';
 import {translateData, translateText} from '../../utils/TranslateData';
 import CustomeLoader from '../../components/CustomLoader';
 
@@ -27,6 +31,8 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const insets = useSafeAreaInsets();
   const currentLanguage = i18n.language;
   const {completed, booking_id} = (route.params || {}) as any;
+
+  console.log('route params :: ', route.params);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [completedPujaData, setCompletedPujaData] = useState<any>(null);
@@ -43,31 +49,19 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         return;
       }
 
-      const response: any = await getCompletedPuja();
-      const list = Array.isArray(response?.data) ? response.data : [];
-      const selected =
-        list.find(
-          (item: any) =>
-            item?.booking_id == booking_id || item?.id == booking_id,
-        ) || list[0];
+      const response: any = await getCompletedPujaDetails(booking_id);
+      console.log('response :: ', response);
 
-      const translatedData: any = await translateData(
-        selected,
-        currentLanguage,
-        [
-          'pooja_name',
-          'booking_status',
-          'muhurat_type',
-          'booking_user_name',
-          'payment_status',
-          'samagri_required',
-        ],
-      );
+      const data = response?.data;
 
-      translatedData.address_details.full_address = await translateText(
-        translatedData.address_details.full_address,
-        currentLanguage,
-      );
+      const translatedData: any = await translateData(data, currentLanguage, [
+        'pooja_title',
+        'address',
+        'booking_status',
+        'muhurat_type',
+        'payment_status',
+        'user_name',
+      ]);
 
       translationCacheRef.current.set(currentLanguage, translatedData);
       setCompletedPujaData(translatedData);
@@ -150,6 +144,12 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     address_details,
     booking_status,
     assigned_pandit,
+    pooja_image,
+    pooja_price,
+    pooja_title,
+    user_name,
+    user_profile_img,
+    address,
   } = pujaData || {};
 
   // Helper to format date (e.g., 19th September)
@@ -196,7 +196,12 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   };
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View
+      style={[
+        styles.container,
+        {paddingTop: insets.top},
+        {backgroundColor: loading ? COLORS.white : COLORS.primaryBackground},
+      ]}>
       <CustomeLoader loading={loading} />
 
       <CustomHeader
@@ -212,13 +217,7 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}>
           <Image
-            source={
-              pooja_image_url
-                ? {uri: pooja_image_url}
-                : {
-                    uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                  }
-            }
+            source={{uri: pooja_image_url || pooja_image}}
             style={[
               styles.heroImage,
               {width: screenWidth, height: verticalScale(200)},
@@ -231,7 +230,9 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               paddingHorizontal: moderateScale(24),
               paddingTop: verticalScale(24),
             }}>
-            <Text style={styles.pujaTitle}>{pooja_name || t('Puja Name')}</Text>
+            <Text style={styles.pujaTitle}>
+              {pooja_name || pooja_title || t('Puja Name')}
+            </Text>
             <View style={[styles.card, THEMESHADOW.shadow]}>
               <View style={styles.cardInner}>
                 <View style={styles.detailRow}>
@@ -243,7 +244,7 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>{t('amount')}</Text>
                   <Text style={[styles.detailValue, {color: COLORS.success}]}>
-                    ₹{amount || '0'}
+                    ₹{amount || pooja_price || '0'}
                   </Text>
                 </View>
                 <View style={styles.detailRow}>
@@ -256,12 +257,14 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   <Text style={styles.detailLabel}>{t('muhurat_time')}</Text>
                   <Text style={styles.detailValue}>{muhurat_time || '-'}</Text>
                 </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('temple')}</Text>
-                  <Text style={styles.detailValue}>
-                    {tirth_place_name || '-'}
-                  </Text>
-                </View>
+                {tirth_place_name && (
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>{t('temple')}</Text>
+                    <Text style={styles.detailValue}>
+                      {tirth_place_name || '-'}
+                    </Text>
+                  </View>
+                )}
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>
                     {t('samagri_required')}
@@ -314,16 +317,12 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
             {/* User Card */}
             <View style={[styles.userCard, THEMESHADOW.shadow]}>
               <Image
-                source={
-                  booking_user_img
-                    ? {
-                        uri:
-                          booking_user_img || assigned_pandit?.profile_img_url,
-                      }
-                    : {
-                        uri: 'https://cdn.builder.io/api/v1/image/assets/TEMP/db9492299c701c6ca2a23d6de9fc258e7ec2b5fd?width=160',
-                      }
-                }
+                source={{
+                  uri:
+                    booking_user_img ||
+                    assigned_pandit?.profile_img_url ||
+                    user_profile_img,
+                }}
                 style={styles.userImage}
                 resizeMode="cover"
               />
@@ -331,23 +330,17 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 <Text style={styles.userName}>
                   {assigned_pandit?.pandit_name ||
                     booking_user_name ||
+                    user_name ||
                     t('User Name')}
                 </Text>
-                {completed && (
-                  <Text style={styles.userMobile}>
-                    {booking_user_mobile || t('Mobile Number')}
-                  </Text>
-                )}
               </View>
             </View>
 
             {/* Address Card */}
-            {address_details && (
+            {address && (
               <View style={[styles.addressCard, THEMESHADOW.shadow]}>
                 <Text style={styles.addressLabel}>{t('address_details')}</Text>
-                <Text style={styles.addressValue}>
-                  {getAddressString(address_details) || '-'}
-                </Text>
+                <Text style={styles.addressValue}>{address}</Text>
               </View>
             )}
           </View>
@@ -363,11 +356,9 @@ const CompletePujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
 export default CompletePujaDetailsScreen;
 
-// Styles remain unchanged
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.primaryBackground,
   },
   scrollView: {
     flex: 1,
@@ -448,16 +439,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.white,
     borderRadius: moderateScale(16),
-    padding: moderateScale(16),
+    padding: moderateScale(12),
     marginBottom: verticalScale(20),
     gap: 12,
   },
   userImage: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 30,
-    borderWidth: 2,
-    borderColor: COLORS.primary,
+    borderWidth: 1,
+    borderColor: COLORS.black,
     backgroundColor: COLORS.backGroundSecondary,
   },
   userInfo: {
@@ -467,7 +458,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 4,
     fontFamily: Fonts.Sen_SemiBold,
   },
   userMobile: {
