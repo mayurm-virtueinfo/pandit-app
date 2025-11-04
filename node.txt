@@ -1,0 +1,8 @@
+node version 22.14.0
+
+
+@react-native-firebase/database
+@react-native-firebase/firestore
+"npm": "^11.4.1",
+react-native-splash-screen
+"yarn": "^1.22.22"

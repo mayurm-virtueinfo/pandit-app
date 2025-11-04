@@ -1,7 +1,8 @@
 import './src/i18n';
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import SplashScreen from 'react-native-splash-screen';
+// import SplashScreen from 'react-native-splash-screen';
+import { hideSplash } from 'react-native-splash-view';
 import RootNavigator from './src/navigation/RootNavigator';
 import {
   LogBox,
@@ -47,7 +48,7 @@ LogBox.ignoreLogs([
 const auth = getAuth();
 if (__DEV__) {
   // auth.useEmulator('http://127.0.0.1:9099');
-  auth.useEmulator('http://192.168.1.22:9099');
+  auth.useEmulator('http://192.168.1.7:9099');
 }
 setupNotifications();
 
@@ -58,7 +59,8 @@ const App = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      SplashScreen.hide();
+      // SplashScreen.hide();
+      hideSplash()
     }, 2500);
 
     requestUserPermission();

@@ -5,7 +5,9 @@ import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import android.os.Bundle // Import Bundle
-import org.devio.rn.splashscreen.SplashScreen // Import SplashScreen
+import com.swmansion.rnscreens.fragment.restoration.RNScreensFragmentFactory;
+import com.splashview.SplashView
+// import org.devio.rn.splashscreen.SplashScreen // Import SplashScreen
 
 class MainActivity : ReactActivity() {
 
@@ -22,8 +24,10 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    SplashScreen.show(this) // Show splash screen
-    super.onCreate(savedInstanceState)
-  }
+    //react-native-screens override
+    override fun onCreate(savedInstanceState: Bundle?) {
+      SplashView.showSplashView(this) // Show the splash screen
+      supportFragmentManager.fragmentFactory = RNScreensFragmentFactory()
+      super.onCreate(savedInstanceState);
+    }
 }

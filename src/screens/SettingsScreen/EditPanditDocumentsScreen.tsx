@@ -1,7 +1,8 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {View, StatusBar, ScrollView, StyleSheet, Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import DocumentPicker from 'react-native-document-picker';
+// import DocumentPicker from 'react-native-document-picker';
+import { pick, types, errorCodes } from '@react-native-documents/picker';
 import CustomHeader from '../../components/CustomHeader';
 import {COLORS} from '../../theme/theme';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -159,8 +160,8 @@ const EditPanditDocumentsScreen: React.FC = () => {
     if (loadingDocument || isDocumentUploading) return;
     try {
       setIsDocumentUploading(true); // Show loader globally
-      const result = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles],
+      const result = await pick({
+        type: [types.allFiles],
       });
       if (result && result.length > 0) {
         const document = result[0];
@@ -192,10 +193,10 @@ const EditPanditDocumentsScreen: React.FC = () => {
       } else {
         setIsDocumentUploading(false); // Hide loader if no file picked
       }
-    } catch (err) {
+    } catch (err: any) {
       setIsDocumentUploading(false); // Hide loader on error/cancel
       setLoadingDocument(null);
-      if (DocumentPicker.isCancel(err)) return;
+      if (errorCodes?.OPERATION_CANCELED == err?.code) return;
       showErrorToast(t('failed_to_pick_document'));
     }
   };

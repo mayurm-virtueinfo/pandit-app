@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -44,16 +46,18 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This is required to check Pandit availability and allow users to schedule appointments and save event dates directly to your calendar.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera to allow you to take and upload photos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>This is required to check Pandit availability and allow users to schedule appointments and save event dates directly to your calendar.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need access to your microphone for audio recording features.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to allow you to select and upload photos.</string>
+	<key>RCTNewArchEnabled</key>
+	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

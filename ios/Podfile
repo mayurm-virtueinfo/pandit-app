@@ -24,12 +24,8 @@ target 'PanditApp' do
   )
 
   # Add RNFBDatabase pod
-  pod 'RNFBDatabase', :path => '../node_modules/@react-native-firebase/database'
+  # pod 'RNFBDatabase', :path => '../node_modules/@react-native-firebase/database'
 
-  target 'PanditAppTests' do
-    inherit! :complete
-    # Pods for testing
-  end
 
   post_install do |installer|
     react_native_post_install(  
