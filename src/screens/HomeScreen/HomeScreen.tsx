@@ -1,13 +1,14 @@
-import React, {useCallback, useState, useEffect} from 'react';
+import React, {useCallback, useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Image,
-  Dimensions,
   StatusBar,
   TouchableOpacity,
+  RefreshControl,
+  DeviceEventEmitter,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
@@ -20,10 +21,14 @@ import {
   getUpcomingPuja,
   getCompletedPuja,
   getInProgressPuja,
+  getCompletePujaList,
 } from '../../api/apiService';
 import {useNavigation} from '@react-navigation/native';
 import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
 import CustomeLoader from '../../components/CustomLoader';
+import {translateData} from '../../utils/TranslateData';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppConstant from '../../utils/AppContent';
 
 interface PujaItem {
   id: string | number;
@@ -49,9 +54,10 @@ interface InProgressPujaItem {
 }
 
 const HomeScreen: React.FC = () => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const navigation = useNavigation<HomeStackParamList>();
   const inset = useSafeAreaInsets();
+
   const [upcomingPujas, setUpcomingPujas] = useState<PujaItem[]>([]);
   const [completedPujas, setCompletedPujas] = useState<PujaItem[]>([]);
   const [pendingPujas, setPendingPujas] = useState<PendingPujaItem[]>([]);
@@ -61,6 +67,10 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [pendingLoading, setPendingLoading] = useState<boolean>(true);
   const [inProgressLoading, setInProgressLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
+  const currentLanguage = i18n.language;
 
   const fetchAllPujas = useCallback(async () => {
     setLoading(true);
@@ -72,71 +82,66 @@ const HomeScreen: React.FC = () => {
         upcomingResponse,
         completedResponse,
         inProgressResponse,
-      ] = await Promise.all([
+      ]: any = await Promise.all([
         getPandingPuja(),
         getUpcomingPuja(),
-        getCompletedPuja(),
+        getCompletePujaList(),
         getInProgressPuja(),
       ]);
 
-      // Pending Puja
-      let pendingList: PendingPujaItem[] = [];
-      if (
-        pendingResponse &&
-        typeof pendingResponse === 'object' &&
-        'data' in pendingResponse
-      ) {
-        const data = (pendingResponse as {data?: unknown}).data;
-        pendingList = Array.isArray(data) ? (data as PendingPujaItem[]) : [];
-      } else if (Array.isArray(pendingResponse)) {
-        pendingList = pendingResponse;
-      }
-      setPendingPujas(pendingList);
-
-      // Upcoming Puja
-      let upcomingList: PujaItem[] = [];
-      if (
-        upcomingResponse &&
-        typeof upcomingResponse === 'object' &&
-        'data' in upcomingResponse
-      ) {
-        const data = (upcomingResponse as {data?: unknown}).data;
-        console.log('data', data);
-        upcomingList = Array.isArray(data) ? (data as PujaItem[]) : [];
-      } else if (Array.isArray(upcomingResponse)) {
-        upcomingList = upcomingResponse;
-      }
-      setUpcomingPujas(upcomingList);
-
-      // Completed Puja
-      let completedList: PujaItem[] = [];
-      if (
-        completedResponse &&
-        typeof completedResponse === 'object' &&
-        'data' in completedResponse
-      ) {
-        const data = (completedResponse as {data?: unknown}).data;
-        completedList = Array.isArray(data) ? (data as PujaItem[]) : [];
-      } else if (Array.isArray(completedResponse)) {
-        completedList = completedResponse;
-      }
-      setCompletedPujas(completedList);
-
-      // In-Progress Puja
-      let inProgressList: InProgressPujaItem[] = [];
-      if (
-        inProgressResponse &&
-        typeof inProgressResponse === 'object' &&
-        'data' in inProgressResponse
-      ) {
-        const data = (inProgressResponse as {data?: unknown}).data;
-        inProgressList = Array.isArray(data)
-          ? (data as InProgressPujaItem[])
+      // Utility to extract array safely
+      const getArray = (res: any) =>
+        Array.isArray(res)
+          ? res
+          : typeof res === 'object' && res?.data && Array.isArray(res.data)
+          ? res.data
           : [];
-      } else if (Array.isArray(inProgressResponse)) {
-        inProgressList = inProgressResponse;
+
+      let pendingList = getArray(pendingResponse);
+      let upcomingList = getArray(upcomingResponse);
+      let completedList = completedResponse?.data?.results;
+      let inProgressList = getArray(inProgressResponse);
+
+      // ✅ Apply Translation Logic
+      const cacheKey = currentLanguage;
+
+      if (translationCacheRef.current.has(cacheKey)) {
+        const cached = translationCacheRef.current.get(cacheKey);
+        setPendingPujas(cached.pending || []);
+        setUpcomingPujas(cached.upcoming || []);
+        setCompletedPujas(cached.completed || []);
+        setInProgressPujas(cached.inProgress || []);
+      } else {
+        const [
+          translatedPending,
+          translatedUpcoming,
+          translatedCompleted,
+          translatedInProgress,
+        ] = await Promise.all([
+          translateData(pendingList, currentLanguage, [
+            'pooja_name',
+            'when_is_pooja',
+          ]),
+          translateData(upcomingList, currentLanguage, [
+            'pooja_name',
+            'when_is_pooja',
+          ]),
+          translateData(completedList, currentLanguage, ['pooja_name']),
+          translateData(inProgressList, currentLanguage, ['pooja_name']),
+        ]);
+
+        setPendingPujas(translatedPending as PendingPujaItem[]);
+        setUpcomingPujas(translatedUpcoming as PujaItem[]);
+        setCompletedPujas(translatedCompleted as PujaItem[]);
+        setInProgressPujas(translatedInProgress as InProgressPujaItem[]);
+
+        translationCacheRef.current.set(cacheKey, {
+          pending: translatedPending,
+          upcoming: translatedUpcoming,
+          completed: translatedCompleted,
+          inProgress: translatedInProgress,
+        });
       }
-      setInProgressPujas(inProgressList);
     } catch (error) {
       setPendingPujas([]);
       setUpcomingPujas([]);
@@ -147,20 +152,105 @@ const HomeScreen: React.FC = () => {
       setLoading(false);
       setInProgressLoading(false);
     }
-  }, []);
+  }, [currentLanguage]);
 
-  // Fetch all API data when the screen is focused (comes into view)
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', fetchAllPujas);
-    // Also fetch once on mount
     fetchAllPujas();
-    return () => {
-      if (typeof unsubscribe === 'function') {
-        unsubscribe();
+  }, [fetchAllPujas]);
+
+  useEffect(() => {
+    let socket: WebSocket | null = null;
+
+    const connectWebSocket = async () => {
+      try {
+        const token = await AsyncStorage.getItem(AppConstant.ACCESS_TOKEN);
+        const userId = await AsyncStorage.getItem(AppConstant.USER_ID);
+
+        if (!token || !userId) return;
+
+        const wsUrl = getSocketURL(token, userId);
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+          console.log('✅ WebSocket connected');
+        };
+
+        socket.onmessage = event => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('📩 WebSocket message received:', data);
+
+            if (
+              data.type === 'booking_request' &&
+              data.action === 'created' &&
+              data.booking_id
+            ) {
+              console.log('🔔 New Puja Booking Created:', data.booking_id);
+
+              // 🔄 Refresh all sections
+              translationCacheRef.current.clear();
+              fetchAllPujas();
+            }
+          } catch (err) {
+            console.error('❌ Error parsing WebSocket message:', err);
+          }
+        };
+
+        socket.onerror = error => {
+          console.error('⚠️ WebSocket error:', error);
+        };
+
+        socket.onclose = e => {
+          console.log('🔌 WebSocket closed:', e.reason);
+          // 🔁 Auto reconnect after 5s
+          setTimeout(connectWebSocket, 5000);
+        };
+      } catch (error) {
+        console.error('⚠️ Failed to connect WebSocket:', error);
       }
     };
-  }, [fetchAllPujas, navigation]);
 
+    connectWebSocket();
+
+    return () => {
+      if (socket) {
+        console.log('❎ Closing WebSocket connection');
+        socket.close();
+      }
+    };
+  }, [fetchAllPujas]);
+
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener(
+      'PUJA_DATA_UPDATED',
+      async () => {
+        translationCacheRef?.current?.clear?.();
+        await fetchAllPujas();
+      },
+    );
+
+    return () => subscription.remove();
+  }, [fetchAllPujas]);
+
+  const getSocketURL = (token: string, userId: string) => {
+    if (__DEV__) {
+      return `ws://dev.puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
+    }
+    return `wss://puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    // 🧹 Clear cached translations
+    translationCacheRef.current.clear();
+
+    // 🔁 Force fresh data from API
+    await fetchAllPujas();
+
+    setRefreshing(false);
+  };
+
+  // upcoming pujas
   const renderPujaItem = (item: PujaItem, isLast: boolean) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('PujaDetailsScreen', {id: item.id})}>
@@ -168,10 +258,9 @@ const HomeScreen: React.FC = () => {
         <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
-          <Text
-            style={
-              styles.pujaDate
-            }>{`Scheduled on ${item.when_is_pooja}`}</Text>
+          <Text style={styles.pujaDate}>
+            {t('scheduled_on')} {item.when_is_pooja}
+          </Text>
         </View>
       </View>
       {!isLast && <View style={styles.separator} />}
@@ -193,20 +282,20 @@ const HomeScreen: React.FC = () => {
     return `${getOrdinal(day)} ${month}`;
   };
 
-  const renderCompletedPuja = (item: PujaItem, isLast: boolean) => (
+  const renderCompletedPuja = (item: any, isLast: boolean) => (
     <TouchableOpacity
       onPress={() =>
         navigation.navigate('CompletePujaDetailsScreen', {
-          booking_id: item.id,
+          booking_id: item.booking_id,
           completed: true,
         })
       }>
       <View style={styles.pujaItem}>
-        <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
+        <Image source={{uri: item.image_url}} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
-          <Text style={styles.pujaName}>{item.pooja_name}</Text>
+          <Text style={styles.pujaName}>{item.title}</Text>
           <Text style={styles.pujaDate}>
-            {t('scheduled_on')} {`${formatDateWithOrdinal(item.booking_date)}`}
+            {t('scheduled_on')} {formatDateWithOrdinal(item.booking_date)}
           </Text>
         </View>
       </View>
@@ -214,7 +303,6 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  // Pending Puja: No accept/reject, just navigate to WaitingApprovalPujaScreen
   const renderPendingPujaItem = (item: PendingPujaItem, isLast: boolean) => (
     <TouchableOpacity
       key={item.id}
@@ -231,8 +319,7 @@ const HomeScreen: React.FC = () => {
             <View>
               <Text style={styles.pujaName}>{item.pooja_name}</Text>
               <Text style={styles.pujaDate}>
-                {t('scheduled_on')}
-                {`${item.when_is_pooja}`}
+                {t('scheduled_on')} {item.when_is_pooja}
               </Text>
             </View>
           </View>
@@ -242,7 +329,6 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  // Render In-Progress Puja Item
   const renderInProgressPujaItem = (
     item: InProgressPujaItem,
     isLast: boolean,
@@ -258,12 +344,10 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
           <Text style={styles.pujaDate}>
             {item.when_is_pooja
-              ? `${t('scheduled_on')}${item.when_is_pooja}`
-              : item.booking_date
-              ? `${t('scheduled_on')}${formatDateWithOrdinal(
+              ? `${t('scheduled_on')} ${item.when_is_pooja}`
+              : `${t('scheduled_on')} ${formatDateWithOrdinal(
                   item.booking_date,
-                )}`
-              : ''}
+                )}`}
           </Text>
         </View>
       </View>
@@ -278,10 +362,8 @@ const HomeScreen: React.FC = () => {
         backgroundColor="transparent"
         barStyle="light-content"
       />
-
       <UserCustomHeader title={t('home')} />
 
-      {/* Main Content */}
       <View style={styles.contentContainer}>
         {loading || pendingLoading || inProgressLoading ? (
           <CustomeLoader
@@ -291,13 +373,19 @@ const HomeScreen: React.FC = () => {
           <ScrollView
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}>
-            {/* In-Progress Puja's Section */}
-            {inProgressPujas && inProgressPujas.length > 0 && (
+            contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={COLORS.primary}
+                colors={[COLORS.primary]}
+              />
+            }>
+            {/* In Progress */}
+            {inProgressPujas.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                  {t('in_progress_puja') || 'In-Progress Puja'}
-                </Text>
+                <Text style={styles.sectionTitle}>{t('in_progress_puja')}</Text>
                 <View style={[styles.pujaCard, THEMESHADOW.shadow]}>
                   {inProgressPujas.map((item, index) =>
                     renderInProgressPujaItem(
@@ -309,19 +397,12 @@ const HomeScreen: React.FC = () => {
               </View>
             )}
 
-            {/* Waiting for approval Section */}
+            {/* waiting for approval */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('pending_puja')}</Text>
               <View style={[styles.pujaCard, THEMESHADOW.shadow]}>
                 {pendingPujas.length === 0 ? (
-                  <Text
-                    style={{
-                      color: COLORS.pujaCardSubtext,
-                      textAlign: 'center',
-                      padding: 10,
-                    }}>
-                    {t('no_pending_puja')}
-                  </Text>
+                  <Text style={styles.emptyText}>{t('no_pending_puja')}</Text>
                 ) : (
                   pendingPujas.map((item, index) =>
                     renderPendingPujaItem(
@@ -333,19 +414,12 @@ const HomeScreen: React.FC = () => {
               </View>
             </View>
 
-            {/* Upcoming Puja's Section */}
+            {/* Upcoming */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('upcoming_puja')}</Text>
               <View style={[styles.pujaCard, THEMESHADOW.shadow]}>
                 {upcomingPujas.length === 0 ? (
-                  <Text
-                    style={{
-                      color: COLORS.pujaCardSubtext,
-                      textAlign: 'center',
-                      padding: 10,
-                    }}>
-                    {t('no_upcoming_puja')}
-                  </Text>
+                  <Text style={styles.emptyText}>{t('no_upcoming_puja')}</Text>
                 ) : (
                   upcomingPujas.map((item, index) =>
                     renderPujaItem(item, index === upcomingPujas.length - 1),
@@ -354,19 +428,12 @@ const HomeScreen: React.FC = () => {
               </View>
             </View>
 
-            {/* Completed Puja's Section */}
+            {/* Completed */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('completed_puja')}</Text>
               <View style={[styles.pujaCard, THEMESHADOW.shadow]}>
                 {completedPujas.length === 0 ? (
-                  <Text
-                    style={{
-                      color: COLORS.pujaCardSubtext,
-                      textAlign: 'center',
-                      padding: 10,
-                    }}>
-                    {t('no_completed_puja')}
-                  </Text>
+                  <Text style={styles.emptyText}>{t('no_completed_puja')}</Text>
                 ) : (
                   completedPujas.map((item, index) =>
                     renderCompletedPuja(
@@ -412,8 +479,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_SemiBold,
     color: COLORS.primaryTextDark,
     marginBottom: verticalScale(12),
-    // fontWeight: '600',
-    lineHeight: 24,
   },
   pujaCard: {
     backgroundColor: COLORS.white,
@@ -443,7 +508,6 @@ const styles = StyleSheet.create({
     color: COLORS.primaryTextDark,
     fontWeight: '600',
     letterSpacing: -0.33,
-    lineHeight: moderateScale(20),
   },
   pujaDate: {
     fontSize: moderateScale(13),
@@ -451,7 +515,6 @@ const styles = StyleSheet.create({
     color: COLORS.pujaCardSubtext,
     fontWeight: '500',
     marginTop: verticalScale(4),
-    lineHeight: moderateScale(18),
   },
   separator: {
     height: 1,
@@ -479,6 +542,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_SemiBold,
     fontSize: moderateScale(14),
     fontWeight: '600',
+  },
+  emptyText: {
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_Medium,
+    color: COLORS.primaryTextDark,
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });
 

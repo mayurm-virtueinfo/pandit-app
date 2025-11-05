@@ -1,5 +1,5 @@
 // import axios from 'axios';
-import { AxiosRequestConfig } from 'axios';
+import {AxiosRequestConfig} from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   CREATE_MEETING,
@@ -9,6 +9,8 @@ import ApiEndpoints, {
   GET_CASTE,
   GET_CITY,
   GET_COMPLETED_PUA,
+  GET_COMPLETED_PUJA,
+  GET_COMPLETED_PUJA_DETAILS,
   GET_EDIT_PUJA,
   GET_GOTRA,
   GET_IN_PROGRESS_PUJA,
@@ -255,7 +257,7 @@ export interface AddPuja {
 export interface UpdateStatus {
   booking_id: number;
   action: string;
-  offer_id: number
+  offer_id: number;
 }
 
 export interface StartCompetePuja {
@@ -299,9 +301,9 @@ export interface postConversations {
 }
 
 export interface postRateUser {
-  booking: number,
-  rating: number,
-  review: string
+  booking: number;
+  rating: number;
+  review: string;
 }
 
 export interface putUpdateProfile {
@@ -326,7 +328,7 @@ export interface ReviewImageUpload {
       type: string;
       name: string;
     };
-  }
+  };
 }
 
 // export const apiService = {
@@ -747,10 +749,7 @@ export const postUpdateStatus = (data: UpdateStatus) => {
         resolve(response);
       })
       .catch(error => {
-        console.error(
-          'Error Update Puja Status',
-          (error.response.data.message),
-        );
+        console.error('Error Update Puja Status', error.response.data.message);
         reject(error);
       });
   });
@@ -1103,7 +1102,7 @@ export const postRegisterFCMToken = (
   let apiUrl = POST_REGISTER_FCM;
   return new Promise((resolve, reject) => {
     apiDev
-      .post(apiUrl, { device_token, app_type })
+      .post(apiUrl, {device_token, app_type})
       .then(response => {
         resolve(response.data);
       })
@@ -1144,18 +1143,18 @@ export const getProfileData = () => {
   });
 };
 
-
 export const putUpdateProfile = (data: any): Promise<any> => {
   const apiUrl = GET_PUT_UPDATE_PROFILE;
-  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+  const isFormData =
+    typeof FormData !== 'undefined' && data instanceof FormData;
 
   // Set headers for multipart/form-data if FormData is used
   const config: AxiosRequestConfig = isFormData
     ? {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     : {};
 
   return new Promise((resolve, reject) => {
@@ -1165,7 +1164,7 @@ export const putUpdateProfile = (data: any): Promise<any> => {
         resolve(response.data);
       })
       .catch(error => {
-        console.log("error", error)
+        console.log('error', error);
         if (error.response && error.response.data) {
           console.error('Error put update profile api:', error.response.data);
         } else if (error.message) {
@@ -1190,11 +1189,14 @@ export const postReviewImageUpload = (data: any, id: string): Promise<any> => {
         // If you need to send auth, add Authorization header here
       })
       .then(response => {
-        console.log("response", response);
+        console.log('response', response);
         resolve(response.data);
       })
       .catch(error => {
-        console.error('Error uploading review image:', error?.response?.data || error);
+        console.error(
+          'Error uploading review image:',
+          error?.response?.data || error,
+        );
         reject(error);
       });
   });
@@ -1209,7 +1211,10 @@ export const getBookingAutoDetails = (bookingID: string) => {
         resolve(response.data);
       })
       .catch(error => {
-        console.error('Error in get booking auto details api', error.response.data);
+        console.error(
+          'Error in get booking auto details api',
+          error.response.data,
+        );
         reject(error);
       });
   });
@@ -1228,7 +1233,10 @@ export const getTermsConditions = (): Promise<any> => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error fetching Terms & Conditions:', error?.response?.data || error);
+        console.error(
+          'Error fetching Terms & Conditions:',
+          error?.response?.data || error,
+        );
         reject(error);
       });
   });
@@ -1247,7 +1255,10 @@ export const getUserAgreement = (): Promise<any> => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error fetching User Agreement:', error?.response?.data || error);
+        console.error(
+          'Error fetching User Agreement:',
+          error?.response?.data || error,
+        );
         reject(error);
       });
   });
@@ -1266,7 +1277,10 @@ export const getRefundPolicy = (): Promise<any> => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error fetching Refund Policy:', error?.response?.data || error);
+        console.error(
+          'Error fetching Refund Policy:',
+          error?.response?.data || error,
+        );
         reject(error);
       });
   });
@@ -1283,11 +1297,14 @@ export const deleteAccount = (params: any): Promise<any> => {
         data: params,
       })
       .then(response => {
-        console.log("response", response)
+        console.log('response', response);
         resolve(response);
       })
       .catch(error => {
-        console.error('Error deleting account:', error?.response?.data || error);
+        console.error(
+          'Error deleting account:',
+          error?.response?.data || error,
+        );
         reject(error);
       });
   });
@@ -1296,14 +1313,52 @@ export const createMeeting = (booking_id: number): Promise<any> => {
   let apiUrl = CREATE_MEETING;
   return new Promise((resolve, reject) => {
     apiDev
-      .post(apiUrl, { booking_id })
+      .post(apiUrl, {booking_id})
       .then(response => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error creating meeting:', error?.response?.data || error);
+        console.error(
+          'Error creating meeting:',
+          error?.response?.data || error,
+        );
         reject(error);
       });
   });
 };
 
+export const getCompletePujaList = () => {
+  let apiUrl = GET_COMPLETED_PUJA;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        console.error(
+          'Error in get completed puja list api',
+          error.response.data,
+        );
+        reject(error);
+      });
+  });
+};
+
+export const getCompletedPujaDetails = (bookingID: string) => {
+  let apiUrl = GET_COMPLETED_PUJA_DETAILS.replace('{id}', bookingID);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error(
+          'Error in get completed puja details api',
+          error.response.data,
+        );
+        reject(error);
+      });
+  });
+};

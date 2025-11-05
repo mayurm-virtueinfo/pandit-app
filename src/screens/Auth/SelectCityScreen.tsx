@@ -1,9 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -24,6 +23,7 @@ import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {translateData} from '../../utils/TranslateData';
 
 type RouteParams = {
   action?: string;
@@ -48,8 +48,9 @@ const SelectCityScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {showErrorToast} = useCommonToast();
+  const currentLanguage = i18n.language;
 
   const {
     phoneNumber,
@@ -65,6 +66,9 @@ const SelectCityScreen: React.FC = () => {
   } = route.params || {};
 
   const [cities, setCities] = useState<CustomeSelectorDataOption[]>([]);
+  const [originalCities, setOriginalCities] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
   const [filteredCities, setFilteredCities] = useState<
     CustomeSelectorDataOption[]
   >([]);
@@ -72,52 +76,79 @@ const SelectCityScreen: React.FC = () => {
   const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    fetchCityData();
-  }, []);
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
-  const fetchCityData = async () => {
+  const fetchCityData = useCallback(async () => {
     setIsLoading(true);
     try {
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+      if (cachedData) {
+        setCities(cachedData);
+        setFilteredCities(cachedData);
+        setIsLoading(false);
+        return;
+      }
+
       const response = (await getCity()) as SelectorDataOption;
       const data = response?.data || [];
+
       const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
         id: item.id,
         name: item.name,
       }));
-      setCities(mappedData);
-      setFilteredCities(mappedData);
+
+      setOriginalCities(mappedData);
+
+      // 🌍 Translate city names
+      const translatedData: any = await translateData(
+        mappedData,
+        currentLanguage,
+        ['name'],
+      );
+
+      translationCacheRef.current.set(currentLanguage, translatedData);
+
+      setCities(translatedData);
+      setFilteredCities(translatedData);
     } catch (error: any) {
-      showErrorToast(error?.message);
+      showErrorToast(error?.message || 'Failed to fetch cities');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    fetchCityData();
+  }, [fetchCityData]);
+
+  // ✅ Search filter (handles English + Translated)
+  useEffect(() => {
+    if (!searchText.trim()) {
+      setFilteredCities(cities);
+    } else {
+      const lower = searchText.toLowerCase();
+
+      setFilteredCities(
+        cities.filter(city => {
+          const translatedMatch = city.name?.toLowerCase()?.includes(lower);
+          const originalMatch = originalCities
+            .find(orig => orig.id === city.id)
+            ?.name?.toLowerCase()
+            ?.includes(lower);
+          return translatedMatch || originalMatch;
+        }),
+      );
+    }
+  }, [searchText, cities, originalCities]);
 
   const action = route.params?.action;
 
-  // console.log('selectedCityId :: ', selectedCityId);
-
   const handleCitySelect = (cityId: number) => {
-    if (selectedCityId === cityId) {
-      setSelectedCityId(null);
-    } else {
-      setSelectedCityId(cityId);
-    }
+    setSelectedCityId(prev => (prev === cityId ? null : cityId));
   };
 
-  // Handle search in CustomSelector
   const handleSearch = (text: string) => {
     setSearchText(text);
-    if (!text) {
-      setFilteredCities(cities);
-      return;
-    }
-    const lowerText = text.toLowerCase();
-    const filtered = cities.filter(city =>
-      city.name.toLowerCase().includes(lowerText),
-    );
-    setFilteredCities(filtered);
   };
 
   const handleNext = () => {
@@ -142,19 +173,11 @@ const SelectCityScreen: React.FC = () => {
   };
 
   const buttonText = action === 'Update' ? t('update') : t('next');
-
-  // Determine if no results for search
   const showNoResult = searchText.length > 0 && filteredCities.length === 0;
 
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
       <CustomeLoader loading={isLoading} />
-      {/* <StatusBar
-        translucent
-        backgroundColor="transparent"
-        barStyle="light-content"
-      /> */}
-      {/* <View style={[styles.container]}> */}
       <CustomHeader title={t('complete_your_profile')} showBackButton={true} />
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
@@ -197,7 +220,6 @@ const SelectCityScreen: React.FC = () => {
           </View>
         </View>
       </KeyboardAvoidingView>
-      {/* </View> */}
     </View>
   );
 };
@@ -221,12 +243,11 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
-    paddingBottom: 0, // Remove padding, handled by bottomButtonContainer
+    paddingBottom: 0,
   },
   mainContent: {
     paddingHorizontal: wp(6.5),
     paddingVertical: moderateScale(24),
-    // Remove flex: 1 to allow ScrollView to size naturally
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -248,7 +269,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     paddingHorizontal: wp(6.5),
     paddingTop: moderateScale(8),
-    // paddingBottom handled inline for safe area
   },
   noResultText: {
     color: COLORS.lighttext,

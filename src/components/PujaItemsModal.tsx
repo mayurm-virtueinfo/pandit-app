@@ -203,7 +203,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.inputLabelText,
     marginBottom: verticalScale(12),
-    lineHeight: moderateScale(20),
   },
   itemsContainer: {
     backgroundColor: COLORS.white,
@@ -223,7 +222,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
-    lineHeight: moderateScale(24),
   },
 });
 

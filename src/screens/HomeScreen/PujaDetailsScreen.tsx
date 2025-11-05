@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,12 @@ import {
 import {useRoute, useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useCommonToast} from '../../common/CommonToast';
+import {
+  translateData,
+  translateOne,
+  translateText,
+} from '../../utils/TranslateData';
+import {Images} from '../../theme/Images';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -93,7 +99,7 @@ type PujaDetailsType = {
 };
 
 const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const route = useRoute();
   const {id, progress} = route.params as any;
   const inset = useSafeAreaInsets();
@@ -104,15 +110,20 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const [progressPujaDetails, setProgressPujaDetails] =
     useState<PujaDetailsType | null>(null);
   const [enteredPin, setEnteredPin] = useState<string>('');
+  const currentLanguage = i18n.language;
+  const [translatedPujaDetails, setTranslatedPujaDetails] = useState<any>(null);
+  const [translatedProgressPujaDetails, setTranslatedProgressPujaDetails] =
+    useState<any>(null);
+
   const {showSuccessToast, showErrorToast} = useCommonToast();
 
-  console.log('pujaDetails :: ', pujaDetails);
-  console.log('progressPujaDetails :: ', progressPujaDetails);
+  console.log('translatedPujaDetails :: ', translatedPujaDetails);
+
+  const pujaTranslationCacheRef = useRef(new Map());
+  const progressPujaTranslationCacheRef = useRef(new Map());
 
   const bookingStatus =
     progressPujaDetails?.booking_status || pujaDetails?.booking_status;
-
-  console.log('bookingStatus :: ', bookingStatus);
 
   // Helper to get is_cos value from either pujaDetails or progressPujaDetails
   const getIsCos = () => {
@@ -132,14 +143,49 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   // Fetch Pooja details
   const fetchPujaDetails = useCallback(async () => {
     try {
-      let response;
+      const inProgressPujaCachedData =
+        progressPujaTranslationCacheRef.current.get(currentLanguage);
+      const pujaDetailsCachedData =
+        pujaTranslationCacheRef.current.get(currentLanguage);
+      if (inProgressPujaCachedData) {
+        setTranslatedProgressPujaDetails(inProgressPujaCachedData);
+        return;
+      }
+      if (pujaDetailsCachedData) {
+        setTranslatedPujaDetails(pujaDetailsCachedData);
+        return;
+      }
+      let response: any;
       if (progress) {
         response = await getInProgressPuja();
+        console.log('response for in progress puja :: ', response?.data);
         const data = Array.isArray((response as any) || [])
           ? (response as any)[0]
           : (response as any)?.data?.[0] || (response as any)?.[0];
         if (data) {
           setProgressPujaDetails(data);
+          const translatedData: any = await translateData(
+            data,
+            currentLanguage,
+            [
+              'pooja_name',
+              'when_is_pooja',
+              'booking_user_name',
+              'pandit_arranged_items',
+              'user_arranged_items',
+              'address_details',
+            ],
+          );
+          translatedData.address_details.full_address = await translateText(
+            translatedData.address_details.full_address,
+            currentLanguage,
+          );
+          translatedData.tirth_place_name = await translateText(
+            translatedData.tirth_place_name,
+            currentLanguage,
+          );
+          pujaTranslationCacheRef.current.set(currentLanguage, translatedData);
+          setTranslatedProgressPujaDetails(translatedData);
         }
       } else {
         response = await getUpcomingPujaDetails(id);
@@ -148,12 +194,34 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           : (response as any)?.data?.[0] || (response as any)?.[0];
         if (data) {
           setPujaDetails(data);
+          const translatedData: any = await translateData(
+            data,
+            currentLanguage,
+            [
+              'pooja_name',
+              'when_is_pooja',
+              'booking_user_name',
+              'pandit_arranged_items',
+              'user_arranged_items',
+              'address_details',
+            ],
+          );
+          translatedData.address_details.full_address = await translateText(
+            translatedData.address_details.full_address,
+            currentLanguage,
+          );
+          translatedData.tirth_place_name = await translateText(
+            translatedData.tirth_place_name,
+            currentLanguage,
+          );
+          pujaTranslationCacheRef.current.set(currentLanguage, translatedData);
+          setTranslatedPujaDetails(translatedData);
         }
       }
     } catch (error) {
       console.error('Error fetching pooja details:', error);
     }
-  }, [id, progress]);
+  }, [id, progress, currentLanguage]);
 
   // Fetch details and status on focus (when coming to this screen)
   useFocusEffect(
@@ -290,8 +358,11 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
       if (pujaDetails.address_details?.full_address) {
         return pujaDetails.address_details.full_address;
       }
-      if (pujaDetails.tirth_place_name) {
-        return pujaDetails.tirth_place_name;
+      if (translatedPujaDetails.tirth_place_name) {
+        return translateText(
+          translatedPujaDetails.tirth_place_name,
+          currentLanguage,
+        );
       }
     }
     return '';
@@ -338,13 +409,16 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const getPanditArrangedItems = () => {
     if (
       progress &&
-      progressPujaDetails &&
-      Array.isArray(progressPujaDetails.pandit_arranged_items)
+      translatedProgressPujaDetails &&
+      Array.isArray(translatedProgressPujaDetails.pandit_arranged_items)
     ) {
-      return progressPujaDetails.pandit_arranged_items;
+      return translatedProgressPujaDetails.pandit_arranged_items;
     }
-    if (pujaDetails && Array.isArray(pujaDetails.pandit_arranged_items)) {
-      return pujaDetails.pandit_arranged_items;
+    if (
+      translatedPujaDetails &&
+      Array.isArray(translatedPujaDetails.pandit_arranged_items)
+    ) {
+      return translatedPujaDetails.pandit_arranged_items;
     }
     return [];
   };
@@ -352,13 +426,16 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const getUserArrangedItems = () => {
     if (
       progress &&
-      progressPujaDetails &&
-      Array.isArray(progressPujaDetails.user_arranged_items)
+      translatedProgressPujaDetails &&
+      Array.isArray(translatedProgressPujaDetails.user_arranged_items)
     ) {
-      return progressPujaDetails.user_arranged_items;
+      return translatedProgressPujaDetails.user_arranged_items;
     }
-    if (pujaDetails && Array.isArray(pujaDetails.user_arranged_items)) {
-      return pujaDetails.user_arranged_items;
+    if (
+      translatedPujaDetails &&
+      Array.isArray(translatedPujaDetails.user_arranged_items)
+    ) {
+      return translatedPujaDetails.user_arranged_items;
     }
     return [];
   };
@@ -368,19 +445,13 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
     if (isCos) {
       return (
         <View style={styles.paymentInfoContainer}>
-          <Text style={styles.paymentInfoText}>
-            {t(
-              'Payment will be collected in cash from the user at the time of puja.',
-            )}
-          </Text>
+          <Text style={styles.paymentInfoText}>{t('payment_cos_desc')}</Text>
         </View>
       );
     } else {
       return (
         <View style={styles.paymentInfoContainer}>
-          <Text style={styles.paymentInfoText}>
-            {t('Pandit will receive payment online after completing the puja.')}
-          </Text>
+          <Text style={styles.paymentInfoText}>{t('payment_no_cos_desc')}</Text>
         </View>
       );
     }
@@ -396,7 +467,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
       <UserCustomHeader
         title={
-          pujaDetails?.pooja_name ||
+          translatedPujaDetails?.pooja_name ||
           progressPujaDetails?.pooja_name ||
           'Pooja Details'
         }
@@ -412,7 +483,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
           <Image
             source={{
               uri:
-                pujaDetails?.pooja_image_url ||
+                translatedPujaDetails?.pooja_image_url ||
                 progressPujaDetails?.pooja_image_url,
             }}
             style={[
@@ -428,7 +499,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               paddingTop: verticalScale(24),
             }}>
             <Text style={styles.pujaTitle}>
-              {pujaDetails?.pooja_name || progressPujaDetails?.pooja_name}
+              {translatedPujaDetails?.pooja_name ||
+                progressPujaDetails?.pooja_name}
             </Text>
 
             <View style={[styles.detailsCard, THEMESHADOW.shadow]}>
@@ -440,7 +512,13 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   style={styles.detailIcon}
                 />
                 <View style={styles.detailContent}>
-                  <Text style={styles.detailText}>{getAddressDisplay()}</Text>
+                  <Text style={styles.detailText}>
+                    {translatedPujaDetails?.address_details?.full_address ||
+                      translatedProgressPujaDetails?.address_details
+                        ?.full_address ||
+                      translatedPujaDetails?.tirth_place_name ||
+                      translatedProgressPujaDetails?.tirth_place_name}
+                  </Text>
                 </View>
               </View>
               <View style={styles.separator} />
@@ -454,7 +532,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailText}>
-                    {pujaDetails?.when_is_pooja ||
+                    {translatedPujaDetails?.when_is_pooja ||
                       progressPujaDetails?.booking_date}
                   </Text>
                 </View>
@@ -470,7 +548,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailText}>
-                    {pujaDetails?.muhurat_time ||
+                    {translatedPujaDetails?.muhurat_time ||
                       progressPujaDetails?.muhurat_time}
                   </Text>
                 </View>
@@ -514,7 +592,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   <View style={styles.priestImageBorder} />
                 </View>
                 <Text style={styles.priestName}>
-                  {pujaDetails?.booking_user_name ||
+                  {translatedPujaDetails?.booking_user_name ||
                     progressPujaDetails?.user_info?.full_name ||
                     progressPujaDetails?.booking_user_name}
                 </Text>
@@ -522,10 +600,9 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                   onPress={handleOnChatClick}
                   style={styles.chatButton}>
                   <Image
-                    source={{
-                      uri: 'https://api.builder.io/api/v1/image/assets/TEMP/4c01dc3358caeee996c8d4195776dbf1f8045f61?width=40',
-                    }}
+                    source={Images.ic_message}
                     style={[styles.chatIcon && {opacity: 0.5}]}
+                    tintColor={COLORS.primaryBackgroundButton}
                   />
                 </TouchableOpacity>
               </View>
@@ -536,33 +613,30 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                     marginTop: 8,
                     fontSize: moderateScale(12),
                   }}>
-                  {t(
-                    'You cannot chat with the {{name}} after the pooja has started.',
-                    {
-                      name:
-                        pujaDetails?.booking_user_name ||
-                        progressPujaDetails?.user_info?.full_name ||
-                        progressPujaDetails?.booking_user_name ||
-                        '',
-                    },
-                  )}
+                  {t('chat_with_pandit_after_puja_started', {
+                    name:
+                      translatedPujaDetails?.booking_user_name ||
+                      progressPujaDetails?.user_info?.full_name ||
+                      progressPujaDetails?.booking_user_name ||
+                      '',
+                  })}
                 </Text>
               )}
             </View>
 
             <View style={[styles.pricingCard, THEMESHADOW.shadow]}>
               <View style={styles.pricingContent}>
-                <Text style={styles.pricingLabel}>Pooja Pricing</Text>
+                <Text style={styles.pricingLabel}>{t('pooja_pricing')}</Text>
                 <Text style={styles.pricingSubtext}>
-                  {pujaDetails?.samagri_required ||
+                  {translatedPujaDetails?.samagri_required ||
                   progressPujaDetails?.samagri_required
-                    ? 'With Pooja Items'
-                    : 'Without Pooja Items'}
+                    ? t('with_puja_items')
+                    : t('without_puja_items')}
                 </Text>
               </View>
               <Text style={styles.pricingAmount}>
-                {pujaDetails?.amount
-                  ? `₹${pujaDetails.amount}`
+                {translatedPujaDetails?.amount
+                  ? `₹${translatedPujaDetails?.amount}`
                   : `₹${progressPujaDetails?.amount}`}
               </Text>
             </View>
@@ -665,7 +739,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     fontWeight: '500',
-    lineHeight: moderateScale(22),
   },
   separator: {
     height: 1,
@@ -706,7 +779,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     fontWeight: '500',
-    letterSpacing: -0.33,
   },
   chatButton: {
     padding: moderateScale(4),
@@ -732,14 +804,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     fontWeight: '500',
-    letterSpacing: -0.33,
   },
   pricingAmount: {
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_SemiBold,
     color: COLORS.primaryTextDark,
     fontWeight: '600',
-    letterSpacing: -0.33,
   },
   pricingSubtext: {
     fontSize: moderateScale(13),

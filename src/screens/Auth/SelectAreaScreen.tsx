@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import {SelectorDataOption} from './type';
 import CustomeLoader from '../../components/CustomLoader';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import {translateData} from '../../utils/TranslateData';
 
 type RouteParams = {
   action?: string;
@@ -48,18 +49,12 @@ type ScreenNavigationProp = StackNavigationProp<
 const SelectAreaScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
-  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
-
+  const {t, i18n} = useTranslation();
   const {showErrorToast} = useCommonToast();
-  const [areas, setAreas] = useState<CustomeSelectorDataOption[]>([]);
-  const [selectedAreaIds, setSelectedAreaIds] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [filteredAreas, setFilteredAreas] = useState<
-    CustomeSelectorDataOption[]
-  >([]);
+  const currentLanguage = i18n.language;
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
+  const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const {
     phoneNumber,
     email,
@@ -76,38 +71,80 @@ const SelectAreaScreen: React.FC = () => {
 
   const action = route.params?.action;
 
-  useEffect(() => {
-    fetchAreaData();
-  }, [selectCityId]);
+  const [areas, setAreas] = useState<CustomeSelectorDataOption[]>([]);
+  const [originalAreas, setOriginalAreas] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
+  const [filteredAreas, setFilteredAreas] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
+  const [selectedAreaIds, setSelectedAreaIds] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
-  useEffect(() => {
-    if (searchText.trim() === '') {
-      setFilteredAreas(areas);
-    } else {
-      const lower = searchText.toLowerCase();
-      setFilteredAreas(
-        areas.filter(area => area.name.toLowerCase().includes(lower)),
-      );
-    }
-  }, [searchText, areas]);
-
-  const fetchAreaData = async () => {
+  /** ✅ Fetch & translate area list */
+  const fetchAreaData = useCallback(async () => {
+    if (!selectCityId) return;
     setIsLoading(true);
     try {
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+      if (cachedData) {
+        setAreas(cachedData);
+        setFilteredAreas(cachedData);
+        setIsLoading(false);
+        return;
+      }
+
       const response = (await getAreas(selectCityId)) as SelectorDataOption;
       const data = response?.data || [];
+
       const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
         id: item.id,
         name: item.name,
       }));
-      setAreas(mappedData);
-      setFilteredAreas(mappedData);
+
+      setOriginalAreas(mappedData);
+
+      // 🌍 Translate area names
+      const translatedData: any = await translateData(
+        mappedData,
+        currentLanguage,
+        ['name'],
+      );
+
+      translationCacheRef.current.set(currentLanguage, translatedData);
+      setAreas(translatedData);
+      setFilteredAreas(translatedData);
     } catch (error: any) {
-      showErrorToast(error?.message);
+      showErrorToast(error?.message || 'Failed to fetch areas');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage, selectCityId]);
+
+  /** 🔹 Initial fetch */
+  useEffect(() => {
+    fetchAreaData();
+  }, [fetchAreaData]);
+
+  /** 🔹 Dual-language search filter */
+  useEffect(() => {
+    if (!searchText.trim()) {
+      setFilteredAreas(areas);
+    } else {
+      const lower = searchText.toLowerCase();
+      setFilteredAreas(
+        areas.filter(area => {
+          const translatedMatch = area.name?.toLowerCase()?.includes(lower);
+          const originalMatch = originalAreas
+            .find(orig => orig.id === area.id)
+            ?.name?.toLowerCase()
+            ?.includes(lower);
+          return translatedMatch || originalMatch;
+        }),
+      );
+    }
+  }, [searchText, areas, originalAreas]);
 
   const handleAreaSelect = (areaId: number) => {
     setSelectedAreaIds(prev =>
@@ -141,9 +178,6 @@ const SelectAreaScreen: React.FC = () => {
     }
   };
 
-  // For debugging
-  // console.log('selectedAreaIds :: ', selectedAreaIds);
-
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
@@ -159,7 +193,6 @@ const SelectAreaScreen: React.FC = () => {
           title={t('complete_your_profile')}
           showBackButton={true}
         />
-
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

@@ -76,7 +76,7 @@ const ChatScreen: React.FC = () => {
 
   const getSocketURL = (token: string, bookingId: string) => {
     if (__DEV__) {
-      return `ws://192.168.1.27:9000/ws/chat/by-booking/${bookingId}/?token=${token}`;
+      return `wss://dev.puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
     }
     return `wss://puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
   };

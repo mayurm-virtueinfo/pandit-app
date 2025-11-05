@@ -29,15 +29,10 @@ import i18n from './src/i18n';
 import {navigationRef} from './src/helper/navigationRef';
 import {getMessaging} from '@react-native-firebase/messaging';
 import {requestUserPermission} from './src/configuration/notificationPermission';
-import {
-  initCallKeep,
-  setOnAnswerListener,
-  setOnEndListener,
-} from './src/configuration/callValidation';
-import {navigate} from './src/utils/NavigationService';
 import DeviceInfo from 'react-native-device-info';
 import checkVersion from 'react-native-store-version';
 import {SessionProvider} from './src/provider/SessionProvider';
+import {NetworkProvider} from './src/provider/NetworkProvider';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -47,7 +42,7 @@ LogBox.ignoreLogs([
 const auth = getAuth();
 if (__DEV__) {
   // auth.useEmulator('http://127.0.0.1:9099');
-  auth.useEmulator('http://192.168.1.22:9099');
+  auth.useEmulator('http://192.168.1.13:9099');
 }
 setupNotifications();
 
@@ -166,26 +161,28 @@ const App = () => {
         </View>
       </Modal>
       {/* App content */}
-      <ToastProvider
-        style={{
-          backgroundColor: COLORS.primary,
-        }}
-        textStyle={{
-          fontSize: moderateScale(16),
-          color: COLORS.textPrimary,
-        }}>
-        <AuthProvider>
-          <SessionProvider>
-            <NavigationContainer
-              ref={navigationRef}
-              onReady={() => {
-                handleInitialNotification();
-              }}>
-              <RootNavigator />
-            </NavigationContainer>
-          </SessionProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <NetworkProvider>
+        <ToastProvider
+          style={{
+            backgroundColor: COLORS.primary,
+          }}
+          textStyle={{
+            fontSize: moderateScale(16),
+            color: COLORS.textPrimary,
+          }}>
+          <AuthProvider>
+            <SessionProvider>
+              <NavigationContainer
+                ref={navigationRef}
+                onReady={() => {
+                  handleInitialNotification();
+                }}>
+                <RootNavigator />
+              </NavigationContainer>
+            </SessionProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </NetworkProvider>
     </I18nextProvider>
   );
 };
@@ -234,7 +231,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: moderateScale(20),
-    lineHeight: moderateScale(22),
   },
   updateButton: {
     backgroundColor: COLORS.primaryBackgroundButton,
@@ -247,7 +243,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontWeight: 'bold',
     fontSize: moderateScale(16),
-    letterSpacing: 0.5,
   },
 });
 

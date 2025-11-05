@@ -1,9 +1,10 @@
-import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   StatusBar,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -22,148 +23,128 @@ import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import {translateData} from '../../utils/TranslateData';
 
 type ScreenNavigation = StackNavigationProp<
   AuthStackParamList,
   'SelectPoojaScreen'
 >;
 
-const PAGE_SIZE = 10;
-
 const EditPanditPoojaScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigation>();
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {showErrorToast, showSuccessToast} = useCommonToast();
 
-  /* ------------------- STATE ------------------- */
+  const [originalPoojaData, setOriginalPoojaData] = useState<poojaDataOption[]>(
+    [],
+  );
   const [poojaData, setPoojaData] = useState<poojaDataOption[]>([]);
+  const [filteredPoojaData, setFilteredPoojaData] = useState<poojaDataOption[]>(
+    [],
+  );
   const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchText, setSearchText] = useState<string>('');
-  const [page, setPage] = useState<number>(1);
-  const [hasNext, setHasNext] = useState<boolean>(true);
-  const [initialLoad, setInitialLoad] = useState(true);
 
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentLanguage = i18n.language;
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
-  /* ------------------- INITIAL FETCH ------------------- */
+  // Fetch all puja list and selected puja list on mount
   useEffect(() => {
     fetchAllPujaAndSelected();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentLanguage]);
 
-  /* ------------------- DEBOUNCED SEARCH ------------------- */
   useEffect(() => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    searchTimeoutRef.current = setTimeout(() => {
-      resetAndSearch();
-    }, 350);
-    return () => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
+    if (searchText.trim() === '') {
+      setFilteredPoojaData(poojaData);
+    } else {
+      const lower = searchText.toLowerCase();
 
-  /* ------------------- FETCH ALL + SELECTED ------------------- */
-  const fetchAllPujaAndSelected = async () => {
+      setFilteredPoojaData(
+        poojaData.filter((item: any) => {
+          const titleMatch = item.title?.toLowerCase().includes(lower);
+          const originalMatch = item.originalTitle
+            ?.toLowerCase()
+            .includes(lower);
+          return titleMatch || originalMatch;
+        }),
+      );
+    }
+  }, [searchText, poojaData]);
+
+  const fetchAllPujaAndSelected = useCallback(async () => {
     setIsLoading(true);
     try {
-      const first = await getPooja({page: 1});
-      const firstList: poojaDataOption[] = (first?.data?.results || []).map(
-        (item: any) => ({
-          id: item.id,
-          title: item.title,
-          short_description: item.short_description,
-        }),
-      );
-      setPoojaData(firstList);
-      setPage(1);
-      setHasNext(!!first?.data?.next);
-
-      const selectedResp = await getPanditPooja();
-      const raw =
-        (selectedResp as any)?.data?.poojas ??
-        (selectedResp as any)?.poojas ??
-        [];
-      const selectedIds: number[] = Array.isArray(raw)
-        ? raw
-            .filter((i: any) => typeof i === 'object' && i.pooja != null)
-            .map((i: any) => i.pooja)
-        : [];
-      setSelectedPoojaId(selectedIds);
-    } catch (e: any) {
-      showErrorToast(e?.message ?? 'Failed to load pooja list');
-      setPoojaData([]);
-    } finally {
-      setIsLoading(false);
-      setInitialLoad(false);
-    }
-  };
-
-  /* ------------------- SEARCH / RESET ------------------- */
-  const resetAndSearch = async () => {
-    setIsLoading(true);
-    setPage(1);
-    setHasNext(true);
-    try {
-      const params: any = {page: 1};
-      if (searchText.trim()) params.search = searchText.trim();
-
-      const res = await getPooja(params);
-      const items: poojaDataOption[] = (res?.data?.results || []).map(
-        (i: any) => ({
-          id: i.id,
-          title: i.title,
-          short_description: i.short_description,
-        }),
-      );
-      setPoojaData(items);
-      setHasNext(!!res?.data?.next);
-    } catch {
-      setPoojaData([]);
-      setHasNext(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /* ------------------- LOAD MORE ------------------- */
-  const handleLoadMore = useCallback(async () => {
-    if (!hasNext || isLoadingMore || isLoading) return;
-
-    setIsLoadingMore(true);
-    try {
-      const nextPage = page + 1;
-      const params: any = {page: nextPage};
-      if (searchText.trim()) params.search = searchText.trim();
-
-      const res = await getPooja(params);
-      const newItems: poojaDataOption[] = (res?.data?.results || []).map(
-        (i: any) => ({
-          id: i.id,
-          title: i.title,
-          short_description: i.short_description,
-        }),
-      );
-
-      if (newItems.length) {
-        setPoojaData(prev => [...prev, ...newItems]);
-        setPage(nextPage);
-        setHasNext(!!res?.data?.next);
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+      if (cachedData) {
+        setPoojaData(cachedData);
+        setFilteredPoojaData(cachedData);
       } else {
-        setHasNext(false);
-      }
-    } catch (e) {
-      console.error(e);
-      setHasNext(false);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [hasNext, isLoadingMore, isLoading, page, searchText]);
+        // 🔹 Fetch all puja list
+        const allPujaResponse = await getPooja();
+        const allPujaData = Array.isArray(allPujaResponse)
+          ? allPujaResponse
+          : Array.isArray((allPujaResponse as any)?.data)
+          ? (allPujaResponse as any).data
+          : [];
 
-  /* ------------------- SELECTION ------------------- */
+        const mappedAllPuja: poojaDataOption[] = allPujaData.map(
+          (item: any) => ({
+            id: item.id,
+            title: item.title,
+            short_description: item.short_description,
+          }),
+        );
+
+        // 🧠 Store original un-translated data for English search
+        setOriginalPoojaData(mappedAllPuja);
+
+        // 🌍 Translate puja data fields
+        const translatedData: any = await translateData(
+          mappedAllPuja,
+          currentLanguage,
+          ['title', 'short_description'],
+        );
+
+        // 🪄 Add English fallback (dual titles) for search
+        const finalData = translatedData.map((item: any, index: number) => ({
+          ...item,
+          originalTitle: mappedAllPuja[index].title, // for English search
+        }));
+
+        translationCacheRef.current.set(currentLanguage, finalData);
+        setPoojaData(finalData);
+        setFilteredPoojaData(finalData);
+      }
+
+      // 🔹 Fetch selected puja ids
+      const selectedPujaResponse = await getPanditPooja();
+      const selectedPujaData = Array.isArray(
+        (selectedPujaResponse as any)?.data?.poojas,
+      )
+        ? (selectedPujaResponse as any).data.poojas
+        : Array.isArray((selectedPujaResponse as any)?.poojas)
+        ? (selectedPujaResponse as any).poojas
+        : [];
+
+      const selectedIds: number[] = Array.isArray(selectedPujaData)
+        ? selectedPujaData
+            .filter(
+              (item: any) =>
+                typeof item === 'object' && item !== null && 'pooja' in item,
+            )
+            .map((item: any) => item.pooja)
+        : [];
+
+      setSelectedPoojaId(selectedIds);
+    } catch (error: any) {
+      showErrorToast(error?.message || 'Failed to fetch pooja list');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentLanguage, translationCacheRef]);
+
   const handlePoojaSelect = (poojaId: number) => {
     setSelectedPoojaId(prev =>
       prev.includes(poojaId)
@@ -172,102 +153,93 @@ const EditPanditPoojaScreen: React.FC = () => {
     );
   };
 
-  const handleSearch = (text: string) => setSearchText(text);
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+  };
 
-  /* ------------------- SUBMIT ------------------- */
   const handleNext = async () => {
-    if (!selectedPoojaId.length) {
+    const selectedPooja = originalPoojaData.filter(area =>
+      selectedPoojaId.includes(area.id),
+    );
+
+    if (selectedPooja.length === 0) {
       showErrorToast(t('please_select_pooja') || 'Please select pooja');
       return;
     }
+
     setIsLoading(true);
     try {
-      await putPanditPooja({pooja_ids: selectedPoojaId});
+      const payload = {pooja_ids: selectedPoojaId};
+      await putPanditPooja(payload);
       showSuccessToast(
         t('puja_updated_successfully') || 'Pooja updated successfully',
       );
       navigation.goBack();
-    } catch (e: any) {
-      showErrorToast(e?.message || 'Failed to update pooja');
+    } catch (error: any) {
+      showErrorToast(error?.message || 'Failed to update pooja');
     } finally {
       setIsLoading(false);
     }
   };
 
-  /* ------------------- SELECTOR PROPS ------------------- */
-  const selectorProps = useMemo(
-    () => ({
-      data: poojaData,
-      selectedDataIds: selectedPoojaId,
-      onDataSelect: handlePoojaSelect,
-      searchPlaceholder: t('select_pooja'),
-      onSearch: handleSearch,
-      onEndReached: handleLoadMore,
-      onEndReachedThreshold: 0.3,
-      loadingMore: isLoadingMore,
-    }),
-    [
-      poojaData,
-      selectedPoojaId,
-      handlePoojaSelect,
-      handleSearch,
-      handleLoadMore,
-      isLoadingMore,
-      t,
-    ],
-  );
-
-  /* ------------------- RENDER ------------------- */
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
-      <CustomeLoader loading={isLoading && !initialLoad} />
+      <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
         backgroundColor="transparent"
         barStyle="light-content"
       />
+      <View style={[styles.container]}>
+        <CustomHeader title={t('edit_puja_list')} showBackButton={true} />
 
-      <CustomHeader title={t('edit_puja_list')} showBackButton={true} />
-
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
-        <View style={styles.contentContainer}>
-          {/* TITLE + DESC */}
-          <View style={styles.header}>
-            <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
-            <Text style={styles.description}>{t('select_pooja_desc')}</Text>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+          <View style={styles.contentContainer}>
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContentContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled">
+              <View style={styles.mainContent}>
+                <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
+                <Text style={styles.description}>{t('select_pooja_desc')}</Text>
+                <CustomeMultiSelector
+                  data={filteredPoojaData}
+                  selectedDataIds={selectedPoojaId}
+                  onDataSelect={handlePoojaSelect}
+                  searchPlaceholder={t('select_pooja')}
+                  isMultiSelect={true}
+                  onSearch={handleSearch}
+                />
+                {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
+                  <Text style={styles.noResultText}>
+                    {t('no_pooja_found') || 'No Pooja found'}
+                  </Text>
+                )}
+              </View>
+            </ScrollView>
+            <View
+              style={[
+                styles.bottomButtonContainer,
+                {paddingBottom: moderateScale(16)},
+              ]}>
+              <PrimaryButton
+                title={t('update')}
+                onPress={handleNext}
+                style={styles.nextButton}
+                disabled={selectedPoojaId.length === 0}
+              />
+            </View>
           </View>
-
-          {/* LIST – fills remaining space */}
-          <View style={styles.listWrapper}>
-            <CustomeMultiSelector {...selectorProps} />
-          </View>
-
-          {/* NO RESULT */}
-          {poojaData.length === 0 && searchText.trim() ? (
-            <Text style={styles.noResultText}>
-              {t('no_pooja_found') || 'No Pooja found'}
-            </Text>
-          ) : null}
-        </View>
-      </KeyboardAvoidingView>
-
-      {/* FIXED UPDATE BUTTON */}
-      <View style={styles.bottomButtonContainer}>
-        <PrimaryButton
-          title={t('update')}
-          onPress={handleNext}
-          style={styles.nextButton}
-          disabled={selectedPoojaId.length === 0}
-        />
+        </KeyboardAvoidingView>
       </View>
     </View>
   );
 };
 
-/* ------------------- STYLES ------------------- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -282,10 +254,16 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
-  header: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
+    paddingBottom: 0,
+  },
+  mainContent: {
     paddingHorizontal: wp(6.5),
-    paddingTop: moderateScale(24),
-    paddingBottom: moderateScale(12),
+    paddingVertical: moderateScale(24),
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -299,11 +277,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     marginBottom: moderateScale(18),
   },
-  listWrapper: {
-    flex: 1,
-    paddingHorizontal: wp(6.5),
-    marginBottom: moderateScale(12),
-  },
   nextButton: {
     height: moderateScale(46),
   },
@@ -313,14 +286,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     marginTop: moderateScale(30),
     textAlign: 'center',
-    paddingHorizontal: wp(6.5),
   },
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
     paddingHorizontal: wp(6.5),
-    paddingVertical: moderateScale(12),
-    borderTopWidth: 1,
-    borderTopColor: COLORS.separatorColor,
+    paddingTop: moderateScale(6),
   },
 });
 

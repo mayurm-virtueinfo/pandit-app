@@ -75,20 +75,17 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_Medium,
-    letterSpacing: -0.33,
   },
   timestamp: {
     color: COLORS.textSecondary,
     fontSize: moderateScale(13),
     fontFamily: Fonts.Sen_Medium,
-    letterSpacing: -0.33,
     textAlign: 'right',
   },
   message: {
     color: COLORS.textDark,
     fontSize: moderateScale(13),
     fontFamily: Fonts.Sen_Regular,
-    lineHeight: moderateScale(18),
     marginBottom: moderateScale(13),
   },
   separator: {

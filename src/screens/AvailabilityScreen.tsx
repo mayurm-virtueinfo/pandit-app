@@ -134,7 +134,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.darkText,
     marginBottom: 16,
-    lineHeight: 22,
   },
   monthHeader: {
     flexDirection: 'row',

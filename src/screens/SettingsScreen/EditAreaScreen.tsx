@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import CustomeLoader from '../../components/CustomLoader';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {SettingsStackParamList} from '../../navigation/SettingsStack/SettingsStack';
 import {SelectorDataOption} from '../Auth/type';
+import {translateData} from '../../utils/TranslateData';
 
 type AreaItem = {
   area: number;
@@ -56,69 +57,105 @@ type ScreenNavigationProp = StackNavigationProp<
 const EditAreaScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
-
-  const {showErrorToast, showSuccessToast} = useCommonToast();
-  const [areas, setAreas] = useState<CustomeSelectorDataOption[]>([]);
   const [selectedAreaIds, setSelectedAreaIds] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  const [areas, setAreas] = useState<CustomeSelectorDataOption[]>([]);
+  const [originalAreas, setOriginalAreas] = useState<
+    CustomeSelectorDataOption[]
+  >([]);
   const [filteredAreas, setFilteredAreas] = useState<
     CustomeSelectorDataOption[]
   >([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
+
+  const {t, i18n} = useTranslation();
+  const {showErrorToast, showSuccessToast} = useCommonToast();
+  const currentLanguage = i18n.language;
 
   const {selectCityId, area} = route.params || {};
-  // area is expected to be AreaItem[] or undefined
 
-  // Set selectedAreaIds from area prop after areas are loaded
   useEffect(() => {
     if (area && Array.isArray(area) && areas.length > 0) {
-      // area is an array of { area: number, ... }
       const areaIds = area.map((a: AreaItem) => a.area);
-      // Only set those areaIds that exist in the loaded areas
       const validAreaIds = areas
         .map(a => a.id)
         .filter(id => areaIds.includes(id));
       setSelectedAreaIds(validAreaIds);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [area, areas]);
 
   useEffect(() => {
-    fetchAreaData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectCityId]);
-
-  useEffect(() => {
-    // Filter areas based on searchText
-    if (searchText.trim() === '') {
+    if (!searchText.trim()) {
       setFilteredAreas(areas);
     } else {
+      const lower = searchText.toLowerCase();
       setFilteredAreas(
-        areas.filter(area =>
-          area.name.toLowerCase().includes(searchText.trim().toLowerCase()),
-        ),
+        areas.filter(item => {
+          const translatedMatch = item.name?.toLowerCase()?.includes(lower);
+          const originalMatch = originalAreas
+            .find(orig => orig.id === item.id)
+            ?.name?.toLowerCase()
+            ?.includes(lower);
+          return translatedMatch || originalMatch;
+        }),
       );
     }
-  }, [areas, searchText]);
+  }, [searchText, areas, originalAreas]);
 
-  const fetchAreaData = async () => {
-    setIsLoading(true);
-    try {
-      const response = (await getAreas(selectCityId)) as SelectorDataOption;
-      const data = response?.data || [];
-      const mappedData: CustomeSelectorDataOption[] = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-      }));
-      setAreas(mappedData);
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const fetchAreaData = useCallback(
+    async (selectCityId?: number) => {
+      if (!selectCityId) return;
+      setIsLoading(true);
+      try {
+        // ✅ Check cache for translated data
+        const cachedData = translationCacheRef.current.get(currentLanguage);
+        if (cachedData) {
+          setAreas(cachedData);
+          setFilteredAreas(cachedData);
+          return;
+        }
+
+        // 🔹 Fetch from API
+        const response: any = await getAreas(selectCityId);
+        const data = response?.data || [];
+
+        // 🔹 Normalize
+        const mappedData: CustomeSelectorDataOption[] = data.map(
+          (item: any) => ({
+            id: item.id,
+            name: item.name,
+          }),
+        );
+
+        setOriginalAreas(mappedData);
+
+        // 🌍 Translate area names
+        const translatedData: any = await translateData(
+          mappedData,
+          currentLanguage,
+          ['name'],
+        );
+
+        // 🔹 Cache translated version
+        translationCacheRef.current.set(currentLanguage, translatedData);
+
+        setAreas(translatedData);
+        setFilteredAreas(translatedData);
+      } catch (error: any) {
+        console.log('fetchAreaData error ::', error);
+        showErrorToast(error?.message || 'Failed to fetch areas');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentLanguage],
+  );
+
+  useEffect(() => {
+    fetchAreaData(selectCityId);
+  }, [selectCityId, fetchAreaData]);
 
   const handleAreaSelect = (areaId: number) => {
     setSelectedAreaIds(prev =>
@@ -139,15 +176,12 @@ const EditAreaScreen: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Prepare data for putServiceArea as { service_areas: [{city, area}, ...] }
-      // selectCityId is always a number here
       const service_areas = selectedAreaIds.map(areaId => ({
         city: Number(selectCityId),
         area: areaId,
       }));
       const payload = {service_areas};
       await putServiceArea(payload);
-      // Optionally, show a success toast or navigate back
       showSuccessToast(t('area_updated_successfully'));
       navigation.replace('SettingsScreen');
     } catch (error: any) {
@@ -202,7 +236,6 @@ const EditAreaScreen: React.FC = () => {
                 )}
               </View>
             </ScrollView>
-            {/* Button fixed at bottom */}
             <View
               style={[
                 styles.bottomButtonContainer,

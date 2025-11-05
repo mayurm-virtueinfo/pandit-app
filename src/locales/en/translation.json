@@ -425,5 +425,12 @@
   "update_now": "Update Now",
   "session_expire": "Session Expired",
   "session_expire_message": "Your session has expired. Please login again.",
-  "login_again": "Login Again"
+  "login_again": "Login Again",
+  "payment_cos_desc": "Payment will be collected in cash from the user at the time of puja.",
+  "payment_no_cos_desc": "Pandit will receive payment online after completing the puja.",
+  "pooja_pricing": "Pooja Pricing",
+  "with_puja_items": "With Pooja Items",
+  "without_puja_items": "Without Pooja Items",
+  "chat_with_pandit_after_puja_started": "You cannot chat with the {{name}} after the pooja has started.",
+  "address_details": "Address Details"
 }

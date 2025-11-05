@@ -248,7 +248,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: Fonts.Sen_Regular,
     color: COLORS.inputLabelText,
-    lineHeight: moderateScale(20),
     marginBottom: verticalScale(17),
     marginRight: scale(21),
   },
@@ -273,7 +272,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     flex: 1,
-    letterSpacing: -0.33,
   },
   separator: {
     height: 1,
@@ -293,7 +291,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: Fonts.Sen_Regular,
     color: COLORS.primaryTextDark,
-    letterSpacing: -0.14,
     minHeight: verticalScale(100),
   },
   policyLinkContainer: {
@@ -318,7 +315,5 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Medium,
     color: COLORS.primaryTextDark,
     textTransform: 'uppercase',
-    letterSpacing: -0.15,
-    lineHeight: moderateScale(21),
   },
 });

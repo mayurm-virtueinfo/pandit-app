@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -28,6 +28,7 @@ import {useCommonToast} from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 import {getFcmToken} from '../../configuration/notificationPermission';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
+import {translateData} from '../../utils/TranslateData';
 
 type ProfileFieldProps = {
   label: string;
@@ -44,28 +45,21 @@ const ProfileField: React.FC<ProfileFieldProps> = ({label, value}) => (
 const ProfileScreen = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation<ProfileStackParamList>();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {signOutApp} = useAuth();
   const {showErrorToast, showSuccessToast} = useCommonToast();
 
-  const [profileData, setProfileData] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const currentLanguage = i18n.language;
+  const translationCacheRef = useRef<Map<string, any>>(new Map());
 
-  // For delete account modal
+  const [profileData, setProfileData] = React.useState<any>(null);
+  const [originalProfileData, setOriginalProfileData] = useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
-  // Store userId from AsyncStorage
   const [userId, setUserId] = useState<string | null>(null);
 
   console.log('userId', userId);
-  // Use useFocusEffect to reload profile data and userId when coming back from EditProfileScreen
-  useFocusEffect(
-    useCallback(() => {
-      fetchProfileData();
-      getUserIdFromStorage();
-    }, []),
-  );
 
   const getUserIdFromStorage = async () => {
     try {
@@ -76,16 +70,13 @@ const ProfileScreen = () => {
     }
   };
 
-  console.log('profileData', profileData);
+  console.log('profileData :: ', profileData);
 
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const handleWalletNavigation = () => {
     navigation.navigate('EarningsHistoryScreen');
-  };
-  const handleNotificationNavigation = () => {
-    navigation.navigate('NotificationScreen');
   };
   const handleEditNavigation = () => {
     navigation.navigate('EditProfileScreen');
@@ -116,20 +107,43 @@ const ProfileScreen = () => {
     setLogoutLoading(false);
   };
 
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response: any = await getPanditProfileDetails();
-      if (response.data.success) {
-        setProfileData(response.data.data);
+      // ✅ Check cache first
+      const cachedData = translationCacheRef.current.get(currentLanguage);
+      if (cachedData) {
+        setProfileData(cachedData);
+        return;
       }
+
+      // 🧾 Fetch profile API
+      const response: any = await getPanditProfileDetails();
+      const data = response?.data?.data;
+
+      if (!data) throw new Error('No profile data found');
+
+      setOriginalProfileData(data);
+
+      // 🌍 Translate dynamic fields
+      const translatedProfile = await translateData(data, currentLanguage, [
+        'pandit_name',
+        'pandit_email',
+        'address_city_name',
+      ]);
+
+      // 💾 Cache translated result
+      translationCacheRef.current.set(currentLanguage, translatedProfile);
+
+      // 📲 Update UI
+      setProfileData(translatedProfile);
     } catch (error: any) {
-      console.error('Profile data error:', error);
-      showErrorToast(error.message);
+      console.error('Profile data fetch error:', error);
+      showErrorToast(error?.message || 'Failed to fetch profile data');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage]);
 
   // Delete Account Handler
   const handleDeleteAccount = async () => {
@@ -186,6 +200,14 @@ const ProfileScreen = () => {
     }
     setDeleteLoading(false);
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      translationCacheRef.current.delete(currentLanguage);
+      fetchProfileData();
+      getUserIdFromStorage();
+    }, [fetchProfileData, currentLanguage]),
+  );
 
   return (
     <SafeAreaView style={[styles.container, {paddingTop: inset.top}]}>
