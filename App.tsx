@@ -1,7 +1,8 @@
 import './src/i18n';
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import SplashScreen from 'react-native-splash-screen';
+// import SplashScreen from 'react-native-splash-screen';
+import { hideSplash } from 'react-native-splash-view';
 import RootNavigator from './src/navigation/RootNavigator';
 import {
   LogBox,
@@ -53,7 +54,8 @@ const App = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      SplashScreen.hide();
+      // SplashScreen.hide();
+      hideSplash()
     }, 2500);
 
     requestUserPermission();

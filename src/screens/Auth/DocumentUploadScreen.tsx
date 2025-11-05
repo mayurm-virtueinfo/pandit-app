@@ -9,9 +9,10 @@ import {
   Platform,
 } from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import DocumentPicker, {
-  DocumentPickerResponse,
-} from 'react-native-document-picker';
+// import DocumentPicker, {
+//   DocumentPickerResponse,
+// } from 'react-native-document-picker';
+import { pick, types, errorCodes, DocumentPickerResponse } from '@react-native-documents/picker';
 import CustomHeader from '../../components/CustomHeader';
 import {COLORS} from '../../theme/theme';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -149,8 +150,8 @@ const DocumentUploadScreen: React.FC = () => {
     if (loadingDocument) return;
 
     try {
-      const result = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles],
+      const result = await pick({
+        type: [types.allFiles],
       });
 
       if (result && result.length > 0) {
@@ -174,8 +175,8 @@ const DocumentUploadScreen: React.FC = () => {
 
         setLoadingDocument(null);
       }
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
+    } catch (err: any) {
+      if (errorCodes?.OPERATION_CANCELED == err?.code) {
         return;
       }
       Alert.alert('Error', 'Failed to pick document. Please try again.');
