@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,25 +11,25 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import CustomHeader from '../../components/CustomHeader';
-import {COLORS} from '../../theme/theme';
+import { COLORS } from '../../theme/theme';
 import CustomTextInput from '../../components/CustomTextInput';
 import PrimaryButton from '../../components/PrimaryButton';
 import Fonts from '../../theme/fonts';
-import {moderateScale} from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 import CustomDropdown from '../../components/CustomDropdown';
-import {useTranslation} from 'react-i18next';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {getCaste, getCity, getGotra, getSubCaste} from '../../api/apiService';
-import {DropdownResponse} from './type';
+import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getCaste, getCity, getGotra, getSubCaste } from '../../api/apiService';
+import { DropdownResponse } from './type';
 import CustomeLoader from '../../components/CustomLoader';
-import {useCommonToast} from '../../common/CommonToast';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import { useCommonToast } from '../../common/CommonToast';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import ImagePicker from 'react-native-image-crop-picker';
 import Feather from 'react-native-vector-icons/Feather';
-import {translateData} from '../../utils/TranslateData';
+import { translateData } from '../../utils/TranslateData';
 
 interface FormData {
   phoneNumber: string;
@@ -61,13 +61,13 @@ const CompleteProfileScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
   const inset = useSafeAreaInsets();
-  const {t, i18n} = useTranslation();
-  const {showErrorToast} = useCommonToast();
+  const { t, i18n } = useTranslation();
+  const { showErrorToast } = useCommonToast();
 
   const currentLanguage = i18n.language;
   const translationCacheRef = useRef<Map<string, any>>(new Map());
 
-  const {phoneNumber} = route.params;
+  const { phoneNumber } = route.params;
 
   const [formData, setFormData] = useState<FormData>({
     phoneNumber: phoneNumber || '',
@@ -100,25 +100,25 @@ const CompleteProfileScreen: React.FC = () => {
   useEffect(() => {
     if (formData.caste) {
       fetchSubCasteData(formData.caste);
-      setFormData(prev => ({...prev, subCaste: '', gotra: ''}));
-      setErrors(prev => ({...prev, subCaste: '', gotra: ''}));
+      setFormData(prev => ({ ...prev, subCaste: '', gotra: '' }));
+      setErrors(prev => ({ ...prev, subCaste: '', gotra: '' }));
     } else {
       setSubCasteData([]);
       setGotraData([]);
-      setFormData(prev => ({...prev, subCaste: '', gotra: ''}));
-      setErrors(prev => ({...prev, subCaste: '', gotra: ''}));
+      setFormData(prev => ({ ...prev, subCaste: '', gotra: '' }));
+      setErrors(prev => ({ ...prev, subCaste: '', gotra: '' }));
     }
   }, [formData.caste]);
 
   useEffect(() => {
     if (formData.subCaste) {
       fetchGotraData(formData.subCaste);
-      setFormData(prev => ({...prev, gotra: ''}));
-      setErrors(prev => ({...prev, gotra: ''}));
+      setFormData(prev => ({ ...prev, gotra: '' }));
+      setErrors(prev => ({ ...prev, gotra: '' }));
     } else {
       setGotraData([]);
-      setFormData(prev => ({...prev, gotra: ''}));
-      setErrors(prev => ({...prev, gotra: ''}));
+      setFormData(prev => ({ ...prev, gotra: '' }));
+      setErrors(prev => ({ ...prev, gotra: '' }));
     }
   }, [formData.subCaste]);
 
@@ -286,16 +286,16 @@ const CompleteProfileScreen: React.FC = () => {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({...prev, [field]: value}));
-    setErrors(prev => ({...prev, [field]: validateField(field, value)}));
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: validateField(field, value) }));
   };
 
   const handlePhotoSelect = () => {
     Keyboard.dismiss();
     Alert.alert(t('select_profile_picture'), t('choose_an_option'), [
-      {text: t('take_photo'), onPress: () => openCamera()},
-      {text: t('choose_from_gallery'), onPress: () => openGallery()},
-      {text: t('cancel'), style: 'cancel'},
+      { text: t('take_photo'), onPress: () => openCamera() },
+      { text: t('choose_from_gallery'), onPress: () => openGallery() },
+      { text: t('cancel'), style: 'cancel' },
     ]);
   };
 
@@ -405,7 +405,7 @@ const CompleteProfileScreen: React.FC = () => {
   ]);
 
   return (
-    <View style={[styles.mainContainer, {paddingTop: inset.top}]}>
+    <View style={[styles.mainContainer, { paddingTop: inset.top }]}>
       <CustomeLoader loading={isLoading} />
       <View style={styles.container}>
         <CustomHeader
@@ -414,14 +414,16 @@ const CompleteProfileScreen: React.FC = () => {
         />
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}>
+          // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
+        >
           <View style={styles.flexGrow}>
             <ScrollView
               style={styles.content}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.scrollContent}>
+              contentContainerStyle={styles.scrollContent}
+            >
               <View style={styles.formContainer}>
                 {/* Photo Picker */}
                 <View style={styles.photoSection}>
@@ -429,10 +431,11 @@ const CompleteProfileScreen: React.FC = () => {
                     style={styles.photoPicker}
                     onPress={handlePhotoSelect}
                     activeOpacity={0.7}
-                    testID="photo-picker">
+                    testID="photo-picker"
+                  >
                     {formData.profile_img && formData.profile_img.uri ? (
                       <Image
-                        source={{uri: formData.profile_img.uri}}
+                        source={{ uri: formData.profile_img.uri }}
                         style={styles.photo}
                       />
                     ) : (
@@ -529,8 +532,9 @@ const CompleteProfileScreen: React.FC = () => {
             <View
               style={[
                 styles.fixedButtonContainer,
-                {paddingBottom: inset.bottom || 16},
-              ]}>
+                { paddingBottom: inset.bottom || 16 },
+              ]}
+            >
               <PrimaryButton
                 title={t('next')}
                 onPress={handleNext}

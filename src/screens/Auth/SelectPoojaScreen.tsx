@@ -1,32 +1,28 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   StatusBar,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {COLORS, wp} from '../../theme/theme';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { COLORS, wp } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {moderateScale} from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { moderateScale } from 'react-native-size-matters';
 import CustomHeader from '../../components/CustomHeader';
-import {useTranslation} from 'react-i18next';
-import {
-  CustomeSelectorDataOption,
-  poojaDataOption,
-} from '../../types/cityTypes';
+import { useTranslation } from 'react-i18next';
+import { poojaDataOption } from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
-import {getPooja} from '../../api/apiService';
-import {SelectorDataOption} from './type';
-import {useCommonToast} from '../../common/CommonToast';
+import { getPooja } from '../../api/apiService';
+import { SelectorDataOption } from './type';
+import { useCommonToast } from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 
 type RouteParams = {
   action?: string;
@@ -49,12 +45,14 @@ type ScreenNavigation = StackNavigationProp<
   'SelectPoojaScreen'
 >;
 
+const PAGE_SIZE = 20;
+
 const SelectPoojaScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigation>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
-  const {t} = useTranslation();
-  const {showErrorToast} = useCommonToast();
+  const { t } = useTranslation();
+  const { showErrorToast } = useCommonToast();
 
   const [poojaData, setPoojaData] = useState<poojaDataOption[]>([]);
   const [selectedPoojaId, setSelectedPoojaId] = useState<number[]>([]);
@@ -63,6 +61,12 @@ const SelectPoojaScreen: React.FC = () => {
   const [filteredPoojaData, setFilteredPoojaData] = useState<poojaDataOption[]>(
     [],
   );
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const firstMountRef = useRef(true);
 
   const {
     phoneNumber,
@@ -81,43 +85,72 @@ const SelectPoojaScreen: React.FC = () => {
 
   const action = route.params?.action;
 
-  useEffect(() => {
-    fetchPoojaData();
-  }, []);
+  const fetchPoojaData = useCallback(
+    async (fetchPage: number, reset: boolean = false) => {
+      if (reset) {
+        setIsLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+      try {
+        const params: any = { page: fetchPage };
+        if (searchText.trim()) params.search = searchText.trim();
+
+        const response = await getPooja(params);
+        const data = response && response.data ? response.data : response;
+
+        // Support .results (paginated) and [] in .data fallback
+        const mappedData: poojaDataOption[] = (data.results || []).map(
+          (item: any) => ({
+            id: item.id,
+            title: item.title,
+            short_description: item.short_description,
+            image_url: item.image_url,
+          }),
+        );
+
+        if (reset) {
+          setPoojaData(mappedData);
+          setFilteredPoojaData(mappedData);
+        } else {
+          setPoojaData(prev => [...prev, ...mappedData]);
+          setFilteredPoojaData(prev => [...prev, ...mappedData]);
+        }
+
+        setTotalPages(
+          data.total_pages ?? Math.ceil((data.count || 0) / PAGE_SIZE),
+        );
+        setHasMore(
+          data.next !== null ||
+            !!(data.total_pages && fetchPage < data.total_pages),
+        );
+      } catch (error: any) {
+        showErrorToast(error?.message);
+      } finally {
+        setIsLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [showErrorToast, searchText],
+  );
 
   useEffect(() => {
-    if (searchText.trim() === '') {
-      setFilteredPoojaData(poojaData);
-    } else {
-      const lowerSearch = searchText.toLowerCase();
-      setFilteredPoojaData(
-        poojaData.filter(
-          item =>
-            item.title?.toLowerCase().includes(lowerSearch) ||
-            item.short_description?.toLowerCase().includes(lowerSearch),
-        ),
-      );
-    }
-  }, [searchText, poojaData]);
+    setPage(1);
+    setHasMore(true);
+    setTotalPages(1);
+    setPoojaData([]);
+    setFilteredPoojaData([]);
+    fetchPoojaData(1, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText]);
 
-  const fetchPoojaData = async () => {
-    setIsLoading(true);
-    try {
-      const response = (await getPooja()) as SelectorDataOption;
-      const data = response?.data || [];
-      const mappedData: poojaDataOption[] = data.map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        short_description: item.short_description,
-      }));
-      setPoojaData(mappedData);
-      setFilteredPoojaData(mappedData);
-    } catch (error: any) {
-      showErrorToast(error?.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleLoadMore = useCallback(() => {
+    if (loadingMore || isLoading) return;
+    if (!hasMore || page >= totalPages) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchPoojaData(nextPage);
+  }, [fetchPoojaData, hasMore, isLoading, loadingMore, page, totalPages]);
 
   const handlePoojaSelect = (poojaId: number) => {
     setSelectedPoojaId(prev =>
@@ -153,7 +186,7 @@ const SelectPoojaScreen: React.FC = () => {
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
@@ -169,7 +202,8 @@ const SelectPoojaScreen: React.FC = () => {
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={styles.contentContainer}>
             <View style={styles.mainContent}>
               <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
@@ -181,6 +215,9 @@ const SelectPoojaScreen: React.FC = () => {
                 searchPlaceholder={t('select_pooja')}
                 isMultiSelect={true}
                 onSearch={setSearchText}
+                onEndReached={handleLoadMore}
+                loadingMore={loadingMore}
+                onEndReachedThreshold={0.2}
               />
               {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
                 <Text style={styles.noDataText}>
@@ -193,8 +230,9 @@ const SelectPoojaScreen: React.FC = () => {
         <View
           style={[
             styles.buttonContainer,
-            {paddingBottom: insets.bottom + moderateScale(12)},
-          ]}>
+            { paddingBottom: insets.bottom + moderateScale(12) },
+          ]}
+        >
           <PrimaryButton
             title={buttonText}
             onPress={handleNext}

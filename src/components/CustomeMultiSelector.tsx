@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
   FlatList,
   Platform,
   ActivityIndicator,
+  ListRenderItemInfo,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {moderateScale} from 'react-native-size-matters';
-import {CustomeSelectorDataOption, poojaDataOption} from '../types/cityTypes';
-import {COLORS, THEMESHADOW} from '../theme/theme';
+import { moderateScale } from 'react-native-size-matters';
+import { CustomeSelectorDataOption, poojaDataOption } from '../types/cityTypes';
+import { COLORS, THEMESHADOW } from '../theme/theme';
 import Fonts from '../theme/fonts';
 
 const isCustomeSelectorDataOption = (
@@ -65,18 +66,19 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
 
   const renderItem = ({
     item,
-  }: {
-    item: CustomeSelectorDataOption | poojaDataOption;
-  }) => (
+    index,
+  }: ListRenderItemInfo<CustomeSelectorDataOption | poojaDataOption>) => (
     <View>
       <TouchableOpacity
         style={styles.cityItem}
-        onPress={() => handleItemPress(item.id)}>
+        onPress={() => handleItemPress(item.id)}
+      >
         <Text style={styles.cityName}>{getDisplayName(item)}</Text>
 
         <TouchableOpacity
           style={styles.checkboxContainer}
-          onPress={() => handleItemPress(item.id)}>
+          onPress={() => handleItemPress(item.id)}
+        >
           {selectedDataIds.includes(item.id) ? (
             <Ionicons
               name="checkbox-outline"
@@ -94,7 +96,7 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
       </TouchableOpacity>
 
       {/* Separator (except after last item) */}
-      <View style={styles.citySeparator} />
+      {index < data.length - 1 && <View style={styles.citySeparator} />}
     </View>
   );
 
@@ -105,7 +107,7 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
         <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     ) : (
-      <View style={{height: moderateScale(10)}} />
+      <View style={{ height: moderateScale(10) }} />
     );
 
   return (
@@ -120,7 +122,8 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
                 paddingVertical:
                   Platform.OS === 'ios' ? moderateScale(10) : moderateScale(2),
               },
-            ]}>
+            ]}
+          >
             <MaterialIcons
               name="search"
               size={16}
@@ -158,7 +161,7 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     borderRadius: moderateScale(10),
     backgroundColor: COLORS.white,
   },
@@ -167,7 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: moderateScale(14),
   },
-  searchIcon: {marginRight: moderateScale(5)},
+  searchIcon: { marginRight: moderateScale(5) },
   searchInput: {
     flex: 1,
     fontSize: moderateScale(14),

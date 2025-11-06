@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef} from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,17 +9,17 @@ import {
   Platform,
   RefreshControl,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
-import {COLORS, THEMESHADOW} from '../../theme/theme';
+import { COLORS, THEMESHADOW } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import {useTranslation} from 'react-i18next';
-import {getPuja} from '../../api/apiService';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {PujaListStackParamList} from '../../navigation/PujaListStack/PujaListStack';
+import { useTranslation } from 'react-i18next';
+import { getPuja } from '../../api/apiService';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { PujaListStackParamList } from '../../navigation/PujaListStack/PujaListStack';
 import CustomeLoader from '../../components/CustomLoader';
-import {translateData} from '../../utils/TranslateData';
+import { translateData } from '../../utils/TranslateData';
 
 type PujaListScreenNavigationProp = StackNavigationProp<
   PujaListStackParamList,
@@ -47,7 +47,7 @@ interface PujaItemProps {
 }
 
 const PujaListScreen: React.FC = () => {
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<PujaListScreenNavigationProp>();
   const [originalPujaList, setOriginalPujaList] = useState<PujaItemType[]>([]);
@@ -118,10 +118,23 @@ const PujaListScreen: React.FC = () => {
     }, [fetchPujaList]),
   );
 
-  const PujaItem: React.FC<PujaItemProps> = ({puja, onEdit}) => {
+  const PujaItem: React.FC<PujaItemProps> = ({ puja, onEdit }) => {
+    let priceValue;
+    if (
+      puja.price_status === 1 &&
+      puja.system_price &&
+      puja.system_price.price_without_samagri
+    ) {
+      priceValue = puja.system_price.price_without_samagri;
+    } else if (puja.price_status === 2 && puja.price_without_samagri) {
+      priceValue = puja.price_without_samagri;
+    } else {
+      priceValue = '0.00';
+    }
+
     const formattedPriceWith =
-      puja.price_with_samagri && puja.price_with_samagri !== '0.00'
-        ? `₹ ${Number(puja.price_with_samagri).toLocaleString('en-IN')}`
+      priceValue && priceValue !== '0.00'
+        ? `₹ ${Number(priceValue).toLocaleString('en-IN')}`
         : '₹ 0';
 
     return (
@@ -129,7 +142,7 @@ const PujaListScreen: React.FC = () => {
         <View style={styles.pujaContent}>
           {puja.pooja_image_url ? (
             <Image
-              source={{uri: puja.pooja_image_url}}
+              source={{ uri: puja.pooja_image_url }}
               style={styles.pujaImage}
               resizeMode="cover"
             />
@@ -145,7 +158,8 @@ const PujaListScreen: React.FC = () => {
               <Text style={styles.pujaPrice}>{formattedPriceWith}</Text>
               <TouchableOpacity
                 style={styles.editButton}
-                onPress={() => onEdit(puja)}>
+                onPress={() => onEdit(puja)}
+              >
                 <Text style={styles.editButtonText}>{t('edit')}</Text>
               </TouchableOpacity>
             </View>
@@ -170,7 +184,7 @@ const PujaListScreen: React.FC = () => {
   const renderSeparator = () => <View style={styles.separator} />;
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <CustomeLoader loading={loading} />
       <UserCustomHeader
         title={t('puja_list')}
@@ -194,7 +208,8 @@ const PujaListScreen: React.FC = () => {
               tintColor={COLORS.primary}
               colors={[COLORS.primary]}
             />
-          }>
+          }
+        >
           <View style={[styles.listContainer, THEMESHADOW.shadow]}>
             {loading ? null : pujaList.length === 0 ? (
               <Text
@@ -202,7 +217,8 @@ const PujaListScreen: React.FC = () => {
                   textAlign: 'center',
                   color: COLORS.primaryTextDark,
                   marginVertical: 30,
-                }}>
+                }}
+              >
                 {t('no_items_found')}
               </Text>
             ) : (
