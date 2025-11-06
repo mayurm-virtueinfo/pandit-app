@@ -428,5 +428,6 @@
   "with_puja_items": "पूजा साहित्यासह",
   "without_puja_items": "पूजा साहित्याशिवाय",
   "chat_with_pandit_after_puja_started": "पूजा सुरू झाल्यावर तुम्ही {{name}} यांच्याशी चॅट करू शकत नाही.",
-  "address_details": "पत्त्याचे तपशील"
+  "address_details": "पत्त्याचे तपशील",
+  "continue_as_guest": "अतिथी म्हणून पुढे जा"
 }

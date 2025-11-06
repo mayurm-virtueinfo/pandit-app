@@ -5,8 +5,8 @@ import React, {
   useContext,
   ReactNode,
 } from 'react';
-import NetInfo, {NetInfoState} from '@react-native-community/netinfo';
-import {Alert, Linking, Platform} from 'react-native';
+import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { Alert } from 'react-native';
 
 interface NetworkContextType {
   isConnected: boolean;
@@ -20,9 +20,39 @@ interface NetworkProviderProps {
   children: ReactNode;
 }
 
-export const NetworkProvider: React.FC<NetworkProviderProps> = ({children}) => {
+export const NetworkProvider: React.FC<NetworkProviderProps> = ({
+  children,
+}) => {
   const [isConnected, setIsConnected] = useState<boolean>(true);
   const [alertShown, setAlertShown] = useState<boolean>(false);
+
+  const handleRetry = () => {
+    NetInfo.fetch().then(state => {
+      const connected = !!state.isConnected;
+      setIsConnected(connected);
+
+      if (!connected) {
+        setAlertShown(true);
+        showNoInternetAlert();
+      } else {
+        setAlertShown(false);
+      }
+    });
+  };
+
+  const showNoInternetAlert = () => {
+    Alert.alert(
+      'No Internet Connection',
+      'Please turn on your internet to continue using the app.',
+      [
+        {
+          text: 'Retry',
+          onPress: handleRetry,
+        },
+      ],
+      { cancelable: false },
+    );
+  };
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
@@ -31,29 +61,7 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({children}) => {
 
       if (!connected && !alertShown) {
         setAlertShown(true);
-        Alert.alert(
-          'No Internet Connection',
-          'Please turn on your internet to continue using the app.',
-          [
-            {
-              text: 'Open Settings',
-              onPress: () => {
-                if (Platform.OS === 'ios') {
-                  Linking.openURL(
-                    'App-Prefs:root=MOBILE_DATA_SETTINGS_ID',
-                  ).catch(() => {
-                    Linking.openURL('App-Prefs:');
-                  });
-                } else {
-                  Linking.openSettings().catch(() => {
-                    Linking.openURL('android.settings.WIRELESS_SETTINGS');
-                  });
-                }
-              },
-            },
-          ],
-          {cancelable: false},
-        );
+        showNoInternetAlert();
       }
 
       if (connected) {
@@ -65,7 +73,7 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({children}) => {
   }, [alertShown]);
 
   return (
-    <NetworkContext.Provider value={{isConnected}}>
+    <NetworkContext.Provider value={{ isConnected }}>
       {children}
     </NetworkContext.Provider>
   );

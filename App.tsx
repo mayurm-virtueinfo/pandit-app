@@ -1,6 +1,6 @@
 import './src/i18n';
-import React, {useEffect, useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 // import SplashScreen from 'react-native-splash-screen';
 import { hideSplash } from 'react-native-splash-view';
 import RootNavigator from './src/navigation/RootNavigator';
@@ -16,24 +16,26 @@ import {
   StyleSheet,
 } from 'react-native';
 import 'react-native-gesture-handler';
-import {AuthProvider} from './src/provider/AuthProvider';
-import {ToastProvider} from 'react-native-toast-notifications';
-import {moderateScale} from 'react-native-size-matters';
-import {COLORS} from './src/theme/theme';
+import { AuthProvider } from './src/provider/AuthProvider';
+import { ToastProvider } from 'react-native-toast-notifications';
+import { moderateScale } from 'react-native-size-matters';
+import { COLORS } from './src/theme/theme';
 import {
   handleNotificationNavigation,
   setupNotifications,
 } from './src/configuration/firebaseMessaging';
-import {getAuth} from '@react-native-firebase/auth';
-import {I18nextProvider, useTranslation} from 'react-i18next';
+import { getAuth } from '@react-native-firebase/auth';
+import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from './src/i18n';
-import {navigationRef} from './src/helper/navigationRef';
-import {getMessaging} from '@react-native-firebase/messaging';
-import {requestUserPermission} from './src/configuration/notificationPermission';
+import { navigationRef } from './src/helper/navigationRef';
+import { getMessaging } from '@react-native-firebase/messaging';
+import { requestUserPermission } from './src/configuration/notificationPermission';
 import DeviceInfo from 'react-native-device-info';
 import checkVersion from 'react-native-store-version';
-import {SessionProvider} from './src/provider/SessionProvider';
-import {NetworkProvider} from './src/provider/NetworkProvider';
+import { SessionProvider } from './src/provider/SessionProvider';
+import { NetworkProvider } from './src/provider/NetworkProvider';
+import Config from 'react-native-config';
+import WebSocketManager from './src/utils/WebSocketManager';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -43,27 +45,36 @@ LogBox.ignoreLogs([
 const auth = getAuth();
 if (__DEV__) {
   // auth.useEmulator('http://127.0.0.1:9099');
-  auth.useEmulator('http://192.168.1.13:9099');
+  auth.useEmulator('http://192.168.1.11:9099');
 }
 setupNotifications();
 
 const App = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const [isUpdateRequired, setIsUpdateRequired] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       // SplashScreen.hide();
-      hideSplash()
+      hideSplash();
     }, 2500);
 
     requestUserPermission();
-    // Check for updates on mount
     checkForUpdate();
 
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    WebSocketManager.start();
+
+    console.log('*****************   App Environment   *****************');
+    console.log('Loaded ENVIRONMENT :', Config.ENVIRONMENT);
+    console.log('Loaded BASE_URL :', Config.BASE_URL);
+    console.log('Loaded APP_NAME :', Config.APP_NAME);
+    console.log('*******************************************************');
+
+    return () => {
+      clearTimeout(timer);
+      WebSocketManager.stop();
+    };
   }, []);
 
   const getCurrentVersion = async () => {
@@ -140,13 +151,11 @@ const App = () => {
         visible={isUpdateRequired}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => {
-          /* Optionally, handle hardware back button or prevent closing */
-        }}
-        statusBarTranslucent>
+        onRequestClose={() => {}}
+        statusBarTranslucent
+      >
         {/* Backdrop */}
         <Pressable style={styles.backdrop} onPress={() => {}} />
-
         {/* Modal Content */}
         <View style={styles.mainModelContainer}>
           <View style={styles.modalView}>
@@ -171,14 +180,16 @@ const App = () => {
           textStyle={{
             fontSize: moderateScale(16),
             color: COLORS.textPrimary,
-          }}>
+          }}
+        >
           <AuthProvider>
             <SessionProvider>
               <NavigationContainer
                 ref={navigationRef}
                 onReady={() => {
                   handleInitialNotification();
-                }}>
+                }}
+              >
                 <RootNavigator />
               </NavigationContainer>
             </SessionProvider>
@@ -204,7 +215,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 2, // above the backdrop
+    zIndex: 2,
   },
   modalView: {
     backgroundColor: '#fff',
@@ -214,7 +225,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     width: '80%',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },

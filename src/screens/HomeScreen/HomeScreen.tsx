@@ -1,4 +1,4 @@
-import React, {useCallback, useState, useEffect, useRef} from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,12 @@ import {
   RefreshControl,
   DeviceEventEmitter,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
-import {COLORS, THEMESHADOW} from '../../theme/theme';
+import { COLORS, THEMESHADOW } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import {moderateScale, verticalScale} from 'react-native-size-matters';
-import {useTranslation} from 'react-i18next';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 import {
   getPandingPuja,
   getUpcomingPuja,
@@ -23,12 +23,10 @@ import {
   getInProgressPuja,
   getCompletePujaList,
 } from '../../api/apiService';
-import {useNavigation} from '@react-navigation/native';
-import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
+import { useNavigation } from '@react-navigation/native';
+import { HomeStackParamList } from '../../navigation/HomeStack/HomeStack';
 import CustomeLoader from '../../components/CustomLoader';
-import {translateData} from '../../utils/TranslateData';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import AppConstant from '../../utils/AppContent';
+import { translateData } from '../../utils/TranslateData';
 
 interface PujaItem {
   id: string | number;
@@ -54,8 +52,8 @@ interface InProgressPujaItem {
 }
 
 const HomeScreen: React.FC = () => {
-  const {t, i18n} = useTranslation();
-  const navigation = useNavigation<HomeStackParamList>();
+  const { t, i18n } = useTranslation();
+  const navigation: any = useNavigation();
   const inset = useSafeAreaInsets();
 
   const [upcomingPujas, setUpcomingPujas] = useState<PujaItem[]>([]);
@@ -159,68 +157,6 @@ const HomeScreen: React.FC = () => {
   }, [fetchAllPujas]);
 
   useEffect(() => {
-    let socket: WebSocket | null = null;
-
-    const connectWebSocket = async () => {
-      try {
-        const token = await AsyncStorage.getItem(AppConstant.ACCESS_TOKEN);
-        const userId = await AsyncStorage.getItem(AppConstant.USER_ID);
-
-        if (!token || !userId) return;
-
-        const wsUrl = getSocketURL(token, userId);
-        socket = new WebSocket(wsUrl);
-
-        socket.onopen = () => {
-          console.log('✅ WebSocket connected');
-        };
-
-        socket.onmessage = event => {
-          try {
-            const data = JSON.parse(event.data);
-            console.log('📩 WebSocket message received:', data);
-
-            if (
-              data.type === 'booking_request' &&
-              data.action === 'created' &&
-              data.booking_id
-            ) {
-              console.log('🔔 New Puja Booking Created:', data.booking_id);
-
-              // 🔄 Refresh all sections
-              translationCacheRef.current.clear();
-              fetchAllPujas();
-            }
-          } catch (err) {
-            console.error('❌ Error parsing WebSocket message:', err);
-          }
-        };
-
-        socket.onerror = error => {
-          console.error('⚠️ WebSocket error:', error);
-        };
-
-        socket.onclose = e => {
-          console.log('🔌 WebSocket closed:', e.reason);
-          // 🔁 Auto reconnect after 5s
-          setTimeout(connectWebSocket, 5000);
-        };
-      } catch (error) {
-        console.error('⚠️ Failed to connect WebSocket:', error);
-      }
-    };
-
-    connectWebSocket();
-
-    return () => {
-      if (socket) {
-        console.log('❎ Closing WebSocket connection');
-        socket.close();
-      }
-    };
-  }, [fetchAllPujas]);
-
-  useEffect(() => {
     const subscription = DeviceEventEmitter.addListener(
       'PUJA_DATA_UPDATED',
       async () => {
@@ -231,13 +167,6 @@ const HomeScreen: React.FC = () => {
 
     return () => subscription.remove();
   }, [fetchAllPujas]);
-
-  const getSocketURL = (token: string, userId: string) => {
-    if (__DEV__) {
-      return `ws://dev.puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
-    }
-    return `wss://puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
-  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -253,9 +182,14 @@ const HomeScreen: React.FC = () => {
   // upcoming pujas
   const renderPujaItem = (item: PujaItem, isLast: boolean) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate('PujaDetailsScreen', {id: item.id})}>
+      key={item.id}
+      onPress={() => navigation.navigate('PujaDetailsScreen', { id: item.id })}
+    >
       <View style={styles.pujaItem}>
-        <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
+        <Image
+          source={{ uri: item.pooja_image_url }}
+          style={styles.pujaImage}
+        />
         <View style={styles.pujaContent}>
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
           <Text style={styles.pujaDate}>
@@ -278,7 +212,7 @@ const HomeScreen: React.FC = () => {
     const dateObj = new Date(dateString);
     if (isNaN(dateObj.getTime())) return dateString;
     const day = dateObj.getDate();
-    const month = dateObj.toLocaleString('default', {month: 'long'});
+    const month = dateObj.toLocaleString('default', { month: 'long' });
     return `${getOrdinal(day)} ${month}`;
   };
 
@@ -289,9 +223,10 @@ const HomeScreen: React.FC = () => {
           booking_id: item.booking_id,
           completed: true,
         })
-      }>
+      }
+    >
       <View style={styles.pujaItem}>
-        <Image source={{uri: item.image_url}} style={styles.pujaImage} />
+        <Image source={{ uri: item.image_url }} style={styles.pujaImage} />
         <View style={styles.pujaContent}>
           <Text style={styles.pujaName}>{item.title}</Text>
           <Text style={styles.pujaDate}>
@@ -307,13 +242,16 @@ const HomeScreen: React.FC = () => {
     <TouchableOpacity
       key={item.id}
       onPress={() =>
-        navigation.navigate('WaitingApprovalPujaScreen', {booking_id: item.id})
-      }>
+        navigation.navigate('WaitingApprovalPujaScreen', {
+          booking_id: item.id,
+        })
+      }
+    >
       <View style={styles.pujaItem}>
         <View style={styles.pujaContent}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Image
-              source={{uri: item.pooja_image_url}}
+              source={{ uri: item.pooja_image_url }}
               style={styles.pujaImage}
             />
             <View>
@@ -336,10 +274,17 @@ const HomeScreen: React.FC = () => {
     <TouchableOpacity
       key={item.id}
       onPress={() =>
-        navigation.navigate('PujaDetailsScreen', {progress: true, id: item.id})
-      }>
+        navigation.navigate('PujaDetailsScreen', {
+          progress: true,
+          id: item.id,
+        })
+      }
+    >
       <View style={styles.pujaItem}>
-        <Image source={{uri: item.pooja_image_url}} style={styles.pujaImage} />
+        <Image
+          source={{ uri: item.pooja_image_url }}
+          style={styles.pujaImage}
+        />
         <View style={styles.pujaContent}>
           <Text style={styles.pujaName}>{item.pooja_name}</Text>
           <Text style={styles.pujaDate}>
@@ -356,7 +301,7 @@ const HomeScreen: React.FC = () => {
   );
 
   return (
-    <View style={[styles.container, {paddingTop: inset.top}]}>
+    <View style={[styles.container, { paddingTop: inset.top }]}>
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -381,7 +326,8 @@ const HomeScreen: React.FC = () => {
                 tintColor={COLORS.primary}
                 colors={[COLORS.primary]}
               />
-            }>
+            }
+          >
             {/* In Progress */}
             {inProgressPujas.length > 0 && (
               <View style={styles.section}>

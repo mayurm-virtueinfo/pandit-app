@@ -49,13 +49,13 @@
 	<key>NSCalendarsUsageDescription</key>
 	<string>This is required to check Pandit availability and allow users to schedule appointments and save event dates directly to your calendar.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to allow you to take and upload photos.</string>
+	<string>Pujaguru Vendor uses your camera to let you take and upload your profile photo for your vendor account.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Pujaguru Vendor uses your location to help you set your service location accurately and connect with nearby customers who book pujas.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone for audio recording features.</string>
+	<string>Pujaguru Vendor uses your microphone only when you record or share audio messages during live puja sessions or consultations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to allow you to select and upload photos.</string>
+	<string>Pujaguru Vendor uses your photo library so you can select and upload a profile picture or service-related images to your vendor account.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>
