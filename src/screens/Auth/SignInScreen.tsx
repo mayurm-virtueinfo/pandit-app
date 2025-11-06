@@ -349,7 +349,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
   );
   const colorScheme = useColorScheme();
   const pickerTextColor =
-    colorScheme === 'dark' ? COLORS.white : COLORS.primaryTextDark;
+    colorScheme === 'dark' ? COLORS.primaryTextDark : COLORS.primaryTextDark;
 
   useEffect(() => {
     getSavedLanguage().then(saved => {
@@ -757,7 +757,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
                     style={
                       colorScheme === 'dark'
-                        ? { backgroundColor: COLORS.backgroundDark }
+                        ? { backgroundColor: COLORS.white }
                         : undefined
                     }
                   />
@@ -767,7 +767,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
                     style={
                       colorScheme === 'dark'
-                        ? { backgroundColor: COLORS.backgroundDark }
+                        ? { backgroundColor: COLORS.white }
                         : undefined
                     }
                   />
@@ -777,7 +777,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
                     style={
                       colorScheme === 'dark'
-                        ? { backgroundColor: COLORS.backgroundDark }
+                        ? { backgroundColor: COLORS.white }
                         : undefined
                     }
                   />
@@ -787,7 +787,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
                     color={Platform.OS === 'ios' ? undefined : pickerTextColor}
                     style={
                       colorScheme === 'dark'
-                        ? { backgroundColor: COLORS.backgroundDark }
+                        ? { backgroundColor: COLORS.white }
                         : undefined
                     }
                   />

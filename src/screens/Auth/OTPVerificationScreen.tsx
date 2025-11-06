@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,29 +10,31 @@ import {
   ImageBackground,
   Image,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {RouteProp} from '@react-navigation/native';
-import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import Loader from '../../components/Loader';
-import {getAuth, signInWithPhoneNumber} from '@react-native-firebase/auth';
-import {useCommonToast} from '../../common/CommonToast';
-import {COLORS} from '../../theme/theme';
-import {Images} from '../../theme/Images';
-import {useTranslation} from 'react-i18next';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {moderateScale} from 'react-native-size-matters';
+import { getAuth, signInWithPhoneNumber } from '@react-native-firebase/auth';
+import { useCommonToast } from '../../common/CommonToast';
+import { COLORS } from '../../theme/theme';
+import { Images } from '../../theme/Images';
+import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { moderateScale } from 'react-native-size-matters';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
 import PrimaryButtonLabeled from '../../components/PrimaryButtonLabeled';
 import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
 // import {apiService, postSignIn} from '../../api/apiService';
-import {useAuth} from '../../provider/AuthProvider';
+import { useAuth } from '../../provider/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {postRegisterFCMToken, postSignIn} from '../../api/apiService';
+import { postRegisterFCMToken, postSignIn } from '../../api/apiService';
 import AppConstant from '../../utils/AppContent';
-import {getMessaging, getToken} from '@react-native-firebase/messaging';
-import {getFirebaseAuthErrorMessage} from '../../helper/firebaseErrorHandler'; // Added import
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
+import { getFirebaseAuthErrorMessage } from '../../helper/firebaseErrorHandler'; // Added import
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -49,17 +51,17 @@ interface Props {
   route: OTPVerificationScreenRouteProp;
 }
 
-const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
-  const {t} = useTranslation();
-  const {showErrorToast, showSuccessToast} = useCommonToast();
-  const {signIn} = useAuth();
+const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { t } = useTranslation();
+  const { showErrorToast, showSuccessToast } = useCommonToast();
+  const { signIn } = useAuth();
   const inset = useSafeAreaInsets();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isLoading, setLoading] = useState(false);
   const [otpConfirmation, setOtpConfirmation] = useState(
     route.params.confirmation,
   );
-  const {phoneNumber, agree} = route.params;
+  const { phoneNumber, agree } = route.params;
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
   // Timer state for resend OTP
@@ -195,7 +197,7 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   return (
-    <View style={[styles.container, {paddingTop: inset.top}]}>
+    <View style={[styles.container, { paddingTop: inset.top }]}>
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -203,20 +205,33 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
       />
       <ImageBackground
         source={Images.ic_splash_background}
-        style={styles.container}>
+        style={styles.container}
+      >
         <KeyboardAvoidingView
           // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.container}>
+          style={styles.container}
+        >
           <Loader loading={isLoading} />
           <ScrollView
             contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled">
+            keyboardShouldPersistTaps="handled"
+          >
             <View style={[styles.content]}>
+              {/* Back Button */}
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+                accessibilityRole="button"
+                accessibilityLabel={t('back') || 'Back'}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Icon name="arrow-back-ios" size={28} color={COLORS.white} />
+              </TouchableOpacity>
               <View style={styles.header}>
                 <Image source={Images.ic_app_logo} style={styles.logo} />
                 <Text style={styles.title}>{t('hi_welcome')}</Text>
               </View>
-              <View style={[styles.body, {paddingBottom: inset.bottom}]}>
+              <View style={[styles.body, { paddingBottom: inset.bottom }]}>
                 <Text style={styles.mainTitle}>{t('otp_verification')}</Text>
                 <Text style={styles.subtitle}>
                   {t('enter_6_digit_the_verification_code')}
@@ -226,7 +241,9 @@ const OTPVerificationScreen: React.FC<Props> = ({navigation, route}) => {
                   {otp.map((digit, index) => (
                     <TextInput
                       key={index}
-                      ref={ref => (inputRefs.current[index] = ref)}
+                      ref={ref => {
+                        inputRefs.current[index] = ref;
+                      }}
                       style={styles.otpInput}
                       value={digit}
                       onChangeText={value => handleOtpChange(value, index)}
@@ -284,10 +301,20 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    position: 'relative',
   },
   header: {
     height: moderateScale(220),
     alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  backButton: {
+    position: 'absolute',
+    top: moderateScale(12),
+    left: moderateScale(12),
+    zIndex: 10,
+    backgroundColor: 'transparent',
+    padding: moderateScale(10),
   },
   body: {
     flex: 1,

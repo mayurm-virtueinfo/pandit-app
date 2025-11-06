@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,35 +6,30 @@ import {
   Platform,
   TouchableOpacity,
   Modal,
-  useColorScheme,
 } from 'react-native';
-import {useTranslation} from 'react-i18next';
-import i18n, {setAppLanguage, getCurrentLanguage} from '../i18n';
-import {Picker} from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
+import i18n, { setAppLanguage, getCurrentLanguage } from '../i18n';
+import { Picker } from '@react-native-picker/picker';
 import { COLORS } from '../theme/theme';
 
 const LANGUAGES = [
-  {label: 'English', value: 'en'},
-  {label: 'हिन्दी', value: 'hi'},
-  {label: 'ગુજરાતી', value: 'gu'},
-  {label: 'मराठी', value: 'mr'},
+  { label: 'English', value: 'en' },
+  { label: 'हिन्दी', value: 'hi' },
+  { label: 'ગુજરાતી', value: 'gu' },
+  { label: 'मराठी', value: 'mr' },
 ];
 
 export default function LanguageSwitcher() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [selectedLang, setSelectedLang] = useState(getCurrentLanguage());
   const [modalVisible, setModalVisible] = useState(false);
-  const colorScheme = useColorScheme();
 
-  // Always use light mode for picker border/text but handle Done button for dark mode
-  const textColor = COLORS.lighttext;
-  const pickerIconColor = COLORS.lighttext;
+  // Always use white bg and black text regardless of color mode
+  const textColor = COLORS.black;
+  const pickerIconColor = COLORS.lighttext; // could be COLORS.black if you want, but keeping neutral
 
-  // For Done button: use light background in light mode, dark in dark mode; text should contrast
-  const doneButtonBg =
-    colorScheme === 'dark' ? '#222' : COLORS.lighttext;
-  const doneButtonText =
-    colorScheme === 'dark' ? COLORS.white : COLORS.white;
+  const doneButtonBg = COLORS.white;
+  const doneButtonText = COLORS.black;
 
   const handleLanguageChange = async (lang: string) => {
     await setAppLanguage(lang);
@@ -51,11 +46,14 @@ export default function LanguageSwitcher() {
   if (Platform.OS === 'ios') {
     return (
       <View style={styles.container}>
-        <Text style={[styles.title, {color: textColor}]}>{t('language')}</Text>
+        <Text style={[styles.title, { color: textColor }]}>
+          {t('language')}
+        </Text>
         <TouchableOpacity
           style={styles.iosPickerButton}
-          onPress={() => setModalVisible(true)}>
-          <Text style={[styles.iosPickerButtonText, {color: textColor}]}>
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={[styles.iosPickerButtonText, { color: textColor }]}>
             {getSelectedLangLabel()}
           </Text>
         </TouchableOpacity>
@@ -63,17 +61,19 @@ export default function LanguageSwitcher() {
           visible={modalVisible}
           transparent
           animationType="slide"
-          onRequestClose={() => setModalVisible(false)}>
+          onRequestClose={() => setModalVisible(false)}
+        >
           <TouchableOpacity
             style={styles.modalOverlay}
             activeOpacity={1}
-            onPressOut={() => setModalVisible(false)}>
+            onPressOut={() => setModalVisible(false)}
+          >
             <View style={styles.iosModalContent}>
               <Picker
                 selectedValue={selectedLang}
                 onValueChange={itemValue => handleLanguageChange(itemValue)}
-                style={styles.iosPicker}
-                itemStyle={{color: textColor}}
+                style={[styles.iosPicker, { backgroundColor: COLORS.white }]}
+                itemStyle={{ color: textColor, backgroundColor: COLORS.white }}
                 dropdownIconColor={pickerIconColor}
               >
                 {LANGUAGES.map(lang => (
@@ -82,19 +82,20 @@ export default function LanguageSwitcher() {
                     label={lang.label}
                     value={lang.value}
                     color={textColor}
+                    style={{ backgroundColor: COLORS.white }}
                   />
                 ))}
               </Picker>
               <TouchableOpacity
                 style={[
                   styles.iosDoneButton,
-                  {backgroundColor: doneButtonBg},
+                  { backgroundColor: doneButtonBg },
                 ]}
-                onPress={() => setModalVisible(false)}>
-                <Text style={[
-                  styles.iosDoneButtonText,
-                  {color: doneButtonText}
-                ]}>
+                onPress={() => setModalVisible(false)}
+              >
+                <Text
+                  style={[styles.iosDoneButtonText, { color: doneButtonText }]}
+                >
                   Done
                 </Text>
               </TouchableOpacity>
@@ -108,11 +109,14 @@ export default function LanguageSwitcher() {
   // Android
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, {color: textColor}]}>{t('language')}</Text>
+      <Text style={[styles.title, { color: textColor }]}>{t('language')}</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedLang}
-          style={[styles.picker, {color: textColor}]}
+          style={[
+            styles.picker,
+            { color: textColor, backgroundColor: COLORS.white },
+          ]}
           onValueChange={itemValue => handleLanguageChange(itemValue)}
           mode="dropdown"
           dropdownIconColor={pickerIconColor}
@@ -123,6 +127,7 @@ export default function LanguageSwitcher() {
               label={lang.label}
               value={lang.value}
               color={textColor}
+              style={{ backgroundColor: COLORS.white }}
             />
           ))}
         </Picker>
@@ -185,6 +190,7 @@ const styles = StyleSheet.create({
   iosPicker: {
     width: 250,
     height: 180,
+    // backgroundColor will be set inline to ensure white for dark/light
   },
   iosDoneButton: {
     marginTop: 10,
