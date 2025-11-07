@@ -1,3 +1,3 @@
-BASE_URL=https:/$()/puja-guru.com
-APP_NAME=Pujaguru Vendor
-ENVIRONMENT=production
+BASE_URL=https:/$()/dev.puja-guru.com
+APP_NAME=Pujaguru Vendor-dev
+ENVIRONMENT=development
