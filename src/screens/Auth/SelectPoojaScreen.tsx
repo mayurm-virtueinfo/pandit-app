@@ -202,7 +202,7 @@ const SelectPoojaScreen: React.FC = () => {
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 30}
         >
           <View style={styles.contentContainer}>
             <View style={styles.mainContent}>
@@ -217,7 +217,7 @@ const SelectPoojaScreen: React.FC = () => {
                 onSearch={setSearchText}
                 onEndReached={handleLoadMore}
                 loadingMore={loadingMore}
-                onEndReachedThreshold={0.2}
+                onEndReachedThreshold={0.7}
               />
               {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
                 <Text style={styles.noDataText}>

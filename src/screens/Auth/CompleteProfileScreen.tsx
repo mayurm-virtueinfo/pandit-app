@@ -414,8 +414,8 @@ const CompleteProfileScreen: React.FC = () => {
         />
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
-          // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
         >
           <View style={styles.flexGrow}>
             <ScrollView
@@ -532,7 +532,7 @@ const CompleteProfileScreen: React.FC = () => {
             <View
               style={[
                 styles.fixedButtonContainer,
-                { paddingBottom: inset.bottom || 16 },
+                // { paddingBottom: inset.bottom || 16 },
               ]}
             >
               <PrimaryButton
@@ -591,6 +591,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     height: 46,
     marginHorizontal: moderateScale(24),
+    marginBottom: moderateScale(24),
   },
   buttonText: {
     fontSize: 15,
@@ -598,7 +599,7 @@ const styles = StyleSheet.create({
   },
   fixedButtonContainer: {
     backgroundColor: COLORS.white,
-    paddingTop: 8,
+    paddingTop: 10,
   },
   photoSection: {
     alignItems: 'center',
