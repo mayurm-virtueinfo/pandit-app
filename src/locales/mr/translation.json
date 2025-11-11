@@ -429,5 +429,14 @@
   "without_puja_items": "पूजा साहित्याशिवाय",
   "chat_with_pandit_after_puja_started": "पूजा सुरू झाल्यावर तुम्ही {{name}} यांच्याशी चॅट करू शकत नाही.",
   "address_details": "पत्त्याचे तपशील",
-  "continue_as_guest": "अतिथी म्हणून पुढे जा"
+  "continue_as_guest": "अतिथी म्हणून पुढे जा",
+  "cash_on": "सेवेच्या वेळी रोख",
+  "online": "ऑनलाइन पेमेंट",
+  "withdraw": "रक्कम काढण्याची विनंती करा",
+  "request_withdrawal": "रक्कम काढण्याची विनंती",
+  "enter_amount": "रक्कम प्रविष्ट करा",
+  "please_enter_amount": "कृपया रक्कम प्रविष्ट करा",
+  "amount_exceeds_balance": "नोंदवलेली रक्कम तुमच्या उपलब्ध शिल्लकीपेक्षा जास्त आहे",
+  "pending_approval": "मंजुरीसाठी प्रलंबित",
+  "ok": "ठीक आहे"
 }

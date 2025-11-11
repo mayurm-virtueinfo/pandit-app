@@ -1,5 +1,5 @@
 // import axios from 'axios';
-import {AxiosRequestConfig} from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import apiDev from './apiDev';
 import ApiEndpoints, {
   CREATE_MEETING,
@@ -41,6 +41,7 @@ import ApiEndpoints, {
   POST_SIGNUP,
   POST_START_PUJA,
   POST_UPDATE_STATUS,
+  POST_WITHDRAWAL_REQUEST,
   PUT_EDIT_PANDIT_PUJA,
   PUT_PANDIT_DOCUMENTS,
   PUT_PANDIT_LANGUAGE,
@@ -304,6 +305,11 @@ export interface postRateUser {
   booking: number;
   rating: number;
   review: string;
+}
+
+export interface postWithDrawalRequests {
+  pandit_id: number;
+  amount: number;
 }
 
 export interface putUpdateProfile {
@@ -1102,7 +1108,7 @@ export const postRegisterFCMToken = (
   let apiUrl = POST_REGISTER_FCM;
   return new Promise((resolve, reject) => {
     apiDev
-      .post(apiUrl, {device_token, app_type})
+      .post(apiUrl, { device_token, app_type })
       .then(response => {
         resolve(response.data);
       })
@@ -1313,7 +1319,7 @@ export const createMeeting = (booking_id: number): Promise<any> => {
   let apiUrl = CREATE_MEETING;
   return new Promise((resolve, reject) => {
     apiDev
-      .post(apiUrl, {booking_id})
+      .post(apiUrl, { booking_id })
       .then(response => {
         resolve(response);
       })
@@ -1358,6 +1364,23 @@ export const getCompletedPujaDetails = (bookingID: string) => {
           'Error in get completed puja details api',
           error.response.data,
         );
+        reject(error);
+      });
+  });
+};
+
+export const postWithDrawalRequest = (
+  data: postWithDrawalRequests,
+): Promise<any> => {
+  const apiUrl = POST_WITHDRAWAL_REQUEST;
+  return new Promise((resolve, reject) => {
+    apiDev
+      .post(apiUrl, data)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error post withdrawal api :: ', error.response.data);
         reject(error);
       });
   });

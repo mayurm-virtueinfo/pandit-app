@@ -85,3 +85,4 @@ export const CREATE_MEETING = '/api/chat/create_meeting/';
 export const GET_COMPLETED_PUJA = '/panditji/completed-poojas-list/';
 export const GET_COMPLETED_PUJA_DETAILS =
   '/panditji/completed-pooja-detail/?booking_id={id}';
+export const POST_WITHDRAWAL_REQUEST = '/panditji/wallet/withdraw/';

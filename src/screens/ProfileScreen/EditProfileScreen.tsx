@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,16 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import CustomHeader from '../../components/CustomHeader';
-import {COLORS} from '../../theme/theme';
+import { COLORS } from '../../theme/theme';
 import CustomTextInput from '../../components/CustomTextInput';
 import PrimaryButton from '../../components/PrimaryButton';
 import Fonts from '../../theme/fonts';
-import {moderateScale} from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 import CustomDropdown from '../../components/CustomDropdown';
-import {useTranslation} from 'react-i18next';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   getCaste,
   getCity,
@@ -30,12 +30,12 @@ import {
   putUpdateProfile,
 } from '../../api/apiService';
 import CustomeLoader from '../../components/CustomLoader';
-import {useCommonToast} from '../../common/CommonToast';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AuthStackParamList} from '../../navigation/AuthNavigator';
+import { useCommonToast } from '../../common/CommonToast';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import ImagePicker from 'react-native-image-crop-picker';
 import Feather from 'react-native-vector-icons/Feather';
-import {DropdownResponse} from '../Auth/type';
+import { DropdownResponse } from '../Auth/type';
 
 interface FormData {
   phoneNumber: string;
@@ -62,8 +62,8 @@ type ScreenNavigationProp = StackNavigationProp<
 const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const inset = useSafeAreaInsets();
-  const {t} = useTranslation();
-  const {showErrorToast, showSuccessToast} = useCommonToast();
+  const { t } = useTranslation();
+  const { showErrorToast, showSuccessToast } = useCommonToast();
 
   const [formData, setFormData] = useState<FormData>({
     phoneNumber: '',
@@ -176,7 +176,7 @@ const EditProfileScreen: React.FC = () => {
                 type: '', // Type is not provided in API response
                 name: '', // Name is not provided in API response
               }
-            : {uri: '', type: '', name: ''},
+            : { uri: '', type: '', name: '' },
         }));
         setOriginalProfileImgUri(profileImgUri);
         setIsImageChanged(false);
@@ -292,8 +292,8 @@ const EditProfileScreen: React.FC = () => {
     } else {
       setSubCasteData([]);
       setGotraData([]);
-      setFormData(prev => ({...prev, subCaste: '', gotra: ''}));
-      setErrors(prev => ({...prev, subCaste: '', gotra: ''}));
+      setFormData(prev => ({ ...prev, subCaste: '', gotra: '' }));
+      setErrors(prev => ({ ...prev, subCaste: '', gotra: '' }));
     }
   }, [formData.caste]);
 
@@ -304,8 +304,8 @@ const EditProfileScreen: React.FC = () => {
       fetchGotraData(formData.subCaste);
     } else {
       setGotraData([]);
-      setFormData(prev => ({...prev, gotra: ''}));
-      setErrors(prev => ({...prev, gotra: ''}));
+      setFormData(prev => ({ ...prev, gotra: '' }));
+      setErrors(prev => ({ ...prev, gotra: '' }));
     }
   }, [formData.subCaste]);
 
@@ -348,8 +348,8 @@ const EditProfileScreen: React.FC = () => {
   };
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({...prev, [field]: value}));
-    setErrors(prev => ({...prev, [field]: validateField(field, value)}));
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: validateField(field, value) }));
     if (field === 'profile_img') {
       // If user selects a new image, mark as changed
       setIsImageChanged(true);
@@ -360,9 +360,9 @@ const EditProfileScreen: React.FC = () => {
   const handlePhotoSelect = () => {
     Keyboard.dismiss();
     Alert.alert(t('select_profile_picture'), t('choose_an_option'), [
-      {text: t('take_photo'), onPress: () => openCamera()},
-      {text: t('choose_from_gallery'), onPress: () => openGallery()},
-      {text: t('cancel'), style: 'cancel'},
+      { text: t('take_photo'), onPress: () => openCamera() },
+      { text: t('choose_from_gallery'), onPress: () => openGallery() },
+      { text: t('cancel'), style: 'cancel' },
     ]);
   };
 
@@ -513,29 +513,32 @@ const EditProfileScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.mainContainer, {paddingTop: inset.top}]}>
+    <View style={[styles.mainContainer, { paddingTop: inset.top }]}>
       <CustomeLoader loading={isLoading} />
       <View style={styles.container}>
         <CustomHeader title={t('edit_profile')} showBackButton={true} />
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}>
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
+        >
           <View style={styles.content}>
             <ScrollView
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.scrollContent}>
+              contentContainerStyle={styles.scrollContent}
+            >
               <View style={styles.formContainer}>
                 {/* Photo Picker */}
                 <View style={styles.photoSection}>
                   <TouchableOpacity
                     style={styles.photoPicker}
                     activeOpacity={0.7}
-                    testID="photo-picker">
+                    testID="photo-picker"
+                  >
                     {formData.profile_img && formData.profile_img.uri ? (
                       <Image
-                        source={{uri: formData.profile_img.uri}}
+                        source={{ uri: formData.profile_img.uri }}
                         style={styles.photo}
                       />
                     ) : (
@@ -553,7 +556,8 @@ const EditProfileScreen: React.FC = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handlePhotoSelect}
-                    activeOpacity={0.7}>
+                    activeOpacity={0.7}
+                  >
                     <Feather name="edit" size={18} color={COLORS.primary} />
                   </TouchableOpacity>
                   <Text style={styles.photoLabel}>
@@ -643,8 +647,9 @@ const EditProfileScreen: React.FC = () => {
             <View
               style={[
                 styles.buttonFixedContainer,
-                {paddingBottom: inset.bottom || 16},
-              ]}>
+                { paddingBottom: inset.bottom || 16 },
+              ]}
+            >
               <PrimaryButton
                 title={t('update')}
                 onPress={handleNext}

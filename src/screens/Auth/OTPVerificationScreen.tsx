@@ -67,6 +67,8 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
   // Timer state for resend OTP
   const [timer, setTimer] = useState(30);
   const [showResend, setShowResend] = useState(false);
+  const [disableModalVisible, setDisableModalVisible] = useState(false);
+  const [disableMessage, setDisableMessage] = useState('');
 
   useEffect(() => {
     setShowResend(false);
@@ -109,36 +111,57 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
         mobile: phoneNumber,
         firebase_uid: uid,
         role: 2,
-        agree: agree,
+        agree,
       };
-      console.log('params', params);
-      const response = await postSignIn(params);
-      if (response) {
-        console.log('response :: ', response);
 
-        if (response?.is_register === false) {
-          navigation.navigate('CompleteProfileScreen', {
-            phoneNumber: phoneNumber,
-          });
-        } else {
-          if (response?.user?.id) {
-            await AsyncStorage.setItem(
-              AppConstant.USER_ID,
-              String(response.user.id),
-            );
-          }
-          signIn(response.access_token, response.refresh_token);
-          const messaging = getMessaging();
-          const fcmToken = await getToken(messaging);
+      const response: any = await postSignIn(params);
+      console.log('SignIn response :: ', response);
 
-          if (fcmToken) {
-            postRegisterFCMToken(fcmToken, 'pandit');
-          }
-          navigation.navigate('AppBottomTabNavigator');
-        }
+      if (!response) {
+        showErrorToast('No response from server.');
+        return;
       }
+
+      if (response.is_register === false) {
+        navigation.navigate('CompleteProfileScreen', { phoneNumber });
+        return;
+      }
+
+      if (response.is_enabled === false) {
+        setDisableMessage(
+          response.message ||
+            'Your account is pending approval. We will notify you once the administrator has verified your profile.',
+        );
+        setDisableModalVisible(true);
+        return;
+      }
+
+      if (response?.user?.id) {
+        await AsyncStorage.setItem(
+          AppConstant.USER_ID,
+          String(response.user.id),
+        );
+      }
+
+      if (response.access_token && response.refresh_token) {
+        signIn(response.access_token, response.refresh_token);
+      } else {
+        showErrorToast('Invalid login tokens.');
+        return;
+      }
+
+      try {
+        const messaging = getMessaging();
+        const fcmToken = await getToken(messaging);
+        if (fcmToken) await postRegisterFCMToken(fcmToken, 'pandit');
+      } catch (err) {
+        console.warn('FCM registration failed:', err);
+      }
+
+      navigation.navigate('AppBottomTabNavigator');
     } catch (error: any) {
-      showErrorToast(error?.message);
+      console.error('SignIn error:', error);
+      showErrorToast(error?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -197,97 +220,119 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: inset.top }]}>
-      <StatusBar
-        translucent
-        backgroundColor="transparent"
-        barStyle="light-content"
-      />
-      <ImageBackground
-        source={Images.ic_splash_background}
-        style={styles.container}
-      >
-        <KeyboardAvoidingView
-          // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <>
+      <View style={[styles.container, { paddingTop: inset.top }]}>
+        <StatusBar
+          translucent
+          backgroundColor="transparent"
+          barStyle="light-content"
+        />
+        <ImageBackground
+          source={Images.ic_splash_background}
           style={styles.container}
         >
-          <Loader loading={isLoading} />
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
+          <KeyboardAvoidingView
+            // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}
           >
-            <View style={[styles.content]}>
-              {/* Back Button */}
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-                accessibilityRole="button"
-                accessibilityLabel={t('back') || 'Back'}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Icon name="arrow-back-ios" size={28} color={COLORS.white} />
-              </TouchableOpacity>
-              <View style={styles.header}>
-                <Image source={Images.ic_app_logo} style={styles.logo} />
-                <Text style={styles.title}>{t('hi_welcome')}</Text>
-              </View>
-              <View style={[styles.body, { paddingBottom: inset.bottom }]}>
-                <Text style={styles.mainTitle}>{t('otp_verification')}</Text>
-                <Text style={styles.subtitle}>
-                  {t('enter_6_digit_the_verification_code')}
-                </Text>
-                <Text style={styles.phoneNumber}>{phoneNumber}</Text>
-                <View style={styles.otpContainer}>
-                  {otp.map((digit, index) => (
-                    <TextInput
-                      key={index}
-                      ref={ref => {
-                        inputRefs.current[index] = ref;
-                      }}
-                      style={styles.otpInput}
-                      value={digit}
-                      onChangeText={value => handleOtpChange(value, index)}
-                      onKeyPress={e => handleKeyPress(e, index)}
-                      keyboardType="number-pad"
-                      maxLength={1}
-                      selectTextOnFocus
-                      testID={`otp-input-${index}`}
-                    />
-                  ))}
+            <Loader loading={isLoading} />
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={[styles.content]}>
+                {/* Back Button */}
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => navigation.goBack()}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('back') || 'Back'}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Icon name="arrow-back-ios" size={28} color={COLORS.white} />
+                </TouchableOpacity>
+                <View style={styles.header}>
+                  <Image source={Images.ic_app_logo} style={styles.logo} />
+                  <Text style={styles.title}>{t('hi_welcome')}</Text>
                 </View>
-                <PrimaryButton
-                  onPress={handleVerification}
-                  title={t('verify')}
-                />
-                {!showResend ? (
-                  <View style={styles.resendContainer}>
-                    <Text style={styles.resendText}>00:{timer}</Text>
+                <View style={[styles.body, { paddingBottom: inset.bottom }]}>
+                  <Text style={styles.mainTitle}>{t('otp_verification')}</Text>
+                  <Text style={styles.subtitle}>
+                    {t('enter_6_digit_the_verification_code')}
+                  </Text>
+                  <Text style={styles.phoneNumber}>{phoneNumber}</Text>
+                  <View style={styles.otpContainer}>
+                    {otp.map((digit, index) => (
+                      <TextInput
+                        key={index}
+                        ref={ref => {
+                          inputRefs.current[index] = ref;
+                        }}
+                        style={styles.otpInput}
+                        value={digit}
+                        onChangeText={value => handleOtpChange(value, index)}
+                        onKeyPress={e => handleKeyPress(e, index)}
+                        keyboardType="number-pad"
+                        maxLength={1}
+                        selectTextOnFocus
+                        testID={`otp-input-${index}`}
+                      />
+                    ))}
                   </View>
-                ) : (
-                  <View style={styles.resendContainer}>
-                    <Text style={styles.resendText}>
-                      {t('didnt_receive_the_code')}
-                    </Text>
-                    <PrimaryButtonLabeled
-                      onPress={handleResendOTP}
-                      title={t('resend_otp')}
-                    />
-                  </View>
-                )}
-                <PrimaryButtonOutlined
-                  onPress={() =>
-                    navigation.replace('SignIn', {
-                      previousPhoneNumber: phoneNumber,
-                    })
-                  }
-                  title={t('change_mobile_number')}
-                />
+                  <PrimaryButton
+                    onPress={handleVerification}
+                    title={t('verify')}
+                  />
+                  {!showResend ? (
+                    <View style={styles.resendContainer}>
+                      <Text style={styles.resendText}>00:{timer}</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.resendContainer}>
+                      <Text style={styles.resendText}>
+                        {t('didnt_receive_the_code')}
+                      </Text>
+                      <PrimaryButtonLabeled
+                        onPress={handleResendOTP}
+                        title={t('resend_otp')}
+                      />
+                    </View>
+                  )}
+                  <PrimaryButtonOutlined
+                    onPress={() =>
+                      navigation.replace('SignIn', {
+                        previousPhoneNumber: phoneNumber,
+                      })
+                    }
+                    title={t('change_mobile_number')}
+                  />
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </ImageBackground>
-    </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </ImageBackground>
+      </View>
+      {disableModalVisible && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>{t('pending_approval')}</Text>
+            <Text style={styles.modalMessage}>{disableMessage}</Text>
+            <TouchableOpacity
+              style={styles.okButton}
+              onPress={() => {
+                setDisableModalVisible(false);
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'SignIn' }],
+                });
+              }}
+            >
+              <Text style={styles.okButtonText}>{t('ok')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </>
   );
 };
 
@@ -383,6 +428,49 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Regular,
     color: COLORS.primaryTextDark,
     marginRight: moderateScale(5),
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  modalBox: {
+    width: '80%',
+    backgroundColor: COLORS.white,
+    borderRadius: moderateScale(10),
+    padding: moderateScale(20),
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: moderateScale(18),
+    fontFamily: Fonts.Sen_SemiBold,
+    color: COLORS.primaryTextDark,
+    marginBottom: moderateScale(10),
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: moderateScale(15),
+    fontFamily: Fonts.Sen_Regular,
+    color: COLORS.gray,
+    textAlign: 'center',
+    marginBottom: moderateScale(20),
+  },
+  okButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: moderateScale(8),
+    paddingVertical: moderateScale(10),
+    paddingHorizontal: moderateScale(25),
+  },
+  okButtonText: {
+    color: COLORS.white,
+    fontSize: moderateScale(15),
+    fontFamily: Fonts.Sen_SemiBold,
   },
 });
 

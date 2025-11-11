@@ -433,5 +433,14 @@
   "without_puja_items": "Without Pooja Items",
   "chat_with_pandit_after_puja_started": "You cannot chat with the {{name}} after the pooja has started.",
   "address_details": "Address Details",
-  "continue_as_guest": "Continue as Guest"
+  "continue_as_guest": "Continue as Guest",
+  "cash_on": "Cash on Service",
+  "online": "Online Payment",
+  "withdraw": "Request Withdrawal",
+  "request_withdrawal": "Request Withdrawal",
+  "enter_amount": "Enter Amount",
+  "please_enter_amount": "Please enter an amount",
+  "amount_exceeds_balance": "Entered amount exceeds your available balance",
+  "pending_approval": "Pending Approval",
+  "ok": "OK"
 }

@@ -429,5 +429,14 @@
   "without_puja_items": "પૂજા સામગ્રી વગર",
   "chat_with_pandit_after_puja_started": "પૂજા શરૂ થયા પછી તમે {{name}} સાથે ચેટ કરી શકતા નથી.",
   "address_details": "સરનામાની વિગતો",
-  "continue_as_guest": "અતિથિ તરીકે ચાલુ રાખો"
+  "continue_as_guest": "અતિથિ તરીકે ચાલુ રાખો",
+  "cash_on": "સેવા સમયે રોકડ",
+  "online": "ઓનલાઇન ચુકવણી",
+  "withdraw": "ઉપાડનો વિનંતી કરો",
+  "request_withdrawal": "રકમ ઉપાડવાની વિનંતી",
+  "enter_amount": "રકમ દાખલ કરો",
+  "please_enter_amount": "કૃપા કરીને રકમ દાખલ કરો",
+  "amount_exceeds_balance": "દાખલ કરેલી રકમ તમારી ઉપલબ્ધ બેલેન્સ કરતાં વધુ છે",
+  "pending_approval": "મંજૂરી માટે બાકી",
+  "ok": "બરાબર"
 }

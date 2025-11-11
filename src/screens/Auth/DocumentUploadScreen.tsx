@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StatusBar,
@@ -7,24 +7,34 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 // import DocumentPicker, {
 //   DocumentPickerResponse,
 // } from 'react-native-document-picker';
-import { pick, types, errorCodes, DocumentPickerResponse } from '@react-native-documents/picker';
+import {
+  pick,
+  types,
+  errorCodes,
+  DocumentPickerResponse,
+} from '@react-native-documents/picker';
 import CustomHeader from '../../components/CustomHeader';
-import {COLORS} from '../../theme/theme';
+import { COLORS } from '../../theme/theme';
 import PrimaryButton from '../../components/PrimaryButton';
-import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import DocumentSection from '../../components/DocumentSection';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {postRegisterFCMToken, postSignUp} from '../../api/apiService';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { postRegisterFCMToken, postSignUp } from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
-import {AuthStackParamList} from '../../navigation/AuthNavigator';
-import {getMessaging, getToken} from '@react-native-firebase/messaging';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
 import CustomeLoader from '../../components/CustomLoader';
+import { useCommonToast } from '../../common/CommonToast';
+import { useTranslation } from 'react-i18next';
 
 interface DocumentUploadState {
   idProof: boolean;
@@ -58,9 +68,10 @@ interface DocumentInfo {
 }
 
 const DocumentUploadScreen: React.FC = () => {
-  const navigation = useNavigation<AuthStackParamList>();
+  const navigation: any = useNavigation<AuthStackParamList>();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
+  const { t } = useTranslation();
 
   const {
     phoneNumber,
@@ -116,6 +127,10 @@ const DocumentUploadScreen: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uid, setUid] = useState<string | null>('');
   const [showLoader, setShowLoader] = useState(false);
+  const [showDisabledModal, setShowDisabledModal] = useState(false);
+  const [disabledMessage, setDisabledMessage] = useState('');
+
+  const { showErrorToast } = useCommonToast();
 
   useEffect(() => {
     fetchUID();
@@ -210,9 +225,9 @@ const DocumentUploadScreen: React.FC = () => {
     formData.append('firebase_uid', uid);
     formData.append('first_name', firstName);
     formData.append('last_name', lastName);
-    formData.append('role', '2'); // As per curl, hardcoded '2'
-    formData.append('address', address); // User's general address
-    formData.append('city', selectCityId?.toString?.() ?? ''); // Ensure city ID is a string
+    formData.append('role', '2');
+    formData.append('address', address);
+    formData.append('city', selectCityId?.toString?.() ?? '');
     formData.append('agree', true);
 
     if (
@@ -286,44 +301,71 @@ const DocumentUploadScreen: React.FC = () => {
     }
 
     try {
-      const response = await postSignUp(formData);
+      const response: any = await postSignUp(formData);
       console.log('response :::::::::::::::::::::::::::::>', response);
-      if (response && response?.user && response?.user?.id) {
-        await AsyncStorage.setItem(
-          AppConstant.USER_ID,
-          String(response.user.id),
-        );
-        await AsyncStorage.setItem(
-          AppConstant.ACCESS_TOKEN,
-          response.access_token,
-        );
-        await AsyncStorage.setItem(
-          AppConstant.REFRESH_TOKEN,
-          response.refresh_token,
-        );
-        const messaging = getMessaging();
-        const fcmToken = await getToken(messaging);
 
-        if (fcmToken) {
-          postRegisterFCMToken(fcmToken, 'pandit');
+      if (response) {
+        if (response.is_enabled == false) {
+          setDisabledMessage(
+            response.message ||
+              'Your account is disabled. Please contact support.',
+          );
+          setShowDisabledModal(true);
+          return;
         }
-        navigation.replace('AppBottomTabNavigator');
+
+        if (response?.user?.id) {
+          await AsyncStorage.setItem(
+            AppConstant.USER_ID,
+            String(response.user.id),
+          );
+        }
+
+        if (response?.access_token) {
+          await AsyncStorage.setItem(
+            AppConstant.ACCESS_TOKEN,
+            response.access_token,
+          );
+        }
+
+        if (response?.refresh_token) {
+          await AsyncStorage.setItem(
+            AppConstant.REFRESH_TOKEN,
+            response.refresh_token,
+          );
+        }
+
+        try {
+          const messaging = getMessaging();
+          const fcmToken = await getToken(messaging);
+          if (fcmToken) {
+            postRegisterFCMToken(fcmToken, 'pandit');
+          }
+        } catch (error: any) {
+          console.warn('FCM token registration failed:', error?.data || error);
+        }
+
+        // navigation.replace('AppBottomTabNavigator');
       } else {
-        console.warn('Signup response did not contain user.id:', response);
-        Alert.alert('Error', 'Signup failed: Invalid response from server.');
+        console.warn('Signup response did not contain valid data:', response);
+        showErrorToast('Signup failed. Please try again.');
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (typeof error === 'object' && error !== null) {
         const err = error as {
-          response?: {data?: {message?: string; detail?: string; errors?: any}};
+          response?: {
+            data?: { message?: string; detail?: string; errors?: any };
+          };
           message?: string;
         };
+
         console.error(
           'Submission error:',
           err.response?.data || err.message || error,
         );
 
         let errorMessage = 'Failed to submit documents. Please try again.';
+
         if (err.response?.data?.message) {
           errorMessage = err.response.data.message;
         } else if (err.response?.data?.detail) {
@@ -332,12 +374,13 @@ const DocumentUploadScreen: React.FC = () => {
           errorMessage = Object.values(err.response.data.errors)
             .flat()
             .join('\n');
+        } else if (err.message) {
+          errorMessage = err.message;
         }
-
-        Alert.alert('Error', errorMessage);
+        showErrorToast(errorMessage);
       } else {
         console.error('Submission error (unknown type):', String(error));
-        Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+        showErrorToast('An unexpected error occurred. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -345,23 +388,24 @@ const DocumentUploadScreen: React.FC = () => {
     }
   };
 
-  // Button at the bottom, not inside ScrollView
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar
         barStyle="light-content"
         backgroundColor={COLORS.primaryBackground}
       />
       <CustomHeader title="Documents" showBackButton={true} />
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
         <View style={styles.content}>
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled">
+            keyboardShouldPersistTaps="handled"
+          >
             <View style={styles.formContainer}>
               <DocumentSection
                 label="ID Proof (Aadhar Card)"
@@ -416,8 +460,9 @@ const DocumentUploadScreen: React.FC = () => {
         <View
           style={[
             styles.bottomButtonContainer,
-            {paddingBottom: insets.bottom || verticalScale(16)},
-          ]}>
+            { paddingBottom: insets.bottom || verticalScale(16) },
+          ]}
+        >
           <PrimaryButton
             title={'SUBMIT'}
             onPress={handleSubmit}
@@ -426,6 +471,32 @@ const DocumentUploadScreen: React.FC = () => {
           />
         </View>
         <CustomeLoader loading={showLoader} />
+        <Modal
+          visible={showDisabledModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowDisabledModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>{t('pending_approval')}</Text>
+              <Text style={styles.modalMessage}>{disabledMessage}</Text>
+
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  setShowDisabledModal(false);
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'SignIn' }],
+                  });
+                }}
+              >
+                <Text style={styles.modalButtonText}>{'OK'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </View>
   );
@@ -444,7 +515,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: verticalScale(16), // Add some bottom padding so last field is not hidden by button
   },
   formContainer: {
     paddingHorizontal: scale(20),
@@ -452,12 +522,46 @@ const styles = StyleSheet.create({
   submitButton: {
     minHeight: moderateScale(46),
     marginHorizontal: scale(20),
-    // marginTop: verticalScale(24), // Remove marginTop so button is flush in bottom bar
   },
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
     paddingTop: verticalScale(8),
-    // paddingBottom: verticalScale(16), // Set dynamically with insets
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: COLORS.white,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(20),
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: moderateScale(18),
+    fontWeight: '700',
+    color: COLORS.primaryTextDark,
+    marginBottom: moderateScale(8),
+  },
+  modalMessage: {
+    fontSize: moderateScale(14),
+    color: COLORS.primaryTextDark,
+    textAlign: 'center',
+    marginBottom: moderateScale(16),
+  },
+  modalButton: {
+    backgroundColor: COLORS.primaryBackground,
+    borderRadius: moderateScale(8),
+    paddingHorizontal: moderateScale(20),
+    paddingVertical: moderateScale(10),
+  },
+  modalButtonText: {
+    color: COLORS.white,
+    fontWeight: '600',
+    fontSize: moderateScale(14),
   },
 });
 

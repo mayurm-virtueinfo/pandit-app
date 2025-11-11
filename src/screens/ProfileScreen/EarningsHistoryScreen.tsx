@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo} from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,17 +8,29 @@ import {
   StatusBar,
   ActivityIndicator,
   useColorScheme,
+  Modal,
 } from 'react-native';
 import UserCustomHeader from '../../components/CustomHeader';
-import {COLORS, THEMESHADOW} from '../../theme/theme';
+import { COLORS, THEMESHADOW } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {getWallet, getTransactions} from '../../api/apiService';
-import {useTranslation} from 'react-i18next';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  getWallet,
+  getTransactions,
+  postWithDrawalRequest,
+} from '../../api/apiService';
+import { useTranslation } from 'react-i18next';
 import Options from '../../components/Options';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {translateText} from '../../utils/TranslateData';
+import { translateText } from '../../utils/TranslateData';
+import { formatReasonText } from '../../helper/helper';
+import PrimaryButton from '../../components/PrimaryButton';
+import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
+import CustomTextInput from '../../components/CustomTextInput';
+import { useCommonToast } from '../../common/CommonToast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppConstant from '../../utils/AppContent';
 
 interface TransactionItem {
   id: number;
@@ -39,7 +51,7 @@ interface TransactionItem {
 
 const EarningsHistoryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
@@ -49,10 +61,16 @@ const EarningsHistoryScreen: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [walletAmount, setWalletAmount] = useState<number>(0);
+  const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+
+  const inset = useSafeAreaInsets();
+  const { showErrorToast, showSuccessToast } = useCommonToast();
 
   useEffect(() => {
     fetchData();
-  }, [i18n.language]); // ✅ re-fetch or re-translate when language changes
+  }, [i18n.language]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -94,16 +112,20 @@ const EarningsHistoryScreen: React.FC = () => {
             rawAmount = Number(item.amount_to_debit || 0);
           else rawAmount = Number(item.amount || 0);
 
-          // Translate pooja_name + reason + notes if available
           const translatedTitle = await translateText(
             item.puja_name || t('transaction'),
             i18n.language,
           );
-          const translatedReason = item.reason
-            ? await translateText(item.reason, i18n.language)
+          const rawReason = item.reason ? formatReasonText(item.reason) : '';
+          const translatedReason = rawReason
+            ? await translateText(rawReason, i18n.language)
             : '';
-          const translatedNotes = item.notes
-            ? await translateText(item.notes, i18n.language)
+
+          const rawNotes = item.notes ? formatReasonText(item.notes) : '';
+          console.log('rawNotes :: ', rawNotes);
+
+          const translatedNotes = rawNotes
+            ? await translateText(rawNotes, i18n.language)
             : '';
 
           let paymentModeLabel: string | undefined;
@@ -161,13 +183,51 @@ const EarningsHistoryScreen: React.FC = () => {
     });
   }
 
+  const handleWithdraw = () => {
+    setWithdrawModalVisible(true);
+  };
+
+  const handleSubmitWithdraw = async () => {
+    try {
+      if (!withdrawAmount) {
+        showErrorToast(t('please_enter_amount'));
+        return;
+      }
+
+      setWithdrawLoading(true);
+
+      const userId = await AsyncStorage.getItem(AppConstant.USER_ID);
+      const data: any = {
+        pandit_id: Number(userId),
+        amount: withdrawAmount,
+      };
+
+      const response: any = await postWithDrawalRequest(data);
+
+      if (response?.success) {
+        console.log('withdraw response :: ', response);
+        showErrorToast(response?.message || t('withdrawal_request_success'));
+        setWithdrawAmount('');
+        setWithdrawModalVisible(false);
+        // fetchData();
+      }
+    } catch (error: any) {
+      console.error('withdraw error :: ', error?.data?.message || error);
+      showErrorToast(error?.data?.message || t('withdrawal_request_failed'));
+    } finally {
+      setWithdrawLoading(false);
+      setWithdrawModalVisible(false);
+      setWithdrawAmount('');
+    }
+  };
+
   const filteredTransactions = useMemo(() => {
     return transactions.filter(item => {
       if (!selectedMonth && !selectedYear) return true;
       if (!item.rawDate || typeof item.rawDate !== 'string') return false;
       const date = new Date(item.rawDate);
       if (isNaN(date.getTime())) return false;
-      const month = date.toLocaleDateString('en-US', {month: 'long'});
+      const month = date.toLocaleDateString('en-US', { month: 'long' });
       const year = String(date.getFullYear());
       const monthMatch = selectedMonth ? month === selectedMonth : true;
       const yearMatch = selectedYear ? year === selectedYear : true;
@@ -222,15 +282,18 @@ const EarningsHistoryScreen: React.FC = () => {
                 style={[
                   styles.paymentMethodText,
                   {
-                    color: isDarkMode ? COLORS.white : COLORS.primaryTextDark,
+                    color: isDarkMode
+                      ? COLORS.primaryTextDark
+                      : COLORS.primaryTextDark,
                   },
-                ]}>
+                ]}
+              >
                 {t('payment_method')}
               </Text>
               <Text style={styles.cash}>{item.paymentModeLabel}</Text>
             </View>
           )}
-          {item.notes && <Text style={styles.earningsNotes}>{item.notes}</Text>}
+          {/* {item.notes && <Text style={styles.earningsNotes}>{item.notes}</Text>} */}
         </View>
         <Text
           style={[
@@ -241,7 +304,8 @@ const EarningsHistoryScreen: React.FC = () => {
                   ? COLORS.error
                   : COLORS.success,
             },
-          ]}>
+          ]}
+        >
           {item.transactionType === 'debit' ? '-' : '+'}
           {item.amount}
         </Text>
@@ -253,76 +317,140 @@ const EarningsHistoryScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
-      <StatusBar
-        translucent
-        backgroundColor="transparent"
-        barStyle="light-content"
-      />
-      <UserCustomHeader
-        title={t('earnings_history')}
-        showBackButton={true}
-        showSliderButton={true}
-        onFilterPress={() => setFilter(true)}
-      />
+    <>
+      <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar
+          translucent
+          backgroundColor="transparent"
+          barStyle="light-content"
+        />
+        <UserCustomHeader
+          title={t('earnings_history')}
+          showBackButton={true}
+          showSliderButton={true}
+          onFilterPress={() => setFilter(true)}
+        />
 
-      <ScrollView
-        style={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}>
-        <View style={[styles.totalEarningsCard, THEMESHADOW.shadow]}>
-          <View style={styles.totalEarningsContent}>
-            <Text style={styles.totalEarningsLabel}>{t('total_earnings')}</Text>
-            <Text style={styles.totalEarningsAmount}>
-              ₹{' '}
-              {totalFilteredEarnings.toLocaleString('en-IN', {
+        <ScrollView
+          style={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View style={[styles.totalEarningsCard, THEMESHADOW.shadow]}>
+            <View style={styles.totalEarningsContent}>
+              <Text style={styles.totalEarningsLabel}>
+                {t('total_earnings')}
+              </Text>
+              <Text style={styles.totalEarningsAmount}>
+                ₹{' '}
+                {totalFilteredEarnings.toLocaleString('en-IN', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.historySection}>
+            <Text style={styles.historyTitle}>{t('history')}</Text>
+            <View style={[styles.historyCard, THEMESHADOW.shadow]}>
+              {loading ? (
+                <View style={{ alignItems: 'center', padding: 20 }}>
+                  <ActivityIndicator size="large" color={COLORS.primary} />
+                </View>
+              ) : filteredTransactions.length === 0 ? (
+                <View style={{ alignItems: 'center', padding: 20 }}>
+                  <Text
+                    style={{ color: COLORS.gray, fontFamily: Fonts.Sen_Medium }}
+                  >
+                    {t('no_earnings_history_available')}
+                  </Text>
+                </View>
+              ) : (
+                filteredTransactions.map((item, index) => (
+                  <View key={item.id}>
+                    {renderTransactionItem(item, index)}
+                  </View>
+                ))
+              )}
+            </View>
+          </View>
+        </ScrollView>
+        <View
+          style={[
+            styles.buttonFixedContainer,
+            { paddingBottom: inset.bottom || 16 },
+          ]}
+        >
+          <PrimaryButton
+            title={t('withdraw')}
+            onPress={handleWithdraw}
+            style={styles.buttonContainer}
+            textStyle={styles.buttonText}
+          />
+        </View>
+
+        <Options
+          visible={filter}
+          onClose={() => setFilter(false)}
+          onApply={(month, year) => {
+            setSelectedMonth(month);
+            setSelectedYear(year);
+            setFilter(false);
+          }}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+        />
+      </SafeAreaView>
+      <Modal
+        visible={withdrawModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setWithdrawModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('request_withdrawal')}</Text>
+
+            <Text style={styles.modalLabel}>
+              {t('total_earnings')}: ₹{' '}
+              {walletAmount.toLocaleString('en-IN', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
             </Text>
+
+            <CustomTextInput
+              placeholder={t('enter_amount')}
+              value={withdrawAmount}
+              onChangeText={setWithdrawAmount}
+              style={styles.input}
+              label=""
+              keyboardType="phone-pad"
+            />
+            <View style={styles.modalButtonRow}>
+              <PrimaryButton
+                title={t('submit')}
+                onPress={handleSubmitWithdraw}
+                style={styles.modalButton}
+                loading={withdrawLoading}
+              />
+              <PrimaryButtonOutlined
+                title={t('cancel')}
+                onPress={() => setWithdrawModalVisible(false)}
+                style={styles.modalButton}
+                disabled={withdrawLoading}
+              />
+            </View>
           </View>
         </View>
-
-        <View style={styles.historySection}>
-          <Text style={styles.historyTitle}>{t('history')}</Text>
-          <View style={[styles.historyCard, THEMESHADOW.shadow]}>
-            {loading ? (
-              <View style={{alignItems: 'center', padding: 20}}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-              </View>
-            ) : filteredTransactions.length === 0 ? (
-              <View style={{alignItems: 'center', padding: 20}}>
-                <Text
-                  style={{color: COLORS.gray, fontFamily: Fonts.Sen_Medium}}>
-                  {t('no_earnings_history_available')}
-                </Text>
-              </View>
-            ) : (
-              filteredTransactions.map((item, index) => (
-                <View key={item.id}>{renderTransactionItem(item, index)}</View>
-              ))
-            )}
-          </View>
-        </View>
-      </ScrollView>
-
-      <Options
-        visible={filter}
-        onClose={() => setFilter(false)}
-        onApply={(month, year) => {
-          setSelectedMonth(month);
-          setSelectedYear(year);
-          setFilter(false);
-        }}
-        selectedMonth={selectedMonth}
-        selectedYear={selectedYear}
-      />
-    </SafeAreaView>
+      </Modal>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: COLORS.primaryBackground},
+  container: { flex: 1, backgroundColor: COLORS.primaryBackground },
   scrollContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -356,7 +484,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Sen_Bold,
     color: COLORS.success,
   },
-  historySection: {flex: 1},
+  historySection: { flex: 1 },
   historyTitle: {
     fontSize: moderateScale(18),
     fontFamily: Fonts.Sen_SemiBold,
@@ -375,7 +503,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: verticalScale(8),
   },
-  earningsItemLeft: {flex: 1, marginRight: scale(16)},
+  earningsItemLeft: { flex: 1, marginRight: scale(16) },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -409,9 +537,8 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     fontFamily: Fonts.Sen_Regular,
     color: COLORS.gray,
-    marginBottom: verticalScale(2),
   },
-  payment_method: {flexDirection: 'row', alignItems: 'center'},
+  payment_method: { flexDirection: 'row', alignItems: 'center' },
   paymentMethodText: {
     fontSize: moderateScale(14),
     fontFamily: Fonts.Sen_SemiBold,
@@ -432,6 +559,63 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.separatorColor,
     marginVertical: verticalScale(12),
   },
+  buttonContainer: {
+    height: 46,
+    marginHorizontal: moderateScale(24),
+  },
+  buttonText: {
+    fontSize: 15,
+    fontFamily: Fonts.Sen_Medium,
+  },
+  buttonFixedContainer: {
+    backgroundColor: COLORS.white,
+    paddingTop: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: Fonts.Sen_SemiBold,
+    color: COLORS.primaryTextDark,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalLabel: {
+    fontSize: 15,
+    fontFamily: Fonts.Sen_Medium,
+    color: COLORS.gray,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  input: {
+    width: '100%',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    fontFamily: Fonts.Sen_Regular,
+    color: COLORS.primaryTextDark,
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+    gap: 8,
+  },
+  modalButton: { flex: 1, height: 46 },
 });
 
 export default EarningsHistoryScreen;
