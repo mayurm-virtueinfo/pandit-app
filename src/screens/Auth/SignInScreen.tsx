@@ -532,7 +532,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
     color: pickerTextColor,
     fontSize: moderateScale(16),
     fontFamily: Fonts.Sen_Regular,
-    backgroundColor: colorScheme === 'dark' ? COLORS.backgroundDark : undefined,
+    backgroundColor: colorScheme === 'dark' ? COLORS.white : COLORS.white,
   });
 
   return (

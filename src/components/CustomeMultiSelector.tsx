@@ -112,18 +112,9 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
 
   return (
     <View style={[styles.container, containerStyle, THEMESHADOW.shadow]}>
-      {/* SEARCH BAR */}
       {showSearch && (
         <>
-          <View
-            style={[
-              styles.searchContainer,
-              {
-                paddingVertical:
-                  Platform.OS === 'ios' ? moderateScale(10) : moderateScale(2),
-              },
-            ]}
-          >
+          <View style={styles.searchContainer}>
             <MaterialIcons
               name="search"
               size={16}
@@ -143,7 +134,6 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
         </>
       )}
 
-      {/* LIST */}
       <FlatList
         data={data}
         renderItem={renderItem}
@@ -151,17 +141,18 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         onEndReached={onEndReached}
-        onEndReachedThreshold={onEndReachedThreshold}
+        onEndReachedThreshold={0.7} // ← Better
         ListFooterComponent={renderFooter}
+        bounces={true}
+        overScrollMode="always"
       />
-      {/* No overlay loader for paging; loader is at list bottom */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
+    flex: 1,
     borderRadius: moderateScale(10),
     backgroundColor: COLORS.white,
   },
