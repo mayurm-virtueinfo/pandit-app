@@ -8,7 +8,6 @@ import {
   StatusBar,
   TouchableOpacity,
   RefreshControl,
-  DeviceEventEmitter,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
@@ -24,9 +23,9 @@ import {
   getCompletePujaList,
 } from '../../api/apiService';
 import { useNavigation } from '@react-navigation/native';
-import { HomeStackParamList } from '../../navigation/HomeStack/HomeStack';
 import CustomeLoader from '../../components/CustomLoader';
 import { translateData } from '../../utils/TranslateData';
+import { useWebSocket } from '../../context/WebSocketContext';
 
 interface PujaItem {
   id: string | number;
@@ -69,6 +68,8 @@ const HomeScreen: React.FC = () => {
 
   const translationCacheRef = useRef<Map<string, any>>(new Map());
   const currentLanguage = i18n.language;
+
+  const { messages } = useWebSocket();
 
   const fetchAllPujas = useCallback(async () => {
     setLoading(true);
@@ -157,16 +158,21 @@ const HomeScreen: React.FC = () => {
   }, [fetchAllPujas]);
 
   useEffect(() => {
-    const subscription = DeviceEventEmitter.addListener(
-      'PUJA_DATA_UPDATED',
-      async () => {
-        translationCacheRef?.current?.clear?.();
-        await fetchAllPujas();
-      },
-    );
+    if (messages.length === 0) return;
+    const latest = messages[messages.length - 1];
 
-    return () => subscription.remove();
-  }, [fetchAllPujas]);
+    if (
+      latest?.type === 'booking_request' &&
+      ['created', 'accepted', 'rejected', 'expired'].includes(latest?.action)
+    ) {
+      console.log('🔔 WS triggered refresh for:', latest.action);
+      clearTimeout((HomeScreen as any)._pujaTimeout);
+      (HomeScreen as any)._pujaTimeout = setTimeout(() => {
+        translationCacheRef?.current?.clear?.();
+        fetchAllPujas();
+      }, 1000);
+    }
+  }, [messages]);
 
   const handleRefresh = async () => {
     setRefreshing(true);

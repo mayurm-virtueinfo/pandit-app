@@ -35,7 +35,7 @@ import checkVersion from 'react-native-store-version';
 import { SessionProvider } from './src/provider/SessionProvider';
 import { NetworkProvider } from './src/provider/NetworkProvider';
 import Config from 'react-native-config';
-import WebSocketManager from './src/utils/WebSocketManager';
+import WebSocketWrapper from './src/components/WebSocketWrapper';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -63,8 +63,6 @@ const App = () => {
     requestUserPermission();
     checkForUpdate();
 
-    WebSocketManager.start();
-
     console.log('*****************   App Environment   *****************');
     console.log('Loaded ENVIRONMENT :', Config.ENVIRONMENT);
     console.log('Loaded BASE_URL :', Config.BASE_URL);
@@ -73,7 +71,6 @@ const App = () => {
 
     return () => {
       clearTimeout(timer);
-      WebSocketManager.stop();
     };
   }, []);
 
@@ -184,14 +181,16 @@ const App = () => {
         >
           <AuthProvider>
             <SessionProvider>
-              <NavigationContainer
-                ref={navigationRef}
-                onReady={() => {
-                  handleInitialNotification();
-                }}
-              >
-                <RootNavigator />
-              </NavigationContainer>
+              <WebSocketWrapper>
+                <NavigationContainer
+                  ref={navigationRef}
+                  onReady={() => {
+                    handleInitialNotification();
+                  }}
+                >
+                  <RootNavigator />
+                </NavigationContainer>
+              </WebSocketWrapper>
             </SessionProvider>
           </AuthProvider>
         </ToastProvider>

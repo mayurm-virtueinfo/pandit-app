@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,26 +8,25 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
-  DeviceEventEmitter,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import Octicons from 'react-native-vector-icons/Octicons';
 import UserCustomHeader from '../../components/CustomHeader';
 import PujaItemsModal from '../../components/PujaItemsModal';
 import CustomModal from '../../components/CustomModal';
-import {COLORS, THEMESHADOW} from '../../theme/theme';
+import { COLORS, THEMESHADOW } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import {moderateScale, verticalScale} from 'react-native-size-matters';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 import PrimaryButton from '../../components/PrimaryButton';
 import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
-import {useTranslation} from 'react-i18next';
-import {useRoute, useFocusEffect} from '@react-navigation/native';
-import {useCommonToast} from '../../common/CommonToast';
-import {getBookingAutoDetails, postUpdateStatus} from '../../api/apiService';
+import { useTranslation } from 'react-i18next';
+import { useRoute, useFocusEffect } from '@react-navigation/native';
+import { useCommonToast } from '../../common/CommonToast';
+import { getBookingAutoDetails, postUpdateStatus } from '../../api/apiService';
 
-const {width: screenWidth} = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
 
 type SamagriItem = {
   name: string;
@@ -66,20 +65,23 @@ type PujaDetailsType = {
   offer_id: number;
 };
 
-const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
-  const {t} = useTranslation();
+const WaitingApprovalPujaScreen = ({ navigation }: { navigation?: any }) => {
+  const { t } = useTranslation();
   const route = useRoute();
-  const {booking_id, offer_id} = route?.params as any;
+  const { booking_id, offer_id } = route?.params as any;
   const inset = useSafeAreaInsets();
   const [isPujaItemsModalVisible, setIsPujaItemsModalVisible] = useState(false);
   const [pujaDetails, setPujaDetails] = useState<PujaDetailsType | null>(null);
   const [loading, setLoading] = useState(false);
-  const {showSuccessToast, showErrorToast} = useCommonToast();
+  const { showSuccessToast, showErrorToast } = useCommonToast();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<'approve' | 'reject' | null>(null);
 
   console.log('booking_id in WaitingApprovalPujaScreen :: ', booking_id);
-  console.log('offer_id in WaitingApprovalPujaScreen :: ', offer_id);
+  console.log(
+    'offer_id in WaitingApprovalPujaScreen :: ',
+    offer_id || pujaDetails?.offer_id,
+  );
   console.log('pujaDetails in WaitingApprovalPujaScreen :: ', pujaDetails);
 
   const fetchPujaDetails = useCallback(async () => {
@@ -121,7 +123,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
   const getAddressDisplay = () => {
     if (!pujaDetails?.location?.type || !pujaDetails.location.details)
       return '';
-    const {type, details} = pujaDetails.location;
+    const { type, details } = pujaDetails.location;
     if (type === 'address') {
       if (details.full_address) return details.full_address;
       let addressStr = '';
@@ -154,9 +156,6 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
       });
       showSuccessToast?.(t('puja_approve'));
 
-      // 🔥 Emit event to update HomeScreen instantly
-      DeviceEventEmitter.emit('PUJA_DATA_UPDATED');
-
       navigation.goBack();
     } catch (error: any) {
       showErrorToast?.(
@@ -180,9 +179,6 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
         offer_id: offer_id || pujaDetails?.offer_id,
       });
       showSuccessToast?.(t('puja_reject'));
-
-      // 🔥 Emit event to update HomeScreen instantly
-      DeviceEventEmitter.emit('PUJA_DATA_UPDATED');
 
       navigation.goBack();
     } catch (error: any) {
@@ -222,21 +218,6 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
 
   const modalContent = getModalContent();
 
-  // Compose items for PujaItemsModal from samagri_details
-  const getPujaItemsForModal = () => {
-    if (!pujaDetails?.samagri_details) return [];
-    return [
-      {
-        title: 'User Items',
-        data: pujaDetails.samagri_details.user_items || [],
-      },
-      {
-        title: 'Pandit Items',
-        data: pujaDetails.samagri_details.pandit_items || [],
-      },
-    ];
-  };
-
   // Fallback image for priest
   const fallbackPriestImage =
     'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=80';
@@ -246,7 +227,7 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
     'https://api.builder.io/api/v1/image/assets/TEMP/0dd21e4828d095d395d4c9eadfb3a0b6c7aee7bd?width=400';
 
   return (
-    <View style={[styles.container, {paddingTop: inset.top}]}>
+    <View style={[styles.container, { paddingTop: inset.top }]}>
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -256,25 +237,22 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
       <UserCustomHeader
         title={pujaDetails?.pooja?.name || 'Pooja Details'}
         showBackButton
-        // showBellButton
         onBackPress={handleBackPress}
-        // onNotificationPress={() => {
-        //   navigation.navigate('NotificationScreen');
-        // }}
       />
 
       <View style={styles.contentContainer}>
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}>
+          contentContainerStyle={styles.scrollContent}
+        >
           <Image
             source={{
               uri: pujaDetails?.pooja?.image_url || fallbackPoojaImage,
             }}
             style={[
               styles.heroImage,
-              {width: screenWidth, height: verticalScale(200)},
+              { width: screenWidth, height: verticalScale(200) },
             ]}
             resizeMode="stretch"
           />
@@ -283,7 +261,8 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
               flex: 1,
               paddingHorizontal: moderateScale(24),
               paddingTop: verticalScale(24),
-            }}>
+            }}
+          >
             <Text style={styles.pujaTitle}>{pujaDetails?.pooja?.name}</Text>
 
             <View style={[styles.detailsCard, THEMESHADOW.shadow]}>
@@ -332,7 +311,8 @@ const WaitingApprovalPujaScreen = ({navigation}: {navigation?: any}) => {
 
               <TouchableOpacity
                 style={styles.detailItem}
-                onPress={handleOpenPujaItemsModal}>
+                onPress={handleOpenPujaItemsModal}
+              >
                 <MaterialIcons
                   name="list-alt"
                   size={24}
