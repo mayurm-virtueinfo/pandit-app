@@ -16,7 +16,7 @@ const state: WSState = {
 
 const getSocketURL = (token: string, userId: string) => {
   if (__DEV__) {
-    return `ws://dev.puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
+    return `wss://dev.puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
   }
   return `wss://puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
 };
