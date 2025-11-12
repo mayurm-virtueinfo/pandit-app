@@ -2001,7 +2001,7 @@ PODS:
     - React-Core
     - React-RCTFabric
     - ReactCommon/turbomodule/core
-  - react-native-keyboard-controller (1.19.5):
+  - react-native-keyboard-controller (1.19.4):
     - boost
     - DoubleConversion
     - fast_float
@@ -2019,7 +2019,7 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-keyboard-controller/common (= 1.19.5)
+    - react-native-keyboard-controller/common (= 1.19.4)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -2030,7 +2030,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-keyboard-controller/common (1.19.5):
+  - react-native-keyboard-controller/common (1.19.4):
     - boost
     - DoubleConversion
     - fast_float
@@ -4028,7 +4028,7 @@ SPEC CHECKSUMS:
   react-native-document-viewer: b26d151588b2021d249baf9f20224fe34d8fd36d
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-keep-awake: a351e6f67006b47f316ae2b17ee8ee69386167f4
-  react-native-keyboard-controller: 78d3372a03063e467842d5abcc010277515126fe
+  react-native-keyboard-controller: 70b9e5c205d51d3c9951674ff51698f2484e7388
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-orientation-locker: dbd3f6ddbe9e62389cb0807dc2af63f6c36dec36
   react-native-pager-view: 0e228ec2dfdd87807d125c7bbfb83299edede19c
