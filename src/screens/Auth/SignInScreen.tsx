@@ -20,7 +20,6 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import ThemedInput from '../../components/ThemedInput';
 import { getAuth, signInWithPhoneNumber } from '@react-native-firebase/auth';
-import Loader from '../../components/Loader';
 import { moderateScale } from 'react-native-size-matters';
 import { useCommonToast } from '../../common/CommonToast';
 import { COLORS } from '../../theme/theme';
@@ -47,6 +46,7 @@ import CustomTextInput from '../../components/CustomTextInput';
 // Import Firebase error handler
 import { getFirebaseAuthErrorMessage } from '../../helper/firebaseErrorHandler';
 import Config from 'react-native-config';
+import CustomeLoader from '../../components/CustomLoader';
 
 // Fallback mapping for country calling codes (complete list)
 const COUNTRY_CALLING_CODES: { [key: string]: string } = {
@@ -547,7 +547,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
         style={styles.container}
       >
         <KeyboardAvoidingView style={styles.container}>
-          <Loader loading={isLoading} />
+          <CustomeLoader loading={isLoading} />
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
