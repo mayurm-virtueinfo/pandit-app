@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,9 +9,9 @@ import {
   Text,
   SafeAreaView,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {moderateScale} from 'react-native-size-matters';
-import {COLORS} from '../../theme/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { moderateScale } from 'react-native-size-matters';
+import { COLORS } from '../../theme/theme';
 import UserCustomHeader from '../../components/CustomHeader';
 import ChatMessages from '../../components/ChatMessages';
 import ChatInput from '../../components/ChatInput';
@@ -20,7 +20,7 @@ import {
   useRoute,
   useNavigation,
 } from '@react-navigation/native';
-import {createMeeting, getMessageHistory} from '../../api/apiService';
+import { createMeeting, getMessageHistory } from '../../api/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
@@ -40,8 +40,13 @@ export interface Message {
 const ChatScreen: React.FC = () => {
   const route = useRoute() as any;
   const navigation = useNavigation();
-  const {booking_id, other_user_name, user_id, videocall, incomingMeetingUrl} =
-    route?.params || {};
+  const {
+    booking_id,
+    other_user_name,
+    user_id,
+    videocall,
+    incomingMeetingUrl,
+  } = route?.params || {};
 
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -336,12 +341,12 @@ const ChatScreen: React.FC = () => {
 
   const scrollToBottom = useCallback((animated = true) => {
     if (scrollViewRef.current) {
-      setTimeout(() => scrollViewRef.current?.scrollToEnd({animated}), 120);
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated }), 120);
     }
   }, []);
 
   const handleScroll = (event: any) => {
-    const {contentOffset, contentSize, layoutMeasurement} = event.nativeEvent;
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
     isUserAtBottom.current =
       contentOffset.y >= contentSize.height - layoutMeasurement.height - 10;
   };
@@ -439,10 +444,12 @@ const ChatScreen: React.FC = () => {
     ) {
       jitsiMeeting.current.close();
     }
-    navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
+    navigation
+      .getParent?.()
+      ?.setOptions?.({ tabBarStyle: { display: 'flex' } });
   }, [navigation]);
 
-  const eventListeners = {onReadyToClose};
+  const eventListeners = { onReadyToClose };
 
   useEffect(() => {
     if ((route as any)?.params?.endCall) {
@@ -452,12 +459,18 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     if (inCall) {
-      navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'none'}});
+      navigation
+        .getParent?.()
+        ?.setOptions?.({ tabBarStyle: { display: 'none' } });
     } else {
-      navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
+      navigation
+        .getParent?.()
+        ?.setOptions?.({ tabBarStyle: { display: 'flex' } });
     }
     return () => {
-      navigation.getParent?.()?.setOptions?.({tabBarStyle: {display: 'flex'}});
+      navigation
+        .getParent?.()
+        ?.setOptions?.({ tabBarStyle: { display: 'flex' } });
     };
   }, [inCall, navigation]);
 
@@ -482,9 +495,9 @@ const ChatScreen: React.FC = () => {
                 enabled: true,
                 collabServerBaseUrl: serverUrl,
               },
-              analytics: {disabled: true},
+              analytics: { disabled: true },
               prejoinPageEnabled: false,
-              prejoinConfig: {enabled: false},
+              prejoinConfig: { enabled: false },
               requireDisplayName: false,
               startWithAudioMuted: false,
               startWithVideoMuted: false,
@@ -508,7 +521,7 @@ const ChatScreen: React.FC = () => {
           />
         ) : (
           <View style={styles.jitsiFullScreenView}>
-            <Text style={{color: '#fff', textAlign: 'center', marginTop: 40}}>
+            <Text style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>
               Video call is not available. Please check your app installation.
             </Text>
           </View>
@@ -524,7 +537,8 @@ const ChatScreen: React.FC = () => {
           flex: 1,
           backgroundColor: COLORS.primaryBackground,
           paddingTop: insets.top,
-        }}>
+        }}
+      >
         <CustomeLoader loading={loading || wsConnecting} />
         <StatusBar
           barStyle="light-content"
@@ -544,7 +558,7 @@ const ChatScreen: React.FC = () => {
           <KeyboardAwareScrollView
             extraKeyboardSpace={Platform.OS === 'android' ? -50 : -70}
             style={styles.messagesContainer}
-            contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
             ref={scrollViewRef}
             onScroll={handleScroll}
             scrollEventThrottle={16}
@@ -553,7 +567,8 @@ const ChatScreen: React.FC = () => {
                 scrollToBottom();
               }
             }}
-            keyboardShouldPersistTaps="handled">
+            keyboardShouldPersistTaps="handled"
+          >
             {messages.length === 0 ? (
               <View style={styles.noChatContainer}>
                 <Text style={styles.noChatText}>
@@ -570,7 +585,8 @@ const ChatScreen: React.FC = () => {
               closed: 0,
               opened: Platform.OS === 'android' ? 50 : 85,
             }}
-            enabled={true}>
+            enabled={true}
+          >
             <ChatInput onSendMessage={handleSendMessage} />
           </KeyboardStickyView>
         </View>

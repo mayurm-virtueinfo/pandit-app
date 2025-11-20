@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import { useCommonToast } from '../../common/CommonToast';
 import { getBookingAutoDetails, postUpdateStatus } from '../../api/apiService';
+import CustomeLoader from '../../components/CustomLoader';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -228,6 +229,7 @@ const WaitingApprovalPujaScreen = ({ navigation }: { navigation?: any }) => {
 
   return (
     <View style={[styles.container, { paddingTop: inset.top }]}>
+      <CustomeLoader loading={loading} />
       <StatusBar
         translucent
         backgroundColor="transparent"

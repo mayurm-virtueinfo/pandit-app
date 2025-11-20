@@ -106,9 +106,27 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
   /** ✅ Manage connection based on internet & token */
   useEffect(() => {
+    console.log('🔍 [Pandit WS] useEffect triggered:', {
+      isConnected,
+      hasToken: !!token,
+      hasUserId: !!userId,
+    });
+
     if (isConnected && token && userId) {
+      console.log(
+        '✅ [Pandit WS] All conditions met, attempting to connect...',
+      );
       connect();
     } else {
+      console.log('⏸️ [Pandit WS] Skipping connection:', {
+        reason: !isConnected
+          ? 'network disconnected'
+          : !token
+          ? 'no token'
+          : !userId
+          ? 'no userId'
+          : 'unknown',
+      });
       disconnect();
     }
 

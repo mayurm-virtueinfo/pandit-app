@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback, useRef} from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,34 +8,36 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import Fonts from '../../theme/fonts';
 import UserCustomHeader from '../../components/CustomHeader';
-import {useAuth} from '../../provider/AuthProvider';
-import {COLORS, THEMESHADOW} from '../../theme/theme';
-import {moderateScale} from 'react-native-size-matters';
-import {ProfileStackParamList} from '../../navigation/ProfileStack/ProfileStack';
+import { useAuth } from '../../provider/AuthProvider';
+import { COLORS, THEMESHADOW } from '../../theme/theme';
+import { moderateScale } from 'react-native-size-matters';
+import { ProfileStackParamList } from '../../navigation/ProfileStack/ProfileStack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomModal from '../../components/CustomModal';
-import {getPanditProfileDetails, postLogout} from '../../api/apiService';
-import {deleteAccount} from '../../api/apiService';
-import {useCommonToast} from '../../common/CommonToast';
+import { getPanditProfileDetails, postLogout } from '../../api/apiService';
+import { deleteAccount } from '../../api/apiService';
+import { useCommonToast } from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
-import {getFcmToken} from '../../configuration/notificationPermission';
+import { getFcmToken } from '../../configuration/notificationPermission';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
-import {translateData} from '../../utils/TranslateData';
+import { translateData } from '../../utils/TranslateData';
+import notifee from '@notifee/react-native';
+import messaging from '@react-native-firebase/messaging';
 
 type ProfileFieldProps = {
   label: string;
   value: string;
 };
 
-const ProfileField: React.FC<ProfileFieldProps> = ({label, value}) => (
+const ProfileField: React.FC<ProfileFieldProps> = ({ label, value }) => (
   <View style={styles.fieldContainer}>
     <Text style={styles.fieldLabel}>{label}</Text>
     <Text style={styles.fieldValue}>{value}</Text>
@@ -45,9 +47,9 @@ const ProfileField: React.FC<ProfileFieldProps> = ({label, value}) => (
 const ProfileScreen = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation<ProfileStackParamList>();
-  const {t, i18n} = useTranslation();
-  const {signOutApp} = useAuth();
-  const {showErrorToast, showSuccessToast} = useCommonToast();
+  const { t, i18n } = useTranslation();
+  const { signOutApp } = useAuth();
+  const { showErrorToast, showSuccessToast } = useCommonToast();
 
   const currentLanguage = i18n.language;
   const translationCacheRef = useRef<Map<string, any>>(new Map());
@@ -88,9 +90,19 @@ const ProfileScreen = () => {
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
+      await notifee.cancelAllNotifications();
       const refreshToken =
         (await AsyncStorage.getItem(AppConstant.REFRESH_TOKEN)) || '';
       const fcmToken = await getFcmToken();
+
+      try {
+        await messaging().deleteToken();
+      } catch (messagingError) {
+        console.warn(
+          'Unable to delete FCM token during logout, proceeding anyway',
+          messagingError,
+        );
+      }
 
       const params = {
         refresh_token: refreshToken,
@@ -172,7 +184,7 @@ const ProfileScreen = () => {
     setDeleteLoading(true);
     try {
       // Only pass user_id as number, remove all other tokens/ids
-      const params = {user_id: numericId};
+      const params = { user_id: numericId };
       const response: any = await deleteAccount(params);
       console.log('response', response);
       if (response?.data?.success) {
@@ -210,7 +222,7 @@ const ProfileScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, {paddingTop: inset.top}]}>
+    <SafeAreaView style={[styles.container, { paddingTop: inset.top }]}>
       <CustomeLoader loading={isLoading || deleteLoading} />
       <LinearGradient
         colors={[COLORS.gradientStart, COLORS.gradientEnd]}
@@ -231,7 +243,8 @@ const ProfileScreen = () => {
       <View style={styles.contentContainer}>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          style={styles.scrollView}>
+          style={styles.scrollView}
+        >
           {profileData && (
             <View style={[styles.infoSection, THEMESHADOW.shadow]}>
               <ProfileField label={t('name')} value={profileData.pandit_name} />
@@ -256,7 +269,8 @@ const ProfileScreen = () => {
             <TouchableOpacity
               style={styles.editFieldContainer}
               onPress={handleEditNavigation}
-              activeOpacity={0.7}>
+              activeOpacity={0.7}
+            >
               <Text style={styles.editFieldLabel}>{t('edit_profile')} </Text>
               <Ionicons
                 name="chevron-forward"
@@ -267,7 +281,8 @@ const ProfileScreen = () => {
             <View style={styles.divider} />
             <TouchableOpacity
               style={styles.editFieldContainer}
-              onPress={handlePastPujaNavigation}>
+              onPress={handlePastPujaNavigation}
+            >
               <Text style={styles.editFieldLabel}>{t('past_puja')} </Text>
               <Ionicons
                 name="chevron-forward"
@@ -279,7 +294,8 @@ const ProfileScreen = () => {
             <TouchableOpacity
               style={styles.editFieldContainer}
               onPress={handleWalletNavigation}
-              activeOpacity={0.7}>
+              activeOpacity={0.7}
+            >
               <Text style={styles.editFieldLabel}>{t('earnings_history')}</Text>
               <Ionicons
                 name="chevron-forward"
@@ -305,7 +321,8 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={[styles.editSection, THEMESHADOW.shadow]}
-            onPress={() => setLogoutModalVisible(true)}>
+            onPress={() => setLogoutModalVisible(true)}
+          >
             <View style={styles.editFieldContainer}>
               <Text style={styles.logoutLabel}>{t('logout')}</Text>
               <Ionicons
@@ -320,7 +337,8 @@ const ProfileScreen = () => {
           <TouchableOpacity
             style={[styles.deleteSection, THEMESHADOW.shadow]}
             onPress={() => setDeleteModalVisible(true)}
-            activeOpacity={0.7}>
+            activeOpacity={0.7}
+          >
             <View style={styles.editFieldContainer}>
               <Text style={styles.deleteLabel}>
                 {t('delete_account') || 'Delete Account'}

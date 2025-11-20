@@ -260,7 +260,7 @@ const HomeScreen: React.FC = () => {
               source={{ uri: item.pooja_image_url }}
               style={styles.pujaImage}
             />
-            <View>
+            <View style={{ flex: 1, justifyContent: 'center' }}>
               <Text style={styles.pujaName}>{item.pooja_name}</Text>
               <Text style={styles.pujaDate}>
                 {t('scheduled_on')} {item.when_is_pooja}

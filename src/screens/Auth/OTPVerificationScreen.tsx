@@ -33,7 +33,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { postRegisterFCMToken, postSignIn } from '../../api/apiService';
 import AppConstant from '../../utils/AppContent';
 import { getMessaging, getToken } from '@react-native-firebase/messaging';
-import { getFirebaseAuthErrorMessage } from '../../helper/firebaseErrorHandler'; // Added import
+import { getFirebaseAuthErrorMessage } from '../../helper/firebaseErrorHandler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
@@ -232,13 +232,17 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.container}
         >
           <KeyboardAvoidingView
-            // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
             style={styles.container}
           >
             <Loader loading={isLoading} />
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
+              scrollEnabled={true}
+              bounces={false}
+              nestedScrollEnabled={true}
             >
               <View style={[styles.content]}>
                 {/* Back Button */}
@@ -343,10 +347,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    minHeight: '100%',
   },
   content: {
     flex: 1,
     position: 'relative',
+    minHeight: '100%',
   },
   header: {
     height: moderateScale(220),
@@ -364,9 +370,11 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     padding: moderateScale(24),
+    paddingTop: moderateScale(32),
     backgroundColor: COLORS.white,
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
+    minHeight: 'auto',
   },
   logo: {
     width: '33%',

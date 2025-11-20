@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,19 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import Octicons from 'react-native-vector-icons/Octicons';
 import UserCustomHeader from '../../components/CustomHeader';
 import CodeVerificationModal from '../../components/CodeVerificationModal';
 import PujaItemsModal from '../../components/PujaItemsModal';
-import {COLORS, THEMESHADOW} from '../../theme/theme';
+import { COLORS, THEMESHADOW } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import {moderateScale, verticalScale} from 'react-native-size-matters';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 import PrimaryButton from '../../components/PrimaryButton';
 import PrimaryButtonOutlined from '../../components/PrimaryButtonOutlined';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import {
   getUpcomingPujaDetails,
   postCompetePuja,
@@ -29,17 +29,18 @@ import {
   getInProgressPuja,
   postConversations,
 } from '../../api/apiService';
-import {useRoute, useFocusEffect} from '@react-navigation/native';
+import { useRoute, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useCommonToast} from '../../common/CommonToast';
+import { useCommonToast } from '../../common/CommonToast';
 import {
   translateData,
   translateOne,
   translateText,
 } from '../../utils/TranslateData';
-import {Images} from '../../theme/Images';
+import { Images } from '../../theme/Images';
+import CustomeLoader from '../../components/CustomLoader';
 
-const {width: screenWidth} = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
 
 type PujaDetailsType = {
   address_details?: {
@@ -94,14 +95,18 @@ type PujaDetailsType = {
     quantity: number;
     units: string;
   }>;
-  user_arranged_items?: Array<{name: string; quantity: number; units: string}>;
+  user_arranged_items?: Array<{
+    name: string;
+    quantity: number;
+    units: string;
+  }>;
   is_cos?: boolean;
 };
 
-const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
-  const {t, i18n} = useTranslation();
+const PujaDetailsScreen = ({ navigation }: { navigation?: any }) => {
+  const { t, i18n } = useTranslation();
   const route = useRoute();
-  const {id, progress} = route.params as any;
+  const { id, progress } = route.params as any;
   const inset = useSafeAreaInsets();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
@@ -115,7 +120,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   const [translatedProgressPujaDetails, setTranslatedProgressPujaDetails] =
     useState<any>(null);
 
-  const {showSuccessToast, showErrorToast} = useCommonToast();
+  const { showSuccessToast, showErrorToast } = useCommonToast();
 
   console.log('translatedPujaDetails :: ', translatedPujaDetails);
 
@@ -254,7 +259,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
         navigation.reset({
           index: 0,
-          routes: [{name: 'HomeScreen'}],
+          routes: [{ name: 'HomeScreen' }],
         });
         return response;
       }
@@ -282,7 +287,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         pin: pin,
       };
       await postCompetePuja(data);
-      navigation?.navigate('PujaSuccessfull', {bookingId: id});
+      navigation?.navigate('PujaSuccessfull', { bookingId: id });
     } catch (error: any) {
       let errorMsg = 'Something went wrong';
       if (error?.response?.data?.message) {
@@ -338,14 +343,14 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         return progressPujaDetails.location_display;
       }
       if (progressPujaDetails.address) {
-        const {address_line1, city_name} = progressPujaDetails.address;
+        const { address_line1, city_name } = progressPujaDetails.address;
         let addressStr = '';
         if (address_line1) addressStr += address_line1;
         if (city_name) addressStr += (addressStr ? ', ' : '') + city_name;
         return addressStr;
       }
       if (progressPujaDetails.address_details) {
-        const {full_address} = progressPujaDetails.address_details;
+        const { full_address } = progressPujaDetails.address_details;
         let addressStr = '';
         if (full_address) addressStr += full_address;
         return addressStr;
@@ -381,7 +386,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         return;
       }
 
-      const conversationRes = await postConversations({booking_id: id});
+      const conversationRes = await postConversations({ booking_id: id });
       const conversationData = conversationRes?.data || conversationRes;
       const conversationUuid =
         conversationData?.uuid ||
@@ -458,7 +463,10 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
   };
 
   return (
-    <View style={[styles.container, {paddingTop: inset.top}]}>
+    <View style={[styles.container, { paddingTop: inset.top }]}>
+      <CustomeLoader
+        loading={!translatedPujaDetails && !translatedProgressPujaDetails}
+      />
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -479,7 +487,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}>
+          contentContainerStyle={styles.scrollContent}
+        >
           <Image
             source={{
               uri:
@@ -488,7 +497,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
             }}
             style={[
               styles.heroImage,
-              {width: screenWidth, height: verticalScale(200)},
+              { width: screenWidth, height: verticalScale(200) },
             ]}
             resizeMode="stretch"
           />
@@ -497,7 +506,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
               flex: 1,
               paddingHorizontal: moderateScale(24),
               paddingTop: verticalScale(24),
-            }}>
+            }}
+          >
             <Text style={styles.pujaTitle}>
               {translatedPujaDetails?.pooja_name ||
                 progressPujaDetails?.pooja_name}
@@ -557,7 +567,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
 
               <TouchableOpacity
                 style={styles.detailItem}
-                onPress={handleOpenPujaItemsModal}>
+                onPress={handleOpenPujaItemsModal}
+              >
                 <MaterialIcons
                   name="list-alt"
                   size={24}
@@ -598,10 +609,11 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                 </Text>
                 <TouchableOpacity
                   onPress={handleOnChatClick}
-                  style={styles.chatButton}>
+                  style={styles.chatButton}
+                >
                   <Image
                     source={Images.ic_message}
-                    style={[styles.chatIcon && {opacity: 0.5}]}
+                    style={[styles.chatIcon && { opacity: 0.5 }]}
                     tintColor={COLORS.primaryBackgroundButton}
                   />
                 </TouchableOpacity>
@@ -612,7 +624,8 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
                     color: COLORS.error,
                     marginTop: 8,
                     fontSize: moderateScale(12),
-                  }}>
+                  }}
+                >
                   {t('chat_with_pandit_after_puja_started', {
                     name:
                       translatedPujaDetails?.booking_user_name ||
@@ -651,7 +664,7 @@ const PujaDetailsScreen = ({navigation}: {navigation?: any}) => {
             <PrimaryButtonOutlined
               title={t('cancel')}
               onPress={() =>
-                navigation.navigate('PujaCancellationScreen', {id})
+                navigation.navigate('PujaCancellationScreen', { id })
               }
               style={styles.button}
             />
