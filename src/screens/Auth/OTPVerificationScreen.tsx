@@ -15,7 +15,6 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
-import Loader from '../../components/Loader';
 import { getAuth, signInWithPhoneNumber } from '@react-native-firebase/auth';
 import { useCommonToast } from '../../common/CommonToast';
 import { COLORS } from '../../theme/theme';
@@ -35,6 +34,7 @@ import AppConstant from '../../utils/AppContent';
 import { getMessaging, getToken } from '@react-native-firebase/messaging';
 import { getFirebaseAuthErrorMessage } from '../../helper/firebaseErrorHandler'; // Added import
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import CustomeLoader from '../../components/CustomLoader';
 
 type OTPVerificationScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -235,7 +235,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
             // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
           >
-            <Loader loading={isLoading} />
+            <CustomeLoader loading={isLoading} />
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
