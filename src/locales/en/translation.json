@@ -443,5 +443,6 @@
   "amount_exceeds_balance": "Entered amount exceeds your available balance",
   "pending_approval": "Pending Approval",
   "ok": "OK",
-  "update_puja": "Update Puja"
+  "update_puja": "Update Puja",
+  "date_of_birth": "Date of Birth"
 }

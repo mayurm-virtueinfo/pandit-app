@@ -49,6 +49,7 @@ type RouteParams = {
   email: string;
   firstName?: string;
   lastName?: string;
+  dob?: string;
   city?: string;
   caste?: string;
   subCaste?: string;
@@ -78,6 +79,7 @@ const DocumentUploadScreen: React.FC = () => {
     email,
     firstName,
     lastName,
+    dob,
     city,
     caste,
     subCaste,
@@ -89,6 +91,8 @@ const DocumentUploadScreen: React.FC = () => {
     selectedPoojaId,
     selectedLanguageId,
   } = route.params || {};
+
+  console.log('dob :: ', dob);
 
   const [uploadedDocuments, setUploadedDocuments] =
     useState<DocumentUploadState>({
@@ -261,6 +265,7 @@ const DocumentUploadScreen: React.FC = () => {
     formData.append('pandit_detail.caste', caste?.toString?.() ?? '');
     formData.append('pandit_detail.sub_caste', subCaste?.toString?.() ?? '');
     formData.append('pandit_detail.gotra', gotra?.toString?.() ?? '');
+    formData.append('dob', dob ?? '');
 
     const uniqueLanguageIds = [...new Set(selectedLanguageId)];
     uniqueLanguageIds.forEach(id =>

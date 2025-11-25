@@ -30,6 +30,7 @@ type RouteParams = {
   email?: string;
   firstName?: string;
   lastName?: string;
+  dob?: string;
   city?: string;
   caste?: string;
   subCaste?: string;
@@ -73,6 +74,7 @@ const SelectPoojaScreen: React.FC = () => {
     email,
     firstName,
     lastName,
+    dob,
     city,
     caste,
     subCaste,
@@ -179,6 +181,7 @@ const SelectPoojaScreen: React.FC = () => {
         selectCityId: selectCityId ?? '',
         selectedAreasId: selectedAreasId ?? [],
         selectedPoojaId: selectedPoojaId ?? [],
+        dob: dob ?? '',
       });
     }
   };

@@ -31,6 +31,7 @@ type RouteParams = {
   phoneNumber?: string;
   firstName?: string;
   lastName?: string;
+  dob?: string;
   city?: string;
   caste?: string;
   subCaste?: string;
@@ -60,6 +61,7 @@ const SelectAreaScreen: React.FC = () => {
     email,
     firstName,
     lastName,
+    dob,
     city,
     caste,
     subCaste,
@@ -172,6 +174,7 @@ const SelectAreaScreen: React.FC = () => {
         address: address ?? '',
         selectCityId: selectCityId ?? '',
         selectedAreasId: selectedAreaIds ?? [],
+      dob: dob ?? '',
       });
     } else {
       showErrorToast('Please select Area');

@@ -124,7 +124,10 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       if (response.is_register === false) {
-        navigation.navigate('CompleteProfileScreen', { phoneNumber });
+        Keyboard.dismiss();
+        setTimeout(() => {
+          navigation.navigate('CompleteProfileScreen', { phoneNumber });
+        }, 100);
         return;
       }
 
@@ -146,6 +149,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       if (response.access_token && response.refresh_token) {
+        Keyboard.dismiss();
         signIn(response.access_token, response.refresh_token);
       } else {
         showErrorToast('Invalid login tokens.');

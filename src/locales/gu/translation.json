@@ -439,5 +439,6 @@
   "amount_exceeds_balance": "દાખલ કરેલી રકમ તમારી ઉપલબ્ધ બેલેન્સ કરતાં વધુ છે",
   "pending_approval": "મંજૂરી માટે બાકી",
   "ok": "બરાબર",
-  "update_puja": "પૂજા અપડેટ કરો"
+  "update_puja": "પૂજા અપડેટ કરો",
+  "date_of_birth": "જન્મ તારીખ"
 }

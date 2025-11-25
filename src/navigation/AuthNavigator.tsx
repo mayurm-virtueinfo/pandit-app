@@ -33,6 +33,7 @@ export type AuthStackParamList = {
     email: string;
     firstName: string;
     lastName: string;
+    dob?: string;
     city: string | number;
     caste: string | number;
     subCaste: string | number;
@@ -45,6 +46,7 @@ export type AuthStackParamList = {
     email: string;
     firstName: string;
     lastName: string;
+    dob?: string;
     city: string | number;
     caste: string | number;
     subCaste: string | number;
@@ -58,6 +60,7 @@ export type AuthStackParamList = {
     email: string;
     firstName: string;
     lastName: string;
+    dob?: string;
     city: string | number;
     caste: string | number;
     subCaste: string | number;
@@ -72,6 +75,7 @@ export type AuthStackParamList = {
     email: string;
     firstName: string;
     lastName: string;
+    dob?: string;
     city: string | number;
     caste: string | number;
     subCaste: string | number;
@@ -87,6 +91,7 @@ export type AuthStackParamList = {
     email: string;
     firstName: string;
     lastName: string;
+    dob?: string;
     city: string | number;
     caste: string | number;
     subCaste: string | number;

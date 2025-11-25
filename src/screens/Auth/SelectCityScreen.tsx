@@ -32,6 +32,7 @@ type RouteParams = {
   profile_img: any;
   firstName?: string;
   lastName?: string;
+  dob?: string;
   city?: string;
   caste?: string;
   subCaste?: string;
@@ -57,6 +58,7 @@ const SelectCityScreen: React.FC = () => {
     email,
     firstName,
     lastName,
+    dob,
     city,
     caste,
     subCaste,
@@ -159,6 +161,7 @@ const SelectCityScreen: React.FC = () => {
         email: email,
         firstName: firstName ?? '',
         lastName: lastName ?? '',
+        dob: dob ?? '',
         city: city ?? '',
         caste: caste ?? '',
         subCaste: subCaste ?? '',

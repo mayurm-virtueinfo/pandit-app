@@ -31,6 +31,7 @@ type RouteParams = {
   email?: string;
   firstName?: string;
   lastName?: string;
+  dob?: string;
   city?: string;
   caste?: string;
   subCaste?: string;
@@ -74,6 +75,7 @@ const SelectLanguageScreen: React.FC = () => {
     email,
     firstName,
     lastName,
+    dob,
     city,
     caste,
     subCaste,
@@ -176,6 +178,7 @@ const SelectLanguageScreen: React.FC = () => {
       selectedAreasId: selectedAreasId ?? [],
       selectedPoojaId: selectedPoojaId ?? [],
       selectedLanguageId: selectedLanguageId ?? [],
+      dob: dob ?? '',
     });
   };
 

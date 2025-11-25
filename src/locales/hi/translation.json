@@ -438,5 +438,6 @@
   "amount_exceeds_balance": "दर्ज की गई राशि आपके उपलब्ध बैलेंस से अधिक है",
   "pending_approval": "स्वीकृति लंबित",
   "ok": "ठीक है",
-  "update_puja": "पूजा अपडेट करें"
+  "update_puja": "पूजा अपडेट करें",
+  "date_of_birth": "जन्म तिथि"
 }
