@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 
 import {
   View,
@@ -14,6 +14,7 @@ import {
   Modal,
   StatusBar,
   useColorScheme,
+  Keyboard,
 } from 'react-native';
 
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -50,6 +51,7 @@ import CustomeLoader from '../../components/CustomLoader';
 
 // Fallback mapping for country calling codes (complete list)
 const COUNTRY_CALLING_CODES: { [key: string]: string } = {
+  // ... same mapping as before ...
   AF: '+93',
   AL: '+355',
   DZ: '+213',
@@ -351,6 +353,8 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
   const pickerTextColor =
     colorScheme === 'dark' ? COLORS.primaryTextDark : COLORS.primaryTextDark;
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
   useEffect(() => {
     getSavedLanguage().then(saved => {
       if (!saved) {
@@ -404,7 +408,22 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
     return '';
   };
 
+  // --- UPDATED handleSignIn to resolve OTP screen blinking when keyboard is open ---
+
   const handleSignIn = async () => {
+    // Fix start: dismiss keyboard and scroll to top to avoid blinking in OTP screen
+    Keyboard.dismiss();
+
+    // Optionally scroll the ScrollView to the top so transition is smooth
+    if (scrollViewRef.current) {
+      // Scroll without animation to avoid flickering
+      // setTimeout to ensure keyboard fully dismissed
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: false });
+      }, 80);
+    }
+    // Fix end
+
     const errorMsg = validateInput(phoneNumber);
     if (errorMsg) {
       setErrors({ phoneNumber: errorMsg });
@@ -553,6 +572,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
         >
           <CustomeLoader loading={isLoading} />
           <ScrollView
+            ref={scrollViewRef}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
