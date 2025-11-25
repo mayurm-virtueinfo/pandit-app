@@ -7,9 +7,9 @@ import {
   ViewStyle,
 } from 'react-native';
 import React from 'react';
-import {COLORS} from '../theme/theme';
+import { COLORS } from '../theme/theme';
 import Fonts from '../theme/fonts';
-import {moderateScale} from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 
 interface InputFieldProps {
   label: string;
@@ -21,6 +21,7 @@ interface InputFieldProps {
   editable?: boolean;
   style?: ViewStyle;
   textColor?: string;
+  onFocus?: () => void;
 }
 
 const CustomTextInput: React.FC<InputFieldProps> = ({
@@ -33,20 +34,23 @@ const CustomTextInput: React.FC<InputFieldProps> = ({
   editable = true,
   style,
   textColor,
+  onFocus,
 }) => {
   return (
     <View style={styles.inputField}>
       {label && <Text style={styles.inputTitle}>{label}</Text>}
       <View
-        style={[styles.inputArea, error ? styles.inputAreaError : null, style]}>
+        style={[styles.inputArea, error ? styles.inputAreaError : null, style]}
+      >
         <TextInput
-          style={[styles.inputText, textColor ? {color: textColor} : null]}
+          style={[styles.inputText, textColor ? { color: textColor } : null]}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
           placeholderTextColor={COLORS.inputLabelText}
           keyboardType={keyboardType}
           editable={editable}
+          onFocus={onFocus}
         />
       </View>
       {error && <Text style={styles.errorText}>{error}</Text>}

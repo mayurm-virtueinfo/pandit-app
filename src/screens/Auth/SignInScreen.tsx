@@ -546,11 +546,16 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
         source={Images.ic_splash_background}
         style={styles.container}
       >
-        <KeyboardAvoidingView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 30 : 0}
+        >
           <CustomeLoader loading={isLoading} />
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             <View style={[styles.content]}>
               <View style={styles.containerHeader}>
@@ -590,7 +595,12 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
               </View>
 
               <View
-                style={[styles.containerBody, { paddingBottom: inset.bottom }]}
+                style={[
+                  styles.containerBody,
+                  {
+                    paddingBottom: Math.max(inset.bottom, 20) + 30,
+                  },
+                ]}
               >
                 <Text
                   style={styles.mainTitle}

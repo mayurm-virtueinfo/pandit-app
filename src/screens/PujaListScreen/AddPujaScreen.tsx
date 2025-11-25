@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,11 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import UserCustomHeader from '../../components/CustomHeader';
-import {COLORS, THEMESHADOW} from '../../theme/theme';
+import { COLORS, THEMESHADOW } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {
   putPuja,
@@ -24,11 +24,11 @@ import {
   EditPuja,
 } from '../../api/apiService';
 import PrimaryButton from '../../components/PrimaryButton';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useCommonToast} from '../../common/CommonToast';
+import { useCommonToast } from '../../common/CommonToast';
 import AppConstant from '../../utils/AppContent';
-import {translateData} from '../../utils/TranslateData';
+import { translateData } from '../../utils/TranslateData';
 
 interface PriceOption {
   id: 'system' | 'custom';
@@ -52,17 +52,17 @@ type PujaDataType = {
 };
 
 const AddPujaScreen: React.FC = () => {
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
-  const {showErrorToast, showSuccessToast} = useCommonToast();
+  const { showErrorToast, showSuccessToast } = useCommonToast();
   const params = route.params as
-    | {pujaId?: number; pujaData?: PujaDataType}
+    | { pujaId?: number; pujaData?: PujaDataType }
     | undefined;
 
-  const {pujaId, pujaData} = params || {};
+  const { pujaId, pujaData } = params || {};
   const isEditMode = !!pujaId;
 
   const [translatedPujaData, setTranslatedPujaData] = useState<any>(pujaData);
@@ -213,7 +213,7 @@ const AddPujaScreen: React.FC = () => {
         price_without_samagri: Number(entry?.price_without_samagri) || 0,
       };
     }
-    return {price_with_samagri: 0, price_without_samagri: 0};
+    return { price_with_samagri: 0, price_without_samagri: 0 };
   };
 
   const getInitialPriceOption = () => {
@@ -295,7 +295,7 @@ const AddPujaScreen: React.FC = () => {
       if (response && (response as any).data.success === true) {
         showSuccessToast((response as any).data.message);
         // Navigate with refresh flag so list screen can force refresh (simpler than storage)
-        (navigation as any).navigate('PujaListScreen', {refresh: Date.now()});
+        (navigation as any).navigate('PujaListScreen', { refresh: Date.now() });
       }
     } catch (error) {
       showErrorToast(error as string);
@@ -357,7 +357,7 @@ const AddPujaScreen: React.FC = () => {
       const response = await putPuja(editRequest as any);
       if (response && (response as any).data.success === true) {
         showSuccessToast((response as any).data.message);
-        (navigation as any).navigate('PujaListScreen', {refresh: Date.now()});
+        (navigation as any).navigate('PujaListScreen', { refresh: Date.now() });
       } else {
         setPujaList([]);
       }
@@ -411,10 +411,11 @@ const AddPujaScreen: React.FC = () => {
     <View key={puja.id}>
       <TouchableOpacity
         style={styles.pujaOptionContainer}
-        onPress={() => handlePujaSelection(puja.id)}>
+        onPress={() => handlePujaSelection(puja.id)}
+      >
         <View style={styles.pujaContent}>
           {puja.image ? (
-            <Image source={{uri: puja.image}} style={styles.pujaImage} />
+            <Image source={{ uri: puja.image }} style={styles.pujaImage} />
           ) : (
             <View
               style={[
@@ -424,8 +425,9 @@ const AddPujaScreen: React.FC = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 },
-              ]}>
-              <Text style={{color: COLORS.gray, fontSize: 12}}>No Image</Text>
+              ]}
+            >
+              <Text style={{ color: COLORS.gray, fontSize: 12 }}>No Image</Text>
             </View>
           )}
           <View style={styles.pujaTextContainer}>
@@ -449,7 +451,8 @@ const AddPujaScreen: React.FC = () => {
     <View key={option.id}>
       <TouchableOpacity
         style={styles.priceOptionContainer}
-        onPress={() => handlePriceOptionSelection(option.id)}>
+        onPress={() => handlePriceOptionSelection(option.id)}
+      >
         <View style={styles.priceContent}>
           <Text style={styles.priceTitle}>{option.title}</Text>
           {option.description && (
@@ -474,7 +477,7 @@ const AddPujaScreen: React.FC = () => {
   const hasSelectedPuja = selectedPuja !== null && selectedPuja !== undefined;
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <UserCustomHeader
         title={isEditMode ? t('edit_puja') : t('add_puja')}
         showBackButton={true}
@@ -484,15 +487,17 @@ const AddPujaScreen: React.FC = () => {
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+        >
           <View style={[styles.sectionContainer, THEMESHADOW.shadow]}>
             {loading ? (
-              <View style={{alignItems: 'center', padding: 20}}>
+              <View style={{ alignItems: 'center', padding: 20 }}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
               </View>
             ) : !hasPujaItems ? (
               <Text
-                style={{textAlign: 'center', color: COLORS.gray, padding: 16}}>
+                style={{ textAlign: 'center', color: COLORS.gray, padding: 16 }}
+              >
                 {t('no_pooja_found')}
               </Text>
             ) : (
@@ -550,11 +555,11 @@ const AddPujaScreen: React.FC = () => {
           )}
         </ScrollView>
         {/* Button fixed at the bottom */}
-        <View style={[styles.bottomButtonContainer, {paddingBottom: 16}]}>
+        <View style={[styles.bottomButtonContainer, { paddingBottom: 16 }]}>
           <PrimaryButton
             title={
               isEditMode
-                ? t('edit_puja').toUpperCase()
+                ? t('update_puja').toUpperCase()
                 : t('add_puja').toUpperCase()
             }
             onPress={handleAddPuja}

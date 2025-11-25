@@ -437,5 +437,6 @@
   "please_enter_amount": "कृपया राशि दर्ज करें",
   "amount_exceeds_balance": "दर्ज की गई राशि आपके उपलब्ध बैलेंस से अधिक है",
   "pending_approval": "स्वीकृति लंबित",
-  "ok": "ठीक है"
+  "ok": "ठीक है",
+  "update_puja": "पूजा अपडेट करें"
 }

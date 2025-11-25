@@ -93,9 +93,28 @@ const EditProfileScreen: React.FC = () => {
   const [subCasteData, setSubCasteData] = useState<any[]>([]);
   const [gotraData, setGotraData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   // To prevent double fetch of subcaste/gotra on initial profile load
   const isProfileLoaded = useRef(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // Listen for keyboard events
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => setKeyboardVisible(true),
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setKeyboardVisible(false),
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   // Fetch profile and dropdown data on mount
   useEffect(() => {
@@ -107,7 +126,7 @@ const EditProfileScreen: React.FC = () => {
     setIsLoading(true);
     try {
       // Fetch all dropdowns in parallel
-      const [cityRes, casteRes, profileRes] = await Promise.all([
+      const [cityRes, casteRes, profileRes]: any = await Promise.all([
         getCity(),
         getCaste(),
         getProfileData(),
@@ -115,7 +134,7 @@ const EditProfileScreen: React.FC = () => {
 
       // Set cityData
       if (Array.isArray(cityRes?.data)) {
-        const cities = cityRes.data.map(item => ({
+        const cities = cityRes.data.map((item: any) => ({
           label: 'name' in item ? item.name : item.title,
           value: item.id?.toString?.() ?? item.id,
         }));
@@ -126,7 +145,7 @@ const EditProfileScreen: React.FC = () => {
 
       // Set casteData
       if (Array.isArray(casteRes?.data)) {
-        const castes = casteRes.data.map(item => ({
+        const castes = casteRes.data.map((item: any) => ({
           label: 'name' in item ? item.name : item.title,
           value: item.id?.toString?.() ?? item.id,
         }));
@@ -136,7 +155,7 @@ const EditProfileScreen: React.FC = () => {
       }
 
       // Set formData from profile
-      const data = profileRes?.data ?? profileRes;
+      const data: any = profileRes?.data ?? profileRes;
       console.log('Data :::: >>>', data);
       if (data && typeof data === 'object') {
         const cityValue =
@@ -419,6 +438,15 @@ const EditProfileScreen: React.FC = () => {
     }
   };
 
+  const handleInputFocus = (yOffset: number) => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollTo({
+        y: yOffset,
+        animated: true,
+      });
+    }, 100);
+  };
+
   const handleNext = async () => {
     const newErrors: Partial<FormData> = {};
     let firstError = '';
@@ -520,13 +548,17 @@ const EditProfileScreen: React.FC = () => {
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
         >
           <View style={styles.content}>
             <ScrollView
+              ref={scrollViewRef}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.scrollContent}
+              contentContainerStyle={[
+                styles.scrollContent,
+                isKeyboardVisible && { paddingBottom: moderateScale(100) },
+              ]}
             >
               <View style={styles.formContainer}>
                 {/* Photo Picker */}
@@ -592,6 +624,7 @@ const EditProfileScreen: React.FC = () => {
                   onChangeText={value => handleInputChange('firstName', value)}
                   placeholder={t('enter_first_name')}
                   error={errors.firstName}
+                  onFocus={() => handleInputFocus(200)}
                 />
                 <CustomTextInput
                   label={t('last_name')}
@@ -599,6 +632,7 @@ const EditProfileScreen: React.FC = () => {
                   onChangeText={value => handleInputChange('lastName', value)}
                   placeholder={t('enter_last_name')}
                   error={errors.lastName}
+                  onFocus={() => handleInputFocus(250)}
                 />
                 <CustomDropdown
                   label={t('city')}
@@ -638,25 +672,26 @@ const EditProfileScreen: React.FC = () => {
                   onChangeText={value => handleInputChange('address', value)}
                   placeholder={t('enter_address')}
                   error={errors.address}
+                  onFocus={() => handleInputFocus(600)}
                 />
               </View>
               <View style={styles.textContainer}>
                 <Text style={styles.text}>{t('address_desc')}</Text>
               </View>
+              <View
+                style={[
+                  styles.buttonFixedContainer,
+                  { paddingBottom: inset.bottom || 16 },
+                ]}
+              >
+                <PrimaryButton
+                  title={t('update')}
+                  onPress={handleNext}
+                  style={styles.buttonContainer}
+                  textStyle={styles.buttonText}
+                />
+              </View>
             </ScrollView>
-            <View
-              style={[
-                styles.buttonFixedContainer,
-                { paddingBottom: inset.bottom || 16 },
-              ]}
-            >
-              <PrimaryButton
-                title={t('update')}
-                onPress={handleNext}
-                style={styles.buttonContainer}
-                textStyle={styles.buttonText}
-              />
-            </View>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -684,7 +719,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 0,
   },
   formContainer: {
     padding: 24,

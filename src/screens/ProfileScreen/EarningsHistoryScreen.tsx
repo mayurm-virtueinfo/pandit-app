@@ -212,8 +212,8 @@ const EarningsHistoryScreen: React.FC = () => {
         // fetchData();
       }
     } catch (error: any) {
-      console.error('withdraw error :: ', error?.data?.message || error);
-      showErrorToast(error?.data?.message || t('withdrawal_request_failed'));
+      console.log('withdraw error :: ', error?.data?.message || error);
+      showErrorToast(error?.data?.message || error?.response?.data?.message);
     } finally {
       setWithdrawLoading(false);
       setWithdrawModalVisible(false);

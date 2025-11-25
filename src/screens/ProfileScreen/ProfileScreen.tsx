@@ -183,6 +183,16 @@ const ProfileScreen = () => {
     }
     setDeleteLoading(true);
     try {
+      await notifee.cancelAllNotifications();
+      try {
+        await messaging().deleteToken();
+      } catch (messagingError) {
+        console.warn(
+          'Unable to delete FCM token during account deletion, proceeding anyway',
+          messagingError,
+        );
+      }
+
       // Only pass user_id as number, remove all other tokens/ids
       const params = { user_id: numericId };
       const response: any = await deleteAccount(params);

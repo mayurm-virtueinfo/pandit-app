@@ -11,6 +11,7 @@ import {
   Image,
   StatusBar,
   TouchableOpacity,
+  Keyboard,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -132,6 +133,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
           response.message ||
             'Your account is pending approval. We will notify you once the administrator has verified your profile.',
         );
+        Keyboard.dismiss();
         setDisableModalVisible(true);
         return;
       }
@@ -259,7 +261,14 @@ const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
                   <Image source={Images.ic_app_logo} style={styles.logo} />
                   <Text style={styles.title}>{t('hi_welcome')}</Text>
                 </View>
-                <View style={[styles.body, { paddingBottom: inset.bottom }]}>
+                <View
+                  style={[
+                    styles.body,
+                    {
+                      paddingBottom: Math.max(inset.bottom, 20) + 40,
+                    },
+                  ]}
+                >
                   <Text style={styles.mainTitle}>{t('otp_verification')}</Text>
                   <Text style={styles.subtitle}>
                     {t('enter_6_digit_the_verification_code')}

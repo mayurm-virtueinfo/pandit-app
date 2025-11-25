@@ -1,17 +1,19 @@
 import { Platform, Alert } from 'react-native';
-import {
-  getMessaging,
-  requestPermission,
-  getToken,
-  getAPNSToken,
+import messaging, {
   AuthorizationStatus,
 } from '@react-native-firebase/messaging';
-import { getApp } from '@react-native-firebase/app';
-
-const messaging = getMessaging(getApp());
+import { checkNotifications } from 'react-native-permissions';
 
 export async function requestUserPermission(): Promise<boolean> {
-  const authStatus = await requestPermission(messaging);
+  console.log('Requesting permission...');
+
+  // Check with react-native-permissions first for debugging
+  const settings = await checkNotifications();
+  console.log('RN Permissions Status:', settings.status, settings.settings);
+
+  const authStatus = await messaging().requestPermission();
+  console.log('Authorization Status:', authStatus);
+
   const enabled =
     authStatus === AuthorizationStatus.AUTHORIZED ||
     authStatus === AuthorizationStatus.PROVISIONAL;
@@ -21,7 +23,7 @@ export async function requestUserPermission(): Promise<boolean> {
 
     try {
       if (Platform.OS === 'ios') {
-        const apnsToken = await getAPNSToken(messaging);
+        const apnsToken = await messaging().getAPNSToken();
         console.log('📲 APNs Token:', apnsToken);
       }
 
@@ -33,9 +35,13 @@ export async function requestUserPermission(): Promise<boolean> {
 
     return true;
   } else {
+    console.log(
+      '❌ Notification permission denied or not determined. Status:',
+      authStatus,
+    );
     Alert.alert(
       'Notifications Disabled',
-      'Please enable push notifications in settings to receive alerts.',
+      `Please enable push notifications in settings to receive alerts.\nStatus: ${authStatus}\nRNP Status: ${settings.status}`,
     );
     return false;
   }
@@ -43,7 +49,7 @@ export async function requestUserPermission(): Promise<boolean> {
 
 export async function getFcmToken(): Promise<string | null> {
   try {
-    const fcmToken = await getToken(messaging);
+    const fcmToken = await messaging().getToken();
     return fcmToken;
   } catch (error) {
     console.error('🚫 Failed to get FCM token:', error);

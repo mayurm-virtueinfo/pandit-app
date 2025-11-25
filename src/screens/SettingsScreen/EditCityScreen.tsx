@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,22 +8,22 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {COLORS, wp} from '../../theme/theme';
+import { useNavigation } from '@react-navigation/native';
+import { COLORS, wp } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {moderateScale} from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { moderateScale } from 'react-native-size-matters';
 import CustomHeader from '../../components/CustomHeader';
-import {useTranslation} from 'react-i18next';
-import {CustomeSelectorDataOption} from '../../types/cityTypes';
+import { useTranslation } from 'react-i18next';
+import { CustomeSelectorDataOption } from '../../types/cityTypes';
 import CustomSelector from '../../components/CustomeSelector';
-import {getCity, getServiceArea} from '../../api/apiService';
-import {useCommonToast} from '../../common/CommonToast';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {SettingsStackParamList} from '../../navigation/SettingsStack/SettingsStack';
+import { getCity, getServiceArea } from '../../api/apiService';
+import { useCommonToast } from '../../common/CommonToast';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { SettingsStackParamList } from '../../navigation/SettingsStack/SettingsStack';
 import CustomeLoader from '../../components/CustomLoader';
-import {translateData} from '../../utils/TranslateData';
+import { translateData } from '../../utils/TranslateData';
 
 type ScreenNavigationProp = StackNavigationProp<
   SettingsStackParamList,
@@ -33,9 +33,9 @@ type ScreenNavigationProp = StackNavigationProp<
 const EditCityScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
-  const {showErrorToast} = useCommonToast();
+  const { showErrorToast } = useCommonToast();
 
   const [cities, setCities] = useState<CustomeSelectorDataOption[]>([]);
   const [originalCities, setOriginalCities] = useState<
@@ -174,7 +174,7 @@ const EditCityScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
@@ -186,13 +186,15 @@ const EditCityScreen: React.FC = () => {
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={styles.contentContainer}>
             <ScrollView
               style={styles.scrollView}
               contentContainerStyle={styles.scrollContentContainer}
               showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled">
+              keyboardShouldPersistTaps="handled"
+            >
               <View style={styles.mainContent}>
                 <Text style={styles.selectCityTitle}>{t('select_city')}</Text>
                 <Text style={styles.description}>
@@ -216,8 +218,9 @@ const EditCityScreen: React.FC = () => {
             <View
               style={[
                 styles.bottomButtonContainer,
-                {paddingBottom: moderateScale(16)},
-              ]}>
+                { paddingBottom: moderateScale(16) },
+              ]}
+            >
               <PrimaryButton
                 title={t('next')}
                 onPress={handleNext}

@@ -442,5 +442,6 @@
   "please_enter_amount": "Please enter an amount",
   "amount_exceeds_balance": "Entered amount exceeds your available balance",
   "pending_approval": "Pending Approval",
-  "ok": "OK"
+  "ok": "OK",
+  "update_puja": "Update Puja"
 }
