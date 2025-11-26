@@ -152,7 +152,7 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flexGrow: 1,
     borderRadius: moderateScale(10),
     backgroundColor: COLORS.white,
   },

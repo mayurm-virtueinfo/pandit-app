@@ -184,7 +184,7 @@ const SelectCityScreen: React.FC = () => {
       <CustomHeader title={t('complete_your_profile')} showBackButton={true} />
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
-        // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <View style={styles.contentContainer}>

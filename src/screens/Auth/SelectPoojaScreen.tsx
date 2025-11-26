@@ -6,6 +6,7 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { COLORS, wp } from '../../theme/theme';
@@ -204,45 +205,52 @@ const SelectPoojaScreen: React.FC = () => {
 
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 30}
         >
           <View style={styles.contentContainer}>
-            <View style={styles.mainContent}>
-              <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
-              <Text style={styles.description}>{t('select_pooja_desc')}</Text>
-              <CustomeMultiSelector
-                data={filteredPoojaData}
-                selectedDataIds={selectedPoojaId}
-                onDataSelect={handlePoojaSelect}
-                searchPlaceholder={t('select_pooja')}
-                isMultiSelect={true}
-                onSearch={setSearchText}
-                onEndReached={handleLoadMore}
-                loadingMore={loadingMore}
-                onEndReachedThreshold={0.7}
-              />
-              {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
-                <Text style={styles.noDataText}>
-                  {t('no_pooja_found') || 'No pooja found'}
-                </Text>
-              )}
-            </View>
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContentContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.mainContent}>
+                <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
+                <Text style={styles.description}>{t('select_pooja_desc')}</Text>
+                <CustomeMultiSelector
+                  data={filteredPoojaData}
+                  selectedDataIds={selectedPoojaId}
+                  onDataSelect={handlePoojaSelect}
+                  searchPlaceholder={t('select_pooja')}
+                  isMultiSelect={true}
+                  onSearch={setSearchText}
+                  onEndReached={handleLoadMore}
+                  loadingMore={loadingMore}
+                  onEndReachedThreshold={0.7}
+                />
+                {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
+                  <Text style={styles.noDataText}>
+                    {t('no_pooja_found') || 'No pooja found'}
+                  </Text>
+                )}
+              </View>
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
-        <View
-          style={[
-            styles.buttonContainer,
-            { paddingBottom: insets.bottom + moderateScale(12) },
-          ]}
-        >
-          <PrimaryButton
-            title={buttonText}
-            onPress={handleNext}
-            style={styles.nextButton}
-            disabled={selectedPoojaId.length === 0}
-          />
-        </View>
+      </View>
+      <View
+        style={[
+          styles.buttonContainer,
+          { paddingBottom: insets.bottom + moderateScale(12) },
+        ]}
+      >
+        <PrimaryButton
+          title={buttonText}
+          onPress={handleNext}
+          style={styles.nextButton}
+          disabled={selectedPoojaId.length === 0}
+        />
       </View>
     </View>
   );

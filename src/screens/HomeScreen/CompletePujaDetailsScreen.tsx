@@ -421,6 +421,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: verticalScale(8),
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   detailLabel: {
     fontSize: 16,

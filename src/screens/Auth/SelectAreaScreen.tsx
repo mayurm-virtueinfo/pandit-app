@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, useCallback} from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,23 +8,23 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {COLORS, wp} from '../../theme/theme';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { COLORS, wp } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
 import PrimaryButton from '../../components/PrimaryButton';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {moderateScale} from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { moderateScale } from 'react-native-size-matters';
 import CustomHeader from '../../components/CustomHeader';
-import {useTranslation} from 'react-i18next';
-import {CustomeSelectorDataOption} from '../../types/cityTypes';
+import { useTranslation } from 'react-i18next';
+import { CustomeSelectorDataOption } from '../../types/cityTypes';
 import CustomeMultiSelector from '../../components/CustomeMultiSelector';
-import {useCommonToast} from '../../common/CommonToast';
-import {getAreas} from '../../api/apiService';
-import {SelectorDataOption} from './type';
+import { useCommonToast } from '../../common/CommonToast';
+import { getAreas } from '../../api/apiService';
+import { SelectorDataOption } from './type';
 import CustomeLoader from '../../components/CustomLoader';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {AuthStackParamList} from '../../navigation/AuthNavigator';
-import {translateData} from '../../utils/TranslateData';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
+import { translateData } from '../../utils/TranslateData';
 
 type RouteParams = {
   action?: string;
@@ -50,8 +50,8 @@ type ScreenNavigationProp = StackNavigationProp<
 const SelectAreaScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const {t, i18n} = useTranslation();
-  const {showErrorToast} = useCommonToast();
+  const { t, i18n } = useTranslation();
+  const { showErrorToast } = useCommonToast();
   const currentLanguage = i18n.language;
   const translationCacheRef = useRef<Map<string, any>>(new Map());
 
@@ -174,7 +174,7 @@ const SelectAreaScreen: React.FC = () => {
         address: address ?? '',
         selectCityId: selectCityId ?? '',
         selectedAreasId: selectedAreaIds ?? [],
-      dob: dob ?? '',
+        dob: dob ?? '',
       });
     } else {
       showErrorToast('Please select Area');
@@ -184,7 +184,7 @@ const SelectAreaScreen: React.FC = () => {
   const buttonText = action === 'Update' ? t('update') : t('next');
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <CustomeLoader loading={isLoading} />
       <StatusBar
         translucent
@@ -199,7 +199,8 @@ const SelectAreaScreen: React.FC = () => {
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={styles.contentContainer}>
             <View style={styles.mainContent}>
               <Text style={styles.selectCityTitle}>{t('select_area')}</Text>
@@ -222,18 +223,19 @@ const SelectAreaScreen: React.FC = () => {
             </View>
           </View>
         </KeyboardAvoidingView>
-        <View
-          style={[
-            styles.buttonContainer,
-            {paddingBottom: insets.bottom + moderateScale(12)},
-          ]}>
-          <PrimaryButton
-            title={buttonText}
-            onPress={handleNext}
-            style={styles.nextButton}
-            disabled={selectedAreaIds.length === 0}
-          />
-        </View>
+      </View>
+      <View
+        style={[
+          styles.buttonContainer,
+          { paddingBottom: insets.bottom + moderateScale(12) },
+        ]}
+      >
+        <PrimaryButton
+          title={buttonText}
+          onPress={handleNext}
+          style={styles.nextButton}
+          disabled={selectedAreaIds.length === 0}
+        />
       </View>
     </View>
   );

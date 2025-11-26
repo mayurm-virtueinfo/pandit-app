@@ -25,7 +25,10 @@ import { moderateScale } from 'react-native-size-matters';
 import { useCommonToast } from '../../common/CommonToast';
 import { COLORS } from '../../theme/theme';
 import Fonts from '../../theme/fonts';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
 import i18n, {
@@ -554,7 +557,7 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
     backgroundColor: colorScheme === 'dark' ? COLORS.white : COLORS.white,
   });
 
-  return (
+  return Platform.OS === 'ios' ? (
     <View style={[styles.container, { paddingTop: inset.top }]}>
       <StatusBar
         translucent
@@ -567,8 +570,8 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
       >
         <KeyboardAvoidingView
           style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 30 : 0}
+          behavior="padding"
+          keyboardVerticalOffset={30}
         >
           <CustomeLoader loading={isLoading} />
           <ScrollView
@@ -743,15 +746,14 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
                   onPress={handleSignIn}
                   title={t('send_otp')}
                   disabled={!isAgreed}
-                  // style={{ marginBottom: 20 }}
                 />
                 {/* {Platform.OS === 'ios' && (
-                  <PrimaryButton
-                    onPress={handleContinueAsGuest}
-                    title={t('continue_as_guest')}
-                    style={{ marginBottom: 20 }}
-                  />
-                )} */}
+                    <PrimaryButton
+                      onPress={handleContinueAsGuest}
+                      title={t('continue_as_guest')}
+                      style={{ marginBottom: 20 }}
+                    />
+                  )} */}
               </View>
             </View>
           </ScrollView>
@@ -833,6 +835,297 @@ const SignInScreen: React.FC<Props> = ({ navigation, route }) => {
         </Modal>
       </ImageBackground>
     </View>
+  ) : (
+    <SafeAreaView style={[styles.container]}>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
+      <ImageBackground
+        source={Images.ic_splash_background}
+        style={styles.container}
+      >
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior="height"
+          keyboardVerticalOffset={0}
+        >
+          <CustomeLoader loading={isLoading} />
+          <ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={[styles.content]}>
+              <View style={styles.containerHeader}>
+                <Image
+                  source={Images.ic_app_logo}
+                  style={{ resizeMode: 'contain' }}
+                />
+                <Text style={styles.title}>{t('hi_welcome')}</Text>
+                <TouchableOpacity
+                  style={styles.languageButton}
+                  onPress={handleOpenLanguageModal}
+                  accessibilityLabel="Change language"
+                  activeOpacity={0.7}
+                >
+                  <Icon
+                    name="language"
+                    size={moderateScale(24)}
+                    color={COLORS.white}
+                  />
+                  <Text style={styles.languageButtonText}>
+                    {(() => {
+                      switch (selectedLang) {
+                        case 'en':
+                          return 'English';
+                        case 'hi':
+                          return 'हिन्दी';
+                        case 'gu':
+                          return 'ગુજરાતી';
+                        case 'mr':
+                          return 'मराठी';
+                        default:
+                          return 'Language';
+                      }
+                    })()}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={[
+                  styles.containerBody,
+                  {
+                    paddingBottom: Math.max(inset.bottom, 20) + 30,
+                  },
+                ]}
+              >
+                <Text
+                  style={styles.mainTitle}
+                  onPress={() => {
+                    showSuccessToast(`${Config.BASE_URL}`);
+                    console.log(`${Config.BASE_URL}`);
+                  }}
+                >
+                  {t('sign_in')}
+                </Text>
+                <Text style={styles.subtitle}>
+                  {t('please_enter_your_credential')}
+                </Text>
+
+                <View style={styles.phoneInputGroup}>
+                  <TouchableOpacity
+                    style={styles.countryCodeButton}
+                    onPress={() => setCountryModalVisible(true)}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="Select country code"
+                  >
+                    <Text style={styles.flagText}>
+                      {selectedCountry?.flag || '🇮🇳'}
+                    </Text>
+                    <Text style={styles.dialCodeText}>
+                      {selectedCountry?.callingCode || '+91'}
+                    </Text>
+                    <Icon
+                      name="arrow-drop-down"
+                      color={COLORS.primaryTextDark}
+                      size={18}
+                    />
+                  </TouchableOpacity>
+                  <CustomTextInput
+                    label=""
+                    value={phoneNumber}
+                    onChangeText={handlePhoneChange}
+                    placeholder={t('enter_mobile_number')}
+                    keyboardType="phone-pad"
+                    error={errors?.phoneNumber}
+                    style={{ width: '65%' }}
+                  />
+                </View>
+
+                <CountrySelect
+                  visible={countryModalVisible}
+                  onClose={() => setCountryModalVisible(false)}
+                  onSelect={(country: any) => {
+                    console.log('Selected country:', country);
+                    const correctCallingCode =
+                      COUNTRY_CALLING_CODES[country.cca2] ||
+                      (Array.isArray(country.callingCode)
+                        ? country.callingCode[0]
+                        : country.callingCode || country.dialCode || '+91');
+                    setSelectedCountry({
+                      name: country.name || {
+                        common: country.name || 'Unknown',
+                      },
+                      flag: country.flag,
+                      callingCode: correctCallingCode,
+                      cca2: country.cca2 || 'IN',
+                    });
+                    setCountryModalVisible(false);
+                  }}
+                  initialCountry={selectedCountry?.cca2 || DEFAULT_COUNTRY_ISO}
+                />
+
+                <View style={styles.termsRow}>
+                  <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => setIsAgreed(!isAgreed)}
+                    activeOpacity={0.7}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isAgreed }}
+                    accessibilityLabel="Agree to terms"
+                  >
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isAgreed && styles.checkboxChecked,
+                      ]}
+                    >
+                      {isAgreed && (
+                        <Icon
+                          name="check"
+                          size={moderateScale(16)}
+                          color="#fff"
+                          style={styles.checkboxIcon}
+                        />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                  <Text style={styles.termsText}>
+                    {t('i_agree_to') || 'I agree to the '}
+                    <Text
+                      style={styles.termsLink}
+                      onPress={() => handleOpenPolicy('terms')}
+                    >
+                      {t('terms_and_conditions') || 'Terms & Conditions'}
+                    </Text>
+                    {', '}
+                    <Text
+                      style={styles.termsLink}
+                      onPress={() => handleOpenPolicy('user')}
+                    >
+                      {t('user_agreement') || 'User Agreement'}
+                    </Text>
+                    {' & '}
+                    <Text
+                      style={styles.termsLink}
+                      onPress={() => handleOpenPolicy('refund')}
+                    >
+                      {t('refund_policy') || 'Refund Policy'}
+                    </Text>
+                  </Text>
+                </View>
+
+                <PrimaryButton
+                  onPress={handleSignIn}
+                  title={t('send_otp')}
+                  disabled={!isAgreed}
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        <Modal
+          visible={showLangModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowLangModal(false)}
+        >
+          <View style={styles.langModalOverlay}>
+            <View style={styles.langModalCard}>
+              <Text style={styles.langModalTitle}>
+                {t('language') || 'Language'}
+              </Text>
+              <View style={styles.langPickerContainer}>
+                <Picker
+                  selectedValue={selectedLang}
+                  onValueChange={v => setSelectedLang(v)}
+                  mode="dropdown"
+                  style={[
+                    styles.langPicker,
+                    Platform.OS === 'ios'.toString() && {
+                      color: pickerTextColor,
+                    },
+                  ]}
+                  itemStyle={
+                    Platform.OS === 'ios'.toString()
+                      ? getIosPickerItemStyle()
+                      : undefined
+                  }
+                >
+                  <Picker.Item
+                    label="English"
+                    value="en"
+                    color={
+                      Platform.OS === 'ios'.toString()
+                        ? undefined
+                        : pickerTextColor
+                    }
+                    style={
+                      colorScheme === 'dark'
+                        ? { backgroundColor: COLORS.white }
+                        : undefined
+                    }
+                  />
+                  <Picker.Item
+                    label="हिन्दी"
+                    value="hi"
+                    color={
+                      Platform.OS === 'ios'.toString()
+                        ? undefined
+                        : pickerTextColor
+                    }
+                    style={
+                      colorScheme === 'dark'
+                        ? { backgroundColor: COLORS.white }
+                        : undefined
+                    }
+                  />
+                  <Picker.Item
+                    label="ગુજરાતી"
+                    value="gu"
+                    color={
+                      Platform.OS === 'ios'.toString()
+                        ? undefined
+                        : pickerTextColor
+                    }
+                    style={
+                      colorScheme === 'dark'
+                        ? { backgroundColor: COLORS.white }
+                        : undefined
+                    }
+                  />
+                  <Picker.Item
+                    label="मराठी"
+                    value="mr"
+                    color={
+                      Platform.OS === 'ios'.toString()
+                        ? undefined
+                        : pickerTextColor
+                    }
+                    style={
+                      colorScheme === 'dark'
+                        ? { backgroundColor: COLORS.white }
+                        : undefined
+                    }
+                  />
+                </Picker>
+              </View>
+              <View style={{ height: 12 }} />
+              <PrimaryButton
+                title={t('continue') || 'Continue'}
+                onPress={handleChangeLanguage}
+              />
+            </View>
+          </View>
+        </Modal>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
