@@ -1,8 +1,31 @@
-import { Platform, Alert } from 'react-native';
+import { Platform, Alert, PermissionsAndroid } from 'react-native';
 import messaging, {
   AuthorizationStatus,
 } from '@react-native-firebase/messaging';
 import { checkNotifications } from 'react-native-permissions';
+
+export const requestPermissions = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      ]);
+
+      const cameraGranted = granted['android.permission.CAMERA'] === 'granted';
+      const audioGranted = granted['android.permission.RECORD_AUDIO'] === 'granted';
+
+      if (!cameraGranted || !audioGranted) {
+        Alert.alert('Permissions required', 'Camera and microphone are required for video calls.');
+        return false;
+      }
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  }
+  return true;
+};
 
 export async function requestUserPermission(): Promise<boolean> {
   console.log('Requesting permission...');

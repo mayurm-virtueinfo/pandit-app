@@ -7,7 +7,6 @@ import {
   ScrollView,
   Alert,
   Text,
-  SafeAreaView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { moderateScale } from 'react-native-size-matters';
@@ -29,11 +28,13 @@ import {
   KeyboardProvider,
   KeyboardStickyView,
 } from 'react-native-keyboard-controller';
+import { requestPermissions } from '../../configuration/notificationPermission';
 
 export interface Message {
   id: string;
   text: string;
   time: string;
+  date: string; // NEW FIELD: formatted date of the message
   isOwn: boolean;
 }
 
@@ -102,6 +103,15 @@ const ChatScreen: React.FC = () => {
     fetchToken();
   }, []);
 
+  // Helper to format date for each message
+  const formatMessageDate = (date: Date) => {
+    // Return something like '2024-04-17'
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}-${String(date.getDate()).padStart(2, '0')}`;
+  };
+
   // Fetch chat history only once on mount
   const fetchChatHistory = useCallback(async () => {
     if (!booking_id || !panditID) return;
@@ -111,15 +121,19 @@ const ChatScreen: React.FC = () => {
       const resp: any = await getMessageHistory(booking_id);
       console.log('resp', resp);
       if (resp && Array.isArray(resp)) {
-        const normalized = resp.map((msg: any) => ({
-          id: msg.uuid,
-          text: msg.content || msg.message,
-          time: new Date(msg.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          isOwn: String(msg.sender) === String(panditID),
-        }));
+        const normalized = resp.map((msg: any) => {
+          const msgDateObj = new Date(msg.timestamp);
+          return {
+            id: msg.uuid,
+            text: msg.content || msg.message,
+            time: msgDateObj.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            date: formatMessageDate(msgDateObj), // include formatted date
+            isOwn: String(msg.sender) === String(panditID),
+          };
+        });
         setMessages(normalized);
         isUserAtBottom.current = true;
       }
@@ -218,13 +232,15 @@ const ChatScreen: React.FC = () => {
 
       // Only add messages from others (own messages already added optimistically)
       if (!isOwn) {
+        const msgDateObj = new Date(data.timestamp);
         const newMsg: Message = {
           id: data.uuid,
           text: data.message,
-          time: new Date(data.timestamp).toLocaleTimeString([], {
+          time: msgDateObj.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
           }),
+          date: formatMessageDate(msgDateObj), // include formatted date
           isOwn: false,
         };
 
@@ -323,6 +339,7 @@ const ChatScreen: React.FC = () => {
         hour: '2-digit',
         minute: '2-digit',
       }),
+      date: formatMessageDate(timestamp), // include formatted date
       isOwn: true,
     };
 
@@ -370,7 +387,9 @@ const ChatScreen: React.FC = () => {
     }
   }, [videocall]);
 
-  const handleVideoCall = () => {
+  const handleVideoCall = async () => {
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
     if (!booking_id) {
       Alert.alert('Error', 'No booking ID available for video call.');
       return;
@@ -417,8 +436,11 @@ const ChatScreen: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
-  const handleMeetingURL = () => {
+  const handleMeetingURL = async () => {
     if (!incomingMeetingUrl) return;
+
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
     let url = incomingMeetingUrl.endsWith('/')
       ? incomingMeetingUrl.slice(0, -1)
       : incomingMeetingUrl;
@@ -489,35 +511,56 @@ const ChatScreen: React.FC = () => {
             room={roomName || 'defaultRoom'}
             serverURL={serverUrl}
             token={meetingToken || undefined}
+            disableScreenSharing={true}
+            disableInviteFunctions={true}
             config={{
-              hideConferenceTimer: true,
-              whiteboard: {
-                enabled: true,
-                collabServerBaseUrl: serverUrl,
-              },
-              analytics: { disabled: true },
-              prejoinPageEnabled: false,
-              prejoinConfig: { enabled: false },
-              requireDisplayName: false,
               startWithAudioMuted: false,
               startWithVideoMuted: false,
+              disableAudioLevels: true,
+              hideConferenceTimer: true,
+              prejoinPageEnabled: false,
+              requireDisplayName: false,
+              // Critical for mute/unmute to work
+              subject: ' ',
+              // Enable toolboxes
+              toolbarButtons: [
+                'microphone',
+                'camera',
+                'hangup',
+                'tileview',
+                'fullscreen',
+              ],
             }}
-            eventListeners={eventListeners as any}
             flags={{
-              'audioMute.enabled': true,
-              'ios.screensharing.enabled': true,
-              'fullscreen.enabled': false,
-              'audioOnly.enabled': false,
-              'android.screensharing.enabled': true,
+              // These are CRITICAL for mute/unmute & camera toggle to work
+              'audio-mute.enabled': true,
+              'audio-unmute.enabled': true,
+              'video-mute.enabled': true,
+              'video-unmute.enabled': true,
+
+              'fullscreen.enabled': true,
+              'toolbox.enabled': true,
+              'microphone.enabled': true,
+              'camera.enabled': true,
+              'chat.enabled': false,
+              'invite.enabled': false,
+              'kick-out.enabled': false,
+              'live-streaming.enabled': false,
+              'recording.enabled': false,
+              'raise-hand.enabled': true,
+              'tile-view.enabled': true,
               'pip.enabled': true,
               'pip-while-screen-sharing.enabled': true,
-              'conference-timer.enabled': true,
-              'close-captions.enabled': false,
-              'toolbox.enabled': true,
-              'chat.enabled': false,
-              'prejoin.enabled': false,
+              'security.enabled': false,
+              'settings.enabled': false,
             }}
+            eventListeners={eventListeners as any}
             style={styles.jitsiFullScreenView}
+            // Add user info (required for proper identity)
+            userInfo={{
+              displayName: other_user_name || 'User',
+              email: '',
+            }}
           />
         ) : (
           <View style={styles.jitsiFullScreenView}>
@@ -532,7 +575,7 @@ const ChatScreen: React.FC = () => {
 
   return (
     <KeyboardProvider>
-      <SafeAreaView
+      <View
         style={{
           flex: 1,
           backgroundColor: COLORS.primaryBackground,
@@ -590,7 +633,7 @@ const ChatScreen: React.FC = () => {
             <ChatInput onSendMessage={handleSendMessage} />
           </KeyboardStickyView>
         </View>
-      </SafeAreaView>
+      </View>
     </KeyboardProvider>
   );
 };

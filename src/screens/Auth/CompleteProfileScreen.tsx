@@ -303,8 +303,8 @@ const CompleteProfileScreen: React.FC = () => {
       const year = selectedDate.getFullYear();
       const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const day = String(selectedDate.getDate()).padStart(2, '0');
-
-      const formatted = `${year}-${month}-${day}`; // 👈 yyyy-mm-dd format
+      // US/ISO format for storage and passing to API
+      const formatted = `${year}-${month}-${day}`;
       handleInputChange('dob', formatted);
     }
 
@@ -315,15 +315,30 @@ const CompleteProfileScreen: React.FC = () => {
 
   const closeDobPicker = () => setShowDobPicker(false);
 
+  // Show Indian format only in UI ("dd-mm-yyyy")
   const formatDob = (dateString: string) => {
     if (!dateString) return '';
-    return dateString; // Already yyyy-mm-dd
+    // Expecting dateString as yyyy-mm-dd
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`; // dd-mm-yyyy
+    }
+    return dateString;
   };
 
   const dobDateValue = (() => {
-    const parsed = new Date(formData.dob);
-    return isNaN(parsed.getTime()) ? new Date() : parsed;
+    // Expect yyyy-mm-dd
+    if (formData.dob) {
+      // Split manually to avoid timezone issues with Date("yyyy-mm-dd")
+      const [year, month, day] = formData.dob.split('-');
+      if (year && month && day) {
+        return new Date(Number(year), Number(month) - 1, Number(day));
+      }
+    }
+    return new Date();
   })();
+
+  // ======== END DOB FORMAT LOGIC ========
 
   const handlePhotoSelect = () => {
     Keyboard.dismiss();
@@ -419,7 +434,7 @@ const CompleteProfileScreen: React.FC = () => {
       caste: formData.caste,
       subCaste: formData.subCaste,
       gotra: formData.gotra,
-      dob: formData.dob,
+      dob: formData.dob, // Pass in yyyy-mm-dd (US) format!
       address: formData.address,
       profile_img: formData.profile_img,
     });

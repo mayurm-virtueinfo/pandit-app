@@ -99,8 +99,8 @@ android {
         applicationId "com.panditjiapp.pandit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 14
-        versionName "1.0.4"
+        versionCode 16
+        versionName "1.0.7"
         // resValue "string", "app_name", (project.hasProperty("env") && project.env.get("APP_NAME") ? project.env.get("APP_NAME") : "Pujaguru Vendor")
         resValue "string", "app_name", (project.env.get("APP_NAME") ?: "Pujaguru Vendor")
     }
