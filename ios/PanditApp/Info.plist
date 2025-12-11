@@ -50,6 +50,8 @@
 	<string>This is required to check Pandit availability and allow users to schedule appointments and save event dates directly to your calendar.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Pujaguru Vendor uses your camera to let you take and upload your profile photo for your vendor account.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need your location to provide continuous location-based services, even when the app is in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Pujaguru Vendor uses your location to help you set your service location accurately and connect with nearby customers who book pujas.</string>
 	<key>NSMicrophoneUsageDescription</key>

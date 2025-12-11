@@ -34,6 +34,7 @@ import DeviceInfo from 'react-native-device-info';
 import checkVersion from 'react-native-store-version';
 import { SessionProvider } from './src/provider/SessionProvider';
 import { NetworkProvider } from './src/provider/NetworkProvider';
+import { LocationProvider } from './src/context/LocationContext';
 import Config from 'react-native-config';
 import WebSocketWrapper from './src/components/WebSocketWrapper';
 
@@ -45,7 +46,7 @@ LogBox.ignoreLogs([
 const auth = getAuth();
 if (__DEV__) {
   // auth.useEmulator('http://127.0.0.1:9099');
-  auth.useEmulator('http://192.168.1.8:9099');
+  auth.useEmulator('http://192.168.1.9:9099');
 }
 setupNotifications();
 
@@ -181,16 +182,18 @@ const App = () => {
         >
           <AuthProvider>
             <SessionProvider>
-              <WebSocketWrapper>
-                <NavigationContainer
-                  ref={navigationRef}
-                  onReady={() => {
-                    handleInitialNotification();
-                  }}
-                >
-                  <RootNavigator />
-                </NavigationContainer>
-              </WebSocketWrapper>
+              <LocationProvider>
+                <WebSocketWrapper>
+                  <NavigationContainer
+                    ref={navigationRef}
+                    onReady={() => {
+                      handleInitialNotification();
+                    }}
+                  >
+                    <RootNavigator />
+                  </NavigationContainer>
+                </WebSocketWrapper>
+              </LocationProvider>
             </SessionProvider>
           </AuthProvider>
         </ToastProvider>

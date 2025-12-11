@@ -6,16 +6,19 @@ import ApiEndpoints, {
   DELETEACCOUNT,
   GET_AREA,
   GET_BOOKING_AUTO_DETAILS,
+  GET_CALENDAR_GRID,
   GET_CASTE,
   GET_CITY,
   GET_COMPLETED_PUA,
   GET_COMPLETED_PUJA,
   GET_COMPLETED_PUJA_DETAILS,
+  GET_DAY_DETAILS,
   GET_EDIT_PUJA,
   GET_GOTRA,
   GET_IN_PROGRESS_PUJA,
   GET_LANGUAGES,
   GET_MESSAGE_HISTORY,
+  GET_MUHRAT,
   GET_PANDING_PUJA,
   GET_PANDIT_PROFILE,
   GET_PAST_BOOKINGS,
@@ -335,6 +338,48 @@ export interface ReviewImageUpload {
       name: string;
     };
   };
+}
+
+export interface CalendarDay {
+  date: string;
+  day_of_week: string;
+  astronomy: {
+    sunrise: string;
+    sunset: string;
+    moonrise: string;
+    moonset: string;
+    moon_phase: number;
+    sun_longitude: number;
+    moon_longitude: number;
+  };
+  gujarati: {
+    month_name: string;
+    month_index: number;
+    paksha: string;
+    vikram_samvat: number;
+    display_text: string;
+    is_adhik: boolean;
+  };
+  panchang?: {
+    nakshatra: {
+      name: string;
+      end_time: string;
+    };
+    yoga: {
+      name: string;
+      end_time: string;
+    };
+    karana: {
+      name: string;
+      end_time: string;
+    };
+    tithi: {
+      name: string;
+      end_time: string;
+    };
+    paksha: string;
+  };
+  festivals?: string[];
 }
 
 // export const apiService = {
@@ -1381,6 +1426,87 @@ export const postWithDrawalRequest = (
       })
       .catch(error => {
         console.error('Error post withdrawal api :: ', error.response.data);
+        reject(error);
+      });
+  });
+};
+
+export const getPanchangCalendarGrid = (
+  month: number,
+  year: number,
+  latitude: number,
+  longitude: number,
+): Promise<CalendarDay[]> => {
+  const apiUrl = GET_CALENDAR_GRID.replace('{month}', month.toString())
+    .replace('{year}', year.toString())
+    .replace('{latitude}', latitude.toString())
+    .replace('{longitude}', longitude.toString());
+  console.log('getPanchangCalendarGrid URL:', apiUrl);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        if (response.data && response.data.data) {
+          resolve(response.data.data as CalendarDay[]);
+        } else {
+          resolve([]);
+        }
+      })
+      .catch(error => {
+        console.error(
+          'Error fetching panchang calendar grid:',
+          error?.response?.data || error,
+        );
+        reject(error);
+      });
+  });
+};
+
+export const getPanchangDayDetails = (
+  date: string,
+  latitude: number,
+  longitude: number,
+): Promise<CalendarDay> => {
+  const apiUrl = GET_DAY_DETAILS.replace('{date}', date)
+    .replace('{latitude}', latitude.toString())
+    .replace('{longitude}', longitude.toString());
+  console.log('getPanchangDayDetails URL:', apiUrl);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        if (response.data && response.data.data) {
+          resolve(response.data.data as CalendarDay);
+        } else {
+          reject('No data found');
+        }
+      })
+      .catch(error => {
+        console.error(
+          'Error fetching panchang day details:',
+          error?.response?.data || error,
+        );
+        reject(error);
+      });
+  });
+};
+
+export const getMuhrat = (
+  date: string,
+  latitude: string,
+  longitude: string,
+): Promise<any> => {
+  const apiUrl = GET_MUHRAT.replace('{date}', date)
+    .replace('{latitude}', latitude)
+    .replace('{longitude}', longitude);
+  return new Promise((resolve, reject) => {
+    apiDev
+      .get(apiUrl)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching muhrat:', error);
         reject(error);
       });
   });

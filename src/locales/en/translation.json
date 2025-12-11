@@ -444,5 +444,10 @@
   "pending_approval": "Pending Approval",
   "ok": "OK",
   "update_puja": "Update Puja",
-  "date_of_birth": "Date of Birth"
+  "date_of_birth": "Date of Birth",
+  "panchang": "Panchang",
+  "location_required": "Location Required",
+  "location_permission_desc": "We need your location to verify precise Panchang details, including local sunrise, sunset updates, and muhurats accurate to your city.",
+  "open_settings": "Open Settings",
+  "allow_access": "Allow Access"
 }

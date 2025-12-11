@@ -1,6 +1,6 @@
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {COLORS} from '../theme/theme';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { COLORS } from '../theme/theme';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -9,11 +9,13 @@ import HomeNavigator from './HomeStack/HomeStack';
 import PujaListNavigator from './PujaListStack/PujaListStack';
 import ProfileNavigator from './ProfileStack/ProfileStack';
 import SettingsNavigator from './SettingsStack/SettingsStack';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import PanchangNavigator from './PanchangStack/PanchangStack';
 
 export type AppBottomTabParamList = {
   HomeNavigator: undefined;
   PujaListNavigator: undefined;
+  PanchangNavigator: undefined;
   SettingsNavigator: undefined;
   ProfileNavigator: undefined;
 };
@@ -21,7 +23,7 @@ export type AppBottomTabParamList = {
 const Tab = createBottomTabNavigator<AppBottomTabParamList>();
 
 const AppBottomTabNavigator: React.FC = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -32,14 +34,15 @@ const AppBottomTabNavigator: React.FC = () => {
         headerTintColor: COLORS.white,
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: 'gray',
-      }}>
+      }}
+    >
       <Tab.Screen
         name="HomeNavigator"
         component={HomeNavigator}
-        options={({route}) => ({
+        options={({ route }) => ({
           title: t('home'),
           // headerTitle: getHeaderTitle(route), // dynamic title in screen header
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <Octicons name="home" size={size} color={color} />
           ),
         })}
@@ -49,8 +52,18 @@ const AppBottomTabNavigator: React.FC = () => {
         component={PujaListNavigator}
         options={{
           title: t('pooja_list'),
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <FontAwesome name="institution" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="PanchangNavigator"
+        component={PanchangNavigator}
+        options={{
+          title: t('panchang'),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" size={size} color={color} />
           ),
         }}
       />
@@ -59,7 +72,7 @@ const AppBottomTabNavigator: React.FC = () => {
         component={SettingsNavigator}
         options={{
           title: t('settings'),
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),
         }}
@@ -69,7 +82,7 @@ const AppBottomTabNavigator: React.FC = () => {
         component={ProfileNavigator}
         options={{
           title: t('profile'),
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="person-outline" size={size} color={color} />
           ),
         }}

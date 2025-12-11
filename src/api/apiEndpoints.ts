@@ -86,3 +86,9 @@ export const GET_COMPLETED_PUJA = '/panditji/completed-poojas-list/';
 export const GET_COMPLETED_PUJA_DETAILS =
   '/panditji/completed-pooja-detail/?booking_id={id}';
 export const POST_WITHDRAWAL_REQUEST = '/panditji/wallet/withdraw/';
+export const GET_CALENDAR_GRID =
+  '/app/panchang/calendar-grid/?month={month}&year={year}&lat={latitude}&lon={longitude}';
+export const GET_DAY_DETAILS =
+  '/app/panchang/day-details/?date={date}&lat={latitude}&lon={longitude}';
+export const GET_MUHRAT =
+  '/app/choghadiya?date={date}&latitude={latitude}&longitude={longitude}';

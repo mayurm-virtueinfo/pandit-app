@@ -77,6 +77,12 @@ export const COLORS = {
   disabled: '#EAEAEA',
   lighttext: '#6C7278',
   searchbartext: '#BAB8B8',
+  // Choghadiya Colors
+  choghadiya: {
+    good: { bg: '#F1F8E9', text: '#7CB342' }, // Olive Green
+    bad: { bg: '#FBE9E7', text: '#D84315' }, // Burnt Orange
+    normal: { bg: '#E3F2FD', text: '#1565C0' }, // Blue
+  },
 };
 
 // Typography
