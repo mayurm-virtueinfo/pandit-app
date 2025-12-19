@@ -114,7 +114,7 @@ export const getCurrentLocation = (
         // If suppressed, just reject immediately without alert
         if (finalConfig.suppressPermissionAlert) {
           // Pass the specific status code in the error for the caller to handle
-          const errorCode = status === 'blocked' ? 2 : 1; // 2 for blocked/permanent
+          const errorCode = status === 'blocked' ? 4 : 1; // 4 for blocked/permanent
           reject(
             new LocationError(`Location permission ${status}.`, errorCode),
           );

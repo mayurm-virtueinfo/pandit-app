@@ -36,12 +36,14 @@ import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import ImagePicker from 'react-native-image-crop-picker';
 import Feather from 'react-native-vector-icons/Feather';
 import { DropdownResponse } from '../Auth/type';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface FormData {
   phoneNumber: string;
   email: string;
   firstName: string;
   lastName: string;
+  dob: string;
   city: string;
   caste: string;
   subCaste: string;
@@ -70,6 +72,7 @@ const EditProfileScreen: React.FC = () => {
     email: '',
     firstName: '',
     lastName: '',
+    dob: '',
     city: '',
     caste: '',
     subCaste: '',
@@ -88,6 +91,7 @@ const EditProfileScreen: React.FC = () => {
 
   console.log('formData', formData);
   const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [showDobPicker, setShowDobPicker] = useState(false);
   const [cityData, setCityData] = useState<any[]>([]);
   const [casteData, setCasteData] = useState<any[]>([]);
   const [subCasteData, setSubCasteData] = useState<any[]>([]);
@@ -184,6 +188,7 @@ const EditProfileScreen: React.FC = () => {
           email: data.email || '',
           firstName: data.first_name || '',
           lastName: data.last_name || '',
+          dob: data.dob || '',
           city: cityValue,
           caste: casteValue,
           subCaste: subCasteValue,
@@ -348,6 +353,9 @@ const EditProfileScreen: React.FC = () => {
     if (field === 'lastName') {
       if (!value) return 'last name is required';
     }
+    if (field === 'dob') {
+      if (!value) return 'date of birth is required';
+    }
     if (field === 'city') {
       if (!value) return 'city is required';
     }
@@ -374,6 +382,46 @@ const EditProfileScreen: React.FC = () => {
       setIsImageChanged(true);
     }
   };
+
+  const handleDobChange = (_event: any, selectedDate?: Date) => {
+    if (selectedDate) {
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      // US/ISO format for storage and passing to API
+      const formatted = `${year}-${month}-${day}`;
+      handleInputChange('dob', formatted);
+    }
+
+    if (Platform.OS === 'android') {
+      setShowDobPicker(false);
+    }
+  };
+
+  const closeDobPicker = () => setShowDobPicker(false);
+
+  // Show Indian format only in UI ("dd-mm-yyyy")
+  const formatDob = (dateString: string) => {
+    if (!dateString) return '';
+    // Expecting dateString as yyyy-mm-dd
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`; // dd-mm-yyyy
+    }
+    return dateString;
+  };
+
+  const dobDateValue = (() => {
+    // Expect yyyy-mm-dd
+    if (formData.dob) {
+      // Split manually to avoid timezone issues with Date("yyyy-mm-dd")
+      const [year, month, day] = formData.dob.split('-');
+      if (year && month && day) {
+        return new Date(Number(year), Number(month) - 1, Number(day));
+      }
+    }
+    return new Date();
+  })();
 
   // Fixed photo selection logic: set profile_img, not photoUri
   const handlePhotoSelect = () => {
@@ -488,6 +536,7 @@ const EditProfileScreen: React.FC = () => {
         payload = new FormData();
         payload.append('first_name', formData.firstName);
         payload.append('last_name', formData.lastName);
+        payload.append('dob', formData.dob);
         payload.append('address.city', cityNum);
         payload.append('caste', casteNum);
         payload.append('sub_caste', subCasteNum);
@@ -503,6 +552,7 @@ const EditProfileScreen: React.FC = () => {
         payload = {
           first_name: formData.firstName,
           last_name: formData.lastName,
+          dob: formData.dob,
           address: {
             city: cityNum,
             address_line1: formData.address,
@@ -634,6 +684,37 @@ const EditProfileScreen: React.FC = () => {
                   error={errors.lastName}
                   onFocus={() => handleInputFocus(250)}
                 />
+                <View>
+                  <Text style={styles.dateLabel}>
+                    {t('date_of_birth') || 'Date of Birth'}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      setShowDobPicker(true);
+                    }}
+                    activeOpacity={0.8}
+                    style={[
+                      styles.datePickerField,
+                      errors.dob ? styles.datePickerFieldError : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.dateValue,
+                        !formData.dob ? styles.placeholderText : null,
+                      ]}
+                    >
+                      {formData.dob
+                        ? formatDob(formData.dob)
+                        : t('select_date') || 'Select Date'}
+                    </Text>
+                    <Feather name="calendar" size={20} color={COLORS.lighttext} />
+                  </TouchableOpacity>
+                  {!!errors.dob && (
+                    <Text style={styles.errorText}>{errors.dob}</Text>
+                  )}
+                </View>
                 <CustomDropdown
                   label={t('city')}
                   items={cityData}
@@ -695,6 +776,31 @@ const EditProfileScreen: React.FC = () => {
           </View>
         </KeyboardAvoidingView>
       </View>
+      {showDobPicker &&
+        (Platform.OS === 'ios' ? (
+          <View style={styles.iosPickerWrapper}>
+            <View style={styles.iosPickerToolbar}>
+              <TouchableOpacity onPress={closeDobPicker}>
+                <Text style={styles.doneText}>{t('done') || 'Done'}</Text>
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              value={dobDateValue}
+              mode="date"
+              maximumDate={new Date()}
+              onChange={handleDobChange}
+              display="inline"
+              themeVariant="light"
+            />
+          </View>
+        ) : (
+          <DateTimePicker
+            value={dobDateValue}
+            mode="date"
+            maximumDate={new Date()}
+            onChange={handleDobChange}
+          />
+        ))}
     </View>
   );
 };
@@ -790,6 +896,71 @@ const styles = StyleSheet.create({
   },
   disabledInput: {
     backgroundColor: COLORS.lightGray,
+  },
+  dateLabel: {
+    fontSize: 14,
+    color: COLORS.lighttext,
+    marginBottom: 6,
+    fontFamily: Fonts.Sen_Medium,
+  },
+  datePickerField: {
+    borderWidth: 1,
+    borderColor: COLORS.border || '#ddd',
+    borderRadius: moderateScale(12),
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: COLORS.white,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  datePickerFieldError: {
+    borderColor: COLORS.error || '#FF5D5D',
+  },
+  dateValue: {
+    fontSize: 16,
+    color: COLORS.textPrimary,
+    fontFamily: Fonts.Sen_Regular,
+  },
+  placeholderText: {
+    color: COLORS.lighttext,
+  },
+  errorText: {
+    color: COLORS.error || '#FF5D5D',
+    fontSize: 12,
+    marginTop: 4,
+    fontFamily: Fonts.Sen_Regular,
+  },
+  iosPickerWrapper: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: moderateScale(16),
+    borderTopRightRadius: moderateScale(16),
+    borderTopWidth: 1,
+    borderColor: COLORS.border || '#ddd',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    alignItems: 'center', // Center the picker
+    paddingBottom: 20, // Add some bottom padding
+  },
+  iosPickerToolbar: {
+    width: '100%', // Ensure toolbar takes full width
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderColor: COLORS.border || '#ddd',
+    alignItems: 'flex-end',
+  },
+  doneText: {
+    fontSize: 16,
+    color: COLORS.primary,
+    fontFamily: Fonts.Sen_SemiBold,
+  },
+  iosPicker: {
+    // width: '100%', // Remove width 100% to let it size naturally or center it
+    marginTop: 10,
   },
 });
 

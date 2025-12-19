@@ -33,12 +33,14 @@ import Fonts from '../../theme/fonts';
 import { useLocation } from '../../context/LocationContext';
 import { getCityName } from '../../utils/LocationUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { translateData, translateText } from '../../utils/TranslateData';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CELL_MARGIN = 4;
 const CELL_WIDTH = (SCREEN_WIDTH - CELL_MARGIN * 14 - 16) / 7;
 
 const CalendarScreen = () => {
+  const translationCacheRef = React.useRef(new Map());
   const {
     location,
     isLoading: isLocationLoading,
@@ -58,20 +60,23 @@ const CalendarScreen = () => {
   const [cityName, setCityName] = useState<string | null>(null);
 
   const inset = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Fetch city name when location changes
   useEffect(() => {
     const fetchCity = async () => {
       if (location) {
-        const city = await getCityName(location.lat, location.lon);
+        let city = await getCityName(location.lat, location.lon);
         if (city) {
+          if (i18n.language !== 'en') {
+            city = await translateText(city, i18n.language);
+          }
           setCityName(city);
         }
       }
     };
     fetchCity();
-  }, [location]);
+  }, [location, i18n.language]);
 
   // Fetch calendar when location or month changes
   const fetchCalendar = useCallback(async () => {
@@ -105,7 +110,7 @@ const CalendarScreen = () => {
           const todayStr = `${today.getFullYear()}-${String(
             today.getMonth() + 1,
           ).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-          const todayItem = data.find(item => item && item.date === todayStr);
+          const todayItem = data.find((item: any) => item && item.date === todayStr);
           if (todayItem) {
             handleDateSelect(todayItem);
           } else if (!selectedDate) {
@@ -120,6 +125,12 @@ const CalendarScreen = () => {
       setLoadingCalendar(false);
     }
   }, [currentMonth, currentYear, location]);
+
+  // Clear cache when language changes
+  useEffect(() => {
+     translationCacheRef.current.clear();
+     // Re-fetch data will be handled by dependencies in other effects
+  }, [i18n.language]);
 
   // Reset selection on month/location change
   useEffect(() => {
@@ -148,29 +159,76 @@ const CalendarScreen = () => {
         ]);
 
         if (details) {
-          setSelectedDate(details);
+          let translatedDetails = { ...details };
+          
+          // Translate nested panchang fields
+          if (translatedDetails.panchang) {
+            const nestedFields = ['tithi', 'nakshatra', 'yoga', 'karana'];
+            for (const field of nestedFields) {
+              // @ts-ignore
+              if (translatedDetails.panchang[field]) {
+                // @ts-ignore
+                translatedDetails.panchang[field] = (await translateData(
+                  // @ts-ignore
+                  translatedDetails.panchang[field],
+                  i18n.language,
+                  ['name']
+                )) as any;
+              }
+            }
+            // Translate paksha
+            translatedDetails.panchang = (await translateData(
+              translatedDetails.panchang as any,
+              i18n.language,
+              ['paksha']
+            )) as any;
+          }
+
+          // Translate gujarati display_text
+          if (translatedDetails.gujarati) {
+            translatedDetails.gujarati = (await translateData(
+              translatedDetails.gujarati as any,
+              i18n.language,
+              ['display_text']
+            )) as any;
+          }
+          
+          setSelectedDate(translatedDetails);
         }
 
+        let choghadiya = [];
         if (muhratResponse && Array.isArray(muhratResponse.choghadiya)) {
-          setChoghadiyaData(muhratResponse.choghadiya);
+          choghadiya = muhratResponse.choghadiya;
         } else if (
           muhratResponse &&
           Array.isArray(muhratResponse.data?.choghadiya)
         ) {
-          setChoghadiyaData(muhratResponse.data.choghadiya);
+          choghadiya = muhratResponse.data.choghadiya;
         } else if (Array.isArray(muhratResponse)) {
-          setChoghadiyaData(muhratResponse);
+          choghadiya = muhratResponse;
         } else {
           console.log('Unexpected Choghadiya response:', muhratResponse);
+          choghadiya = [];
+        }
+
+        if (choghadiya.length > 0) {
+          const translatedChoghadiya = (await translateData(
+            choghadiya,
+            i18n.language,
+            ['type']
+          )) as any[];
+          setChoghadiyaData(translatedChoghadiya);
+        } else {
           setChoghadiyaData([]);
         }
+
       } catch (error) {
         console.error('Error fetching day details:', error);
       } finally {
         setDetailsLoading(false);
       }
     },
-    [location],
+    [location, i18n.language],
   );
 
   const changeMonth = useCallback(
@@ -205,6 +263,13 @@ const CalendarScreen = () => {
       }),
   );
 
+  // Refresh selected date details when language changes
+  useEffect(() => {
+    if (selectedDate) {
+      handleDateSelect(selectedDate);
+    }
+  }, [handleDateSelect]);
+
   const renderHeader = () => {
     let displayMonthName = '';
     let displayYear = currentYear;
@@ -213,7 +278,7 @@ const CalendarScreen = () => {
 
     if (selectedDate) {
       const d = new Date(selectedDate.date);
-      displayMonthName = d.toLocaleString('default', { month: 'long' });
+      displayMonthName = d.toLocaleString(i18n.language, { month: 'long' });
       displayYear = d.getFullYear();
       displayGujMonth = selectedDate.gujarati.month_name;
       displayVikramSamvat = selectedDate.gujarati.vikram_samvat;
@@ -224,7 +289,7 @@ const CalendarScreen = () => {
         displayVikramSamvat = validDay.gujarati.vikram_samvat;
       }
       displayMonthName = new Date(currentYear, currentMonth - 1).toLocaleString(
-        'default',
+        i18n.language,
         { month: 'long' },
       );
     }
@@ -248,7 +313,7 @@ const CalendarScreen = () => {
               {displayMonthName} {displayYear}
             </Text>
             <Text style={styles.headerSubtitle}>
-              {displayGujMonth} - Vikram Samvat {displayVikramSamvat}
+              {displayGujMonth} - {t('vikram_samvat')} {displayVikramSamvat}
             </Text>
           </View>
 
@@ -293,7 +358,15 @@ const CalendarScreen = () => {
     );
   }, [selectedDate, choghadiyaData, cityName]);
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = (t('weekDays', { returnObjects: true }) as string[]) || [
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+  ];
 
   const renderScrollableHeader = () => (
     <View>

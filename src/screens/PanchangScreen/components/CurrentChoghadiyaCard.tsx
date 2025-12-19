@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS } from '../../../theme/theme';
+import { t } from 'i18next';
 
 interface CurrentChoghadiyaProps {
   choghadiyaData: any[]; // Replace 'any' with proper type if available
@@ -155,7 +156,7 @@ const CurrentChoghadiyaCard: React.FC<CurrentChoghadiyaProps> = ({
             numberOfLines={1}
             adjustsFontSizeToFit
           >
-            Current Choghadiya
+            {t('Choghadiya')}
           </Text>
         </View>
 
@@ -175,7 +176,7 @@ const CurrentChoghadiyaCard: React.FC<CurrentChoghadiyaProps> = ({
         </Text>
 
         <View style={styles.footerRow}>
-          <Text style={styles.timeLabel}>Remaining</Text>
+          <Text style={styles.timeLabel}>{t('remaining')}</Text>
           <Text style={styles.timerText}>{timeLeft}</Text>
         </View>
       </View>
@@ -190,7 +191,7 @@ const CurrentChoghadiyaCard: React.FC<CurrentChoghadiyaProps> = ({
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
-                Next Choghadiya
+                {t('next_choghadiya')}
               </Text>
             </View>
 
@@ -211,7 +212,7 @@ const CurrentChoghadiyaCard: React.FC<CurrentChoghadiyaProps> = ({
           </>
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No Next Choghadiya</Text>
+            <Text style={styles.emptyText}>{t('no_next_choghadiya')}</Text>
           </View>
         )}
       </View>
@@ -254,12 +255,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
-    flexWrap: 'wrap',
     gap: 6,
   },
   nameText: {
     fontSize: 20,
     fontWeight: '700',
+    flexShrink: 1,
   },
   badge: {
     paddingHorizontal: 8,

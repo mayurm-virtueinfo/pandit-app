@@ -66,15 +66,22 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
     } catch (error: any) {
       console.warn('LocationContext: Location access failed', error);
 
-      // Check for specific error code 2 from LocationUtils which means "blocked" or "never_ask_again"
-      if (error.code === 2) {
+      // Check for specific error code 4 from LocationUtils which means "blocked" or "never_ask_again"
+      if (error.code === 4) {
         setPermissionStatus('permanent_denial');
+        setLocation(null);
+      } else if (error.code === 1) {
+        setPermissionStatus('denied');
+        setLocation(null);
       } else if (retry) {
         // If it was a retry and still failed (and wasn't caught as blocked),
         // it is likely permanently denied or user keeps saying no
         setPermissionStatus('permanent_denial');
+        setLocation(null);
       } else {
-        setPermissionStatus('denied');
+        // For other errors (timeout, position unavailable), we assume permission is granted
+        // but location fetch failed. We don't want to show the "Allow Access" screen.
+        setPermissionStatus('granted');
       }
     } finally {
       setIsLoading(false);
@@ -91,13 +98,9 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
     const subscription = AppState.addEventListener(
       'change',
       (nextAppState: AppStateStatus) => {
-        if (
-          nextAppState === 'active' &&
-          (permissionStatus === 'denied' ||
-            permissionStatus === 'permanent_denial')
-        ) {
+        if (nextAppState === 'active') {
           console.log(
-            'LocationContext: App resumed, retrying location check...',
+            'LocationContext: App resumed, checking location permission...',
           );
           fetchLocation();
         }

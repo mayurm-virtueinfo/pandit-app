@@ -3,14 +3,15 @@ import {
   View,
   Text,
   StyleSheet,
-  Platform,
   TouchableOpacity,
   Modal,
+  FlatList,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import i18n, { setAppLanguage, getCurrentLanguage } from '../i18n';
-import { Picker } from '@react-native-picker/picker';
-import { COLORS } from '../theme/theme';
+import { setAppLanguage, getCurrentLanguage } from '../i18n';
+import { COLORS, THEMESHADOW } from '../theme/theme';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Fonts from '../theme/fonts';
 
 const LANGUAGES = [
   { label: 'English', value: 'en' },
@@ -24,181 +25,161 @@ export default function LanguageSwitcher() {
   const [selectedLang, setSelectedLang] = useState(getCurrentLanguage());
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Always use white bg and black text regardless of color mode
-  const textColor = COLORS.black;
-  const pickerIconColor = COLORS.lighttext; // could be COLORS.black if you want, but keeping neutral
-
-  const doneButtonBg = COLORS.white;
-  const doneButtonText = COLORS.black;
-
   const handleLanguageChange = async (lang: string) => {
     await setAppLanguage(lang);
     setSelectedLang(lang);
     setModalVisible(false);
   };
 
-  // Helper to get the label for the selected language
   const getSelectedLangLabel = () => {
     const found = LANGUAGES.find(l => l.value === selectedLang);
     return found ? found.label : 'English';
   };
 
-  if (Platform.OS === 'ios') {
+  const renderLanguageItem = ({ item }: { item: { label: string; value: string } }) => {
+    const isSelected = item.value === selectedLang;
     return (
-      <View style={styles.container}>
-        <Text style={[styles.title, { color: textColor }]}>
-          {t('language')}
-        </Text>
-        <TouchableOpacity
-          style={styles.iosPickerButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={[styles.iosPickerButtonText, { color: textColor }]}>
-            {getSelectedLangLabel()}
-          </Text>
-        </TouchableOpacity>
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPressOut={() => setModalVisible(false)}
-          >
-            <View style={styles.iosModalContent}>
-              <Picker
-                selectedValue={selectedLang}
-                onValueChange={itemValue => handleLanguageChange(itemValue)}
-                style={[styles.iosPicker, { backgroundColor: COLORS.white }]}
-                itemStyle={{ color: textColor, backgroundColor: COLORS.white }}
-                dropdownIconColor={pickerIconColor}
-              >
-                {LANGUAGES.map(lang => (
-                  <Picker.Item
-                    key={lang.value}
-                    label={lang.label}
-                    value={lang.value}
-                    color={textColor}
-                    style={{ backgroundColor: COLORS.white }}
-                  />
-                ))}
-              </Picker>
-              <TouchableOpacity
-                style={[
-                  styles.iosDoneButton,
-                  { backgroundColor: doneButtonBg },
-                ]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text
-                  style={[styles.iosDoneButtonText, { color: doneButtonText }]}
-                >
-                  Done
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      </View>
+      <TouchableOpacity
+        style={[styles.languageItem, isSelected && styles.languageItemSelected]}
+        onPress={() => handleLanguageChange(item.value)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.languageLabel}>{item.label}</Text>
+        <View style={[styles.radioButton, isSelected && styles.radioButtonSelected]}>
+          {isSelected && <Ionicons name="checkmark" size={14} color={COLORS.white} />}
+        </View>
+      </TouchableOpacity>
     );
-  }
+  };
 
-  // Android
   return (
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: textColor }]}>{t('language')}</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={selectedLang}
-          style={[
-            styles.picker,
-            { color: textColor, backgroundColor: COLORS.white },
-          ]}
-          onValueChange={itemValue => handleLanguageChange(itemValue)}
-          mode="dropdown"
-          dropdownIconColor={pickerIconColor}
+    <>
+      <TouchableOpacity
+        style={[styles.container,THEMESHADOW.shadow]}
+        onPress={() => setModalVisible(true)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.label}>{t('language')}</Text>
+        <View style={styles.valueContainer}>
+          <Text style={styles.value}>{getSelectedLangLabel()}</Text>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.primaryTextDark} />
+        </View>
+      </TouchableOpacity>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
         >
-          {LANGUAGES.map(lang => (
-            <Picker.Item
-              key={lang.value}
-              label={lang.label}
-              value={lang.value}
-              color={textColor}
-              style={{ backgroundColor: COLORS.white }}
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('select_language') || 'Select Language'}</Text>
+            <FlatList
+              data={LANGUAGES}
+              renderItem={renderLanguageItem}
+              keyExtractor={item => item.value}
+              contentContainerStyle={styles.listContainer}
             />
-          ))}
-        </Picker>
-      </View>
-    </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    paddingHorizontal: 20,
+  },
+  label: {
+    fontSize: 15,
+    fontFamily: Fonts.Sen_Medium,
+    color: COLORS.inputLabelText,
+  },
+  valueContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 14,
-    marginBottom: 12,
-    // color set dynamically
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: COLORS.lighttext,
-    borderRadius: 8,
-    overflow: 'hidden',
-    width: 180,
-    height: 44,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-  },
-  picker: {
-    width: '100%',
-    // color set dynamically
-  },
-  iosPickerButton: {
-    borderWidth: 1,
-    borderColor: COLORS.lighttext,
-    borderRadius: 8,
-    width: 180,
-    height: 44,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iosPickerButtonText: {
-    // color set dynamically
-    fontSize: 16,
+  value: {
+    fontSize: 15,
+    fontFamily: Fonts.Sen_Medium,
+    color: COLORS.textPrimary, // Or gray if preferred
+    marginRight: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  iosModalContent: {
+  modalContent: {
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingBottom: 24,
-    paddingTop: 12,
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 340,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: Fonts.Sen_Bold,
+    color: COLORS.black,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  listContainer: {
+    paddingHorizontal: 10,
+  },
+  languageItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    marginBottom: 10,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 10,
+  },
+  languageItemSelected: {
+    backgroundColor: '#FFF5F5',
+    borderColor: COLORS.primary,
+    borderWidth: 1,
+  },
+  languageLabel: {
+    fontSize: 16,
+    fontFamily: Fonts.Sen_Regular,
+    color: COLORS.black,
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  iosPicker: {
-    width: 250,
-    height: 180,
-    // backgroundColor will be set inline to ensure white for dark/light
-  },
-  iosDoneButton: {
-    marginTop: 10,
-    borderRadius: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-  },
-  iosDoneButtonText: {
-    fontSize: 16,
+  radioButtonSelected: {
+    backgroundColor: 'red', // Or COLORS.primary if it's red
+    borderColor: 'red',
   },
 });

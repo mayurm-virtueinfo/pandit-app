@@ -323,6 +323,7 @@ export interface putUpdateProfile {
   subCaste: string;
   gotra: string;
   address: string;
+  dob?: string;
   profile_img: {
     uri: string;
     type: string;
@@ -1202,10 +1203,10 @@ export const putUpdateProfile = (data: any): Promise<any> => {
   // Set headers for multipart/form-data if FormData is used
   const config: AxiosRequestConfig = isFormData
     ? {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
     : {};
 
   return new Promise((resolve, reject) => {
