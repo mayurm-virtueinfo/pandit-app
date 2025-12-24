@@ -465,15 +465,15 @@ const styles = StyleSheet.create({
     color: COLORS.inputLabelText,
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_Medium,
-    flex: 1,
     paddingVertical: 5,
+    // flex: 1,
   },
   fieldValue: {
     color: COLORS.textPrimary,
     fontSize: moderateScale(15),
     fontFamily: Fonts.Sen_Medium,
     textAlign: 'right',
-    flex: 2,
+    flex: 1,
   },
   editFieldContainer: {
     minHeight: 34,

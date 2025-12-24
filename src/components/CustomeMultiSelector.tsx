@@ -160,6 +160,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: moderateScale(14),
+    paddingVertical:
+      Platform.OS === 'ios' ? moderateScale(10) : moderateScale(4),
   },
   searchIcon: { marginRight: moderateScale(5) },
   searchInput: {

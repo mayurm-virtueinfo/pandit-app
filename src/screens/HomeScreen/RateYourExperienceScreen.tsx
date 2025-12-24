@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,15 +11,15 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import ImagePicker from 'react-native-image-crop-picker';
 
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useTranslation} from 'react-i18next';
-import {HomeStackParamList} from '../../navigation/HomeStack/HomeStack';
-import {COLORS} from '../../theme/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { HomeStackParamList } from '../../navigation/HomeStack/HomeStack';
+import { COLORS } from '../../theme/theme';
 import CustomHeader from '../../components/CustomHeader';
 import PrimaryButton from '../../components/PrimaryButton';
 import Fonts from '../../theme/fonts';
@@ -30,7 +30,7 @@ import {
   getCompletedPuja,
   postReviewImageUpload,
 } from '../../api/apiService';
-import {useCommonToast} from '../../common/CommonToast';
+import { useCommonToast } from '../../common/CommonToast';
 import CustomeLoader from '../../components/CustomLoader';
 
 const RateYourExperienceScreen: React.FC = () => {
@@ -45,11 +45,11 @@ const RateYourExperienceScreen: React.FC = () => {
     HomeStackParamList,
     'RateYourExperienceScreen'
   >;
-  const {t} = useTranslation();
-  const {showErrorToast, showSuccessToast} = useCommonToast();
+  const { t } = useTranslation();
+  const { showErrorToast, showSuccessToast } = useCommonToast();
   const inset = useSafeAreaInsets();
   const route = useRoute();
-  const {bookingId} = route.params as any;
+  const { bookingId } = route.params as any;
   const navigation = useNavigation<ScreenNavigationProp>();
 
   useEffect(() => {
@@ -131,28 +131,35 @@ const RateYourExperienceScreen: React.FC = () => {
       let uploadedPhotoUrls: string[] = [];
 
       if (photos.length > 0) {
-        // Upload each photo using postReviewImageUpload
-        // Assume postReviewImageUpload returns { url: string }
-        const uploadPromises = photos.map(async photo => {
-          // Prepare FormData for each image
-          const formData = new FormData();
+        // Upload all photos in a single multipart request (matches working curl)
+        const formData = new FormData();
+        photos.forEach((photo, idx) => {
           formData.append('images', {
             uri: photo.uri,
-            type: photo.mime,
-            name: `review_photo_${Date.now()}.${
-              photo.mime?.split('/')[1] || 'jpg'
+            type: photo.mime || 'image/jpeg',
+            name: `review_photo_${Date.now()}_${idx}.${
+              photo.mime?.split('/')?.[1] || 'jpg'
             }`,
-          });
-          // Call the API
-          const res = await postReviewImageUpload(formData, bookingIdToSend);
-          // Support both {url} and {data: {url}}
-          if (res?.url) return res.url;
-          if (res?.data?.url) return res.data.url;
-          return null;
+          } as any);
         });
 
-        const results = await Promise.all(uploadPromises);
-        uploadedPhotoUrls = results.filter(Boolean) as string[];
+        // Call the API once with all images
+        const res = await postReviewImageUpload(formData, bookingIdToSend);
+
+        // Try to extract urls depending on response shape
+        if (Array.isArray(res)) {
+          uploadedPhotoUrls = res
+            .map((r: any) => r.url || r.data?.url)
+            .filter(Boolean);
+        } else if (res?.data && Array.isArray(res.data)) {
+          uploadedPhotoUrls = res.data
+            .map((r: any) => r.url || r.data?.url)
+            .filter(Boolean);
+        } else if (res?.url) {
+          uploadedPhotoUrls = [res.url];
+        } else if (res?.data?.url) {
+          uploadedPhotoUrls = [res.data.url];
+        }
       }
 
       // Prepare payload for postRateUser
@@ -186,7 +193,8 @@ const RateYourExperienceScreen: React.FC = () => {
       <TouchableOpacity
         key={index}
         onPress={() => handleStarPress(index)}
-        style={styles.starButton}>
+        style={styles.starButton}
+      >
         <Icon
           name="star"
           size={36}
@@ -209,11 +217,11 @@ const RateYourExperienceScreen: React.FC = () => {
     : '';
 
   return (
-    <View style={[styles.container, {paddingTop: inset.top}]}>
+    <View style={[styles.container, { paddingTop: inset.top }]}>
       <CustomHeader title={t('rate_experience')} showBackButton={true} />
 
       {(pujaLoading || loading) && (
-        <View style={{flex: 1, backgroundColor: COLORS.white}}>
+        <View style={{ flex: 1, backgroundColor: COLORS.white }}>
           <CustomeLoader loading={loading} />
         </View>
       )}
@@ -222,7 +230,8 @@ const RateYourExperienceScreen: React.FC = () => {
           style={styles.scrollContainer}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.mainContent}>
             {/* Puja Details Card */}
             <View style={styles.panditCard}>
@@ -278,13 +287,14 @@ const RateYourExperienceScreen: React.FC = () => {
                 {photos.map((photo, idx) => (
                   <View key={idx} style={styles.photoItem}>
                     <Image
-                      source={{uri: photo.uri}}
+                      source={{ uri: photo.uri }}
                       style={styles.photoImage}
                       resizeMode="cover"
                     />
                     <TouchableOpacity
                       style={styles.removePhotoBtn}
-                      onPress={() => handleRemovePhoto(idx)}>
+                      onPress={() => handleRemovePhoto(idx)}
+                    >
                       <AntDesign
                         name="closecircle"
                         size={20}
@@ -295,7 +305,8 @@ const RateYourExperienceScreen: React.FC = () => {
                 ))}
                 <TouchableOpacity
                   style={styles.addPhotoBtn}
-                  onPress={handleAddPhotos}>
+                  onPress={handleAddPhotos}
+                >
                   <AntDesign
                     name="pluscircleo"
                     size={32}

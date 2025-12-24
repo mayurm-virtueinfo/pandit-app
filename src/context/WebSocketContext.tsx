@@ -47,7 +47,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
     // Prevent multiple active sockets
     if (wsRef.current) {
-      console.log('⚠️ [Pandit WS] Already connected, skipping...');
+      console.log(
+        '⚠️ [Pandit booking status webSocket] Already connected, skipping...',
+      );
       return;
     }
 
@@ -56,7 +58,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('🔗 [Pandit WS] Connected');
+      console.log('🔗 [Pandit booking status webSocket] Connected');
       setConnected(true);
       if (reconnectRef.current) clearTimeout(reconnectRef.current);
     };
@@ -64,26 +66,26 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     ws.onmessage = event => {
       try {
         const data = JSON.parse(event.data);
-        console.log('📩 [Pandit WS] message:', data);
+        console.log('📩 [Pandit booking status webSocket] message :: ', data);
         setMessages(prev => [...prev, data]);
       } catch (err) {
-        console.warn('⚠️ [Pandit WS] parse error', err);
+        console.warn('⚠️ [Pandit booking status webSocket] parse error', err);
       }
     };
 
     ws.onerror = error => {
-      console.log('⚠️ [Pandit WS] error:', error);
+      console.log('⚠️ [Pandit booking status webSocket] error:', error);
     };
 
     ws.onclose = e => {
-      console.log('🔌 [Pandit WS] closed:', e.reason);
+      console.log('🔌 [Pandit booking status webSocket] closed:', e.reason);
       setConnected(false);
       wsRef.current = null;
 
       // Reconnect if not manually closed
       if (!manuallyClosed.current) {
         reconnectRef.current = setTimeout(() => {
-          console.log('♻️ [Pandit WS] reconnecting...');
+          console.log('♻️ [Pandit booking status webSocket] reconnecting...');
           connect();
         }, 3000);
       }
@@ -106,7 +108,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
   /** ✅ Manage connection based on internet & token */
   useEffect(() => {
-    console.log('🔍 [Pandit WS] useEffect triggered:', {
+    console.log('🔍 [Pandit booking status webSocket] useEffect triggered:', {
       isConnected,
       hasToken: !!token,
       hasUserId: !!userId,
@@ -114,11 +116,11 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
     if (isConnected && token && userId) {
       console.log(
-        '✅ [Pandit WS] All conditions met, attempting to connect...',
+        '✅ [Pandit booking status webSocket] All conditions met, attempting to connect...',
       );
       connect();
     } else {
-      console.log('⏸️ [Pandit WS] Skipping connection:', {
+      console.log('⏸️ [Pandit booking status webSocket] Skipping connection:', {
         reason: !isConnected
           ? 'network disconnected'
           : !token

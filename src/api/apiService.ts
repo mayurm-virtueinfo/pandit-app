@@ -801,7 +801,7 @@ export const postUpdateStatus = (data: UpdateStatus) => {
         resolve(response);
       })
       .catch(error => {
-        console.error('Error Update Puja Status', error.response.data.message);
+        console.error('Error Update Puja Status', error?.response?.data);
         reject(error);
       });
   });
@@ -1203,10 +1203,10 @@ export const putUpdateProfile = (data: any): Promise<any> => {
   // Set headers for multipart/form-data if FormData is used
   const config: AxiosRequestConfig = isFormData
     ? {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     : {};
 
   return new Promise((resolve, reject) => {
@@ -1234,11 +1234,14 @@ export const postReviewImageUpload = (data: any, id: string): Promise<any> => {
   const apiUrl = POST_REVIEW_IMAGE.replace('{id}', id);
   return new Promise((resolve, reject) => {
     apiDev
+      // Do NOT force Content-Type header here. apiDev has a default
+      // 'application/json' header; overriding it to undefined allows
+      // axios / RN to set the proper multipart boundary automatically.
       .post(apiUrl, data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': undefined,
+          Accept: 'application/json',
         },
-        // If you need to send auth, add Authorization header here
       })
       .then(response => {
         console.log('response', response);

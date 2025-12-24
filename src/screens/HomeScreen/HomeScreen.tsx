@@ -71,6 +71,8 @@ const HomeScreen: React.FC = () => {
 
   const { messages } = useWebSocket();
 
+  console.log('WebSocket Messages in HomeScreen :: ', messages);
+
   const fetchAllPujas = useCallback(async () => {
     setLoading(true);
     setPendingLoading(true);
@@ -163,7 +165,9 @@ const HomeScreen: React.FC = () => {
 
     if (
       latest?.type === 'booking_request' &&
-      ['created', 'accepted', 'rejected', 'expired'].includes(latest?.action)
+      ['created', 'accepted', 'rejected', 'expired', 'cancelled'].includes(
+        latest?.action,
+      )
     ) {
       console.log('🔔 WS triggered refresh for:', latest.action);
       clearTimeout((HomeScreen as any)._pujaTimeout);
