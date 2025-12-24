@@ -17,6 +17,7 @@ interface CustomDropdownProps {
   placeholder?: string;
   label?: string;
   error?: string;
+  required?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -26,10 +27,16 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   placeholder = 'Select an option',
   label,
   error,
+  required,
 }) => {
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text style={styles.label}>
+          {label}
+          {required && <Text style={{color: COLORS.error}}> *</Text>}
+        </Text>
+      )}
       <Dropdown
         style={[styles.dropdown, error ? styles.dropdownError : null]}
         data={items}

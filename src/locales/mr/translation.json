@@ -477,5 +477,7 @@
   "no_next_choghadiya": "आगामी चोगद्या नहीं",
   "good": "सुंदर",
   "bad": "खराब",
-  "normal": "सामान्य"
+  "normal": "सामान्य",
+  "camera_access_failed": "कैमरा अनुमति लौटी नहीं",
+  "gallery_access_failed": "गैलरी अनुमति लौटी नहीं"
 }

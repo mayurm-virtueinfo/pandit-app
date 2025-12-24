@@ -481,5 +481,7 @@
   "no_next_choghadiya": "No Next Choghadiya",
   "good": "Good",
   "bad": "Bad",
-  "normal": "Normal"
+  "normal": "Normal",
+  "camera_access_failed": "Camera access failed",
+  "gallery_access_failed": "Gallery access failed"
 }
