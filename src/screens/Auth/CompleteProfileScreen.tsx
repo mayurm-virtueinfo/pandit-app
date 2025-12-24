@@ -369,14 +369,33 @@ const CompleteProfileScreen: React.FC = () => {
 
   const openGallery = async () => {
     try {
-      const image = await ImagePicker.openPicker({
-        width: 300,
-        height: 300,
-        cropping: true,
-        cropperCircleOverlay: true,
+      // Step 1: Pick image without cropping
+      const pickedImage = await ImagePicker.openPicker({
+        mediaType: 'photo',
         compressImageQuality: 0.7,
       });
-      await processImage(image);
+
+      // Step 2: Open cropper
+      if (pickedImage && pickedImage.path) {
+        try {
+          const croppedImage = await ImagePicker.openCropper({
+            path: pickedImage.path,
+            width: 300,
+            height: 300,
+            cropping: true,
+            cropperCircleOverlay: true,
+            compressImageQuality: 0.7,
+            mediaType: 'photo',
+            freeStyleCropEnabled: true,
+          });
+          await processImage(croppedImage);
+        } catch (cropError: any) {
+             if (cropError.code !== 'E_PICKER_CANCELLED') {
+            console.log('Error cropping image:', cropError);
+            showErrorToast(t('image_processing_failed'));
+          }
+        }
+      }
     } catch (error: any) {
       if (error.code !== 'E_PICKER_CANCELLED') {
         console.log('Error accessing gallery:', error);
@@ -511,6 +530,7 @@ const CompleteProfileScreen: React.FC = () => {
                   placeholder={t('enter_phone_number')}
                   keyboardType="phone-pad"
                   error={errors.phoneNumber}
+                  required={true}
                 />
                 <CustomTextInput
                   label={t('email')}
@@ -519,6 +539,7 @@ const CompleteProfileScreen: React.FC = () => {
                   placeholder={t('enter_email')}
                   keyboardType="email-address"
                   error={errors.email}
+                  required={true}
                 />
                 <CustomTextInput
                   label={t('first_name')}
@@ -526,6 +547,7 @@ const CompleteProfileScreen: React.FC = () => {
                   onChangeText={value => handleInputChange('firstName', value)}
                   placeholder={t('enter_first_name')}
                   error={errors.firstName}
+                  required={true}
                 />
                 <CustomTextInput
                   label={t('last_name')}
@@ -533,10 +555,12 @@ const CompleteProfileScreen: React.FC = () => {
                   onChangeText={value => handleInputChange('lastName', value)}
                   placeholder={t('enter_last_name')}
                   error={errors.lastName}
+                  required={true}
                 />
                 <View>
                   <Text style={styles.dateLabel}>
                     {t('date_of_birth') || 'Date of Birth'}
+                    <Text style={{color: COLORS.error}}> *</Text>
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
@@ -571,6 +595,7 @@ const CompleteProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('city', value)}
                   placeholder={t('select_your_city')}
                   error={errors.city}
+                  required={true}
                 />
                 <CustomDropdown
                   label={t('caste')}
@@ -579,6 +604,7 @@ const CompleteProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('caste', value)}
                   placeholder={t('select_your_caste')}
                   error={errors.caste}
+                  required={true}
                 />
                 <CustomDropdown
                   label={t('sub_caste')}
@@ -587,6 +613,7 @@ const CompleteProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('subCaste', value)}
                   placeholder={t('select_your_sub_caste')}
                   error={errors.subCaste}
+                  required={true}
                 />
                 <CustomDropdown
                   label={t('gotra')}
@@ -595,6 +622,7 @@ const CompleteProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('gotra', value)}
                   placeholder={t('select_your_gotra')}
                   error={errors.gotra}
+                  required={true}
                 />
                 <CustomTextInput
                   label={t('address')}
@@ -602,6 +630,7 @@ const CompleteProfileScreen: React.FC = () => {
                   onChangeText={value => handleInputChange('address', value)}
                   placeholder={t('enter_address')}
                   error={errors.address}
+                  required={true}
                 />
               </View>
               <View style={styles.textContainer}>

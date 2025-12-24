@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(20),
   },
   requiredAsterisk: {
-    color: COLORS.lighttext,
+    color: COLORS.error,
     fontFamily: Fonts.Sen_Medium,
   },
   uploadButton: {

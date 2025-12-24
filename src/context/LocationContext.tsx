@@ -73,9 +73,15 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
       } else if (error.code === 1) {
         setPermissionStatus('denied');
         setLocation(null);
-      } else if (retry) {
+      } else if (
+        retry &&
+        error.code !== 2 &&
+        error.code !== 3 &&
+        error.message !== 'Location request timed out'
+      ) {
         // If it was a retry and still failed (and wasn't caught as blocked),
-        // it is likely permanently denied or user keeps saying no
+        // we only set permanent denial if it's NOT a timeout or availability issue.
+        // Timeouts (code 3) and Unavailable (code 2) should NOT block the user.
         setPermissionStatus('permanent_denial');
         setLocation(null);
       } else {

@@ -477,5 +477,7 @@
   "no_next_choghadiya": "આગામી ચોઘડિયા નથી",
   "good": "સારું",
   "bad": "ખરાબ",
-  "normal": "સામાન્ય"
+  "normal": "સામાન્ય",
+  "camera_access_failed": "કેમેરા એક્સેસ નિષ્ફળ",
+  "gallery_access_failed": "ગેલેરી એક્સેસ નિષ્ફળ"
 }

@@ -22,6 +22,7 @@ interface InputFieldProps {
   style?: ViewStyle;
   textColor?: string;
   onFocus?: () => void;
+  required?: boolean;
 }
 
 const CustomTextInput: React.FC<InputFieldProps> = ({
@@ -35,10 +36,16 @@ const CustomTextInput: React.FC<InputFieldProps> = ({
   style,
   textColor,
   onFocus,
+  required,
 }) => {
   return (
     <View style={styles.inputField}>
-      {label && <Text style={styles.inputTitle}>{label}</Text>}
+      {label && (
+        <Text style={styles.inputTitle}>
+          {label}
+          {required && <Text style={{color: COLORS.error}}> *</Text>}
+        </Text>
+      )}
       <View
         style={[styles.inputArea, error ? styles.inputAreaError : null, style]}
       >

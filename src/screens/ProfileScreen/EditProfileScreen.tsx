@@ -441,11 +441,13 @@ const EditProfileScreen: React.FC = () => {
         cropping: true,
         cropperCircleOverlay: true,
         compressImageQuality: 0.7,
+        mediaType: 'photo',
+        forceJpg: true,
       });
       await processImage(image);
     } catch (error: any) {
       if (error.code !== 'E_PICKER_CANCELLED') {
-        console.log('Error accessing camera:', error);
+        console.warn('Error accessing camera:', error.code, error.message);
         showErrorToast(t('camera_access_failed'));
       }
     }
@@ -453,17 +455,37 @@ const EditProfileScreen: React.FC = () => {
 
   const openGallery = async () => {
     try {
-      const image = await ImagePicker.openPicker({
-        width: 300,
-        height: 300,
-        cropping: true,
-        cropperCircleOverlay: true,
-        compressImageQuality: 0.7,
+      // Step 1: Pick the image from gallery without cropping
+      const pickedImage = await ImagePicker.openPicker({
+        mediaType: 'photo',
+        forceJpg: true,
       });
-      await processImage(image);
+
+      // Step 2: Open cropper with the picked image
+      if (pickedImage && pickedImage.path) {
+        try {
+          const croppedImage = await ImagePicker.openCropper({
+            path: pickedImage.path,
+            width: 300,
+            height: 300,
+            cropping: true,
+            cropperCircleOverlay: true,
+            compressImageQuality: 0.7,
+            mediaType: 'photo',
+            freeStyleCropEnabled: true,
+          });
+          await processImage(croppedImage);
+        } catch (cropError: any) {
+             if (cropError.code !== 'E_PICKER_CANCELLED') {
+            console.warn('Error cropping image:', cropError);
+             // Use a distinct error message or fallback to generic
+            showErrorToast(t('image_processing_failed')); 
+          }
+        }
+      }
     } catch (error: any) {
       if (error.code !== 'E_PICKER_CANCELLED') {
-        console.log('Error accessing gallery:', error);
+        console.warn('Error accessing gallery:', error.code, error.message);
         showErrorToast(t('gallery_access_failed'));
       }
     }
@@ -675,6 +697,7 @@ const EditProfileScreen: React.FC = () => {
                   placeholder={t('enter_first_name')}
                   error={errors.firstName}
                   onFocus={() => handleInputFocus(200)}
+                  required={true}
                 />
                 <CustomTextInput
                   label={t('last_name')}
@@ -683,10 +706,12 @@ const EditProfileScreen: React.FC = () => {
                   placeholder={t('enter_last_name')}
                   error={errors.lastName}
                   onFocus={() => handleInputFocus(250)}
+                  required={true}
                 />
                 <View>
                   <Text style={styles.dateLabel}>
                     {t('date_of_birth') || 'Date of Birth'}
+                    <Text style={{color: COLORS.error}}> *</Text>
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
@@ -722,6 +747,7 @@ const EditProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('city', value)}
                   placeholder={t('select_your_city')}
                   error={errors.city}
+                  required={true}
                 />
                 <CustomDropdown
                   label={t('caste')}
@@ -730,6 +756,7 @@ const EditProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('caste', value)}
                   placeholder={t('select_your_caste')}
                   error={errors.caste}
+                  required={true}
                 />
                 <CustomDropdown
                   label={t('sub_caste')}
@@ -738,6 +765,7 @@ const EditProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('subCaste', value)}
                   placeholder={t('select_your_sub_caste')}
                   error={errors.subCaste}
+                  required={true}
                 />
                 <CustomDropdown
                   label={t('gotra')}
@@ -746,6 +774,7 @@ const EditProfileScreen: React.FC = () => {
                   onSelect={value => handleInputChange('gotra', value)}
                   placeholder={t('select_your_gotra')}
                   error={errors.gotra}
+                  required={true}
                 />
                 <CustomTextInput
                   label={t('address')}
@@ -754,6 +783,7 @@ const EditProfileScreen: React.FC = () => {
                   placeholder={t('enter_address')}
                   error={errors.address}
                   onFocus={() => handleInputFocus(600)}
+                  required={true}
                 />
               </View>
               <View style={styles.textContainer}>
