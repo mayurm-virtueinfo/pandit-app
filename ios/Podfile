@@ -23,6 +23,16 @@ target 'PanditApp' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pre_install do |installer|
+    installer.pod_targets.each do |pod|
+      if pod.name.start_with?('RNFB')
+        def pod.build_type
+          Pod::BuildType.static_library
+        end
+      end
+    end
+  end
+
   # Add RNFBDatabase pod
   # pod 'RNFBDatabase', :path => '../node_modules/@react-native-firebase/database'
 
