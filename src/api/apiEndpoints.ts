@@ -91,4 +91,4 @@ export const GET_CALENDAR_GRID =
 export const GET_DAY_DETAILS =
   '/app/panchang/day-details/?date={date}&lat={latitude}&lon={longitude}';
 export const GET_MUHRAT =
-  '/app/choghadiya?date={date}&latitude={latitude}&longitude={longitude}';
+  '/app/muhurat?date={date}&latitude={latitude}&longitude={longitude}';
