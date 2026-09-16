@@ -74,6 +74,36 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
-# .env
-# .env.development
-# .env.production
+# Environment & Config
+.env
+.env.*
+!.env.example
+ios/tmp.xcconfig
+
+# Certificates, Keys, and Keystores
+*.p8
+*.key
+*.pem
+*.keystore
+*.jks
+!debug.keystore
+!android/app/debug.keystore
+keystore.properties
+android/keystore.properties
+!android/keystore.properties.example
+
+# Build Artifacts
+*.bundle
+*.jsbundle
+android/app/src/main/assets/index.android.bundle
+
+# Internal Logs & Secrets
+firebase-debug.log*
+*-debug.log
+PujaGuru-Pandit-Credential
+pandit-app-fcm.*
+node.txt
+buglist.txt
+old-pod-file.txt
+old-package.json
+*-app-description.md

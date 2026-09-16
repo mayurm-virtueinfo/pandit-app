@@ -1,8 +1,7 @@
 import Config from 'react-native-config';
 
 class ApiEndpoints {
-  static readonly XMasterKey =
-    '$2a$10$XR82L3T4Q4gtDUAvZKwioOsmNaU2X7QVpkZbtKJ90jdcoVal/Pd4a';
+  static readonly XMasterKey = Config.X_MASTER_KEY || '';
 
   static readonly CITY_API = 'https://api.postalpincode.in/pincode';
   static readonly BASE_URL = 'https://api.jsonbin.io';
