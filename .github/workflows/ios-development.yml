@@ -49,10 +49,11 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Configure .env.development
+        env:
+          ENV_CONTENT: ${{ secrets.ENV_DEVELOPMENT || secrets.ENV_FILE }}
         run: |
-          ENV_CONTENT="${{ secrets.ENV_DEVELOPMENT || secrets.ENV_FILE }}"
           if [ -n "$ENV_CONTENT" ]; then
-            echo "$ENV_CONTENT" > .env.development
+            printf '%s\n' "$ENV_CONTENT" > .env.development
             cp .env.development .env
             echo "Successfully generated .env.development from secret."
           elif [ -f .env.development ]; then
@@ -109,13 +110,16 @@ jobs:
           fi
 
       - name: Configure Firebase Credentials
+        env:
+          FIREBASE_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_CLI_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          if [ -n "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" ]; then
-            echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > firebase-credentials.json
+          if [ -n "$FIREBASE_JSON" ]; then
+            printf '%s\n' "$FIREBASE_JSON" > firebase-credentials.json
             echo "FIREBASE_SERVICE_ACCOUNT_PATH=$GITHUB_WORKSPACE/firebase-credentials.json" >> $GITHUB_ENV
             echo "Wrote firebase-credentials.json for App Distribution."
-          elif [ -n "${{ secrets.FIREBASE_TOKEN }}" ]; then
-            echo "FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }}" >> $GITHUB_ENV
+          elif [ -n "$FIREBASE_CLI_TOKEN" ]; then
+            echo "FIREBASE_TOKEN=$FIREBASE_CLI_TOKEN" >> $GITHUB_ENV
             echo "Configured FIREBASE_TOKEN for App Distribution."
           else
             echo "Warning: No FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_TOKEN configured in secrets."

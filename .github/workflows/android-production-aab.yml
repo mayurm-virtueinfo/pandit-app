@@ -78,10 +78,11 @@ jobs:
           echo "=========================================="
 
       - name: Configure .env.production
+        env:
+          ENV_CONTENT: ${{ secrets.ENV_PRODUCTION || secrets.ENV_FILE }}
         run: |
-          ENV_CONTENT="${{ secrets.ENV_PRODUCTION || secrets.ENV_FILE }}"
           if [ -n "$ENV_CONTENT" ]; then
-            echo "$ENV_CONTENT" > .env.production
+            printf '%s\n' "$ENV_CONTENT" > .env.production
             cp .env.production .env
             echo "Successfully generated .env.production from secret."
           elif [ -f .env.production ]; then
@@ -92,29 +93,34 @@ jobs:
             exit 1
           fi
 
-
       - name: Configure Android Signing Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_PROPS: ${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}
+          STORE_FILE: ${{ secrets.ANDROID_STORE_FILE }}
+          STORE_PWD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PWD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           mkdir -p android/app
 
           # Write keystore binary if provided as base64
-          if [ -n "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/pandit.keystore
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/pandit.keystore
             cp android/app/pandit.keystore android/app/release.keystore
             echo "Decoded keystore into android/app/pandit.keystore and android/app/release.keystore"
           fi
 
-
           # Write keystore.properties
-          if [ -n "${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}" ]; then
-            echo "${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}" > android/keystore.properties
+          if [ -n "$KEYSTORE_PROPS" ]; then
+            printf '%s\n' "$KEYSTORE_PROPS" > android/keystore.properties
             echo "Wrote android/keystore.properties from secret."
-          elif [ -n "${{ secrets.ANDROID_STORE_FILE }}" ]; then
+          elif [ -n "$STORE_FILE" ]; then
             cat <<EOF > android/keystore.properties
-          storeFile=${{ secrets.ANDROID_STORE_FILE }}
-          storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          storeFile=$STORE_FILE
+          storePassword=$STORE_PWD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PWD
           EOF
             echo "Assembled android/keystore.properties from individual secrets."
           elif [ -f android/keystore.properties ]; then
@@ -125,13 +131,16 @@ jobs:
           fi
 
       - name: Configure Firebase Credentials
+        env:
+          FIREBASE_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_CLI_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          if [ -n "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" ]; then
-            echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > firebase-credentials.json
+          if [ -n "$FIREBASE_JSON" ]; then
+            printf '%s\n' "$FIREBASE_JSON" > firebase-credentials.json
             echo "FIREBASE_SERVICE_ACCOUNT_PATH=$GITHUB_WORKSPACE/firebase-credentials.json" >> $GITHUB_ENV
             echo "Wrote firebase-credentials.json for App Distribution."
-          elif [ -n "${{ secrets.FIREBASE_TOKEN }}" ]; then
-            echo "FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }}" >> $GITHUB_ENV
+          elif [ -n "$FIREBASE_CLI_TOKEN" ]; then
+            echo "FIREBASE_TOKEN=$FIREBASE_CLI_TOKEN" >> $GITHUB_ENV
             echo "Configured FIREBASE_TOKEN for App Distribution."
           else
             echo "Warning: No FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_TOKEN configured in secrets."
