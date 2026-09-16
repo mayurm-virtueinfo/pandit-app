@@ -20,7 +20,9 @@ apiDev.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    config.headers['X-Master-Key'] = ApiEndpoints.XMasterKey;
+    if (ApiEndpoints.XMasterKey) {
+      config.headers['X-Master-Key'] = ApiEndpoints.XMasterKey;
+    }
     console.log('------------------------------------------------');
     console.log('------------apiDev-config-------------');
     console.log('------------------------------------------------');
