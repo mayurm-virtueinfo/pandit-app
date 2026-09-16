@@ -363,6 +363,16 @@ def build_ios_app_with_signing(scheme_name, output_name)
   profile_name = ENV["PROVISIONING_PROFILE_SPECIFIER"] || ENV["APPLE_PROVISIONING_PROFILE_NAME"] || "PanditApp AppStore"
   team_id = ENV["APPLE_TEAM_ID"] || "5DSXYK6JTQ"
 
+  update_code_signing_settings(
+    path: "ios/PanditApp.xcodeproj",
+    use_automatic_signing: false,
+    team_id: team_id,
+    targets: ["PanditApp"],
+    build_configurations: ["Release"],
+    code_sign_identity: "Apple Distribution",
+    profile_name: profile_name
+  )
+
   export_opts = {
     method: "app-store",
     signingStyle: "manual",
@@ -373,11 +383,7 @@ def build_ios_app_with_signing(scheme_name, output_name)
   }
 
   xcargs_params = [
-    "-allowProvisioningUpdates",
-    "CODE_SIGN_STYLE=Manual",
-    "CODE_SIGN_IDENTITY='Apple Distribution'",
-    "DEVELOPMENT_TEAM='#{team_id}'",
-    "PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'"
+    "-allowProvisioningUpdates"
   ].join(" ")
 
   build_app(
