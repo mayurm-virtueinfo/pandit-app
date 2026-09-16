@@ -114,6 +114,10 @@ jobs:
 
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           PROFILE_UUID=$(strings "$PP_PATH" | grep -A1 -m1 "<key>UUID</key>" | tail -n1 | sed -e 's/.*<string>//' -e 's/<\/string>.*//')
+          PROFILE_NAME=$(strings "$PP_PATH" | grep -A1 -m1 "<key>Name</key>" | tail -n1 | sed -e 's/.*<string>//' -e 's/<\/string>.*//')
+          if [ -z "$PROFILE_NAME" ]; then
+            PROFILE_NAME="PanditApp AppStore"
+          fi
           if [ -n "$PROFILE_UUID" ]; then
             cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/${PROFILE_UUID}.mobileprovision
             echo "Installed provisioning profile with UUID: $PROFILE_UUID"
@@ -121,6 +125,9 @@ jobs:
             cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/dev.mobileprovision
             echo "Installed provisioning profile as dev.mobileprovision"
           fi
+          echo "PROVISIONING_PROFILE_SPECIFIER=$PROFILE_NAME" >> $GITHUB_ENV
+          echo "APPLE_PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
+          echo "Configured Profile Specifier: $PROFILE_NAME"
 
       - name: Configure Firebase Credentials
         env:

@@ -359,6 +359,41 @@ def distribute_ipa_to_firebase(ipa_path, default_groups, options)
   UI.success("Successfully distributed to Firebase App Distribution (Group: #{groups})!")
 end
 
+def build_ios_app_with_signing(scheme_name, output_name)
+  profile_name = ENV["PROVISIONING_PROFILE_SPECIFIER"] || ENV["APPLE_PROVISIONING_PROFILE_NAME"] || "PanditApp AppStore"
+  team_id = ENV["APPLE_TEAM_ID"] || "5DSXYK6JTQ"
+
+  export_opts = {
+    method: "app-store",
+    signingStyle: "manual",
+    teamID: team_id,
+    provisioningProfiles: {
+      "com.panditjiapp.pandit" => profile_name
+    }
+  }
+
+  xcargs_params = [
+    "-allowProvisioningUpdates",
+    "CODE_SIGN_STYLE=Manual",
+    "CODE_SIGN_IDENTITY='Apple Distribution'",
+    "DEVELOPMENT_TEAM='#{team_id}'",
+    "PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'"
+  ].join(" ")
+
+  build_app(
+    workspace: "ios/PanditApp.xcworkspace",
+    scheme: scheme_name,
+    configuration: "Release",
+    clean: true,
+    export_method: "app-store",
+    export_options: export_opts,
+    xcargs: xcargs_params,
+    output_directory: "ios/build",
+    output_name: output_name,
+    silent: false
+  )
+end
+
 platform :ios do
   desc "Build iOS Development IPA and distribute to BOTH Apple TestFlight & Firebase App Distribution"
   lane :development do |options|
@@ -373,16 +408,7 @@ platform :ios do
       UI.important("Notice during BuildXCConfig execution: #{e.message}")
     end
 
-    build_app(
-      workspace: "ios/PanditApp.xcworkspace",
-      scheme: "PanditApp-Development",
-      configuration: "Release",
-      clean: true,
-      export_method: "app-store",
-      output_directory: "ios/build",
-      output_name: "PanditApp-Development.ipa",
-      silent: false
-    )
+    build_ios_app_with_signing("PanditApp-Development", "PanditApp-Development.ipa")
 
     ipa_path = File.expand_path("../ios/build/PanditApp-Development.ipa", __dir__)
     verify_file_exists(ipa_path, "iOS Development IPA")
@@ -409,16 +435,7 @@ platform :ios do
       UI.important("Notice during BuildXCConfig execution: #{e.message}")
     end
 
-    build_app(
-      workspace: "ios/PanditApp.xcworkspace",
-      scheme: "PanditApp-Production",
-      configuration: "Release",
-      clean: true,
-      export_method: "app-store",
-      output_directory: "ios/build",
-      output_name: "PanditApp-Production.ipa",
-      silent: false
-    )
+    build_ios_app_with_signing("PanditApp-Production", "PanditApp-Production.ipa")
 
     ipa_path = File.expand_path("../ios/build/PanditApp-Production.ipa", __dir__)
     verify_file_exists(ipa_path, "iOS Production IPA")
