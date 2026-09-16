@@ -30,14 +30,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16.1
+      - name: Select Xcode 26
         run: |
-          if [ -d "/Applications/Xcode_16.1.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+          if ls -d /Applications/Xcode_26*.app 1> /dev/null 2>&1; then
+            LATEST_XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -n 1)
+            echo "Selecting latest Xcode 26: $LATEST_XCODE"
+            sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
           elif [ -d "/Applications/Xcode.app" ]; then
+            echo "Selecting default Xcode.app"
             sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-          elif [ -d "/Applications/Xcode_16.2.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
           fi
           sudo xcodebuild -runFirstLaunch || true
           xcodebuild -version
