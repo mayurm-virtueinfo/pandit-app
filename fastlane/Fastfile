@@ -1,0 +1,426 @@
+# Fastfile for PanditApp (com.panditjiapp.pandit)
+#
+# DISTRIBUTION TARGETS:
+# - Android Development: Firebase App Distribution (APK and AAB)
+# - Android Production: Firebase App Distribution (APK and AAB)
+# - iOS Development: Firebase App Distribution (IPA)
+# - iOS Production: Apple TestFlight (IPA for beta testers)
+#
+# ABSOLUTE SAFETY GUARDS:
+# - NEVER publish or promote builds to Google Play Console (no supply / upload_to_play_store).
+# - NEVER submit builds for public App Store review or public release (no deliver / upload_to_app_store).
+
+default_platform(:android)
+
+# ==============================================================================
+# Shared Helpers
+# ==============================================================================
+
+def default_android_firebase_app_id
+  ENV["FIREBASE_APP_ID_ANDROID"] || "1:763089003272:android:ef8b3f3f1ab892936342bd"
+end
+
+def default_ios_firebase_app_id
+  ENV["FIREBASE_APP_ID_IOS"] || "1:763089003272:ios:c172ce64912035c96342bd"
+end
+
+def resolve_firebase_credentials
+  if ENV["FIREBASE_SERVICE_ACCOUNT_PATH"] && File.exist?(ENV["FIREBASE_SERVICE_ACCOUNT_PATH"])
+    return { service_credentials_file: ENV["FIREBASE_SERVICE_ACCOUNT_PATH"] }
+  elsif ENV["FIREBASE_APP_DISTRO_CREDENTIALS"] && File.exist?(ENV["FIREBASE_APP_DISTRO_CREDENTIALS"])
+    return { service_credentials_file: ENV["FIREBASE_APP_DISTRO_CREDENTIALS"] }
+  elsif ENV["FIREBASE_TOKEN"] && !ENV["FIREBASE_TOKEN"].to_s.strip.empty?
+    return { firebase_cli_token: ENV["FIREBASE_TOKEN"] }
+  elsif ENV["GOOGLE_APPLICATION_CREDENTIALS"] && File.exist?(ENV["GOOGLE_APPLICATION_CREDENTIALS"])
+    return { service_credentials_file: ENV["GOOGLE_APPLICATION_CREDENTIALS"] }
+  else
+    default_path = File.expand_path("../firebase-credentials.json", __dir__)
+    if File.exist?(default_path)
+      return { service_credentials_file: default_path }
+    end
+  end
+
+  UI.user_error!("Missing Firebase credentials! Please set FIREBASE_SERVICE_ACCOUNT_PATH, FIREBASE_APP_DISTRO_CREDENTIALS, or FIREBASE_TOKEN.")
+end
+
+def resolve_release_notes(options)
+  if options[:release_notes] && !options[:release_notes].to_s.strip.empty?
+    return options[:release_notes]
+  end
+
+  if ENV["RELEASE_NOTES"] && !ENV["RELEASE_NOTES"].to_s.strip.empty?
+    return ENV["RELEASE_NOTES"]
+  end
+
+  if ENV["RELEASE_NOTES_FILE"] && File.exist?(ENV["RELEASE_NOTES_FILE"])
+    return File.read(ENV["RELEASE_NOTES_FILE"]).strip
+  end
+
+  begin
+    commit = last_git_commit
+    return "Commit: #{commit[:abbreviated_commit_hash]} - #{commit[:message]}"
+  rescue => e
+    return "Automated CI/CD build - #{Time.now.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+  end
+end
+
+def verify_file_exists(file_path, description = "Artifact")
+  unless File.exist?(file_path)
+    UI.user_error!("#{description} not found at #{file_path}")
+  end
+  size_bytes = File.size(file_path)
+  if size_bytes == 0
+    UI.user_error!("#{description} at #{file_path} is empty (0 bytes)!")
+  end
+  UI.success("Verified #{description}: #{file_path} (#{(size_bytes / (1024.0 * 1024.0)).round(2)} MB)")
+end
+
+def ensure_env_file(env_filename)
+  target_file = File.expand_path("../#{env_filename}", __dir__)
+  unless File.exist?(target_file)
+    UI.user_error!("Required environment file '#{env_filename}' does not exist at #{target_file}! Check your CI configuration.")
+  end
+  root_env = File.expand_path("../.env", __dir__)
+  FileUtils.cp(target_file, root_env)
+  UI.message("Synchronized environment file: #{env_filename} -> .env")
+end
+
+def ensure_android_keystore
+  keystore_props = File.expand_path("../android/keystore.properties", __dir__)
+  unless File.exist?(keystore_props)
+    UI.user_error!("Missing android/keystore.properties! In CI, generate this file from secret variables before running release builds.")
+  end
+end
+
+def resolve_gradle_properties(env_file, options)
+  props = { "ENVFILE" => env_file }
+  code = options[:version_code] || ENV["APP_VERSION_CODE"]
+  name = options[:version_name] || ENV["APP_VERSION_NAME"]
+
+  props["versionCode"] = code.to_s if code && !code.to_s.strip.empty?
+  props["versionName"] = name.to_s if name && !name.to_s.strip.empty?
+  props
+end
+
+platform :android do
+  desc "Build Android Development APK and distribute via Firebase App Distribution"
+  lane :build_and_distribute_dev_apk do |options|
+    ensure_env_file(".env.development")
+    ensure_android_keystore
+
+    gradle(
+      project_dir: "android",
+      task: "assemble",
+      build_type: "Release",
+      properties: resolve_gradle_properties(".env.development", options)
+    )
+
+    apk_path = File.expand_path("../android/app/build/outputs/apk/release/app-release.apk", __dir__)
+    verify_file_exists(apk_path, "Development APK")
+
+    creds = resolve_firebase_credentials
+    app_id = options[:firebase_app_id] || default_android_firebase_app_id
+    groups = options[:groups] || ENV["FIREBASE_TESTER_GROUPS"] || "pandit-dev-testers"
+    notes = resolve_release_notes(options)
+
+    firebase_app_distribution(
+      app: app_id,
+      apk_path: apk_path,
+      groups: groups,
+      release_notes: notes,
+      **creds
+    )
+    UI.success("Successfully distributed Development APK to Firebase App Distribution (Group: #{groups})")
+  end
+
+  desc "Build Android Development AAB and distribute via Firebase App Distribution"
+  lane :build_and_distribute_dev_aab do |options|
+    ensure_env_file(".env.development")
+    ensure_android_keystore
+
+    gradle(
+      project_dir: "android",
+      task: "bundle",
+      build_type: "Release",
+      properties: resolve_gradle_properties(".env.development", options)
+    )
+
+    aab_path = File.expand_path("../android/app/build/outputs/bundle/release/app-release.aab", __dir__)
+    verify_file_exists(aab_path, "Development AAB")
+
+    creds = resolve_firebase_credentials
+    app_id = options[:firebase_app_id] || default_android_firebase_app_id
+    groups = options[:groups] || ENV["FIREBASE_TESTER_GROUPS"] || "pandit-dev-testers"
+    notes = resolve_release_notes(options)
+
+    firebase_app_distribution(
+      app: app_id,
+      android_artifact_type: "AAB",
+      android_artifact_path: aab_path,
+      groups: groups,
+      release_notes: notes,
+      **creds
+    )
+    UI.success("Successfully distributed Development AAB to Firebase App Distribution (Group: #{groups})")
+  end
+
+  desc "Build both Android Development APK & AAB and distribute to Firebase"
+  lane :development do |options|
+    build_and_distribute_dev_apk(options)
+    build_and_distribute_dev_aab(options)
+  end
+
+  desc "Build Android Production APK and distribute via Firebase App Distribution"
+  lane :build_and_distribute_prod_apk do |options|
+    ensure_env_file(".env.production")
+    ensure_android_keystore
+
+    gradle(
+      project_dir: "android",
+      task: "assemble",
+      build_type: "Release",
+      properties: resolve_gradle_properties(".env.production", options)
+    )
+
+    apk_path = File.expand_path("../android/app/build/outputs/apk/release/app-release.apk", __dir__)
+    verify_file_exists(apk_path, "Production APK")
+
+    creds = resolve_firebase_credentials
+    app_id = options[:firebase_app_id] || default_android_firebase_app_id
+    groups = options[:groups] || ENV["FIREBASE_TESTER_GROUPS"] || "pandit-prod-testers"
+    notes = resolve_release_notes(options)
+
+    firebase_app_distribution(
+      app: app_id,
+      apk_path: apk_path,
+      groups: groups,
+      release_notes: notes,
+      **creds
+    )
+    UI.success("Successfully distributed Production APK to Firebase App Distribution (Group: #{groups})")
+  end
+
+  desc "Build Android Production AAB and distribute via Firebase App Distribution"
+  lane :build_and_distribute_prod_aab do |options|
+    ensure_env_file(".env.production")
+    ensure_android_keystore
+
+    gradle(
+      project_dir: "android",
+      task: "bundle",
+      build_type: "Release",
+      properties: resolve_gradle_properties(".env.production", options)
+    )
+
+    aab_path = File.expand_path("../android/app/build/outputs/bundle/release/app-release.aab", __dir__)
+    verify_file_exists(aab_path, "Production AAB")
+
+    creds = resolve_firebase_credentials
+    app_id = options[:firebase_app_id] || default_android_firebase_app_id
+    groups = options[:groups] || ENV["FIREBASE_TESTER_GROUPS"] || "pandit-prod-testers"
+    notes = resolve_release_notes(options)
+
+    firebase_app_distribution(
+      app: app_id,
+      android_artifact_type: "AAB",
+      android_artifact_path: aab_path,
+      groups: groups,
+      release_notes: notes,
+      **creds
+    )
+    UI.success("Successfully distributed Production AAB to Firebase App Distribution (Group: #{groups})")
+  end
+
+
+  desc "Build both Android Production APK & AAB and distribute to Firebase"
+  lane :production do |options|
+    build_and_distribute_prod_apk(options)
+    build_and_distribute_prod_aab(options)
+  end
+end
+
+# ==============================================================================
+# iOS Platform Lanes
+# ==============================================================================
+
+def resolve_app_store_connect_api_key
+  if ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] && ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"]
+    key_content = ENV["APP_STORE_CONNECT_API_KEY_KEY"] || ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+    is_base64 = (ENV["APP_STORE_CONNECT_API_KEY_IS_BASE64"] == "true")
+    return app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+      key_content: key_content,
+      is_key_content_base64: is_base64
+    )
+  elsif ENV["APP_STORE_CONNECT_API_KEY_PATH"] && File.exist?(ENV["APP_STORE_CONNECT_API_KEY_PATH"])
+    return app_store_connect_api_key(
+      key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+    )
+  end
+  nil
+end
+
+def configure_ios_versions(options, api_key = nil)
+  # 1. Custom Marketing Version (Version Name like 1.0.9 or 1.1.0)
+  version_name = options[:version_name] || ENV["APP_VERSION_NAME"]
+  if version_name && !version_name.to_s.strip.empty?
+    increment_version_number(
+      version_number: version_name.to_s.strip,
+      xcodeproj: "ios/PanditApp.xcodeproj"
+    )
+    UI.message("Set iOS MARKETING_VERSION: #{version_name}")
+  end
+
+  # 2. Build Number (CURRENT_PROJECT_VERSION like 21, 22, etc.)
+  custom_build_number = options[:build_number] || ENV["APP_BUILD_NUMBER"]
+  if custom_build_number && !custom_build_number.to_s.strip.empty?
+    increment_build_number(
+      build_number: custom_build_number.to_s.strip,
+      xcodeproj: "ios/PanditApp.xcodeproj"
+    )
+    UI.message("Set custom iOS CURRENT_PROJECT_VERSION: #{custom_build_number}")
+  else
+    # Auto-increment via TestFlight or fallback to 21 + GITHUB_RUN_NUMBER
+    api_key ||= resolve_app_store_connect_api_key
+    latest_build = nil
+    if api_key
+      begin
+        latest_build = latest_testflight_build_number(
+          api_key: api_key,
+          app_identifier: "com.panditjiapp.pandit",
+          initial_build_number: 21
+        )
+        UI.message("Retrieved latest TestFlight build number: #{latest_build}")
+      rescue => e
+        UI.important("Notice when checking TestFlight build number: #{e.message}")
+      end
+    end
+
+    if latest_build && latest_build.to_i > 0
+      new_build = latest_build.to_i + 1
+      increment_build_number(
+        build_number: new_build.to_s,
+        xcodeproj: "ios/PanditApp.xcodeproj"
+      )
+      UI.success("Auto-incremented iOS build number from TestFlight: #{new_build}")
+    elsif ENV["GITHUB_RUN_NUMBER"] && !ENV["GITHUB_RUN_NUMBER"].to_s.strip.empty?
+      base_build = 21
+      new_build = base_build + ENV["GITHUB_RUN_NUMBER"].to_i
+      increment_build_number(
+        build_number: new_build.to_s,
+        xcodeproj: "ios/PanditApp.xcodeproj"
+      )
+      UI.success("Auto-incremented iOS build number using CI run: #{new_build}")
+    else
+      UI.message("Using existing CURRENT_PROJECT_VERSION from PanditApp.xcodeproj")
+    end
+  end
+end
+
+def upload_ipa_to_testflight(ipa_path, options, api_key = nil)
+  upload_options = {
+    ipa: ipa_path,
+    skip_waiting_for_build_processing: true,
+    distribute_external: false,
+    changelog: resolve_release_notes(options)
+  }
+
+  api_key ||= resolve_app_store_connect_api_key
+  upload_options[:api_key] = api_key if api_key
+
+  upload_to_testflight(upload_options)
+  UI.success("Successfully uploaded to Apple TestFlight!")
+end
+
+def distribute_ipa_to_firebase(ipa_path, default_groups, options)
+  creds = resolve_firebase_credentials
+  app_id = options[:firebase_app_id] || default_ios_firebase_app_id
+  groups = options[:groups] || ENV["FIREBASE_TESTER_GROUPS"] || default_groups
+  notes = resolve_release_notes(options)
+
+  firebase_app_distribution(
+    app: app_id,
+    ipa_path: ipa_path,
+    groups: groups,
+    release_notes: notes,
+    **creds
+  )
+  UI.success("Successfully distributed to Firebase App Distribution (Group: #{groups})!")
+end
+
+platform :ios do
+  desc "Build iOS Development IPA and distribute to BOTH Apple TestFlight & Firebase App Distribution"
+  lane :development do |options|
+    ensure_env_file(".env.development")
+
+    api_key = resolve_app_store_connect_api_key
+    configure_ios_versions(options, api_key)
+
+    begin
+      sh("ruby", "../node_modules/react-native-config/ios/ReactNativeConfig/BuildXCConfig.rb", "..", "tmp.xcconfig")
+    rescue => e
+      UI.important("Notice during BuildXCConfig execution: #{e.message}")
+    end
+
+    build_app(
+      workspace: "ios/PanditApp.xcworkspace",
+      scheme: "PanditApp-Development",
+      configuration: "Release",
+      clean: true,
+      export_method: "app-store",
+      output_directory: "ios/build",
+      output_name: "PanditApp-Development.ipa",
+      silent: false
+    )
+
+    ipa_path = File.expand_path("../ios/build/PanditApp-Development.ipa", __dir__)
+    verify_file_exists(ipa_path, "iOS Development IPA")
+
+    # 1. Upload to Apple TestFlight
+    upload_ipa_to_testflight(ipa_path, options, api_key)
+
+    # 2. Distribute to Firebase App Distribution
+    distribute_ipa_to_firebase(ipa_path, "pandit-dev-testers", options)
+
+    UI.success("iOS Development build fully distributed to BOTH TestFlight and Firebase!")
+  end
+
+  desc "Build iOS Production IPA and distribute to BOTH Apple TestFlight & Firebase App Distribution"
+  lane :production do |options|
+    ensure_env_file(".env.production")
+
+    api_key = resolve_app_store_connect_api_key
+    configure_ios_versions(options, api_key)
+
+    begin
+      sh("ruby", "../node_modules/react-native-config/ios/ReactNativeConfig/BuildXCConfig.rb", "..", "tmp.xcconfig")
+    rescue => e
+      UI.important("Notice during BuildXCConfig execution: #{e.message}")
+    end
+
+    build_app(
+      workspace: "ios/PanditApp.xcworkspace",
+      scheme: "PanditApp-Production",
+      configuration: "Release",
+      clean: true,
+      export_method: "app-store",
+      output_directory: "ios/build",
+      output_name: "PanditApp-Production.ipa",
+      silent: false
+    )
+
+    ipa_path = File.expand_path("../ios/build/PanditApp-Production.ipa", __dir__)
+    verify_file_exists(ipa_path, "iOS Production IPA")
+
+    # 1. Upload to Apple TestFlight
+    upload_ipa_to_testflight(ipa_path, options, api_key)
+
+    # 2. Distribute to Firebase App Distribution
+    distribute_ipa_to_firebase(ipa_path, "pandit-prod-testers", options)
+
+    UI.success("iOS Production build fully distributed to BOTH TestFlight and Firebase!")
+  end
+end
+
+
