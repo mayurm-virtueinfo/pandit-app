@@ -1,0 +1,153 @@
+name: Android Production APK (Firebase App Distribution)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Custom Version Name (e.g. 1.0.8, leave blank to use build.gradle default)'
+        required: false
+        type: string
+      version_code:
+        description: 'Custom Version Code (e.g. 17, leave blank for auto-increment)'
+        required: false
+        type: string
+      release_notes:
+        description: 'Release notes for Firebase App Distribution (optional)'
+        required: false
+        type: string
+
+concurrency:
+  group: android-prod-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-distribute:
+    name: Build & Distribute Production APK
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Setup Java 17 (Zulu LTS)
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+          cache: gradle
+
+      - name: Setup Ruby 3.3
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+
+      - name: Install Node dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Calculate Version Code and Name
+        run: |
+          BASE_VERSION_CODE=16
+          AUTO_VERSION_CODE=$(( BASE_VERSION_CODE + GITHUB_RUN_NUMBER ))
+
+          FINAL_VERSION_CODE="${{ inputs.version_code }}"
+          if [ -z "$FINAL_VERSION_CODE" ]; then
+            FINAL_VERSION_CODE="$AUTO_VERSION_CODE"
+          fi
+
+          FINAL_VERSION_NAME="${{ inputs.version_name }}"
+
+          echo "APP_VERSION_CODE=$FINAL_VERSION_CODE" >> $GITHUB_ENV
+          if [ -n "$FINAL_VERSION_NAME" ]; then
+            echo "APP_VERSION_NAME=$FINAL_VERSION_NAME" >> $GITHUB_ENV
+          fi
+          echo "=========================================="
+          echo "Using Version Code: $FINAL_VERSION_CODE"
+          if [ -n "$FINAL_VERSION_NAME" ]; then
+            echo "Using Custom Version Name: $FINAL_VERSION_NAME"
+          else
+            echo "Using Version Name from build.gradle"
+          fi
+          echo "=========================================="
+
+      - name: Configure .env.production
+        run: |
+          ENV_CONTENT="${{ secrets.ENV_PRODUCTION || secrets.ENV_FILE }}"
+          if [ -n "$ENV_CONTENT" ]; then
+            echo "$ENV_CONTENT" > .env.production
+            cp .env.production .env
+            echo "Successfully generated .env.production from secret."
+          elif [ -f .env.production ]; then
+            echo ".env.production already present in repository."
+            cp .env.production .env
+          else
+            echo "Error: Missing ENV_PRODUCTION / ENV_FILE secret and .env.production file!" >&2
+            exit 1
+          fi
+
+      - name: Configure Android Signing Keystore
+        run: |
+          mkdir -p android/app
+
+          # Write keystore binary if provided as base64
+          if [ -n "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/pandit.keystore
+            cp android/app/pandit.keystore android/app/release.keystore
+            echo "Decoded keystore into android/app/pandit.keystore and android/app/release.keystore"
+          fi
+
+          # Write keystore.properties
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}" > android/keystore.properties
+            echo "Wrote android/keystore.properties from secret."
+          elif [ -n "${{ secrets.ANDROID_STORE_FILE }}" ]; then
+            cat <<EOF > android/keystore.properties
+          storeFile=${{ secrets.ANDROID_STORE_FILE }}
+          storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+            echo "Assembled android/keystore.properties from individual secrets."
+          elif [ -f android/keystore.properties ]; then
+            echo "Using existing android/keystore.properties."
+          else
+            echo "Error: No keystore credentials configured! Please set ANDROID_KEYSTORE_PROPERTIES or ANDROID_RELEASE_KEYSTORE_BASE64." >&2
+            exit 1
+          fi
+
+      - name: Configure Firebase Credentials
+        run: |
+          if [ -n "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" ]; then
+            echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > firebase-credentials.json
+            echo "FIREBASE_SERVICE_ACCOUNT_PATH=$GITHUB_WORKSPACE/firebase-credentials.json" >> $GITHUB_ENV
+            echo "Wrote firebase-credentials.json for App Distribution."
+          elif [ -n "${{ secrets.FIREBASE_TOKEN }}" ]; then
+            echo "FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }}" >> $GITHUB_ENV
+            echo "Configured FIREBASE_TOKEN for App Distribution."
+          else
+            echo "Warning: No FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_TOKEN configured in secrets."
+          fi
+
+      - name: Build & Distribute Production APK via Fastlane
+        env:
+          FIREBASE_APP_ID_ANDROID: ${{ secrets.FIREBASE_APP_ID_ANDROID || '1:763089003272:android:ef8b3f3f1ab892936342bd' }}
+          FIREBASE_TESTER_GROUPS: ${{ secrets.FIREBASE_TESTER_GROUPS_PROD || 'pandit-prod-testers' }}
+          RELEASE_NOTES: ${{ inputs.release_notes || github.event.head_commit.message }}
+        run: |
+          bundle exec fastlane android build_and_distribute_prod_apk
+
+
+      - name: Upload Production APK Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-prod-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: ignore

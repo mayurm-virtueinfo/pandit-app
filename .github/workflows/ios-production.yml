@@ -1,0 +1,151 @@
+name: iOS Production (TestFlight & Firebase)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Custom Marketing Version (e.g. 1.1.0, leave blank to use Xcode project default)'
+        required: false
+        type: string
+      build_number:
+        description: 'Custom Build Number (e.g. 22, leave blank for TestFlight auto-increment)'
+        required: false
+        type: string
+      release_notes:
+        description: 'Release notes / Changelog (optional)'
+        required: false
+        type: string
+
+concurrency:
+  group: ios-prod-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-distribute:
+    name: Build & Distribute iOS Production
+    runs-on: macos-14
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Setup Ruby 3.3
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+
+      - name: Install Node dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Configure .env.production
+        run: |
+          ENV_CONTENT="${{ secrets.ENV_PRODUCTION || secrets.ENV_FILE }}"
+          if [ -n "$ENV_CONTENT" ]; then
+            echo "$ENV_CONTENT" > .env.production
+            cp .env.production .env
+            echo "Successfully generated .env.production from secret."
+          elif [ -f .env.production ]; then
+            echo ".env.production already present in repository."
+            cp .env.production .env
+          else
+            echo "Error: Missing ENV_PRODUCTION / ENV_FILE secret and .env.production file!" >&2
+            exit 1
+          fi
+
+      - name: Install CocoaPods
+        run: |
+          bundle exec pod install --project-directory=ios
+
+      - name: Install Apple Distribution Certificate and Provisioning Profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 || secrets.IOS_BUILD_CERTIFICATE_BASE64 }}
+          BUILD_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD || secrets.IOS_BUILD_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_PROD_BASE64 || secrets.IOS_PROVISIONING_PROFILE_DEV_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD || 'temporary-ci-keychain-pwd' }}
+        run: |
+          if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
+            echo "Error: Missing IOS_DISTRIBUTION_CERTIFICATE_BASE64 secret!" >&2
+            exit 1
+          fi
+          if [ -z "$PROVISIONING_PROFILE_BASE64" ]; then
+            echo "Error: Missing IOS_PROVISIONING_PROFILE_PROD_BASE64 secret!" >&2
+            exit 1
+          fi
+
+          CERT_PATH=$RUNNER_TEMP/dist_cert.p12
+          PP_PATH=$RUNNER_TEMP/prod_profile.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > "$CERT_PATH"
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PP_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-key-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          security import "$CERT_PATH" -P "$BUILD_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          PROFILE_UUID=$(strings "$PP_PATH" | grep -A1 -m1 "<key>UUID</key>" | tail -n1 | sed -e 's/.*<string>//' -e 's/<\/string>.*//')
+          if [ -n "$PROFILE_UUID" ]; then
+            cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/${PROFILE_UUID}.mobileprovision
+            echo "Installed provisioning profile with UUID: $PROFILE_UUID"
+          else
+            cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/prod.mobileprovision
+            echo "Installed provisioning profile as prod.mobileprovision"
+          fi
+
+      - name: Configure Firebase Credentials
+        run: |
+          if [ -n "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" ]; then
+            echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > firebase-credentials.json
+            echo "FIREBASE_SERVICE_ACCOUNT_PATH=$GITHUB_WORKSPACE/firebase-credentials.json" >> $GITHUB_ENV
+            echo "Wrote firebase-credentials.json for App Distribution."
+          elif [ -n "${{ secrets.FIREBASE_TOKEN }}" ]; then
+            echo "FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }}" >> $GITHUB_ENV
+            echo "Configured FIREBASE_TOKEN for App Distribution."
+          else
+            echo "Warning: No FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_TOKEN configured in secrets."
+          fi
+
+      - name: Execute Fastlane iOS Production
+        env:
+          APP_VERSION_NAME: ${{ inputs.version_name }}
+          APP_BUILD_NUMBER: ${{ inputs.build_number }}
+          FIREBASE_APP_ID_IOS: ${{ secrets.FIREBASE_APP_ID_IOS || '1:763089003272:ios:c172ce64912035c96342bd' }}
+          FIREBASE_TESTER_GROUPS: ${{ secrets.FIREBASE_TESTER_GROUPS_PROD || 'pandit-prod-testers' }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          APP_STORE_CONNECT_API_KEY_IS_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_IS_BASE64 || 'false' }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '5DSXYK6JTQ' }}
+          APPLE_ITC_TEAM_ID: ${{ secrets.APPLE_ITC_TEAM_ID }}
+          RELEASE_NOTES: ${{ inputs.release_notes || github.event.head_commit.message }}
+        run: |
+          bundle exec fastlane ios production
+
+      - name: Upload Production IPA Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-prod-ipa
+          path: ios/build/*.ipa
+          if-no-files-found: ignore
+
+      - name: Clean up temporary keychain
+        if: always()
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          if [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi

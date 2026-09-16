@@ -1,0 +1,10 @@
+# Appfile for PanditApp
+# Used by Fastlane to determine identifiers and developer portal configuration
+
+app_identifier("com.panditjiapp.pandit")
+package_name("com.panditjiapp.pandit")
+
+# Apple Developer Portal & App Store Connect Team IDs
+team_id(ENV["APPLE_TEAM_ID"] || "5DSXYK6JTQ")
+itc_team_id(ENV["APPLE_ITC_TEAM_ID"] || "5DSXYK6JTQ")
+

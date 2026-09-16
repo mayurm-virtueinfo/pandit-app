@@ -105,11 +105,16 @@ android {
         applicationId "com.panditjiapp.pandit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 16
-        versionName "1.0.7"
+
+        def appVersionCode = project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 16
+        def appVersionName = project.hasProperty('versionName') ? project.property('versionName') : "1.0.7"
+
+        versionCode appVersionCode
+        versionName appVersionName
         // resValue "string", "app_name", (project.hasProperty("env") && project.env.get("APP_NAME") ? project.env.get("APP_NAME") : "Pujaguru Vendor")
         resValue "string", "app_name", (project.env.get("APP_NAME") ?: "Pujaguru Vendor")
     }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
