@@ -245,8 +245,18 @@ end
 
 def resolve_app_store_connect_api_key
   if ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] && ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"]
-    key_content = ENV["APP_STORE_CONNECT_API_KEY_KEY"] || ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+    key_content = (ENV["APP_STORE_CONNECT_API_KEY_KEY"] || ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]).to_s.strip
     is_base64 = (ENV["APP_STORE_CONNECT_API_KEY_IS_BASE64"] == "true")
+
+    # If the user pasted the key without PEM headers, auto-wrap it
+    if !is_base64 && !key_content.empty?
+      # Normalize literal escaped newlines if any
+      key_content = key_content.gsub("\\n", "\n")
+      unless key_content.include?("BEGIN")
+        key_content = "-----BEGIN PRIVATE KEY-----\n#{key_content}\n-----END PRIVATE KEY-----"
+      end
+    end
+
     return app_store_connect_api_key(
       key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
       issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
