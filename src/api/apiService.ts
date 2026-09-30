@@ -474,7 +474,10 @@ export const postSignIn = (data: SignInRequest): Promise<SignInResponse> => {
         resolve(response.data);
       })
       .catch(error => {
-        console.error('Error fetching sign in data:', error.response.data);
+        console.error(
+          'Error fetching sign in data:',
+          error.response?.data || error.message || error,
+        );
         reject(error);
       });
   });
