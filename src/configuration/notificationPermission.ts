@@ -30,42 +30,53 @@ export const requestPermissions = async () => {
 export async function requestUserPermission(): Promise<boolean> {
   console.log('Requesting permission...');
 
-  // Check with react-native-permissions first for debugging
-  const settings = await checkNotifications();
-  console.log('RN Permissions Status:', settings.status, settings.settings);
+  let rnpStatus = 'unknown';
+  try {
+    // Check with react-native-permissions first for debugging
+    const settings = await checkNotifications();
+    rnpStatus = settings.status;
+    console.log('RN Permissions Status:', settings.status, settings.settings);
+  } catch (err) {
+    console.warn('RN Permissions check failed:', err);
+  }
 
-  const authStatus = await messaging().requestPermission();
-  console.log('Authorization Status:', authStatus);
+  try {
+    const authStatus = await messaging().requestPermission();
+    console.log('Authorization Status:', authStatus);
 
-  const enabled =
-    authStatus === AuthorizationStatus.AUTHORIZED ||
-    authStatus === AuthorizationStatus.PROVISIONAL;
+    const enabled =
+      authStatus === AuthorizationStatus.AUTHORIZED ||
+      authStatus === AuthorizationStatus.PROVISIONAL;
 
-  if (enabled) {
-    console.log('✅ Notification permission granted');
+    if (enabled) {
+      console.log('✅ Notification permission granted');
 
-    try {
-      if (Platform.OS === 'ios') {
-        const apnsToken = await messaging().getAPNSToken();
-        console.log('📲 APNs Token:', apnsToken);
+      try {
+        if (Platform.OS === 'ios') {
+          const apnsToken = await messaging().getAPNSToken();
+          console.log('📲 APNs Token:', apnsToken);
+        }
+
+        const fcmToken = await getFcmToken();
+        console.log('🎯 FCM Token:', fcmToken);
+      } catch (error) {
+        console.error('🚫 Error during notification setup:', error);
       }
 
-      const fcmToken = await getFcmToken();
-      console.log('🎯 FCM Token:', fcmToken);
-    } catch (error) {
-      console.error('🚫 Error during notification setup:', error);
+      return true;
+    } else {
+      console.log(
+        '❌ Notification permission denied or not determined. Status:',
+        authStatus,
+      );
+      Alert.alert(
+        'Notifications Disabled',
+        `Please enable push notifications in settings to receive alerts.\nStatus: ${authStatus}\nRNP Status: ${rnpStatus}`,
+      );
+      return false;
     }
-
-    return true;
-  } else {
-    console.log(
-      '❌ Notification permission denied or not determined. Status:',
-      authStatus,
-    );
-    Alert.alert(
-      'Notifications Disabled',
-      `Please enable push notifications in settings to receive alerts.\nStatus: ${authStatus}\nRNP Status: ${settings.status}`,
-    );
+  } catch (error) {
+    console.error('🚫 Error requesting user permission:', error);
     return false;
   }
 }

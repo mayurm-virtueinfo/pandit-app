@@ -190,9 +190,13 @@ const HomeScreen: React.FC = () => {
   };
 
   // upcoming pujas
-  const renderPujaItem = (item: PujaItem, isLast: boolean) => (
+  const renderPujaItem = (
+    item: PujaItem,
+    isLast: boolean,
+    index: number,
+  ) => (
     <TouchableOpacity
-      key={item.id}
+      key={item.id ? `upcoming-${item.id}` : `upcoming-${index}`}
       onPress={() => navigation.navigate('PujaDetailsScreen', { id: item.id })}
     >
       <View style={styles.pujaItem}>
@@ -226,8 +230,17 @@ const HomeScreen: React.FC = () => {
     return `${getOrdinal(day)} ${month}`;
   };
 
-  const renderCompletedPuja = (item: any, isLast: boolean) => (
+  const renderCompletedPuja = (
+    item: any,
+    isLast: boolean,
+    index: number,
+  ) => (
     <TouchableOpacity
+      key={
+        item.booking_id ?? item.id
+          ? `completed-${item.booking_id ?? item.id}`
+          : `completed-${index}`
+      }
       onPress={() =>
         navigation.navigate('CompletePujaDetailsScreen', {
           booking_id: item.booking_id,
@@ -248,9 +261,13 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  const renderPendingPujaItem = (item: PendingPujaItem, isLast: boolean) => (
+  const renderPendingPujaItem = (
+    item: PendingPujaItem,
+    isLast: boolean,
+    index: number,
+  ) => (
     <TouchableOpacity
-      key={item.id}
+      key={item.id ? `pending-${item.id}` : `pending-${index}`}
       onPress={() =>
         navigation.navigate('WaitingApprovalPujaScreen', {
           booking_id: item.id,
@@ -280,9 +297,10 @@ const HomeScreen: React.FC = () => {
   const renderInProgressPujaItem = (
     item: InProgressPujaItem,
     isLast: boolean,
+    index: number,
   ) => (
     <TouchableOpacity
-      key={item.id}
+      key={item.id ? `in-progress-${item.id}` : `in-progress-${index}`}
       onPress={() =>
         navigation.navigate('PujaDetailsScreen', {
           progress: true,
@@ -347,6 +365,7 @@ const HomeScreen: React.FC = () => {
                     renderInProgressPujaItem(
                       item,
                       index === inProgressPujas.length - 1,
+                      index,
                     ),
                   )}
                 </View>
@@ -364,6 +383,7 @@ const HomeScreen: React.FC = () => {
                     renderPendingPujaItem(
                       item,
                       index === pendingPujas.length - 1,
+                      index,
                     ),
                   )
                 )}
@@ -378,7 +398,11 @@ const HomeScreen: React.FC = () => {
                   <Text style={styles.emptyText}>{t('no_upcoming_puja')}</Text>
                 ) : (
                   upcomingPujas.map((item, index) =>
-                    renderPujaItem(item, index === upcomingPujas.length - 1),
+                    renderPujaItem(
+                      item,
+                      index === upcomingPujas.length - 1,
+                      index,
+                    ),
                   )
                 )}
               </View>
@@ -395,6 +419,7 @@ const HomeScreen: React.FC = () => {
                     renderCompletedPuja(
                       item,
                       index === completedPujas.length - 1,
+                      index,
                     ),
                   )
                 )}

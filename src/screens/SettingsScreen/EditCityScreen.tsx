@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   StatusBar,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -189,31 +188,21 @@ const EditCityScreen: React.FC = () => {
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <View style={styles.contentContainer}>
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContentContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View style={styles.mainContent}>
-                <Text style={styles.selectCityTitle}>{t('select_city')}</Text>
-                <Text style={styles.description}>
-                  {t('select_city_description')}
-                </Text>
-                <CustomSelector
-                  data={filteredCities}
-                  selectedDataId={selectedCityId || null}
-                  onDataSelect={handleCitySelect}
-                  searchPlaceholder={t('search_city')}
-                  onSearch={handleSearch}
-                />
-                {filteredCities.length === 0 && searchText.trim() !== '' && (
-                  <Text style={styles.noResultText}>
-                    {t('no_city_found') || 'No city found'}
-                  </Text>
-                )}
-              </View>
-            </ScrollView>
+            <View style={styles.mainContent}>
+              <Text style={styles.selectCityTitle}>{t('select_city')}</Text>
+              <Text style={styles.description}>
+                {t('select_city_description')}
+              </Text>
+              <CustomSelector
+                containerStyle={styles.selectorContainer}
+                data={filteredCities}
+                selectedDataId={selectedCityId || null}
+                onDataSelect={handleCitySelect}
+                searchPlaceholder={t('search_city')}
+                onSearch={handleSearch}
+                emptyText={t('no_city_found') || 'No city found'}
+              />
+            </View>
             {/* Button fixed at bottom */}
             <View
               style={[
@@ -249,18 +238,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContentContainer: {
-    flexGrow: 1,
-    // Remove bottom padding here, handled by bottomButtonContainer
-    paddingBottom: 0,
-  },
   mainContent: {
+    flex: 1,
     paddingHorizontal: wp(6.5),
-    paddingVertical: moderateScale(24),
-    // Remove flex: 1 to allow ScrollView to size naturally
+    paddingTop: moderateScale(24),
+    paddingBottom: moderateScale(8),
+  },
+  selectorContainer: {
+    flexShrink: 1,
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -276,20 +261,11 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     height: moderateScale(46),
-    // marginTop: moderateScale(24), // Remove marginTop, handled by bottomButtonContainer
-  },
-  noResultText: {
-    color: COLORS.lighttext,
-    fontSize: moderateScale(14),
-    fontFamily: Fonts.Sen_Regular,
-    marginTop: moderateScale(30),
-    textAlign: 'center',
   },
   bottomButtonContainer: {
     backgroundColor: COLORS.white,
     paddingHorizontal: wp(6.5),
     paddingTop: moderateScale(6),
-    // paddingBottom handled inline for safe area
   },
 });
 

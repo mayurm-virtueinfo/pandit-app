@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {moderateScale} from 'react-native-size-matters';
-import {CustomeSelectorDataOption, poojaDataOption} from '../types/cityTypes';
-import {COLORS, THEMESHADOW} from '../theme/theme';
+import { moderateScale } from 'react-native-size-matters';
+import { CustomeSelectorDataOption, poojaDataOption } from '../types/cityTypes';
+import { COLORS, THEMESHADOW } from '../theme/theme';
 import Fonts from '../theme/fonts';
 
 const isCustomeSelectorDataOption = (
@@ -29,6 +29,7 @@ interface CustomeSelectorProps {
   showSearch?: boolean;
   containerStyle?: any;
   onSearch?: (text: string) => void; // Added for on search
+  emptyText?: string;
 }
 
 const CustomSelector: React.FC<CustomeSelectorProps> = ({
@@ -39,6 +40,7 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
   showSearch = true,
   containerStyle,
   onSearch, // Added for on search
+  emptyText,
 }) => {
   const [searchText, setSearchText] = useState('');
 
@@ -67,11 +69,13 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
     <View>
       <TouchableOpacity
         style={styles.cityItem}
-        onPress={() => onDataSelect(item.id)}>
+        onPress={() => onDataSelect(item.id)}
+      >
         <Text style={styles.cityName}>{getDisplayName(item)}</Text>
         <TouchableOpacity
           style={styles.checkboxContainer}
-          onPress={() => onDataSelect(item.id)}>
+          onPress={() => onDataSelect(item.id)}
+        >
           {item.id === selectedDataId ? (
             <Ionicons
               name="checkbox-outline"
@@ -102,7 +106,8 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
                 paddingVertical:
                   Platform.OS === 'ios' ? moderateScale(10) : moderateScale(2),
               },
-            ]}>
+            ]}
+          >
             <MaterialIcons
               name="search"
               size={16}
@@ -121,11 +126,20 @@ const CustomSelector: React.FC<CustomeSelectorProps> = ({
         </>
       )}
       <FlatList
+        style={styles.flatList}
+        contentContainerStyle={styles.flatListContent}
         data={filteredData}
         renderItem={renderCityItem}
         keyExtractor={item => item.id.toString()}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        ListEmptyComponent={
+          searchText.trim() !== '' ? (
+            <Text style={styles.noResultText}>
+              {emptyText || 'No result found'}
+            </Text>
+          ) : null
+        }
       />
     </View>
   );
@@ -135,6 +149,21 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: moderateScale(10),
     backgroundColor: COLORS.white,
+    flexShrink: 1,
+  },
+  flatList: {
+    flexShrink: 1,
+    flexGrow: 0,
+  },
+  flatListContent: {},
+  noResultText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(24),
+    marginBottom: moderateScale(24),
+    textAlign: 'center',
+    paddingHorizontal: moderateScale(16),
   },
   searchContainer: {
     flexDirection: 'row',

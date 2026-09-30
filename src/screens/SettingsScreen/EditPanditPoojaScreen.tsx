@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   StatusBar,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -229,31 +228,23 @@ const EditPanditPoojaScreen: React.FC = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={styles.contentContainer}>
-            <ScrollView
-              contentContainerStyle={styles.scrollContentContainer}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View style={styles.mainContent}>
-                <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
-                <Text style={styles.description}>{t('select_pooja_desc')}</Text>
-                <CustomeMultiSelector
-                  data={filteredPoojaData}
-                  selectedDataIds={selectedPoojaId}
-                  onDataSelect={handlePoojaSelect}
-                  searchPlaceholder={t('select_pooja')}
-                  isMultiSelect={true}
-                  onSearch={setSearchText}
-                  onEndReached={handleLoadMore}
-                  loadingMore={loadingMore}
-                  onEndReachedThreshold={0.2}
-                />
-                {filteredPoojaData.length === 0 && searchText.trim() !== '' && (
-                  <Text style={styles.noResultText}>
-                    {t('no_pooja_found') || 'No Pooja found'}
-                  </Text>
-                )}
-              </View>
-            </ScrollView>
+            <View style={styles.mainContent}>
+              <Text style={styles.selectCityTitle}>{t('select_pooja')}</Text>
+              <Text style={styles.description}>{t('select_pooja_desc')}</Text>
+              <CustomeMultiSelector
+                containerStyle={styles.selectorContainer}
+                data={filteredPoojaData}
+                selectedDataIds={selectedPoojaId}
+                onDataSelect={handlePoojaSelect}
+                searchPlaceholder={t('select_pooja')}
+                isMultiSelect={true}
+                onSearch={setSearchText}
+                onEndReached={handleLoadMore}
+                loadingMore={loadingMore}
+                onEndReachedThreshold={0.2}
+                emptyText={t('no_pooja_found') || 'No Pooja found'}
+              />
+            </View>
             <View
               style={[
                 styles.bottomButtonContainer,
@@ -288,13 +279,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
-  scrollContentContainer: {
-    flexGrow: 1,
-    paddingBottom: 0,
-  },
   mainContent: {
+    flex: 1,
     paddingHorizontal: wp(6.5),
-    paddingVertical: moderateScale(24),
+    paddingTop: moderateScale(24),
+    paddingBottom: moderateScale(8),
+  },
+  selectorContainer: {
+    flexShrink: 1,
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -310,13 +302,6 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     height: moderateScale(46),
-  },
-  noResultText: {
-    color: COLORS.lighttext,
-    fontSize: moderateScale(14),
-    fontFamily: Fonts.Sen_Regular,
-    marginTop: moderateScale(30),
-    textAlign: 'center',
   },
   bottomButtonContainer: {
     backgroundColor: COLORS.white,

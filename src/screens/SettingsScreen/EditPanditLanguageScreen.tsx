@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   StatusBar,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -171,33 +170,24 @@ const EditPanditLanguageScreen: React.FC = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
           <View style={styles.contentContainer}>
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContentContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled">
-              <View style={styles.mainContent}>
-                <Text style={styles.selectCityTitle}>
-                  {t('select_language')}
-                </Text>
-                <Text style={styles.description}>
-                  {t('select_language_desc')}
-                </Text>
-                <CustomeMultiSelector
-                  data={filteredLanguages}
-                  selectedDataIds={selectedLanguageId}
-                  onDataSelect={handleLanguageSelect}
-                  searchPlaceholder={t('select_language')}
-                  isMultiSelect={true}
-                  onSearch={handleSearch}
-                />
-                {filteredLanguages.length === 0 && searchText.trim() !== '' && (
-                  <Text style={styles.noResultText}>
-                    {t('no_language_found') || 'No language found'}
-                  </Text>
-                )}
-              </View>
-            </ScrollView>
+            <View style={styles.mainContent}>
+              <Text style={styles.selectCityTitle}>
+                {t('select_language')}
+              </Text>
+              <Text style={styles.description}>
+                {t('select_language_desc')}
+              </Text>
+              <CustomeMultiSelector
+                containerStyle={styles.selectorContainer}
+                data={filteredLanguages}
+                selectedDataIds={selectedLanguageId}
+                onDataSelect={handleLanguageSelect}
+                searchPlaceholder={t('select_language')}
+                isMultiSelect={true}
+                onSearch={handleSearch}
+                emptyText={t('no_language_found') || 'No language found'}
+              />
+            </View>
 
             {/* Button fixed at bottom */}
             <View
@@ -228,11 +218,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(30),
     borderTopRightRadius: moderateScale(30),
   },
-  scrollView: {flex: 1},
-  scrollContentContainer: {flexGrow: 1, paddingBottom: 0},
   mainContent: {
+    flex: 1,
     paddingHorizontal: wp(6.5),
-    paddingVertical: moderateScale(24),
+    paddingTop: moderateScale(24),
+    paddingBottom: moderateScale(8),
+  },
+  selectorContainer: {
+    flexShrink: 1,
   },
   selectCityTitle: {
     color: COLORS.primaryTextDark,
@@ -251,13 +244,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     paddingHorizontal: wp(6.5),
     paddingTop: moderateScale(6),
-  },
-  noResultText: {
-    color: COLORS.lighttext,
-    fontSize: moderateScale(15),
-    fontFamily: Fonts.Sen_Regular,
-    marginTop: moderateScale(16),
-    textAlign: 'center',
   },
 });
 

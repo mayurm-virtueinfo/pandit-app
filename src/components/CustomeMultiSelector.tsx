@@ -33,6 +33,7 @@ interface CustomeMultiSelectorProps {
   onEndReached?: () => void;
   onEndReachedThreshold?: number;
   loadingMore?: boolean;
+  emptyText?: string;
 }
 
 const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
@@ -47,6 +48,7 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
   onEndReached,
   onEndReachedThreshold = 0.3,
   loadingMore = false,
+  emptyText,
 }) => {
   const [localSearch, setLocalSearch] = useState('');
   // console.log('loadingMore', loadingMore);
@@ -135,14 +137,23 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
       )}
 
       <FlatList
+        style={styles.flatList}
+        contentContainerStyle={styles.flatListContent}
         data={data}
         renderItem={renderItem}
         keyExtractor={i => i.id.toString()}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         onEndReached={onEndReached}
-        onEndReachedThreshold={0.7} // ← Better
+        onEndReachedThreshold={onEndReachedThreshold}
         ListFooterComponent={renderFooter}
+        ListEmptyComponent={
+          localSearch.trim() !== '' ? (
+            <Text style={styles.noResultText}>
+              {emptyText || 'No result found'}
+            </Text>
+          ) : null
+        }
         bounces={true}
         overScrollMode="always"
       />
@@ -152,9 +163,23 @@ const CustomeMultiSelector: React.FC<CustomeMultiSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    // flexGrow: 1,
     borderRadius: moderateScale(10),
     backgroundColor: COLORS.white,
+    flexShrink: 1,
+  },
+  flatList: {
+    flexShrink: 1,
+    flexGrow: 0,
+  },
+  flatListContent: {},
+  noResultText: {
+    color: COLORS.lighttext,
+    fontSize: moderateScale(14),
+    fontFamily: Fonts.Sen_Regular,
+    marginTop: moderateScale(24),
+    marginBottom: moderateScale(24),
+    textAlign: 'center',
+    paddingHorizontal: moderateScale(16),
   },
   searchContainer: {
     flexDirection: 'row',
@@ -209,7 +234,7 @@ const styles = StyleSheet.create({
   },
   // Retain overlay style in case needed elsewhere, but not used here
   loaderOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#FFFFFFAA',
     alignItems: 'center',
     justifyContent: 'center',
