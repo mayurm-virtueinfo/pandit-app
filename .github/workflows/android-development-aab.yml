@@ -43,6 +43,40 @@ jobs:
           java-version: 17
           cache: gradle
 
+      - name: Install Android SDK components
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager was not found under $SDK_ROOT" >&2
+            exit 1
+          fi
+          NDK_DIR="$SDK_ROOT/ndk/27.1.12297006"
+          # Remove incomplete installations and cached archives.
+          rm -rf "$NDK_DIR"
+          rm -rf "$HOME/.android/cache"
+          rm -rf "$SDK_ROOT/.temp"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          for attempt in 1 2 3; do
+            echo "Installing Android SDK components, attempt $attempt..."
+            if yes | "$SDKMANAGER" --install \
+              "platform-tools" \
+              "platforms;android-36" \
+              "build-tools;36.0.0" \
+              "ndk;27.1.12297006"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Unable to install NDK 27.1.12297006" >&2
+              exit 1
+            fi
+            rm -rf "$NDK_DIR" "$HOME/.android/cache" "$SDK_ROOT/.temp"
+            sleep 10
+          done
+          test -f "$NDK_DIR/source.properties"
+
       - name: Setup Ruby 3.3
         uses: ruby/setup-ruby@v1
         with:
@@ -117,6 +151,10 @@ jobs:
             echo "Wrote android/keystore.properties from secret."
           elif [ -n "$STORE_FILE" ]; then
             cat <<EOF > android/keystore.properties
+          RELEASE_STORE_FILE=$STORE_FILE
+          RELEASE_STORE_PASSWORD=$STORE_PWD
+          RELEASE_KEY_ALIAS=$KEY_ALIAS
+          RELEASE_KEY_PASSWORD=$KEY_PWD
           storeFile=$STORE_FILE
           storePassword=$STORE_PWD
           keyAlias=$KEY_ALIAS

@@ -129,10 +129,15 @@ android {
         }
         release {
             if (keystorePropertiesFile.exists()) {
-                storeFile rootProject.file(keystoreProperties['RELEASE_STORE_FILE'])
-                storePassword keystoreProperties['RELEASE_STORE_PASSWORD']
-                keyAlias keystoreProperties['RELEASE_KEY_ALIAS']
-                keyPassword keystoreProperties['RELEASE_KEY_PASSWORD']
+                def relStoreFile = keystoreProperties['RELEASE_STORE_FILE'] ?: keystoreProperties['storeFile']
+                def relStorePassword = keystoreProperties['RELEASE_STORE_PASSWORD'] ?: keystoreProperties['storePassword']
+                def relKeyAlias = keystoreProperties['RELEASE_KEY_ALIAS'] ?: keystoreProperties['keyAlias']
+                def relKeyPassword = keystoreProperties['RELEASE_KEY_PASSWORD'] ?: keystoreProperties['keyPassword']
+
+                storeFile rootProject.file(relStoreFile)
+                storePassword relStorePassword
+                keyAlias relKeyAlias
+                keyPassword relKeyPassword
             }
         }
     }
