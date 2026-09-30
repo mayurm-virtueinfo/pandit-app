@@ -58,19 +58,25 @@ jobs:
           rm -rf "$NDK_DIR"
           rm -rf "$HOME/.android/cache"
           rm -rf "$SDK_ROOT/.temp"
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          set +o pipefail
+          yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
+          set -o pipefail
           for attempt in 1 2 3; do
             echo "Installing Android SDK components, attempt $attempt..."
-            if yes | "$SDKMANAGER" --install \
+            set +o pipefail
+            yes | "$SDKMANAGER" --install \
               "platform-tools" \
               "platforms;android-36" \
               "build-tools;36.0.0" \
-              "ndk;27.1.12297006"; then
+              "ndk;27.1.12297006"
+            sdkmanager_status=$?
+            set -o pipefail
+            if [ "$sdkmanager_status" -eq 0 ]; then
               break
             fi
             if [ "$attempt" -eq 3 ]; then
-              echo "Unable to install NDK 27.1.12297006" >&2
-              exit 1
+              echo "Unable to install Android SDK components" >&2
+              exit "$sdkmanager_status"
             fi
             rm -rf "$NDK_DIR" "$HOME/.android/cache" "$SDK_ROOT/.temp"
             sleep 10
