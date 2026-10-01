@@ -20,6 +20,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { createMeeting, getMessageHistory } from '../../api/apiService';
+import { getWebSocketBaseUrl } from '../../api/apiEndpoints';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstant from '../../utils/AppContent';
 import CustomeLoader from '../../components/CustomLoader';
@@ -81,10 +82,8 @@ const ChatScreen: React.FC = () => {
   }
 
   const getSocketURL = (token: string, bookingId: string) => {
-    if (__DEV__) {
-      return `wss://dev.puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
-    }
-    return `wss://puja-guru.com/ws/chat/by-booking/${bookingId}/?token=${token}`;
+    const wsBaseUrl = getWebSocketBaseUrl();
+    return `${wsBaseUrl}/ws/chat/by-booking/${bookingId}/?token=${token}`;
   };
 
   // Fetch tokens once on mount
@@ -199,6 +198,7 @@ const ChatScreen: React.FC = () => {
     }, 2300);
 
     const socketURL = getSocketURL(accessToken, booking_id);
+    console.log('🔌 [ChatScreen] Connecting to WebSocket:', socketURL);
     let newWs: WebSocket | null = null;
 
     try {

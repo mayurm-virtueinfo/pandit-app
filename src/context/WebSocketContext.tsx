@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { useNetwork } from '../provider/NetworkProvider';
+import { getWebSocketBaseUrl } from '../api/apiEndpoints';
 
 interface WebSocketContextType {
   messages: any[];
@@ -36,10 +37,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const manuallyClosed = useRef(false);
 
   /** ✅ Build WebSocket URL */
-  const getSocketURL = () =>
-    __DEV__
-      ? `wss://dev.puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`
-      : `wss://puja-guru.com/ws/pandit/requests/${userId}/?token=${token}`;
+  const getSocketURL = () => {
+    const wsBaseUrl = getWebSocketBaseUrl();
+    return `${wsBaseUrl}/ws/pandit/requests/${userId}/?token=${token}`;
+  };
 
   /** ✅ Connect WebSocket */
   const connect = () => {
@@ -54,7 +55,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     }
 
     manuallyClosed.current = false;
-    const ws = new WebSocket(getSocketURL());
+    const socketUrl = getSocketURL();
+    console.log('🔌 [Pandit booking status webSocket] Connecting to:', socketUrl);
+    const ws = new WebSocket(socketUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {

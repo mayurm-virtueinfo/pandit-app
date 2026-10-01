@@ -22,7 +22,7 @@ import {
   getInProgressPuja,
   getCompletePujaList,
 } from '../../api/apiService';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import CustomeLoader from '../../components/CustomLoader';
 import { translateData } from '../../utils/TranslateData';
 import { useWebSocket } from '../../context/WebSocketContext';
@@ -40,6 +40,7 @@ interface PendingPujaItem {
   pooja_name: string;
   when_is_pooja?: string;
   pooja_image_url?: string;
+  [key: string]: any;
 }
 
 interface InProgressPujaItem {
@@ -65,8 +66,6 @@ const HomeScreen: React.FC = () => {
   const [pendingLoading, setPendingLoading] = useState<boolean>(true);
   const [inProgressLoading, setInProgressLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState(false);
-
-  const translationCacheRef = useRef<Map<string, any>>(new Map());
   const currentLanguage = i18n.language;
 
   const { messages } = useWebSocket();
@@ -90,64 +89,88 @@ const HomeScreen: React.FC = () => {
         getInProgressPuja(),
       ]);
 
-      // Utility to extract array safely
-      const getArray = (res: any) =>
-        Array.isArray(res)
-          ? res
-          : typeof res === 'object' && res?.data && Array.isArray(res.data)
-          ? res.data
-          : [];
+      // Utility to extract array safely from various response formats
+      const getArray = (res: any) => {
+        if (Array.isArray(res)) return res;
+        if (Array.isArray(res?.data)) return res.data;
+        if (Array.isArray(res?.data?.results)) return res.data.results;
+        if (Array.isArray(res?.results)) return res.results;
+        if (Array.isArray(res?.data?.bookings)) return res.data.bookings;
+        if (Array.isArray(res?.bookings)) return res.bookings;
+        return [];
+      };
 
       let pendingList = getArray(pendingResponse);
       let upcomingList = getArray(upcomingResponse);
-      let completedList = completedResponse?.data?.results;
+      let completedList = getArray(completedResponse);
       let inProgressList = getArray(inProgressResponse);
 
-      // ✅ Apply Translation Logic
-      const cacheKey = currentLanguage;
+      const [
+        translatedPending,
+        translatedUpcoming,
+        translatedCompleted,
+        translatedInProgress,
+      ] = await Promise.all([
+        translateData(pendingList, currentLanguage, [
+          'pooja_name',
+          'when_is_pooja',
+        ]),
+        translateData(upcomingList, currentLanguage, [
+          'pooja_name',
+          'when_is_pooja',
+        ]),
+        translateData(completedList, currentLanguage, ['pooja_name']),
+        translateData(inProgressList, currentLanguage, ['pooja_name']),
+      ]);
 
-      if (translationCacheRef.current.has(cacheKey)) {
-        const cached = translationCacheRef.current.get(cacheKey);
-        setPendingPujas(cached.pending || []);
-        setUpcomingPujas(cached.upcoming || []);
-        setCompletedPujas(cached.completed || []);
-        setInProgressPujas(cached.inProgress || []);
-      } else {
-        const [
-          translatedPending,
-          translatedUpcoming,
-          translatedCompleted,
-          translatedInProgress,
-        ] = await Promise.all([
-          translateData(pendingList, currentLanguage, [
-            'pooja_name',
-            'when_is_pooja',
-          ]),
-          translateData(upcomingList, currentLanguage, [
-            'pooja_name',
-            'when_is_pooja',
-          ]),
-          translateData(completedList, currentLanguage, ['pooja_name']),
-          translateData(inProgressList, currentLanguage, ['pooja_name']),
-        ]);
+      // 1. Determine IDs that are already upcoming, completed, or in-progress
+      const nonPendingIds = new Set<number>([
+        ...upcomingList.map((p: any) => Number(p.id)),
+        ...completedList.map((p: any) => Number(p.id ?? p.booking_id)),
+        ...inProgressList.map((p: any) => Number(p.id)),
+      ]);
 
-        setPendingPujas(translatedPending as PendingPujaItem[]);
-        setUpcomingPujas(translatedUpcoming as PujaItem[]);
-        setCompletedPujas(translatedCompleted as PujaItem[]);
-        setInProgressPujas(translatedInProgress as InProgressPujaItem[]);
+      // 2. Filter out anything from translatedPending that is already resolved
+      const validPending = (translatedPending as PendingPujaItem[]).filter(
+        item => {
+          const itemId = Number(item.id);
+          const status = (item.booking_status || '').toLowerCase();
+          return (
+            !nonPendingIds.has(itemId) &&
+            status !== 'accepted' &&
+            status !== 'completed' &&
+            status !== 'cancelled' &&
+            status !== 'rejected'
+          );
+        },
+      );
 
-        translationCacheRef.current.set(cacheKey, {
-          pending: translatedPending,
-          upcoming: translatedUpcoming,
-          completed: translatedCompleted,
-          inProgress: translatedInProgress,
+      // 3. Merge with prev state to keep ephemeral WS items, strictly excluding nonPendingIds
+      setPendingPujas(prev => {
+        const apiMap = new Map(validPending.map(p => [Number(p.id), p]));
+        const merged = [...validPending];
+
+        prev.forEach(item => {
+          const itemId = Number(item.id);
+          const status = (item.booking_status || '').toLowerCase();
+          if (
+            !apiMap.has(itemId) &&
+            !nonPendingIds.has(itemId) &&
+            status !== 'accepted' &&
+            status !== 'completed' &&
+            status !== 'cancelled' &&
+            status !== 'rejected'
+          ) {
+            merged.unshift(item);
+          }
         });
-      }
+        return merged;
+      });
+      setUpcomingPujas(translatedUpcoming as PujaItem[]);
+      setCompletedPujas(translatedCompleted as PujaItem[]);
+      setInProgressPujas(translatedInProgress as InProgressPujaItem[]);
     } catch (error) {
-      setPendingPujas([]);
-      setUpcomingPujas([]);
-      setCompletedPujas([]);
-      setInProgressPujas([]);
+      console.error('Error in fetchAllPujas:', error);
     } finally {
       setPendingLoading(false);
       setLoading(false);
@@ -155,37 +178,94 @@ const HomeScreen: React.FC = () => {
     }
   }, [currentLanguage]);
 
-  useEffect(() => {
-    fetchAllPujas();
-  }, [fetchAllPujas]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAllPujas();
+    }, [fetchAllPujas]),
+  );
 
   useEffect(() => {
-    if (messages.length === 0) return;
+    if (!messages || messages.length === 0) return;
     const latest = messages[messages.length - 1];
+    if (!latest) return;
 
-    if (
-      latest?.type === 'booking_request' &&
-      ['created', 'accepted', 'rejected', 'expired', 'cancelled'].includes(
-        latest?.action,
-      )
-    ) {
-      console.log('🔔 WS triggered refresh for:', latest.action);
+    console.log(
+      '🔔 WS message received in HomeScreen:',
+      latest.type,
+      latest.action,
+    );
+
+    // 1. Initial list from socket on connect
+    if (latest.type === 'initial_list' && Array.isArray(latest.bookings)) {
+      if (latest.bookings.length > 0) {
+        setPendingPujas(prev => {
+          const existingIds = new Set(prev.map(p => Number(p.id)));
+          const newItems = latest.bookings
+            .filter((b: any) => !existingIds.has(Number(b.id)))
+            .map((b: any) => ({
+              id: b.id,
+              pooja_name: b.pooja_name,
+              when_is_pooja: b.when_is_pooja || 'Today',
+              pooja_image_url: b.pooja_image_url,
+              ...b,
+            }));
+          return [...newItems, ...prev];
+        });
+      }
+      return;
+    }
+
+    // 2. Real-time booking request events
+    if (latest.type === 'booking_request') {
+      const bookingId = Number(latest.booking_id || latest.booking?.id);
+
+      if (latest.action === 'created' && latest.booking) {
+        const newBooking: PendingPujaItem = {
+          id: latest.booking.id,
+          pooja_name: latest.booking.pooja_name,
+          when_is_pooja: latest.booking.when_is_pooja || 'Today',
+          pooja_image_url: latest.booking.pooja_image_url,
+          ...latest.booking,
+        };
+
+        setPendingPujas(prev => {
+          if (prev.some(p => Number(p.id) === Number(newBooking.id))) {
+            return prev;
+          }
+          console.log(
+            '✅ Added real-time booking request to pendingPujas:',
+            newBooking.id,
+          );
+          return [newBooking, ...prev];
+        });
+      } else if (
+        ['accepted', 'rejected', 'expired', 'cancelled'].includes(latest.action)
+      ) {
+        console.log(
+          '🗑️ Removing resolved booking from pendingPujas:',
+          bookingId,
+        );
+        setPendingPujas(prev => prev.filter(p => Number(p.id) !== bookingId));
+
+        if (latest.action === 'accepted' && latest.booking) {
+          setUpcomingPujas(prev => {
+            if (prev.some(p => Number(p.id) === bookingId)) return prev;
+            return [latest.booking, ...prev];
+          });
+        }
+      }
+
+      // Background refresh all lists (e.g. upcoming after accept)
       clearTimeout((HomeScreen as any)._pujaTimeout);
       (HomeScreen as any)._pujaTimeout = setTimeout(() => {
-        translationCacheRef?.current?.clear?.();
         fetchAllPujas();
-      }, 1000);
+      }, 500);
     }
-  }, [messages]);
+  }, [messages, fetchAllPujas]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    // 🧹 Clear cached translations
-    translationCacheRef.current.clear();
-
-    // 🔁 Force fresh data from API
     await fetchAllPujas();
-
     setRefreshing(false);
   };
 
