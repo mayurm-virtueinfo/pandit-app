@@ -172,6 +172,7 @@ const App = () => {
       {/* App content */}
       <NetworkProvider>
         <ToastProvider
+          offsetBottom={Platform.OS === 'ios' ? 50 : 80}
           style={{
             backgroundColor: COLORS.primary,
           }}

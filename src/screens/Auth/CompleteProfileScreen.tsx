@@ -642,7 +642,7 @@ const CompleteProfileScreen: React.FC = () => {
             <View
               style={[
                 styles.fixedButtonContainer,
-                // { paddingBottom: inset.bottom || 16 },
+                { paddingBottom: Math.max(inset.bottom, 16) },
               ]}
             >
               <PrimaryButton

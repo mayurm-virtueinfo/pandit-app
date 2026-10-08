@@ -41,8 +41,18 @@ export async function requestUserPermission(): Promise<boolean> {
   }
 
   try {
-    const authStatus = await messaging().requestPermission();
+    let authStatus = await messaging().requestPermission();
     console.log('Authorization Status:', authStatus);
+
+    // Status -1 means NOT_DETERMINED — the OS hasn't resolved the permission yet.
+    // This can happen on iOS if APNs isn't ready or on simulators.
+    // Retry once after a short delay before giving up.
+    if (authStatus === AuthorizationStatus.NOT_DETERMINED) {
+      console.log('⏳ Permission not determined yet, retrying after delay...');
+      await new Promise<void>(resolve => setTimeout(() => resolve(), 2000));
+      authStatus = await messaging().requestPermission();
+      console.log('Authorization Status (retry):', authStatus);
+    }
 
     const enabled =
       authStatus === AuthorizationStatus.AUTHORIZED ||
@@ -64,14 +74,24 @@ export async function requestUserPermission(): Promise<boolean> {
       }
 
       return true;
-    } else {
+    } else if (authStatus === AuthorizationStatus.NOT_DETERMINED) {
+      // Still not determined after retry — likely a simulator or APNs config issue.
+      // Don't show a scary alert; just log and return false silently.
       console.log(
-        '❌ Notification permission denied or not determined. Status:',
+        '⚠️ Notification permission still not determined after retry. Status:',
+        authStatus,
+        '— This is expected on iOS Simulator or if APNs is not configured.',
+      );
+      return false;
+    } else {
+      // Truly denied (status 0)
+      console.log(
+        '❌ Notification permission denied. Status:',
         authStatus,
       );
       Alert.alert(
         'Notifications Disabled',
-        `Please enable push notifications in settings to receive alerts.\nStatus: ${authStatus}\nRNP Status: ${rnpStatus}`,
+        'Please enable push notifications in settings to receive alerts.',
       );
       return false;
     }

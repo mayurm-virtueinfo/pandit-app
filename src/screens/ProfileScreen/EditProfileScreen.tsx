@@ -640,23 +640,14 @@ const EditProfileScreen: React.FC = () => {
                     activeOpacity={0.7}
                     testID="photo-picker"
                   >
-                    {formData.profile_img && formData.profile_img.uri ? (
-                      <Image
-                        source={{ uri: formData.profile_img.uri }}
-                        style={styles.photo}
-                      />
-                    ) : (
-                      <View style={styles.photoPlaceholder}>
-                        {/* <Text style={styles.photoPlaceholderText}>
-                          <Feather
-                            name="camera"
-                            size={32}
-                            color={COLORS.gray}
-                          />
-                          <Text>{t('select_photo')}</Text>
-                        </Text> */}
-                      </View>
-                    )}
+                    <Image
+                      source={{
+                        uri:
+                          formData.profile_img?.uri ||
+                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy3IRQZYt7VgvYzxEqdhs8R6gNE6cYdeJueyHS-Es3MXb9XVRQQmIq7tI0grb8GTlzBRU&usqp=CAU',
+                      }}
+                      style={styles.photo}
+                    />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handlePhotoSelect}

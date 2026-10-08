@@ -555,7 +555,7 @@ const AddPujaScreen: React.FC = () => {
           )}
         </ScrollView>
         {/* Button fixed at the bottom */}
-        <View style={[styles.bottomButtonContainer, { paddingBottom: 16 }]}>
+        <View style={[styles.bottomButtonContainer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <PrimaryButton
             title={
               isEditMode
