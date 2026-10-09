@@ -1,0 +1,39 @@
+{
+  "message": {
+    "token": "<PANDIT_FCM_TOKEN>",
+    "data": {
+      "type": "PUJA_REQUEST",
+      "bookingId": "BK-20261008-A7F3",
+      "pujaName": "Satyanarayan Katha",
+      "dakshina": "2100",
+      "location": "Bopal, Ahmedabad",
+      "pujaTime": "2026-10-08T16:00:00+05:30",
+      "distance": "3.2",
+      "expireInSeconds": "30",
+      "customerName": "Ramesh Patel",
+      "pujaDate": "Today",
+      "offerId": "OFFER-12345"
+    },
+    "android": {
+      "priority": "high",
+      "ttl": "30s"
+    },
+    "apns": {
+      "headers": {
+        "apns-priority": "10",
+        "apns-push-type": "alert"
+      },
+      "payload": {
+        "aps": {
+          "content-available": 1,
+          "interruption-level": "time-sensitive",
+          "sound": {
+            "critical": 1,
+            "name": "temple_bell.caf",
+            "volume": 1.0
+          }
+        }
+      }
+    }
+  }
+}

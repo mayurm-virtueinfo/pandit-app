@@ -37,6 +37,8 @@ import { NetworkProvider } from './src/provider/NetworkProvider';
 import { LocationProvider } from './src/context/LocationContext';
 import Config from 'react-native-config';
 import WebSocketWrapper from './src/components/WebSocketWrapper';
+import PujaRequestModal from './src/components/PujaRequestModal';
+import { requestAllPujaRequestPermissions } from './src/configuration/pujaRequest';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -63,6 +65,9 @@ const App = () => {
 
     requestUserPermission();
     checkForUpdate();
+
+    // Request all permissions needed for full-screen Puja request alerts
+    requestAllPujaRequestPermissions();
 
     console.log('*****************   App Environment   *****************');
     console.log('Loaded ENVIRONMENT :', Config.ENVIRONMENT);
@@ -199,6 +204,8 @@ const App = () => {
           </AuthProvider>
         </ToastProvider>
       </NetworkProvider>
+      {/* Full-Screen Puja Request Modal — renders above everything */}
+      <PujaRequestModal />
     </I18nextProvider>
   );
 };

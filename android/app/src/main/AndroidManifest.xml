@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ── Existing Permissions ── -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -15,6 +16,22 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- ── Full-Screen Incoming Puja Request Permissions ── -->
+    <!-- Allows the app to show full-screen intent over lock screen (Android 10+) -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- Allows the app to display over other apps (heads-up overlay) -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Keeps the CPU awake to process incoming requests -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Vibration for incoming request alerts -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Re-register FCM after device reboot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Disable battery optimization for reliable background delivery -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- Schedule exact alarms for countdown timer accuracy -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
       android:name=".MainApplication"
@@ -36,18 +53,20 @@
         tools:replace="android:resource" />
 
       <activity
-        android:name=".MainActivity"  
+        android:name=".MainActivity"
         android:label="@string/app_name"
         android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
         android:launchMode="singleTask"
         android:windowSoftInputMode="adjustResize"
-        android:exported="true">
-       
+        android:exported="true"
+        android:showWhenLocked="true"
+        android:turnScreenOn="true">
+
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      
+
     </application>
 </manifest>

@@ -7,6 +7,11 @@ import { checkNotifications } from 'react-native-permissions';
 export const requestPermissions = async () => {
   if (Platform.OS === 'android') {
     try {
+      const { AppState } = require('react-native');
+      if (AppState.currentState !== 'active') {
+        return false;
+      }
+      
       const granted = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.CAMERA,
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,

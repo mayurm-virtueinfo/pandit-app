@@ -76,6 +76,23 @@ export const requestLocationPermission =
 
     if (Platform.OS === 'android') {
       try {
+        // Check if permission is already granted to avoid "not attached to Activity" errors
+        // when checking from background or early in app lifecycle.
+        const hasPermission = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
+        
+        if (hasPermission) {
+          return 'granted';
+        }
+
+        const { AppState } = require('react-native');
+        if (AppState.currentState !== 'active') {
+          // Cannot request permissions when the app is in the background
+          // or not attached to an Activity.
+          return 'unavailable';
+        }
+
         const status = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
